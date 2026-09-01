@@ -171,7 +171,6 @@
         }
         body.overflow-hidden {
             overflow: hidden !important;
-            touch-action: none;
         }
         /* Ensure modal overlay covers 100% of viewport over all headers */
         .fixed.inset-0:not(.hidden):not(#mobileDrawerContainer) {
@@ -560,39 +559,67 @@
     </div>
 
     <script>
-        function toggleMobileDrawer(open) {
-            const container = document.getElementById('mobileDrawerContainer');
-            const drawer = document.getElementById('mobileDrawer');
-            const backdrop = document.getElementById('mobileDrawerBackdrop');
-            if (!container || !drawer || !backdrop) return;
+        (function() {
+            var drawerCloseTimer = null;
 
-            if (open) {
-                container.classList.remove('hidden');
-                container.classList.remove('pointer-events-none');
-                container.style.pointerEvents = 'auto';
-                
-                // Trigger animation on next tick
-                requestAnimationFrame(() => {
-                    backdrop.classList.remove('opacity-0');
-                    backdrop.classList.add('opacity-100');
-                    drawer.classList.remove('translate-x-full');
-                    drawer.classList.add('translate-x-0');
-                });
-                document.body.classList.add('overflow-hidden');
-            } else {
-                backdrop.classList.remove('opacity-100');
-                backdrop.classList.add('opacity-0');
-                drawer.classList.remove('translate-x-0');
-                drawer.classList.add('translate-x-full');
-                container.style.pointerEvents = 'none';
-                document.body.classList.remove('overflow-hidden');
-                setTimeout(() => {
-                    container.classList.add('hidden');
-                    container.classList.add('pointer-events-none');
-                }, 300);
+            function toggleMobileDrawer(open) {
+                var container = document.getElementById('mobileDrawerContainer');
+                var drawer = document.getElementById('mobileDrawer');
+                var backdrop = document.getElementById('mobileDrawerBackdrop');
+                if (!container || !drawer || !backdrop) return;
+
+                if (open) {
+                    // Clear any pending close timer
+                    if (drawerCloseTimer) { clearTimeout(drawerCloseTimer); drawerCloseTimer = null; }
+
+                    // Make container visible and interactive
+                    container.style.visibility = 'visible';
+                    container.style.display = '';
+                    container.classList.remove('hidden');
+                    container.style.pointerEvents = 'auto';
+
+                    // Lock body scroll
+                    document.body.style.overflow = 'hidden';
+                    document.body.style.position = 'fixed';
+                    document.body.style.width = '100%';
+                    document.body.style.top = '-' + window.scrollY + 'px';
+                    document.body.setAttribute('data-scroll-y', window.scrollY);
+
+                    // Animate in on next frame
+                    requestAnimationFrame(function() {
+                        backdrop.style.opacity = '1';
+                        drawer.style.transform = 'translateX(0)';
+                    });
+                } else {
+                    // === CLOSE ===
+                    // 1. Animate drawer and backdrop out
+                    backdrop.style.opacity = '0';
+                    drawer.style.transform = 'translateX(100%)';
+
+                    // 2. IMMEDIATELY make container non-interactive and invisible to touch
+                    container.style.pointerEvents = 'none';
+                    container.style.visibility = 'hidden';
+
+                    // 3. Restore body scroll IMMEDIATELY
+                    var scrollY = parseInt(document.body.getAttribute('data-scroll-y') || '0', 10);
+                    document.body.style.overflow = '';
+                    document.body.style.position = '';
+                    document.body.style.width = '';
+                    document.body.style.top = '';
+                    document.body.removeAttribute('data-scroll-y');
+                    window.scrollTo(0, scrollY);
+
+                    // 4. After animation ends, fully hide
+                    drawerCloseTimer = setTimeout(function() {
+                        container.classList.add('hidden');
+                        container.style.display = 'none';
+                        drawerCloseTimer = null;
+                    }, 350);
+                }
             }
-        }
-        window.toggleMobileDrawer = toggleMobileDrawer;
+
+            window.toggleMobileDrawer = toggleMobileDrawer;
+        })();
     </script>
 
     <!-- Main Content Area -->
