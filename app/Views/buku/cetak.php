@@ -13,8 +13,8 @@
            PRINT & PAGE SETUP
            ═══════════════════════════════════════════ */
         @page {
-            size: A4;
-            margin: 18mm 15mm 18mm 15mm;
+            size: A4 portrait;
+            margin: 12mm 15mm 12mm 15mm;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -28,19 +28,22 @@
 
         .page {
             background: #fff;
-            max-width: 210mm;
-            margin: 0 auto;
-            padding: 18mm 15mm 20mm 15mm;
             position: relative;
-            min-height: 297mm;
             display: flex;
             flex-direction: column;
+            box-sizing: border-box;
         }
         .page-content {
             flex: 1 0 auto;
         }
-        .page-break { page-break-after: always; }
-        .page-break:last-child { page-break-after: avoid; }
+        .page-break {
+            page-break-after: always;
+            break-after: page;
+        }
+        .page-break:last-child {
+            page-break-after: avoid;
+            break-after: avoid;
+        }
 
         /* ═══════════════════════════════════════════
            PAGE NUMBER & RUNNING FOOTER
@@ -622,42 +625,61 @@
            ═══════════════════════════════════════════ */
         @media print {
             .no-print { display: none !important; }
-            body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
-            .page {
-                max-width: none !important;
-                padding: 0 !important;
+            html, body {
+                background: #fff !important;
                 margin: 0 !important;
-                min-height: auto !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+            .page {
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                min-height: 0 !important;
                 height: auto !important;
                 box-shadow: none !important;
+                border-radius: 0 !important;
                 page-break-after: always !important;
                 break-after: page !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
             }
             .page:last-child {
                 page-break-after: avoid !important;
                 break-after: avoid !important;
             }
             .cover-page {
+                height: 265mm !important;
+                max-height: 265mm !important;
+                overflow: hidden !important;
+                padding: 0 !important;
+                page-break-after: always !important;
+                break-after: page !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
-                max-height: 258mm !important;
-                overflow: hidden !important;
             }
             .cover {
-                min-height: auto !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: space-between !important;
                 height: 100% !important;
-                max-height: 258mm !important;
-                padding: 6mm 10mm 0 10mm !important;
+                max-height: 265mm !important;
+                min-height: 0 !important;
+                padding: 2mm 0 !important;
+                text-align: center !important;
+                box-sizing: border-box !important;
                 overflow: hidden !important;
             }
             .cover-main-title {
-                margin-top: 18px !important;
+                margin-top: 15px !important;
             }
             .cover-period {
-                margin-top: 18px !important;
+                margin-top: 15px !important;
             }
             .cover-ornament {
-                margin: 10px auto !important;
+                margin: 8px auto !important;
             }
             .section-banner,
             th,
@@ -680,9 +702,9 @@
                 break-inside: avoid !important;
             }
             .cal-cell {
-                height: 88px !important;
-                max-height: 98px !important;
-                padding: 3px 4px !important;
+                height: 80px !important;
+                max-height: 88px !important;
+                padding: 2px 4px !important;
             }
             tr:nth-child(even) td {
                 -webkit-print-color-adjust: exact !important;
@@ -690,13 +712,30 @@
             }
         }
 
-        /* Web preview shadow */
+        /* Web preview styling */
         @media screen {
             .page {
-                box-shadow: 0 2px 30px rgba(0,0,0,0.1);
-                margin-top: 20px;
-                margin-bottom: 20px;
-                border-radius: 4px;
+                width: 210mm;
+                max-width: 210mm;
+                min-height: 297mm;
+                box-shadow: 0 4px 25px rgba(0,0,0,0.08);
+                margin: 25px auto;
+                padding: 18mm 15mm 20mm 15mm;
+                border-radius: 6px;
+            }
+            .cover-page {
+                height: 297mm;
+                max-height: 297mm;
+                overflow: hidden;
+                padding: 14mm 15mm 14mm 15mm;
+            }
+            .cover {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: space-between;
+                height: 100%;
+                text-align: center;
             }
         }
     </style>
