@@ -149,102 +149,255 @@
         }
 
         /* ═══════════════════════════════════════════
-           COVER PAGE
+           PREMIUM INSTITUTIONAL COVER STYLES
            ═══════════════════════════════════════════ */
-        .cover {
+        .cover-outer-frame {
+            border: 2.5px solid #065f46;
+            border-radius: 14px;
+            padding: 5px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            background: #fff;
+            position: relative;
+        }
+        .cover-inner-frame {
+            border: 1.5px solid #10b981;
+            border-radius: 10px;
+            padding: 20px 22px 16px 22px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+            background: radial-gradient(circle at 50% 25%, #f0fdf4 0%, #ffffff 75%);
+            position: relative;
+            text-align: center;
+        }
+        .cover-corner {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-color: #065f46;
+            border-style: solid;
+            pointer-events: none;
+        }
+        .cover-corner.top-left { top: 7px; left: 7px; border-width: 3px 0 0 3px; }
+        .cover-corner.top-right { top: 7px; right: 7px; border-width: 3px 3px 0 0; }
+        .cover-corner.bottom-left { bottom: 7px; left: 7px; border-width: 0 0 3px 3px; }
+        .cover-corner.bottom-right { bottom: 7px; right: 7px; border-width: 0 3px 3px 0; }
+
+        .cover-top-section {
+            width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            min-height: 240mm;
-            text-align: center;
-            padding: 12mm 15mm 8mm 15mm;
-            box-sizing: border-box;
-        }
-        .cover-ornament {
-            width: 80%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, #166534, #15803d, #166534, transparent);
-            margin: 14px auto;
-        }
-        .cover-ornament-thin {
-            width: 50%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #16a34a, transparent);
-            margin: 6px auto;
         }
         .cover-header {
             display: flex;
-            justify-content: center;
             align-items: center;
-            gap: 20px;
-            margin-bottom: 12px;
+            justify-content: center;
+            gap: 16px;
+            width: 100%;
+            margin-bottom: 8px;
         }
         .cover-logo-img {
-            height: 60px;
+            height: 54px;
             width: auto;
             object-fit: contain;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.08));
         }
-        .cover-logo {
-            width: 52px; height: 52px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #166534, #15803d);
-            color: #fff;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 12px rgba(22, 101, 52, 0.3);
+        .cover-header-divider {
+            width: 1.5px;
+            height: 38px;
+            background: #cbd5e1;
         }
-        .cover-org {
+        .cover-org-block {
+            text-align: center;
+        }
+        .cover-org-title {
             font-family: 'Outfit', sans-serif;
             font-weight: 800;
-            font-size: 14pt;
-            color: #166534;
-            letter-spacing: 1px;
+            font-size: 12.5pt;
+            color: #064e3b;
+            letter-spacing: 0.8px;
             text-transform: uppercase;
+            line-height: 1.25;
+            margin: 0;
         }
-        .cover-sub-org {
+        .cover-org-subtitle {
             font-family: 'Outfit', sans-serif;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 9.5pt;
-            color: #15803d;
+            color: #059669;
             letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+        .cover-org-address {
+            font-size: 7.5pt;
+            color: #64748b;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+        .cover-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 82%;
+            margin: 8px auto 0 auto;
+        }
+        .cover-divider-line {
+            flex: 1;
+            height: 1.5px;
+            background: linear-gradient(90deg, transparent, #059669, #064e3b, #059669, transparent);
+        }
+        .cover-divider-emblem {
+            padding: 0 10px;
+            color: #059669;
+            font-size: 10pt;
+        }
+
+        .cover-middle-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .cover-badge-wrap {
+            margin-bottom: 10px;
+        }
+        .cover-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+            color: #fff;
+            padding: 4px 18px;
+            border-radius: 30px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 8pt;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(6, 78, 59, 0.25);
         }
         .cover-main-title {
             font-family: 'Outfit', sans-serif;
             font-weight: 800;
             font-size: 20pt;
-            color: #1e293b;
-            margin-top: 28px;
-            line-height: 1.3;
+            color: #0f172a;
+            line-height: 1.25;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin: 0 0 4px 0;
         }
-        .cover-subtitle {
+        .cover-sub-title {
             font-family: 'Outfit', sans-serif;
             font-weight: 700;
-            font-size: 15pt;
-            color: #334155;
-            margin-top: 4px;
+            font-size: 10.5pt;
+            color: #047857;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            margin-bottom: 14px;
         }
-        .cover-period {
-            margin-top: 24px;
-            padding: 10px 36px;
-            border: 2px solid #166534;
+        .cover-period-card {
+            background: #ffffff;
+            border: 2px solid #059669;
             border-radius: 14px;
+            padding: 8px 36px;
+            box-shadow: 0 4px 14px rgba(5, 150, 105, 0.12);
             display: inline-block;
         }
-        .cover-period-text {
-            font-family: 'Outfit', sans-serif;
+        .cover-period-label {
+            font-size: 7pt;
             font-weight: 800;
-            font-size: 15pt;
-            color: #166534;
             text-transform: uppercase;
             letter-spacing: 2px;
-        }
-        .cover-footer {
-            margin-top: auto;
-            padding-top: 15px;
-            font-size: 8.5pt;
             color: #64748b;
+            margin-bottom: 2px;
+        }
+        .cover-period-value {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 16pt;
+            color: #064e3b;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .cover-meta-section {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 6px;
+        }
+        .cover-meta-box {
+            width: 90%;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 8px 16px;
+            text-align: left;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+        .cover-meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+            border: none;
+            font-size: 8pt;
+        }
+        .cover-meta-table td {
+            border: none !important;
+            padding: 2.5px 5px !important;
+            background: transparent !important;
+            vertical-align: middle;
+        }
+        .cover-meta-icon {
+            width: 20px;
+            text-align: center;
+            color: #059669;
+            font-size: 8.5pt;
+        }
+        .cover-meta-label {
+            font-weight: 700;
+            color: #475569;
+            width: 32%;
+        }
+        .cover-meta-colon {
+            width: 3%;
+            color: #64748b;
+            font-weight: 700;
+        }
+        .cover-meta-val {
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .cover-bottom-section {
+            width: 100%;
+        }
+        .cover-footer-bar {
+            width: 100%;
+            padding-top: 8px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 7.5pt;
+            color: #64748b;
+        }
+        .cover-footer-left {
+            font-weight: 700;
+            color: #047857;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .cover-footer-right {
+            font-style: italic;
         }
 
         /* ═══════════════════════════════════════════
@@ -650,8 +803,8 @@
                 break-after: avoid !important;
             }
             .cover-page {
-                height: 265mm !important;
-                max-height: 265mm !important;
+                height: 268mm !important;
+                max-height: 268mm !important;
                 overflow: hidden !important;
                 padding: 0 !important;
                 page-break-after: always !important;
@@ -659,27 +812,37 @@
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
             }
-            .cover {
-                display: flex !important;
-                flex-direction: column !important;
-                align-items: center !important;
-                justify-content: space-between !important;
+            .cover-outer-frame {
                 height: 100% !important;
-                max-height: 265mm !important;
-                min-height: 0 !important;
-                padding: 2mm 0 !important;
-                text-align: center !important;
                 box-sizing: border-box !important;
-                overflow: hidden !important;
+                border-color: #065f46 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
-            .cover-main-title {
-                margin-top: 15px !important;
+            .cover-inner-frame {
+                height: 100% !important;
+                padding: 16px 18px 12px 18px !important;
+                box-sizing: border-box !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
-            .cover-period {
-                margin-top: 15px !important;
+            .cover-badge {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
-            .cover-ornament {
-                margin: 8px auto !important;
+            .cover-period-card {
+                padding: 6px 28px !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .cover-meta-box {
+                padding: 6px 12px !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .cover-divider-line {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
             .section-banner,
             th,
@@ -729,14 +892,6 @@
                 overflow: hidden;
                 padding: 14mm 15mm 14mm 15mm;
             }
-            .cover {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: space-between;
-                height: 100%;
-                text-align: center;
-            }
         }
     </style>
 </head>
@@ -783,40 +938,97 @@
     ?>
 
     <!-- ══════════════════════════════════════════════
-         1. SAMPUL (COVER PAGE)
+         1. SAMPUL RESMI (COVER PAGE)
          ══════════════════════════════════════════════ -->
     <div class="page cover-page page-break">
-        <div class="cover">
-            <!-- Organization Header with Dual Logos -->
-            <div class="cover-header">
-                <img src="<?= base_url('assets/images/logo_yayasan.png') ?>" alt="Logo Yayasan Assalafiyyah" class="cover-logo-img" style="height: 68px;">
-                <img src="<?= base_url('assets/images/logo_gemerlap.png') ?>" alt="Logo Gemerlap" class="cover-logo-img" style="height: 60px;">
-            </div>
-            <div class="cover-org">KEBERSIHAN YAYASAN ASSALAFIYYAH</div>
-            <div class="cover-sub-org">Buku Manajemen Kebersihan Yayasan Assalafiyyah</div>
+        <div class="cover-outer-frame">
+            <!-- Corner Ornaments -->
+            <div class="cover-corner top-left"></div>
+            <div class="cover-corner top-right"></div>
+            <div class="cover-corner bottom-left"></div>
+            <div class="cover-corner bottom-right"></div>
 
-            <div class="cover-ornament"></div>
+            <div class="cover-inner-frame">
+                <!-- TOP: Institutional Header -->
+                <div class="cover-top-section">
+                    <div class="cover-header">
+                        <img src="<?= base_url('assets/images/logo_yayasan.png') ?>" alt="Logo Yayasan Assalafiyyah" class="cover-logo-img">
+                        <div class="cover-header-divider"></div>
+                        <img src="<?= base_url('assets/images/logo_gemerlap.png') ?>" alt="Logo Gemerlap" class="cover-logo-img">
+                    </div>
+                    <div class="cover-org-block">
+                        <h2 class="cover-org-title">YAYASAN PONDOK PESANTREN ASSALAFIYYAH</h2>
+                        <h3 class="cover-org-subtitle">DIVISI KEBERSIHAN & KESELAMATAN LINGKUNGAN (K3L)</h3>
+                        <p class="cover-org-address">Mlangi, Nogotirto, Gamping, Sleman, D.I. Yogyakarta 55292</p>
+                    </div>
+                    <div class="cover-divider">
+                        <div class="cover-divider-line"></div>
+                        <div class="cover-divider-emblem"><i class="fa-solid fa-gem"></i></div>
+                        <div class="cover-divider-line"></div>
+                    </div>
+                </div>
 
-            <!-- Main Title -->
-            <div class="cover-main-title">LEMBAR<br>LAPORAN PERTANGGUNGJAWABAN</div>
-            <div class="cover-subtitle">( LPJ )</div>
+                <!-- MIDDLE: Document Title & Badge & Period Box -->
+                <div class="cover-middle-section">
+                    <div class="cover-badge-wrap">
+                        <span class="cover-badge">DOKUMEN RESMI PERTANGGUNGJAWABAN</span>
+                    </div>
 
-            <div class="cover-ornament-thin"></div>
+                    <h1 class="cover-main-title">LAPORAN PERTANGGUNGJAWABAN<br>( LPJ KEBERSIHAN )</h1>
+                    
+                    <p class="cover-sub-title">BUKU MANAJEMEN & EVALUASI OPERASIONAL KEBERSIHAN</p>
 
-            <div style="margin-top: 30px; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 13pt; color: #334155;">
-                KEBERSIHAN YAYASAN ASSALAFIYYAH MLANGI
-            </div>
+                    <!-- Period Box -->
+                    <div class="cover-period-card">
+                        <div class="cover-period-label">PERIODE LAPORAN BULANAN</div>
+                        <div class="cover-period-value"><?= strtoupper(esc($buku['bulan'])) ?> <?= esc($buku['tahun']) ?></div>
+                    </div>
+                </div>
 
-            <!-- Period Badge -->
-            <div class="cover-period">
-                <div class="cover-period-text"><?= esc($buku['bulan']) ?> <?= esc($buku['tahun']) ?></div>
-            </div>
+                <!-- LOWER: Structured Metadata Box -->
+                <div class="cover-meta-section">
+                    <div class="cover-meta-box">
+                        <table class="cover-meta-table">
+                            <tr>
+                                <td class="cover-meta-icon"><i class="fa-solid fa-building-columns"></i></td>
+                                <td class="cover-meta-label">Lembaga Naungan</td>
+                                <td class="cover-meta-colon">:</td>
+                                <td class="cover-meta-val">Yayasan Pondok Pesantren Assalafiyyah Mlangi</td>
+                            </tr>
+                            <tr>
+                                <td class="cover-meta-icon"><i class="fa-solid fa-users-gear"></i></td>
+                                <td class="cover-meta-label">Penyusun / Pelaksana</td>
+                                <td class="cover-meta-colon">:</td>
+                                <td class="cover-meta-val">Divisi Kebersihan & K3L (Tim Gemerlap)</td>
+                            </tr>
+                            <tr>
+                                <td class="cover-meta-icon"><i class="fa-solid fa-user-check"></i></td>
+                                <td class="cover-meta-label">Koordinator Operasional</td>
+                                <td class="cover-meta-colon">:</td>
+                                <td class="cover-meta-val"><?= esc($settings['nama_koordinator'] ?? 'Bapak Muhammad Ashar') ?></td>
+                            </tr>
+                            <tr>
+                                <td class="cover-meta-icon"><i class="fa-solid fa-location-dot"></i></td>
+                                <td class="cover-meta-label">Titimangsa Penerbitan</td>
+                                <td class="cover-meta-colon">:</td>
+                                <td class="cover-meta-val"><?= esc($settings['kota_dokumen'] ?? 'Sleman') ?>, <?= date('d') ?> <?= esc($buku['bulan']) ?> <?= esc($buku['tahun']) ?></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
 
-            <div class="cover-ornament" style="margin-top: 50px;"></div>
-
-            <!-- Footer -->
-            <div class="cover-footer">
-                Dokumen Resmi — Dicetak dari Sistem LPJ Kebersihan Digital
+                <!-- BOTTOM: Footer Bar -->
+                <div class="cover-bottom-section">
+                    <div class="cover-footer-bar">
+                        <div class="cover-footer-left">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Sistem Informasi LPJ Kebersihan Digital</span>
+                        </div>
+                        <div class="cover-footer-right">
+                            Dokumen Sah & Resmi — Arsip Yayasan Assalafiyyah
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
