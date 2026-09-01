@@ -153,48 +153,49 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 260mm;
+            min-height: 240mm;
             text-align: center;
-            padding: 20mm 20mm;
+            padding: 12mm 15mm 8mm 15mm;
+            box-sizing: border-box;
         }
         .cover-ornament {
             width: 80%;
             height: 3px;
             background: linear-gradient(90deg, transparent, #166534, #15803d, #166534, transparent);
-            margin: 18px auto;
+            margin: 14px auto;
         }
         .cover-ornament-thin {
             width: 50%;
             height: 1px;
             background: linear-gradient(90deg, transparent, #16a34a, transparent);
-            margin: 8px auto;
+            margin: 6px auto;
         }
         .cover-header {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 20px;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
         .cover-logo-img {
-            height: 64px;
+            height: 60px;
             width: auto;
             object-fit: contain;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.08));
         }
         .cover-logo {
-            width: 56px; height: 56px;
-            border-radius: 16px;
+            width: 52px; height: 52px;
+            border-radius: 14px;
             background: linear-gradient(135deg, #166534, #15803d);
             color: #fff;
             display: flex; align-items: center; justify-content: center;
-            font-size: 26px;
+            font-size: 24px;
             box-shadow: 0 4px 12px rgba(22, 101, 52, 0.3);
         }
         .cover-org {
             font-family: 'Outfit', sans-serif;
             font-weight: 800;
-            font-size: 15pt;
+            font-size: 14pt;
             color: #166534;
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -202,28 +203,28 @@
         .cover-sub-org {
             font-family: 'Outfit', sans-serif;
             font-weight: 600;
-            font-size: 10pt;
+            font-size: 9.5pt;
             color: #15803d;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
         }
         .cover-main-title {
             font-family: 'Outfit', sans-serif;
             font-weight: 800;
-            font-size: 22pt;
+            font-size: 20pt;
             color: #1e293b;
-            margin-top: 50px;
+            margin-top: 28px;
             line-height: 1.3;
         }
         .cover-subtitle {
             font-family: 'Outfit', sans-serif;
             font-weight: 700;
-            font-size: 16pt;
+            font-size: 15pt;
             color: #334155;
             margin-top: 4px;
         }
         .cover-period {
-            margin-top: 40px;
-            padding: 12px 40px;
+            margin-top: 24px;
+            padding: 10px 36px;
             border: 2px solid #166534;
             border-radius: 14px;
             display: inline-block;
@@ -231,14 +232,15 @@
         .cover-period-text {
             font-family: 'Outfit', sans-serif;
             font-weight: 800;
-            font-size: 16pt;
+            font-size: 15pt;
             color: #166534;
             text-transform: uppercase;
             letter-spacing: 2px;
         }
         .cover-footer {
             margin-top: auto;
-            font-size: 9pt;
+            padding-top: 15px;
+            font-size: 8.5pt;
             color: #64748b;
         }
 
@@ -620,12 +622,42 @@
            ═══════════════════════════════════════════ */
         @media print {
             .no-print { display: none !important; }
-            body { background: #fff; }
+            body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
             .page {
-                max-width: none;
-                padding: 0;
-                margin: 0;
-                box-shadow: none;
+                max-width: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                min-height: auto !important;
+                height: auto !important;
+                box-shadow: none !important;
+                page-break-after: always !important;
+                break-after: page !important;
+            }
+            .page:last-child {
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+            }
+            .cover-page {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                max-height: 258mm !important;
+                overflow: hidden !important;
+            }
+            .cover {
+                min-height: auto !important;
+                height: 100% !important;
+                max-height: 258mm !important;
+                padding: 6mm 10mm 0 10mm !important;
+                overflow: hidden !important;
+            }
+            .cover-main-title {
+                margin-top: 18px !important;
+            }
+            .cover-period {
+                margin-top: 18px !important;
+            }
+            .cover-ornament {
+                margin: 10px auto !important;
             }
             .section-banner,
             th,
@@ -640,15 +672,21 @@
             .calendar-table td,
             .cal-cell,
             .cal-event {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
             .calendar-table {
-                page-break-inside: avoid;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            .cal-cell {
+                height: 88px !important;
+                max-height: 98px !important;
+                padding: 3px 4px !important;
             }
             tr:nth-child(even) td {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
         }
 
@@ -708,7 +746,7 @@
     <!-- ══════════════════════════════════════════════
          1. SAMPUL (COVER PAGE)
          ══════════════════════════════════════════════ -->
-    <div class="page page-break">
+    <div class="page cover-page page-break">
         <div class="cover">
             <!-- Organization Header with Dual Logos -->
             <div class="cover-header">
