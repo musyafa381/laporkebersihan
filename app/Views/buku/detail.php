@@ -632,9 +632,9 @@
                                         <div class="sm:col-span-2">
                                             <div id="container_preview_<?= $p['id'] ?>" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm group flex items-center justify-center cursor-grab select-none">
                                                 <?php if (!empty($kData['foto'])): ?>
-                                                    <img id="img_preview_<?= $p['id'] ?>" src="<?= base_url('uploads/' . $kData['foto']) ?>" alt="Foto Dokumentasi" class="w-full h-full object-cover transition-all duration-75" style="object-position: <?= esc($kData['foto_position'] ?? '50% 50%') ?>;">
+                                                    <img id="img_preview_<?= $p['id'] ?>" src="<?= image_url($kData['foto'], 'uploads') ?>" alt="Foto Dokumentasi" class="w-full h-full object-cover transition-all duration-75" style="object-position: <?= esc($kData['foto_position'] ?? '50% 50%') ?>;">
                                                     <div class="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-1.5 pointer-events-none">
-                                                        <a href="<?= base_url('uploads/' . $kData['foto']) ?>" target="_blank" class="pointer-events-auto px-2.5 py-1 bg-white/90 text-slate-900 rounded-xl text-[10px] font-bold shadow-md hover:bg-white transition">
+                                                        <a href="<?= image_url($kData['foto'], 'uploads') ?>" target="_blank" class="pointer-events-auto px-2.5 py-1 bg-white/90 text-slate-900 rounded-xl text-[10px] font-bold shadow-md hover:bg-white transition">
                                                             <i class="fa-solid fa-up-right-from-square"></i> Perbesar
                                                         </a>
                                                         <button type="button" onclick="resetPhotoPosition('img_preview_<?= $p['id'] ?>', 'foto_pos_<?= $p['id'] ?>')" class="pointer-events-auto px-2.5 py-1 bg-slate-900/80 text-white rounded-xl text-[10px] font-bold shadow-md hover:bg-slate-900 transition">

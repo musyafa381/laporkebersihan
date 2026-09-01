@@ -113,9 +113,9 @@
                 <div>
                     <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Upload Logo Resmi Instansi (PNG/JPG)</label>
                     <div class="flex items-center gap-4">
-                        <?php if (!empty($settings['logo_img']) && file_exists(FCPATH . $settings['logo_img'])): ?>
+                        <?php if (!empty($settings['logo_img']) && has_valid_image($settings['logo_img'])): ?>
                             <div class="w-16 h-16 rounded-2xl border border-slate-200 bg-slate-50 p-2 flex items-center justify-center flex-shrink-0">
-                                <img src="<?= base_url($settings['logo_img']) ?>" alt="Logo" class="max-h-full max-w-full object-contain">
+                                <img src="<?= image_url($settings['logo_img'], 'uploads/settings') ?>" alt="Logo" class="max-h-full max-w-full object-contain">
                             </div>
                         <?php endif; ?>
                         <input type="file" name="logo_img" accept="image/*" class="text-xs font-semibold text-slate-600 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition">
@@ -198,8 +198,8 @@
                             <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-2">Tanda Tangan Digital (PNG Transparan)</label>
                             <div class="flex items-center gap-4 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs">
                                 <div class="w-24 h-16 rounded-xl border border-dashed border-emerald-300 bg-slate-50 flex items-center justify-center p-1 overflow-hidden flex-shrink-0 relative group">
-                                    <?php if (!empty($settings['ttd_ketua_img']) && file_exists(FCPATH . $settings['ttd_ketua_img'])): ?>
-                                        <img id="preview_ttd_ketua" src="<?= base_url($settings['ttd_ketua_img']) ?>" alt="TTD Ketua" class="max-h-full max-w-full object-contain">
+                                    <?php if (!empty($settings['ttd_ketua_img']) && has_valid_image($settings['ttd_ketua_img'])): ?>
+                                        <img id="preview_ttd_ketua" src="<?= image_url($settings['ttd_ketua_img'], 'uploads/settings') ?>" alt="TTD Ketua" class="max-h-full max-w-full object-contain">
                                     <?php else: ?>
                                         <img id="preview_ttd_ketua" src="" alt="TTD Ketua" class="max-h-full max-w-full object-contain hidden">
                                         <span id="placeholder_ttd_ketua" class="text-[10px] text-slate-400 font-extrabold text-center leading-tight"><i class="fa-solid fa-signature text-slate-300 text-base block mb-0.5"></i>Kosong</span>
@@ -227,7 +227,7 @@
                                         <span class="text-[10px] text-teal-700 font-bold bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200/60 inline-block mt-0.5">Penanggung Jawab Operasional</span>
                                     </div>
                                 </div>
-                                <?php if (!empty($settings['ttd_koordinator_img']) && file_exists(FCPATH . $settings['ttd_koordinator_img'])): ?>
+                                <?php if (!empty($settings['ttd_koordinator_img']) && has_valid_image($settings['ttd_koordinator_img'])): ?>
                                     <span class="px-2.5 py-1 rounded-xl bg-teal-100 text-teal-800 text-[10px] font-extrabold flex items-center gap-1 border border-teal-200">
                                         <i class="fa-solid fa-check text-[9px]"></i> TTD Aktif
                                     </span>
@@ -260,8 +260,8 @@
                             <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-2">Tanda Tangan Digital (PNG Transparan)</label>
                             <div class="flex items-center gap-4 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs">
                                 <div class="w-24 h-16 rounded-xl border border-dashed border-teal-300 bg-slate-50 flex items-center justify-center p-1 overflow-hidden flex-shrink-0 relative group">
-                                    <?php if (!empty($settings['ttd_koordinator_img']) && file_exists(FCPATH . $settings['ttd_koordinator_img'])): ?>
-                                        <img id="preview_ttd_koordinator" src="<?= base_url($settings['ttd_koordinator_img']) ?>" alt="TTD Koordinator" class="max-h-full max-w-full object-contain">
+                                    <?php if (!empty($settings['ttd_koordinator_img']) && has_valid_image($settings['ttd_koordinator_img'])): ?>
+                                        <img id="preview_ttd_koordinator" src="<?= image_url($settings['ttd_koordinator_img'], 'uploads/settings') ?>" alt="TTD Koordinator" class="max-h-full max-w-full object-contain">
                                     <?php else: ?>
                                         <img id="preview_ttd_koordinator" src="" alt="TTD Koordinator" class="max-h-full max-w-full object-contain hidden">
                                         <span id="placeholder_ttd_koordinator" class="text-[10px] text-slate-400 font-extrabold text-center leading-tight"><i class="fa-solid fa-signature text-slate-300 text-base block mb-0.5"></i>Kosong</span>
@@ -289,7 +289,7 @@
                                         <span class="text-[10px] text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200/60 inline-block mt-0.5">Pembuat Dokumen LPJ</span>
                                     </div>
                                 </div>
-                                <?php if (!empty($settings['ttd_sekretaris_img']) && file_exists(FCPATH . $settings['ttd_sekretaris_img'])): ?>
+                                <?php if (!empty($settings['ttd_sekretaris_img']) && has_valid_image($settings['ttd_sekretaris_img'])): ?>
                                     <span class="px-2.5 py-1 rounded-xl bg-blue-100 text-blue-800 text-[10px] font-extrabold flex items-center gap-1 border border-blue-200">
                                         <i class="fa-solid fa-check text-[9px]"></i> TTD Aktif
                                     </span>
@@ -322,8 +322,8 @@
                             <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-2">Tanda Tangan Digital (PNG Transparan)</label>
                             <div class="flex items-center gap-4 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs">
                                 <div class="w-24 h-16 rounded-xl border border-dashed border-blue-300 bg-slate-50 flex items-center justify-center p-1 overflow-hidden flex-shrink-0 relative group">
-                                    <?php if (!empty($settings['ttd_sekretaris_img']) && file_exists(FCPATH . $settings['ttd_sekretaris_img'])): ?>
-                                        <img id="preview_ttd_sekretaris" src="<?= base_url($settings['ttd_sekretaris_img']) ?>" alt="TTD Sekretaris" class="max-h-full max-w-full object-contain">
+                                    <?php if (!empty($settings['ttd_sekretaris_img']) && has_valid_image($settings['ttd_sekretaris_img'])): ?>
+                                        <img id="preview_ttd_sekretaris" src="<?= image_url($settings['ttd_sekretaris_img'], 'uploads/settings') ?>" alt="TTD Sekretaris" class="max-h-full max-w-full object-contain">
                                     <?php else: ?>
                                         <img id="preview_ttd_sekretaris" src="" alt="TTD Sekretaris" class="max-h-full max-w-full object-contain hidden">
                                         <span id="placeholder_ttd_sekretaris" class="text-[10px] text-slate-400 font-extrabold text-center leading-tight"><i class="fa-solid fa-signature text-slate-300 text-base block mb-0.5"></i>Kosong</span>
@@ -351,7 +351,7 @@
                                         <span class="text-[10px] text-purple-700 font-bold bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200/60 inline-block mt-0.5">Cap Resmi Lembaga</span>
                                     </div>
                                 </div>
-                                <?php if (!empty($settings['stempel_img']) && file_exists(FCPATH . $settings['stempel_img'])): ?>
+                                <?php if (!empty($settings['stempel_img']) && has_valid_image($settings['stempel_img'])): ?>
                                     <span class="px-2.5 py-1 rounded-xl bg-purple-100 text-purple-800 text-[10px] font-extrabold flex items-center gap-1 border border-purple-200">
                                         <i class="fa-solid fa-check text-[9px]"></i> Stempel Aktif
                                     </span>
@@ -377,8 +377,8 @@
                             <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-2">Upload Stempel Resmi PNG (Transparan)</label>
                             <div class="flex items-center gap-4 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs">
                                 <div class="w-24 h-16 rounded-xl border border-dashed border-purple-300 bg-slate-50 flex items-center justify-center p-1 overflow-hidden flex-shrink-0 relative group">
-                                    <?php if (!empty($settings['stempel_img']) && file_exists(FCPATH . $settings['stempel_img'])): ?>
-                                        <img id="preview_stempel" src="<?= base_url($settings['stempel_img']) ?>" alt="Stempel" class="max-h-full max-w-full object-contain">
+                                    <?php if (!empty($settings['stempel_img']) && has_valid_image($settings['stempel_img'])): ?>
+                                        <img id="preview_stempel" src="<?= image_url($settings['stempel_img'], 'uploads/settings') ?>" alt="Stempel" class="max-h-full max-w-full object-contain">
                                     <?php else: ?>
                                         <img id="preview_stempel" src="" alt="Stempel" class="max-h-full max-w-full object-contain hidden">
                                         <span id="placeholder_stempel" class="text-[10px] text-slate-400 font-extrabold text-center leading-tight"><i class="fa-solid fa-stamp text-slate-300 text-base block mb-0.5"></i>Kosong</span>

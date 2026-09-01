@@ -190,7 +190,7 @@
                     <?php foreach ($fotoList as $idx => $fObj): 
                         $fFileName = $fObj['file'] ?? '';
                         $fCaption  = $fObj['caption'] ?? ('Foto #' . ($idx + 1));
-                        $imgUrl    = base_url('uploads/proker/' . $fFileName);
+                        $imgUrl    = image_url($fFileName, 'uploads/proker');
                     ?>
                         <div class="rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-md shadow-slate-200/50 flex flex-col justify-between group hover:shadow-xl transition-all duration-300">
                             <!-- 16:9 Image Preview Container -->
@@ -204,7 +204,7 @@
                                             #<?= $idx + 1 ?>
                                         </span>
                                         <?php if ($canEdit): ?>
-                                            <a href="<?= base_url('program-kerja/delete-foto/' . $proker['id'] . '/' . $fFileName) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus foto '<?= esc($fCaption) ?>'?" class="w-8 h-8 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-white flex items-center justify-center text-xs shadow-lg transition backdrop-blur-xs" title="Hapus Foto">
+                                            <a href="<?= base_url('program-kerja/delete-foto/' . $proker['id'] . '/' . $idx) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus foto '<?= esc($fCaption) ?>'?" class="w-8 h-8 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-white flex items-center justify-center text-xs shadow-lg transition backdrop-blur-xs" title="Hapus Foto">
                                                 <i class="fa-solid fa-trash"></i>
                                             </a>
                                         <?php endif; ?>

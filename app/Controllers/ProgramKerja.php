@@ -6,6 +6,7 @@ use App\Models\ProgramKerjaModel;
 use App\Models\MasterUnitModel;
 use App\Models\BukuLpjModel;
 use App\Models\PengaturanModel;
+use App\Libraries\CloudinaryService;
 
 class ProgramKerja extends BaseController
 {
@@ -13,6 +14,7 @@ class ProgramKerja extends BaseController
     protected $unitModel;
     protected $bukuModel;
     protected $pengaturanModel;
+    protected $cloudinary;
 
     public function __construct()
     {
@@ -20,6 +22,7 @@ class ProgramKerja extends BaseController
         $this->unitModel       = new MasterUnitModel();
         $this->bukuModel       = new BukuLpjModel();
         $this->pengaturanModel = new PengaturanModel();
+        $this->cloudinary      = new CloudinaryService();
     }
 
     private function respondJsonOrRedirect($message, $success = true, $redirectUrl = null)
@@ -388,6 +391,19 @@ class ProgramKerja extends BaseController
             }
         }
 
+        // Hapus seluruh foto dokumentasi dari Cloudinary / lokal sebelum hapus data
+        $rawExisting = json_decode($proker['foto_dokumentasi'] ?? '[]', true) ?: [];
+        foreach ($rawExisting as $item) {
+            $itemFile = is_array($item) ? ($item['file'] ?? '') : $item;
+            if (!empty($itemFile)) {
+                if (str_contains($itemFile, 'cloudinary.com')) {
+                    $this->cloudinary->delete($itemFile);
+                } elseif (file_exists(FCPATH . 'uploads/proker/' . basename($itemFile))) {
+                    @unlink(FCPATH . 'uploads/proker/' . basename($itemFile));
+                }
+            }
+        }
+
         $this->prokerModel->delete($id);
         return $this->respondJsonOrRedirect('Program kerja berhasil dihapus.');
     }
@@ -457,15 +473,29 @@ class ProgramKerja extends BaseController
                 }
 
                 $caption = trim($fotoCaptions[$idx] ?? '') ?: pathinfo($file->getClientName(), PATHINFO_FILENAME);
-                $newName = 'proker_' . $id . '_' . time() . '_' . substr(uniqid(), -4) . '.' . $file->guessExtension();
-                $file->move($uploadDir, $newName);
+                $customName = 'proker_' . $id . '_' . time() . '_' . substr(uniqid(), -4);
 
-                $existingPhotos[] = [
-                    'file'       => $newName,
-                    'caption'    => $caption,
-                    'created_at' => date('Y-m-d H:i:s')
-                ];
-                $savedCount++;
+                // Prioritaskan upload ke Cloudinary
+                $cldRes = $this->cloudinary->upload($file, 'proker_docs', $customName);
+                if ($cldRes['success'] && !empty($cldRes['url'])) {
+                    $existingPhotos[] = [
+                        'file'       => $cldRes['url'],
+                        'caption'    => $caption,
+                        'created_at' => date('Y-m-d H:i:s')
+                    ];
+                    $savedCount++;
+                } else {
+                    // Fallback lokal jika kendala koneksi
+                    $newName = $customName . '.' . $file->guessExtension();
+                    $file->move($uploadDir, $newName);
+
+                    $existingPhotos[] = [
+                        'file'       => $newName,
+                        'caption'    => $caption,
+                        'created_at' => date('Y-m-d H:i:s')
+                    ];
+                    $savedCount++;
+                }
             }
         }
 
@@ -501,18 +531,24 @@ class ProgramKerja extends BaseController
             }
         }
 
-        $fileName = basename($fileName);
-        $filePath = FCPATH . 'uploads/proker/' . $fileName;
-        if (file_exists($filePath)) {
-            @unlink($filePath);
-        }
-
         $rawExisting = json_decode($proker['foto_dokumentasi'] ?? '[]', true) ?: [];
         $updatedPhotos = [];
+        $targetIdx = is_numeric($fileName) ? (int)$fileName : null;
 
-        foreach ($rawExisting as $item) {
+        foreach ($rawExisting as $idx => $item) {
             $itemFile = is_array($item) ? ($item['file'] ?? '') : $item;
-            if ($itemFile !== $fileName) {
+            $isTarget = ($targetIdx !== null && $idx === $targetIdx) || 
+                        ($itemFile === $fileName) || 
+                        (basename($itemFile) === basename($fileName)) || 
+                        (urldecode($fileName) === $itemFile);
+
+            if ($isTarget) {
+                if (str_contains($itemFile, 'cloudinary.com')) {
+                    $this->cloudinary->delete($itemFile);
+                } elseif (file_exists(FCPATH . 'uploads/proker/' . basename($itemFile))) {
+                    @unlink(FCPATH . 'uploads/proker/' . basename($itemFile));
+                }
+            } else {
                 $updatedPhotos[] = $item;
             }
         }

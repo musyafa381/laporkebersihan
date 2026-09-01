@@ -12,6 +12,7 @@ use App\Models\CapaianBulananModel;
 use App\Models\EvaluasiBulananModel;
 use App\Models\KeuanganMasukModel;
 use App\Models\KeuanganItemModel;
+use App\Libraries\CloudinaryService;
 
 class Buku extends BaseController
 {
@@ -25,6 +26,7 @@ class Buku extends BaseController
     protected $evaluasiBulananModel;
     protected $keuanganMasukModel;
     protected $keuanganItemModel;
+    protected $cloudinary;
 
     public function __construct()
     {
@@ -38,6 +40,7 @@ class Buku extends BaseController
         $this->evaluasiBulananModel = new EvaluasiBulananModel();
         $this->keuanganMasukModel   = new KeuanganMasukModel();
         $this->keuanganItemModel    = new KeuanganItemModel();
+        $this->cloudinary           = new CloudinaryService();
     }
 
     protected function normalizeStatus($status)
@@ -445,12 +448,21 @@ class Buku extends BaseController
             if ($fotoFile->getSize() > 3 * 1024 * 1024) {
                 return $this->respondJsonOrRedirect('Ukuran foto dokumentasi melebihi batas maksimal 3MB.', false);
             }
-            $uploadDir = FCPATH . 'uploads';
-            if (!file_exists($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
+
+            // Prioritaskan upload ke Cloudinary
+            $customName = 'koordinasi_' . $bukuId . '_' . time();
+            $cldRes = $this->cloudinary->upload($fotoFile, 'lpj_koordinasi', $customName);
+            if ($cldRes['success'] && !empty($cldRes['url'])) {
+                $fotoName = $cldRes['url'];
+            } else {
+                // Fallback ke penyimpanan lokal jika koneksi bermasalah
+                $uploadDir = FCPATH . 'uploads';
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                $fotoName = $fotoFile->getRandomName();
+                $fotoFile->move($uploadDir, $fotoName);
             }
-            $fotoName = $fotoFile->getRandomName();
-            $fotoFile->move($uploadDir, $fotoName);
         }
 
         $existing = null;
@@ -462,6 +474,15 @@ class Buku extends BaseController
         }
 
         if ($existing) {
+            // Hapus foto lama dari Cloudinary / lokal jika diganti dengan foto baru
+            if ($fotoName && !empty($existing['foto']) && $existing['foto'] !== $fotoName) {
+                if (str_contains($existing['foto'], 'cloudinary.com')) {
+                    $this->cloudinary->delete($existing['foto']);
+                } elseif (file_exists(FCPATH . 'uploads/' . $existing['foto'])) {
+                    @unlink(FCPATH . 'uploads/' . $existing['foto']);
+                }
+            }
+
             $updateData = [
                 'proker_id'     => $prokerId ?: $existing['proker_id'],
                 'tempat'        => $tempat,
@@ -494,6 +515,14 @@ class Buku extends BaseController
 
     public function deleteKoordinasi($id)
     {
+        $koordinasi = $this->koordinasiModel->find($id);
+        if ($koordinasi && !empty($koordinasi['foto'])) {
+            if (str_contains($koordinasi['foto'], 'cloudinary.com')) {
+                $this->cloudinary->delete($koordinasi['foto']);
+            } elseif (file_exists(FCPATH . 'uploads/' . $koordinasi['foto'])) {
+                @unlink(FCPATH . 'uploads/' . $koordinasi['foto']);
+            }
+        }
         $this->koordinasiModel->delete($id);
         return $this->respondJsonOrRedirect('Laporan Hasil Koordinasi berhasil dihapus.');
     }
@@ -502,8 +531,12 @@ class Buku extends BaseController
     {
         $koordinasi = $this->koordinasiModel->find($id);
         if ($koordinasi) {
-            if (!empty($koordinasi['foto']) && file_exists(FCPATH . 'uploads/' . $koordinasi['foto'])) {
-                @unlink(FCPATH . 'uploads/' . $koordinasi['foto']);
+            if (!empty($koordinasi['foto'])) {
+                if (str_contains($koordinasi['foto'], 'cloudinary.com')) {
+                    $this->cloudinary->delete($koordinasi['foto']);
+                } elseif (file_exists(FCPATH . 'uploads/' . $koordinasi['foto'])) {
+                    @unlink(FCPATH . 'uploads/' . $koordinasi['foto']);
+                }
             }
             $this->koordinasiModel->update($id, [
                 'foto'          => null,

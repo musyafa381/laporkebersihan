@@ -7,6 +7,7 @@ use App\Models\MasterUnitModel;
 use App\Models\UserModel;
 use App\Models\UnitPjModel;
 use App\Models\TipeUnitModel;
+use App\Libraries\CloudinaryService;
 
 class Pengaturan extends BaseController
 {
@@ -16,6 +17,7 @@ class Pengaturan extends BaseController
     protected $unitPjModel;
     protected $tipeUnitModel;
     protected $unitKaderModel;
+    protected $cloudinary;
 
     public function __construct()
     {
@@ -25,6 +27,7 @@ class Pengaturan extends BaseController
         $this->unitPjModel     = new UnitPjModel();
         $this->tipeUnitModel   = new TipeUnitModel();
         $this->unitKaderModel  = new \App\Models\UnitKaderModel();
+        $this->cloudinary      = new CloudinaryService();
     }
 
     public function index()
@@ -310,9 +313,28 @@ class Pengaturan extends BaseController
             if ($logoFile->getSize() > 3 * 1024 * 1024) {
                 return $this->respondJsonOrRedirect('Ukuran file logo melebihi batas maksimal 3MB.', false);
             }
-            $newName = 'logo_' . time() . '.' . $logoFile->getExtension();
-            $logoFile->move(FCPATH . 'uploads/settings', $newName);
-            $this->pengaturanModel->updateKey('logo_img', 'uploads/settings/' . $newName);
+
+            // Hapus logo lama dari Cloudinary / lokal jika ada
+            $oldLogo = $this->pengaturanModel->getVal('logo_img');
+            if (!empty($oldLogo)) {
+                if (str_contains($oldLogo, 'cloudinary.com')) {
+                    $this->cloudinary->delete($oldLogo);
+                } elseif (file_exists(FCPATH . $oldLogo)) {
+                    @unlink(FCPATH . $oldLogo);
+                }
+            }
+
+            // Upload ke Cloudinary
+            $customName = 'logo_instansi_' . time();
+            $cldRes = $this->cloudinary->upload($logoFile, 'settings', $customName);
+            if ($cldRes['success'] && !empty($cldRes['url'])) {
+                $this->pengaturanModel->updateKey('logo_img', $cldRes['url']);
+            } else {
+                // Fallback lokal
+                $newName = 'logo_' . time() . '.' . $logoFile->getExtension();
+                $logoFile->move(FCPATH . 'uploads/settings', $newName);
+                $this->pengaturanModel->updateKey('logo_img', 'uploads/settings/' . $newName);
+            }
         }
 
         return $this->respondJsonOrRedirect('Pengaturan umum berhasil diperbarui.', true, base_url('pengaturan?tab=general'));
@@ -340,9 +362,24 @@ class Pengaturan extends BaseController
             if ($ttdKetua->getSize() > $maxSize) {
                 return $this->respondJsonOrRedirect('Ukuran file TTD Ketua melebihi batas maksimal 3MB.', false);
             }
-            $newName = 'ttd_ketua_' . time() . '.' . $ttdKetua->getExtension();
-            $ttdKetua->move(FCPATH . 'uploads/settings', $newName);
-            $this->pengaturanModel->updateKey('ttd_ketua_img', 'uploads/settings/' . $newName);
+
+            $oldVal = $this->pengaturanModel->getVal('ttd_ketua_img');
+            if (!empty($oldVal)) {
+                if (str_contains($oldVal, 'cloudinary.com')) {
+                    $this->cloudinary->delete($oldVal);
+                } elseif (file_exists(FCPATH . $oldVal)) {
+                    @unlink(FCPATH . $oldVal);
+                }
+            }
+
+            $cldRes = $this->cloudinary->upload($ttdKetua, 'settings', 'ttd_ketua_' . time());
+            if ($cldRes['success'] && !empty($cldRes['url'])) {
+                $this->pengaturanModel->updateKey('ttd_ketua_img', $cldRes['url']);
+            } else {
+                $newName = 'ttd_ketua_' . time() . '.' . $ttdKetua->getExtension();
+                $ttdKetua->move(FCPATH . 'uploads/settings', $newName);
+                $this->pengaturanModel->updateKey('ttd_ketua_img', 'uploads/settings/' . $newName);
+            }
         }
 
         // Upload TTD Koordinator Kebersihan
@@ -351,9 +388,24 @@ class Pengaturan extends BaseController
             if ($ttdKoor->getSize() > $maxSize) {
                 return $this->respondJsonOrRedirect('Ukuran file TTD Koordinator melebihi batas maksimal 3MB.', false);
             }
-            $newName = 'ttd_koordinator_' . time() . '.' . $ttdKoor->getExtension();
-            $ttdKoor->move(FCPATH . 'uploads/settings', $newName);
-            $this->pengaturanModel->updateKey('ttd_koordinator_img', 'uploads/settings/' . $newName);
+
+            $oldVal = $this->pengaturanModel->getVal('ttd_koordinator_img');
+            if (!empty($oldVal)) {
+                if (str_contains($oldVal, 'cloudinary.com')) {
+                    $this->cloudinary->delete($oldVal);
+                } elseif (file_exists(FCPATH . $oldVal)) {
+                    @unlink(FCPATH . $oldVal);
+                }
+            }
+
+            $cldRes = $this->cloudinary->upload($ttdKoor, 'settings', 'ttd_koordinator_' . time());
+            if ($cldRes['success'] && !empty($cldRes['url'])) {
+                $this->pengaturanModel->updateKey('ttd_koordinator_img', $cldRes['url']);
+            } else {
+                $newName = 'ttd_koordinator_' . time() . '.' . $ttdKoor->getExtension();
+                $ttdKoor->move(FCPATH . 'uploads/settings', $newName);
+                $this->pengaturanModel->updateKey('ttd_koordinator_img', 'uploads/settings/' . $newName);
+            }
         }
 
         // Upload TTD Sekretaris
@@ -362,9 +414,24 @@ class Pengaturan extends BaseController
             if ($ttdSek->getSize() > $maxSize) {
                 return $this->respondJsonOrRedirect('Ukuran file TTD Sekretaris melebihi batas maksimal 3MB.', false);
             }
-            $newName = 'ttd_sekretaris_' . time() . '.' . $ttdSek->getExtension();
-            $ttdSek->move(FCPATH . 'uploads/settings', $newName);
-            $this->pengaturanModel->updateKey('ttd_sekretaris_img', 'uploads/settings/' . $newName);
+
+            $oldVal = $this->pengaturanModel->getVal('ttd_sekretaris_img');
+            if (!empty($oldVal)) {
+                if (str_contains($oldVal, 'cloudinary.com')) {
+                    $this->cloudinary->delete($oldVal);
+                } elseif (file_exists(FCPATH . $oldVal)) {
+                    @unlink(FCPATH . $oldVal);
+                }
+            }
+
+            $cldRes = $this->cloudinary->upload($ttdSek, 'settings', 'ttd_sekretaris_' . time());
+            if ($cldRes['success'] && !empty($cldRes['url'])) {
+                $this->pengaturanModel->updateKey('ttd_sekretaris_img', $cldRes['url']);
+            } else {
+                $newName = 'ttd_sekretaris_' . time() . '.' . $ttdSek->getExtension();
+                $ttdSek->move(FCPATH . 'uploads/settings', $newName);
+                $this->pengaturanModel->updateKey('ttd_sekretaris_img', 'uploads/settings/' . $newName);
+            }
         }
 
         // Upload Stempel
@@ -373,9 +440,24 @@ class Pengaturan extends BaseController
             if ($stempelFile->getSize() > $maxSize) {
                 return $this->respondJsonOrRedirect('Ukuran file stempel melebihi batas maksimal 3MB.', false);
             }
-            $newName = 'stempel_' . time() . '.' . $stempelFile->getExtension();
-            $stempelFile->move(FCPATH . 'uploads/settings', $newName);
-            $this->pengaturanModel->updateKey('stempel_img', 'uploads/settings/' . $newName);
+
+            $oldVal = $this->pengaturanModel->getVal('stempel_img');
+            if (!empty($oldVal)) {
+                if (str_contains($oldVal, 'cloudinary.com')) {
+                    $this->cloudinary->delete($oldVal);
+                } elseif (file_exists(FCPATH . $oldVal)) {
+                    @unlink(FCPATH . $oldVal);
+                }
+            }
+
+            $cldRes = $this->cloudinary->upload($stempelFile, 'settings', 'stempel_' . time());
+            if ($cldRes['success'] && !empty($cldRes['url'])) {
+                $this->pengaturanModel->updateKey('stempel_img', $cldRes['url']);
+            } else {
+                $newName = 'stempel_' . time() . '.' . $stempelFile->getExtension();
+                $stempelFile->move(FCPATH . 'uploads/settings', $newName);
+                $this->pengaturanModel->updateKey('stempel_img', 'uploads/settings/' . $newName);
+            }
         }
 
         return $this->respondJsonOrRedirect('Pengaturan pengesahan cetak PDF & Tanda Tangan berhasil diperbarui.', true, base_url('pengaturan?tab=pengesahan'));

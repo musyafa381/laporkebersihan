@@ -997,7 +997,7 @@
                                     <?php if (!empty($k['foto'])): ?>
                                         <div class="koordinasi-side-layout">
                                             <div class="koordinasi-side-foto">
-                                                <img src="<?= base_url('uploads/' . $k['foto']) ?>" alt="Foto Dokumentasi">
+                                                <img src="<?= image_url($k['foto'], 'uploads') ?>" alt="Foto Dokumentasi">
                                             </div>
                                             <div class="koordinasi-side-materi">
                                                 <?= esc($k['hasil_materi'] ?? '-') ?>
@@ -1610,12 +1610,12 @@
                 <div class="signature-main" style="position: relative; display: inline-block; width: 100%; text-align: center; margin-bottom: 50px;">
                     <div class="sig-title"><?= esc($settings['jabatan_ketua'] ?? 'Ketua K3L') ?></div>
                     <div class="sig-space" style="height: 75px; display: flex; items-center; justify-content: center; align-items: center; position: relative;">
-                        <?php if (!empty($settings['ttd_ketua_img']) && file_exists(FCPATH . $settings['ttd_ketua_img'])): ?>
-                            <img src="<?= base_url($settings['ttd_ketua_img']) ?>" alt="TTD Ketua" style="max-height: 70px; object-contain: contain;">
+                        <?php if (!empty($settings['ttd_ketua_img']) && has_valid_image($settings['ttd_ketua_img'])): ?>
+                            <img src="<?= image_url($settings['ttd_ketua_img'], 'uploads/settings') ?>" alt="TTD Ketua" style="max-height: 70px; object-contain: contain;">
                         <?php endif; ?>
 
-                        <?php if (!empty($settings['stempel_img']) && file_exists(FCPATH . $settings['stempel_img'])): ?>
-                            <img src="<?= base_url($settings['stempel_img']) ?>" alt="Stempel" style="max-height: 80px; position: absolute; left: 52%; opacity: 0.85; pointer-events: none;">
+                        <?php if (!empty($settings['stempel_img']) && has_valid_image($settings['stempel_img'])): ?>
+                            <img src="<?= image_url($settings['stempel_img'], 'uploads/settings') ?>" alt="Stempel" style="max-height: 80px; position: absolute; left: 52%; opacity: 0.85; pointer-events: none;">
                         <?php endif; ?>
                     </div>
                     <div class="sig-name"><?= esc($settings['nama_ketua_k3l'] ?? 'Bapak Afif Muzayyin') ?></div>
@@ -1626,8 +1626,8 @@
                     <div class="signature-box">
                         <div class="sig-title"><?= esc($settings['jabatan_koordinator'] ?? 'Koordinator Kebersihan') ?></div>
                         <div class="sig-space" style="height: 70px; display: flex; align-items: center; justify-content: center;">
-                            <?php if (!empty($settings['ttd_koordinator_img']) && file_exists(FCPATH . $settings['ttd_koordinator_img'])): ?>
-                                <img src="<?= base_url($settings['ttd_koordinator_img']) ?>" alt="TTD Koordinator" style="max-height: 65px; object-contain: contain;">
+                            <?php if (!empty($settings['ttd_koordinator_img']) && has_valid_image($settings['ttd_koordinator_img'])): ?>
+                                <img src="<?= image_url($settings['ttd_koordinator_img'], 'uploads/settings') ?>" alt="TTD Koordinator" style="max-height: 65px; object-contain: contain;">
                             <?php endif; ?>
                         </div>
                         <div class="sig-name"><?= esc($settings['nama_koordinator'] ?? 'Bapak Muhammad Ashar') ?></div>
@@ -1636,8 +1636,8 @@
                     <div class="signature-box">
                         <div class="sig-title"><?= esc($settings['jabatan_sekretaris'] ?? 'Sekretaris Kebersihan') ?></div>
                         <div class="sig-space" style="height: 70px; display: flex; align-items: center; justify-content: center;">
-                            <?php if (!empty($settings['ttd_sekretaris_img']) && file_exists(FCPATH . $settings['ttd_sekretaris_img'])): ?>
-                                <img src="<?= base_url($settings['ttd_sekretaris_img']) ?>" alt="TTD Sekretaris" style="max-height: 65px; object-contain: contain;">
+                            <?php if (!empty($settings['ttd_sekretaris_img']) && has_valid_image($settings['ttd_sekretaris_img'])): ?>
+                                <img src="<?= image_url($settings['ttd_sekretaris_img'], 'uploads/settings') ?>" alt="TTD Sekretaris" style="max-height: 65px; object-contain: contain;">
                             <?php endif; ?>
                         </div>
                         <div class="sig-name"><?= esc($settings['nama_sekretaris'] ?? 'Ahmad Musyafa') ?></div>
