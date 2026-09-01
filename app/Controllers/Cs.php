@@ -1,0 +1,348 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Models\CsReportModel;
+use App\Models\PengajuanAlatModel;
+use App\Models\AlatModel;
+use App\Libraries\CloudinaryService;
+
+class Cs extends BaseController
+{
+    protected $csModel;
+    protected $pengajuanModel;
+    protected $alatModel;
+    protected $cloudinary;
+
+    public function __construct()
+    {
+        $this->csModel        = new CsReportModel();
+        $this->pengajuanModel = new PengajuanAlatModel();
+        $this->alatModel      = new AlatModel();
+        $this->cloudinary     = new CloudinaryService();
+    }
+
+    private function respondJsonOrRedirect($message, $success = true, $redirectUrl = null)
+    {
+        if ($this->request->isAJAX()) {
+            $jsonData = ['status' => $success ? 'success' : 'error', 'message' => $message];
+            if ($redirectUrl) {
+                $jsonData['redirect'] = $redirectUrl;
+            }
+            return $this->response->setJSON($jsonData);
+        }
+
+        $target = $redirectUrl ?: ($this->request->getServer('HTTP_REFERER') ?: base_url('cs'));
+        return redirect()->to($target)->with($success ? 'success' : 'error', $message);
+    }
+
+    public function index()
+    {
+        $session = session();
+        $isUserAdminOrAuditor = $session->get('isLoggedIn') && in_array($session->get('role'), ['Admin', 'Auditor']);
+
+        // Generate random math CAPTCHA for public form
+        if (!$session->get('captcha_num1')) {
+            $num1 = rand(3, 9);
+            $num2 = rand(2, 8);
+            $session->set([
+                'captcha_num1'   => $num1,
+                'captcha_num2'   => $num2,
+                'captcha_answer' => $num1 + $num2
+            ]);
+        }
+
+        $reportsList   = [];
+        $pengajuanList = [];
+
+        // Only fetch inbox list if logged in as Admin or Auditor
+        if ($isUserAdminOrAuditor) {
+            $reportsList   = $this->csModel->orderBy('id', 'DESC')->findAll();
+            $pengajuanList = $this->pengajuanModel
+                ->select('pengajuan_alat.*, users.nama_lengkap, users.username, alat_inventaris.nama_alat, alat_inventaris.kode_alat, alat_inventaris.satuan')
+                ->join('users', 'users.id = pengajuan_alat.user_id', 'left')
+                ->join('alat_inventaris', 'alat_inventaris.id = pengajuan_alat.alat_id', 'left')
+                ->orderBy('pengajuan_alat.id', 'DESC')
+                ->findAll();
+        }
+
+        $pengaturanModel = new \App\Models\PengaturanModel();
+        $settings = $pengaturanModel->getAllAsMap();
+
+        $data = [
+            'title'                => $isUserAdminOrAuditor ? 'Inbox Customer Service Admin K3L' : 'Lapor Kebersihan & Layanan Bantuan (CS)',
+            'isUserAdminOrAuditor' => $isUserAdminOrAuditor,
+            'reportsList'          => $reportsList,
+            'pengajuanList'        => $pengajuanList,
+            'settings'             => $settings,
+            'captcha_num1'         => $session->get('captcha_num1'),
+            'captcha_num2'         => $session->get('captcha_num2'),
+        ];
+
+        return view('cs/index', $data);
+    }
+
+    public function storePublicReport()
+    {
+        $session = session();
+        $userAnswer   = (int)$this->request->getPost('captcha_user');
+        $actualAnswer = (int)$session->get('captcha_answer');
+
+        if ($actualAnswer === 0 || $userAnswer !== $actualAnswer) {
+            // Generate pertanyaan baru jika salah
+            $num1 = rand(3, 9);
+            $num2 = rand(2, 8);
+            $session->set([
+                'captcha_num1'   => $num1,
+                'captcha_num2'   => $num2,
+                'captcha_answer' => $num1 + $num2
+            ]);
+
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'status'       => 'error',
+                    'message'      => 'Verifikasi Keamanan (Anti-SPAM) salah. Silakan coba lagi.',
+                    'new_captcha'  => [
+                        'num1'   => $num1,
+                        'num2'   => $num2,
+                        'prompt' => "Berapa {$num1} + {$num2} = ?"
+                    ]
+                ]);
+            }
+
+            return $this->respondJsonOrRedirect('Verifikasi Keamanan (Anti-SPAM) salah. Silakan coba lagi.', false);
+        }
+
+        // Generate CAPTCHA baru untuk laporan berikutnya
+        $num1 = rand(3, 9);
+        $num2 = rand(2, 8);
+        $session->set([
+            'captcha_num1'   => $num1,
+            'captcha_num2'   => $num2,
+            'captcha_answer' => $num1 + $num2
+        ]);
+
+        $nama     = trim($this->request->getPost('nama_pengirim') ?? '');
+        $kontak   = trim($this->request->getPost('kontak_hp') ?? '');
+        $lokasi   = trim($this->request->getPost('unit_lokasi') ?? '');
+        $laporan  = trim($this->request->getPost('isi_laporan') ?? '');
+        $kategori = $this->request->getPost('kategori') ?: 'Kendala Kebersihan';
+
+        if (empty($nama) || empty($kontak) || empty($laporan)) {
+            return $this->respondJsonOrRedirect('Nama, nomor kontak HP, dan isi laporan wajib diisi.', false);
+        }
+
+        // 1. Validasi Format Nomor Kontak
+        $cleanPhone = preg_replace('/[^0-9]/', '', $kontak);
+        if (strlen($cleanPhone) < 9 || strlen($cleanPhone) > 15) {
+            return $this->respondJsonOrRedirect('Nomor WhatsApp / HP tidak valid. Masukkan nomor yang benar.', false);
+        }
+
+        // 2. Filter Kata Tidak Pantas (Profanity & SARA & Judi Online Filter)
+        $badWords = [
+            'anjing', 'babi', 'monyet', 'bangsat', 'kontol', 'memek', 'jembut', 'pantek', 'asu',
+            'bajingan', 'tolol', 'goblok', 'idiot', 'perek', 'lonte', 'silit', 'itil', 'pepek',
+            'slot', 'gacor', 'judi', 'togel', 'bokep', 'porn', 'porno', 'ngocok', 'open bo'
+        ];
+
+        $combinedText = strtolower($nama . ' ' . $laporan . ' ' . $lokasi);
+        $foundBadWord = null;
+        foreach ($badWords as $bw) {
+            if (preg_match('/\b' . preg_quote($bw, '/') . '\b/i', $combinedText) || stripos($combinedText, $bw) !== false) {
+                $foundBadWord = $bw;
+                break;
+            }
+        }
+
+        if ($foundBadWord !== null) {
+            return $this->respondJsonOrRedirect('Laporan ditolak: Ditemukan kata/kalimat yang tidak pantas atau melanggar etika.', false);
+        }
+
+        // 3. Perekaman IP Address & User Agent serta Rate Limiting (Maks. 5 laporan per 15 menit per IP)
+        $ipAddress = $this->request->getIPAddress();
+        $userAgent = substr($this->request->getUserAgent()->getAgentString(), 0, 250);
+
+        $fifteenMinsAgo = date('Y-m-d H:i:s', strtotime('-15 minutes'));
+        $recentCount = $this->csModel
+            ->where('ip_address', $ipAddress)
+            ->where('created_at >=', $fifteenMinsAgo)
+            ->countAllResults();
+
+        if ($recentCount >= 5) {
+            return $this->respondJsonOrRedirect('Anda telah mengirim terlalu banyak laporan dalam waktu singkat. Mohon tunggu beberapa menit lagi.', false);
+        }
+
+        $uploadedFiles = $this->request->getFiles();
+        $fotoNames = $this->request->getPost('foto_names') ?: [];
+        $fotoPaths = [];
+
+        if (!empty($uploadedFiles['foto_files'])) {
+            $files = is_array($uploadedFiles['foto_files']) ? $uploadedFiles['foto_files'] : [$uploadedFiles['foto_files']];
+            foreach ($files as $idx => $file) {
+                if ($file->isValid() && !$file->hasMoved()) {
+                    if ($file->getSize() > 3 * 1024 * 1024) {
+                        return $this->respondJsonOrRedirect("File foto '{$file->getClientName()}' melebihi batas maksimal 3MB.", false);
+                    }
+                    $customName = !empty($fotoNames[$idx]) ? trim($fotoNames[$idx]) : ('bukti_' . ($idx + 1));
+                    // Coba upload ke Cloudinary dengan nama kustom
+                    $cldRes = $this->cloudinary->upload($file, 'cs_reports', $customName);
+                    if ($cldRes['success'] && !empty($cldRes['url'])) {
+                        $fotoPaths[] = $cldRes['url'];
+                    } else {
+                        // Fallback penyimpanan lokal jika terjadi kendala koneksi
+                        $uploadDir = FCPATH . 'uploads/cs/';
+                        if (!is_dir($uploadDir)) {
+                            mkdir($uploadDir, 0777, true);
+                        }
+                        $cleanLocalName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $customName) . '_' . substr(uniqid(), -4) . '.' . $file->guessExtension();
+                        $file->move($uploadDir, $cleanLocalName);
+                        $fotoPaths[] = $cleanLocalName;
+                    }
+                }
+            }
+        }
+
+        $data = [
+            'nama_pengirim' => $nama,
+            'kontak_hp'     => $kontak,
+            'unit_lokasi'   => $lokasi ?: 'Umum / Pesantren',
+            'kategori'      => $kategori,
+            'isi_laporan'   => $laporan,
+            'foto_lampiran' => !empty($fotoPaths) ? json_encode($fotoPaths) : null,
+            'status'        => 'Baru',
+            'ip_address'    => $ipAddress,
+            'user_agent'    => $userAgent,
+            'is_flagged'    => 0,
+        ];
+
+        $this->csModel->insert($data);
+        return $this->respondJsonOrRedirect('Laporan/Pengaduan Anda beserta foto bukti berhasil dikirim ke Cloud Storage & Tim CS!');
+    }
+
+    public function updateReportStatus($id)
+    {
+        $report = $this->csModel->find($id);
+        if (!$report) {
+            return $this->respondJsonOrRedirect('Laporan tidak ditemukan.', false);
+        }
+
+        $namaPengirim = trim($this->request->getPost('nama_pengirim') ?? $report['nama_pengirim']);
+        $kontakHp     = trim($this->request->getPost('kontak_hp') ?? $report['kontak_hp']);
+        $unitLokasi   = trim($this->request->getPost('unit_lokasi') ?? $report['unit_lokasi']);
+        $kategori     = trim($this->request->getPost('kategori') ?? $report['kategori']);
+        $isiLaporan   = trim($this->request->getPost('isi_laporan') ?? $report['isi_laporan']);
+        $status       = $this->request->getPost('status') ?: $report['status'];
+        $tanggapan    = trim($this->request->getPost('tanggapan_admin') ?? '');
+
+        // Cek daftar foto yang dipertahankan admin (jika ada yang dihapus via modal)
+        $retainedFotos = $this->request->getPost('existing_fotos');
+        if ($retainedFotos !== null) {
+            $existingFotos = is_array($retainedFotos) ? $retainedFotos : [$retainedFotos];
+        } else {
+            $existingFotos = json_decode($report['foto_lampiran'] ?? '[]', true) ?: [];
+        }
+
+        // Hapus file yang tidak dipertahankan dari Cloudinary / Lokal
+        $oldFotos = json_decode($report['foto_lampiran'] ?? '[]', true) ?: [];
+        foreach ($oldFotos as $oldF) {
+            if (!in_array($oldF, $existingFotos)) {
+                if (str_contains($oldF, 'cloudinary.com')) {
+                    $this->cloudinary->delete($oldF);
+                } elseif (file_exists(FCPATH . 'uploads/cs/' . $oldF)) {
+                    @unlink(FCPATH . 'uploads/cs/' . $oldF);
+                }
+            }
+        }
+
+        $uploadedFiles = $this->request->getFiles();
+        $adminFotoNames = $this->request->getPost('foto_names') ?: [];
+
+        if (!empty($uploadedFiles['foto_files'])) {
+            $files = is_array($uploadedFiles['foto_files']) ? $uploadedFiles['foto_files'] : [$uploadedFiles['foto_files']];
+            foreach ($files as $idx => $file) {
+                if ($file->isValid() && !$file->hasMoved()) {
+                    $customName = !empty($adminFotoNames[$idx]) ? trim($adminFotoNames[$idx]) : ('admin_bukti_' . ($idx + 1));
+                    $cldRes = $this->cloudinary->upload($file, 'cs_reports', $customName);
+                    if ($cldRes['success'] && !empty($cldRes['url'])) {
+                        $existingFotos[] = $cldRes['url'];
+                    } else {
+                        $uploadDir = FCPATH . 'uploads/cs/';
+                        if (!is_dir($uploadDir)) {
+                            mkdir($uploadDir, 0777, true);
+                        }
+                        $cleanLocalName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $customName) . '_' . substr(uniqid(), -4) . '.' . $file->guessExtension();
+                        $file->move($uploadDir, $cleanLocalName);
+                        $existingFotos[] = $cleanLocalName;
+                    }
+                }
+            }
+        }
+
+        $this->csModel->update($id, [
+            'nama_pengirim'   => $namaPengirim,
+            'kontak_hp'       => $kontakHp,
+            'unit_lokasi'     => $unitLokasi,
+            'kategori'        => $kategori,
+            'isi_laporan'     => $isiLaporan,
+            'foto_lampiran'   => !empty($existingFotos) ? json_encode(array_values($existingFotos)) : null,
+            'status'          => $status,
+            'tanggapan_admin' => $tanggapan
+        ]);
+
+        return $this->respondJsonOrRedirect("Laporan CS berhasil diperbarui & status diset ke '{$status}'!");
+    }
+
+    public function updatePengajuanStatus($id)
+    {
+        $pengajuan = $this->pengajuanModel->find($id);
+        if (!$pengajuan) {
+            return $this->respondJsonOrRedirect('Pengajuan alat tidak ditemukan.', false);
+        }
+
+        $jumlah          = (int)($this->request->getPost('jumlah') ?: $pengajuan['jumlah']);
+        $alasanKeperluan = trim($this->request->getPost('alasan_keperluan') ?? $pengajuan['alasan_keperluan']);
+        $status          = $this->request->getPost('status') ?: $pengajuan['status'];
+        $catatan         = trim($this->request->getPost('catatan_admin') ?? '');
+
+        $this->pengajuanModel->update($id, [
+            'jumlah'           => $jumlah,
+            'alasan_keperluan' => $alasanKeperluan,
+            'status'           => $status,
+            'catatan_admin'    => $catatan
+        ]);
+
+        return $this->respondJsonOrRedirect("Pengajuan alat berhasil diperbarui & status diset ke '{$status}'!");
+    }
+
+    public function deleteReport($id)
+    {
+        $report = $this->csModel->find($id);
+        if (!$report) {
+            return $this->respondJsonOrRedirect('Laporan tidak ditemukan.', false);
+        }
+
+        // Hapus semua foto bukti terkait dari Cloudinary atau disk lokal
+        $fotos = json_decode($report['foto_lampiran'] ?? '[]', true) ?: [];
+        foreach ($fotos as $f) {
+            if (str_contains($f, 'cloudinary.com')) {
+                $this->cloudinary->delete($f);
+            } elseif (file_exists(FCPATH . 'uploads/cs/' . $f)) {
+                @unlink(FCPATH . 'uploads/cs/' . $f);
+            }
+        }
+
+        $this->csModel->delete($id);
+        return $this->respondJsonOrRedirect('Laporan CS beserta lampiran berhasil dihapus.');
+    }
+
+    public function deletePengajuan($id)
+    {
+        $pengajuan = $this->pengajuanModel->find($id);
+        if (!$pengajuan) {
+            return $this->respondJsonOrRedirect('Pengajuan alat tidak ditemukan.', false);
+        }
+
+        $this->pengajuanModel->delete($id);
+        return $this->respondJsonOrRedirect('Pengajuan alat berhasil dihapus.');
+    }
+}

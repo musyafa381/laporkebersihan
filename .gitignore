@@ -1,0 +1,10 @@
+/vendor/
+/writable/cache/
+/writable/debugbar/
+/writable/logs/
+/writable/session/
+/writable/tmp/
+/writable/uploads/
+.env
+.DS_Store
+Thumbs.db

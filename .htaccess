@@ -1,0 +1,16 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Explicitly catch all /app routes and forward directly to front controller (preventing physical app/ directory 403 block)
+    RewriteRule ^app/(.*)$ public/index.php/app/$1 [L,QSA]
+    RewriteRule ^app$ public/index.php/app [L,QSA]
+
+    # Serve static files from public folder if they exist
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteCond %{DOCUMENT_ROOT}/adminkebersihan/public/$1 -f
+    RewriteRule ^(.*)$ public/$1 [L]
+
+    # Forward all other routes to public/index.php
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/index.php/$1 [L,QSA]
+</IfModule>

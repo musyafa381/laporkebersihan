@@ -1,0 +1,10 @@
+<IfModule authz_core_module>
+	<FilesMatch "\.php$">
+		Require all denied
+	</FilesMatch>
+</IfModule>
+<IfModule !authz_core_module>
+	<FilesMatch "\.php$">
+		Deny from all
+	</FilesMatch>
+</IfModule>

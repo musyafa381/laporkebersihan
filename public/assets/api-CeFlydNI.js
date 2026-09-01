@@ -1,0 +1,1 @@
+import{at as e}from"./index-BP2yjG1U.js";var t=e.create({baseURL:`http://localhost:8080/api`});export{t};
