@@ -53,14 +53,29 @@
                         <input type="text" name="unit_lokasi" placeholder="Misal: Asrama Kitab Putra" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
                     </div>
                     <div>
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Kategori Pengaduan</label>
-                        <select name="kategori" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                            <option value="Kendala Kebersihan">Kendala Kebersihan / Sampah Penuh</option>
-                            <option value="Fasilitas Rusak">Fasilitas Tempat Kebersihan Rusak</option>
-                            <option value="Pertanyaan/Konsultasi">Pertanyaan / Konsultasi</option>
-                            <option value="Lainnya">Lainnya</option>
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                            <span>Wilayah Pemetaan (Opsional)</span>
+                            <span class="text-[10px] text-slate-400 font-semibold lowercase">Opsional</span>
+                        </label>
+                        <select name="wilayah_id" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                            <option value="">-- Bukan Wilayah Khusus / Umum --</option>
+                            <?php if (!empty($wilayahList)): ?>
+                                <?php foreach ($wilayahList as $w): ?>
+                                    <option value="<?= $w['id'] ?>"><?= esc($w['nama_wilayah']) ?> (<?= esc($w['kategori_area']) ?>)</option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </select>
                     </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Kategori Pengaduan</label>
+                    <select name="kategori" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                        <option value="Kendala Kebersihan">Kendala Kebersihan / Sampah Penuh</option>
+                        <option value="Fasilitas Rusak">Fasilitas Tempat Kebersihan Rusak</option>
+                        <option value="Pertanyaan/Konsultasi">Pertanyaan / Konsultasi</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
                 </div>
 
                 <div>
@@ -216,10 +231,18 @@
                                         <i class="fa-solid fa-location-dot text-emerald-600"></i>
                                         <span><?= esc($r['unit_lokasi']) ?></span>
                                     </div>
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-extrabold mt-1 border border-emerald-200/80 shadow-2xs">
-                                        <i class="fa-solid fa-tag text-[9px]"></i>
-                                        <?= esc($r['kategori']) ?>
-                                    </span>
+                                    <div class="flex flex-wrap items-center gap-1 mt-1">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-extrabold border border-emerald-200/80 shadow-2xs">
+                                            <i class="fa-solid fa-tag text-[9px]"></i>
+                                            <?= esc($r['kategori']) ?>
+                                        </span>
+                                        <?php if (!empty($r['nama_wilayah'])): ?>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 border border-teal-200/80 text-[10px] font-extrabold shadow-2xs">
+                                                <i class="fa-solid fa-map-location-dot text-teal-600 text-[9px]"></i>
+                                                <span><?= esc($r['nama_wilayah']) ?></span>
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                                 <td class="py-4 px-4">
                                     <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/70 text-slate-800 text-xs font-medium leading-relaxed shadow-2xs">

@@ -21,7 +21,7 @@
                 </p>
             </div>
 
-            <?php if ($isAdminOrAuditor): ?>
+            <?php if (session()->get('role') === 'Admin'): ?>
                 <div class="flex-shrink-0 flex items-center gap-3">
                     <a href="<?= base_url('sop/create') ?>" class="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-white text-emerald-900 font-heading font-bold text-xs sm:text-sm hover:bg-emerald-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 group">
                         <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition">
@@ -63,7 +63,7 @@
     </div>
 
     <!-- SOP Cards Grid (3 Columns) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div id="sopCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <?php if (!empty($sopList)): ?>
             <?php foreach ($sopList as $s): 
                 $points = json_decode($s['poin_poin'] ?? '[]', true) ?: [];
@@ -80,7 +80,7 @@
                     default         => 'from-emerald-600 to-teal-600',
                 };
             ?>
-                <div class="glass-card rounded-3xl p-6 shadow-xl border border-slate-200/90 bg-white flex flex-col justify-between hover:shadow-2xl hover:border-emerald-400 transition-all duration-300 group space-y-4">
+                <div class="glass-card sop-card rounded-3xl p-6 shadow-xl border border-slate-200/90 bg-white flex flex-col justify-between hover:shadow-2xl hover:border-emerald-400 transition-all duration-300 group space-y-4">
                     <div class="space-y-3.5">
                         <!-- Top Badges & Category Header -->
                         <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
@@ -89,7 +89,7 @@
                             </span>
 
                             <div class="flex items-center gap-1.5">
-                                <?php if ($isAdminOrAuditor): ?>
+                                <?php if (session()->get('role') === 'Admin'): ?>
                                     <?php if ($s['status'] === 'Nonaktif'): ?>
                                         <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold">Draft / Nonaktif</span>
                                     <?php endif; ?>
@@ -179,9 +179,26 @@
         <?php endif; ?>
     </div>
 
+    <!-- Pagination Footer for SOP Cards -->
+    <?php if (!empty($sopList)): ?>
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200/80 px-1 mt-6" id="pagination-container-sop">
+        <div class="text-xs font-semibold text-slate-500 flex items-center gap-2">
+            <span id="page-info-sop">Menampilkan 0 data</span>
+            <select id="pageSize-sop" class="ml-2 px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs">
+                <option value="6" selected>6 / hal</option>
+                <option value="9">9 / hal</option>
+                <option value="12">12 / hal</option>
+                <option value="24">24 / hal</option>
+                <option value="all">Semua</option>
+            </select>
+        </div>
+        <div class="flex items-center gap-1.5" id="page-buttons-sop"></div>
+    </div>
+    <?php endif; ?>
+
 </div>
 
-<?php if ($isAdminOrAuditor): ?>
+<?php if (session()->get('role') === 'Admin'): ?>
 <!-- ================================================= -->
 <!-- 📝 MODAL TAMBAH / EDIT SOP & KEBIJAKAN KEBERSIHAN -->
 <!-- ================================================= -->
@@ -282,6 +299,7 @@
         </form>
     </div>
 </div>
+<?php endif; ?>
 
 <script>
     const categoryIconMap = {
@@ -380,7 +398,153 @@
     document.getElementById('modalSop')?.addEventListener('click', function(e) {
         if (e.target === this) closeModalSop();
     });
+
+    // Client-side Paginator for SOP Cards
+    class SopPaginator {
+        constructor(cardsSelector, infoId, buttonsId, sizeSelectId) {
+            this.cards = Array.from(document.querySelectorAll(cardsSelector));
+            this.infoEl = document.getElementById(infoId);
+            this.buttonsEl = document.getElementById(buttonsId);
+            this.sizeSelect = document.getElementById(sizeSelectId);
+            this.currentPage = 1;
+            this.pageSize = (this.sizeSelect && this.sizeSelect.value === 'all') ? 999999 : (parseInt(this.sizeSelect ? this.sizeSelect.value : 6) || 6);
+
+            if (this.sizeSelect) {
+                this.sizeSelect.addEventListener('change', (e) => {
+                    this.pageSize = e.target.value === 'all' ? 999999 : parseInt(e.target.value);
+                    this.currentPage = 1;
+                    this.render();
+                });
+            }
+            this.render();
+        }
+
+        render() {
+            const total = this.cards.length;
+            const totalPages = Math.ceil(total / this.pageSize) || 1;
+
+            if (this.currentPage > totalPages) this.currentPage = totalPages;
+            if (this.currentPage < 1) this.currentPage = 1;
+
+            const startIdx = (this.currentPage - 1) * this.pageSize;
+            const endIdx = startIdx + this.pageSize;
+
+            this.cards.forEach((card, idx) => {
+                if (idx >= startIdx && idx < endIdx) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            if (this.infoEl) {
+                if (total === 0) {
+                    this.infoEl.textContent = 'Menampilkan 0 data';
+                } else {
+                    const actualEnd = Math.min(endIdx, total);
+                    this.infoEl.textContent = `Menampilkan ${startIdx + 1} - ${actualEnd} dari ${total} data`;
+                }
+            }
+
+            if (this.buttonsEl) {
+                this.buttonsEl.innerHTML = '';
+                if (totalPages <= 1) return;
+
+                // Prev Button
+                const prevBtn = document.createElement('button');
+                prevBtn.type = 'button';
+                prevBtn.className = `px-3 py-1.5 rounded-xl border text-xs font-bold transition flex items-center gap-1 ${
+                    this.currentPage === 1 
+                    ? 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed' 
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 shadow-2xs'
+                }`;
+                prevBtn.innerHTML = '<i class="fa-solid fa-chevron-left text-[10px]"></i> <span class="hidden sm:inline">Sebelumnya</span>';
+                prevBtn.disabled = this.currentPage === 1;
+                prevBtn.onclick = () => {
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
+                        this.render();
+                        document.getElementById('sopCardsGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                };
+                this.buttonsEl.appendChild(prevBtn);
+
+                // Numbered Page Buttons
+                let startPage = Math.max(1, this.currentPage - 2);
+                let endPage = Math.min(totalPages, startPage + 4);
+                if (endPage - startPage < 4) {
+                    startPage = Math.max(1, endPage - 4);
+                }
+
+                if (startPage > 1) {
+                    this.addPageBtn(1);
+                    if (startPage > 2) {
+                        const dots = document.createElement('span');
+                        dots.className = 'px-1.5 py-1 text-slate-400 text-xs font-bold';
+                        dots.textContent = '...';
+                        this.buttonsEl.appendChild(dots);
+                    }
+                }
+
+                for (let p = startPage; p <= endPage; p++) {
+                    this.addPageBtn(p);
+                }
+
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                        const dots = document.createElement('span');
+                        dots.className = 'px-1.5 py-1 text-slate-400 text-xs font-bold';
+                        dots.textContent = '...';
+                        this.buttonsEl.appendChild(dots);
+                    }
+                    this.addPageBtn(totalPages);
+                }
+
+                // Next Button
+                const nextBtn = document.createElement('button');
+                nextBtn.type = 'button';
+                nextBtn.className = `px-3 py-1.5 rounded-xl border text-xs font-bold transition flex items-center gap-1 ${
+                    this.currentPage === totalPages 
+                    ? 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed' 
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 shadow-2xs'
+                }`;
+                nextBtn.innerHTML = '<span class="hidden sm:inline">Berikutnya</span> <i class="fa-solid fa-chevron-right text-[10px]"></i>';
+                nextBtn.disabled = this.currentPage === totalPages;
+                nextBtn.onclick = () => {
+                    if (this.currentPage < totalPages) {
+                        this.currentPage++;
+                        this.render();
+                        document.getElementById('sopCardsGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                };
+                this.buttonsEl.appendChild(nextBtn);
+            }
+        }
+
+        addPageBtn(pageNum) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `w-8 h-8 rounded-xl font-bold text-xs transition flex items-center justify-center ${
+                pageNum === this.currentPage
+                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20 font-extrabold'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 shadow-2xs'
+            }`;
+            btn.textContent = pageNum;
+            btn.onclick = () => {
+                this.currentPage = pageNum;
+                this.render();
+                document.getElementById('sopCardsGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+            this.buttonsEl.appendChild(btn);
+        }
+    }
+
+    var paginatorSop = null;
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.querySelectorAll('.sop-card').length > 0) {
+            paginatorSop = new SopPaginator('.sop-card', 'page-info-sop', 'page-buttons-sop', 'pageSize-sop');
+        }
+    });
 </script>
-<?php endif; ?>
 
 <?= $this->endSection() ?>

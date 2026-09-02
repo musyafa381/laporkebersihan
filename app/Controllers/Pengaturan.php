@@ -7,6 +7,7 @@ use App\Models\MasterUnitModel;
 use App\Models\UserModel;
 use App\Models\UnitPjModel;
 use App\Models\TipeUnitModel;
+use App\Models\KategoriAlatModel;
 use App\Libraries\CloudinaryService;
 
 class Pengaturan extends BaseController
@@ -16,18 +17,20 @@ class Pengaturan extends BaseController
     protected $userModel;
     protected $unitPjModel;
     protected $tipeUnitModel;
+    protected $kategoriAlatModel;
     protected $unitKaderModel;
     protected $cloudinary;
 
     public function __construct()
     {
-        $this->pengaturanModel = new PengaturanModel();
-        $this->unitModel       = new MasterUnitModel();
-        $this->userModel       = new UserModel();
-        $this->unitPjModel     = new UnitPjModel();
-        $this->tipeUnitModel   = new TipeUnitModel();
-        $this->unitKaderModel  = new \App\Models\UnitKaderModel();
-        $this->cloudinary      = new CloudinaryService();
+        $this->pengaturanModel   = new PengaturanModel();
+        $this->unitModel         = new MasterUnitModel();
+        $this->userModel         = new UserModel();
+        $this->unitPjModel       = new UnitPjModel();
+        $this->tipeUnitModel     = new TipeUnitModel();
+        $this->kategoriAlatModel = new KategoriAlatModel();
+        $this->unitKaderModel    = new \App\Models\UnitKaderModel();
+        $this->cloudinary        = new CloudinaryService();
     }
 
     public function index()
@@ -114,16 +117,18 @@ class Pengaturan extends BaseController
         unset($unit);
 
         $tipeList = $this->tipeUnitModel->getAllOrdered();
+        $kategoriAlatList = $this->kategoriAlatModel->getAllOrdered();
 
         $data = [
-            'title'        => 'Pengaturan Sistem Kebersihan',
-            'settings'     => $settings,
-            'unitsList'    => $units,
-            'tipeList'     => $tipeList,
-            'usersList'    => $users,
-            'pengurusList' => $pengurusList,
-            'kaderList'    => $kaderList,
-            'activeTab'    => $this->request->getGet('tab') ?? 'general',
+            'title'            => 'Pengaturan Sistem Kebersihan',
+            'settings'         => $settings,
+            'unitsList'        => $units,
+            'tipeList'         => $tipeList,
+            'kategoriAlatList' => $kategoriAlatList,
+            'usersList'        => $users,
+            'pengurusList'     => $pengurusList,
+            'kaderList'        => $kaderList,
+            'activeTab'        => $this->request->getGet('tab') ?? 'general',
         ];
 
         return view('pengaturan/index', $data);
@@ -782,6 +787,91 @@ class Pengaturan extends BaseController
         $this->tipeUnitModel->delete($id);
 
         return $this->respondJsonOrRedirect('Tipe Unit berhasil dihapus.', true, base_url('pengaturan?tab=units'));
+    }
+
+    public function storeKategoriAlat()
+    {
+        $namaKategori = trim($this->request->getPost('nama_kategori') ?? '');
+        $keterangan   = trim($this->request->getPost('keterangan') ?? '');
+        $urutan       = (int)($this->request->getPost('urutan') ?? 0);
+
+        if (empty($namaKategori)) {
+            return $this->respondJsonOrRedirect('Nama kategori alat wajib diisi.', false, base_url('pengaturan?tab=units'));
+        }
+
+        $existing = $this->kategoriAlatModel->where('nama_kategori', $namaKategori)->first();
+        if ($existing) {
+            return $this->respondJsonOrRedirect("Kategori alat '{$namaKategori}' sudah ada.", false, base_url('pengaturan?tab=units'));
+        }
+
+        $this->kategoriAlatModel->insert([
+            'nama_kategori' => $namaKategori,
+            'keterangan'    => $keterangan,
+            'urutan'        => $urutan,
+            'created_at'    => date('Y-m-d H:i:s'),
+            'updated_at'    => date('Y-m-d H:i:s'),
+        ]);
+
+        return $this->respondJsonOrRedirect("Kategori alat '{$namaKategori}' berhasil ditambahkan.", true, base_url('pengaturan?tab=units'));
+    }
+
+    public function updateKategoriAlat($id)
+    {
+        $kat = $this->kategoriAlatModel->find($id);
+        if (!$kat) {
+            return $this->respondJsonOrRedirect('Kategori alat tidak ditemukan.', false, base_url('pengaturan?tab=units'));
+        }
+
+        $namaKategori = trim($this->request->getPost('nama_kategori') ?? '');
+        $keterangan   = trim($this->request->getPost('keterangan') ?? '');
+        $urutan       = (int)($this->request->getPost('urutan') ?? 0);
+
+        if (empty($namaKategori)) {
+            return $this->respondJsonOrRedirect('Nama kategori alat wajib diisi.', false, base_url('pengaturan?tab=units'));
+        }
+
+        $oldName = $kat['nama_kategori'];
+
+        // Check duplicate name
+        $existing = $this->kategoriAlatModel->where('nama_kategori', $namaKategori)->where('id !=', $id)->first();
+        if ($existing) {
+            return $this->respondJsonOrRedirect("Kategori alat '{$namaKategori}' sudah ada.", false, base_url('pengaturan?tab=units'));
+        }
+
+        $this->kategoriAlatModel->update($id, [
+            'nama_kategori' => $namaKategori,
+            'keterangan'    => $keterangan,
+            'urutan'        => $urutan,
+            'updated_at'    => date('Y-m-d H:i:s'),
+        ]);
+
+        // Sync category name in alat_inventaris
+        $alatModel = new \App\Models\AlatModel();
+        if ($oldName !== $namaKategori) {
+            $alatModel->where('kategori', $oldName)->set(['kategori' => $namaKategori])->update();
+        }
+
+        return $this->respondJsonOrRedirect("Kategori alat '{$namaKategori}' berhasil diperbarui.", true, base_url('pengaturan?tab=units'));
+    }
+
+    public function deleteKategoriAlat($id)
+    {
+        $kat = $this->kategoriAlatModel->find($id);
+        if (!$kat) {
+            return $this->respondJsonOrRedirect('Kategori alat tidak ditemukan.', false, base_url('pengaturan?tab=units'));
+        }
+
+        $namaKategori = $kat['nama_kategori'];
+        $alatModel    = new \App\Models\AlatModel();
+
+        // Prevent deletion if items are using this category
+        $count = $alatModel->where('kategori', $namaKategori)->countAllResults();
+        if ($count > 0) {
+            return $this->respondJsonOrRedirect("Kategori '{$namaKategori}' masih digunakan oleh {$count} data alat inventaris. Ubah kategori alat tersebut terlebih dahulu sebelum menghapus.", false, base_url('pengaturan?tab=units'));
+        }
+
+        $this->kategoriAlatModel->delete($id);
+        return $this->respondJsonOrRedirect("Kategori alat '{$namaKategori}' berhasil dihapus.", true, base_url('pengaturan?tab=units'));
     }
 
     public function backupDatabase()

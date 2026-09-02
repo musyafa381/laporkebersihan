@@ -437,7 +437,7 @@
 </div>
 
 <!-- Modal Tambah & Edit Form -->
-<?php if (!empty($isLoggedIn)): ?>
+<?php if (!empty($isLoggedIn) && session()->get('role') === 'Admin'): ?>
     <div id="modalAddStruktur" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[999999] flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-3xl p-6 sm:p-7 max-w-lg w-full bg-white shadow-2xl space-y-5 border border-slate-200 relative animate-in fade-in zoom-in duration-200">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">

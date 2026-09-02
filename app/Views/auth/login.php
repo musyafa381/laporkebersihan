@@ -27,7 +27,10 @@
                 <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Password</label>
                 <div class="relative">
                     <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
-                    <input type="password" id="passwordInput" name="password" placeholder="••••••••" required class="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                    <input type="password" id="passwordInput" name="password" placeholder="••••••••" required class="w-full pl-10 pr-10 py-3 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                    <button type="button" onclick="toggleLoginPassword()" class="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 text-xs focus:outline-none transition" title="Lihat/Sembunyikan Sandi">
+                        <i id="loginEyeIcon" class="fa-solid fa-eye text-xs"></i>
+                    </button>
                 </div>
             </div>
 
@@ -36,6 +39,23 @@
                 <span>Masuk ke Sistem</span>
             </button>
         </form>
+
+        <script>
+            function toggleLoginPassword() {
+                const input = document.getElementById('passwordInput');
+                const icon = document.getElementById('loginEyeIcon');
+                if (!input || !icon) return;
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            }
+        </script>
 
         <div class="text-center space-y-2 pt-2 border-t border-slate-100">
             <a href="<?= base_url('cs') ?>" class="inline-flex items-center gap-1.5 text-xs text-emerald-700 hover:text-emerald-800 font-extrabold">

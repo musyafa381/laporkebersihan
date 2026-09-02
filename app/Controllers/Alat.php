@@ -4,16 +4,19 @@ namespace App\Controllers;
 
 use App\Models\AlatModel;
 use App\Models\AlatTransaksiModel;
+use App\Models\KategoriAlatModel;
 
 class Alat extends BaseController
 {
     protected $alatModel;
     protected $transaksiModel;
+    protected $kategoriAlatModel;
 
     public function __construct()
     {
-        $this->alatModel      = new AlatModel();
-        $this->transaksiModel = new AlatTransaksiModel();
+        $this->alatModel         = new AlatModel();
+        $this->transaksiModel    = new AlatTransaksiModel();
+        $this->kategoriAlatModel = new KategoriAlatModel();
     }
 
     private function respondJsonOrRedirect($message, $success = true, $redirectUrl = null)
@@ -99,9 +102,20 @@ class Alat extends BaseController
             }
         }
 
+        $kategoriList = $this->kategoriAlatModel->getAllOrdered();
+
+        // Calculate count of tools per category
+        $categoryCounts = [];
+        foreach ($alatList as $a) {
+            $kat = $a['kategori'] ?: 'Lainnya';
+            $categoryCounts[$kat] = ($categoryCounts[$kat] ?? 0) + 1;
+        }
+
         $data = [
             'title'           => 'Inventaris & Peralatan Kebersihan',
             'alatList'        => $alatList,
+            'kategoriList'    => $kategoriList,
+            'categoryCounts'  => $categoryCounts,
             'transaksiKeluar' => $transaksiKeluar,
             'transaksiMasuk'  => $transaksiMasuk,
             'totalJenis'      => $totalJenis,
@@ -111,6 +125,89 @@ class Alat extends BaseController
         ];
 
         return view('alat/index', $data);
+    }
+
+    public function storeKategori()
+    {
+        $namaKategori = trim($this->request->getPost('nama_kategori') ?? '');
+        $keterangan   = trim($this->request->getPost('keterangan') ?? '');
+        $urutan       = (int)($this->request->getPost('urutan') ?? 0);
+
+        if (empty($namaKategori)) {
+            return $this->respondJsonOrRedirect('Nama kategori alat wajib diisi.', false);
+        }
+
+        $existing = $this->kategoriAlatModel->where('nama_kategori', $namaKategori)->first();
+        if ($existing) {
+            return $this->respondJsonOrRedirect("Kategori alat '{$namaKategori}' sudah ada.", false);
+        }
+
+        $this->kategoriAlatModel->insert([
+            'nama_kategori' => $namaKategori,
+            'keterangan'    => $keterangan,
+            'urutan'        => $urutan,
+            'created_at'    => date('Y-m-d H:i:s'),
+            'updated_at'    => date('Y-m-d H:i:s'),
+        ]);
+
+        return $this->respondJsonOrRedirect("Kategori alat '{$namaKategori}' berhasil ditambahkan.");
+    }
+
+    public function updateKategori($id)
+    {
+        $kat = $this->kategoriAlatModel->find($id);
+        if (!$kat) {
+            return $this->respondJsonOrRedirect('Kategori alat tidak ditemukan.', false);
+        }
+
+        $namaKategori = trim($this->request->getPost('nama_kategori') ?? '');
+        $keterangan   = trim($this->request->getPost('keterangan') ?? '');
+        $urutan       = (int)($this->request->getPost('urutan') ?? 0);
+
+        if (empty($namaKategori)) {
+            return $this->respondJsonOrRedirect('Nama kategori alat wajib diisi.', false);
+        }
+
+        $oldName = $kat['nama_kategori'];
+
+        // Check duplicate name
+        $existing = $this->kategoriAlatModel->where('nama_kategori', $namaKategori)->where('id !=', $id)->first();
+        if ($existing) {
+            return $this->respondJsonOrRedirect("Kategori alat '{$namaKategori}' sudah ada.", false);
+        }
+
+        $this->kategoriAlatModel->update($id, [
+            'nama_kategori' => $namaKategori,
+            'keterangan'    => $keterangan,
+            'urutan'        => $urutan,
+            'updated_at'    => date('Y-m-d H:i:s'),
+        ]);
+
+        // Sync category name in alat_inventaris table if changed
+        if ($oldName !== $namaKategori) {
+            $this->alatModel->where('kategori', $oldName)->set(['kategori' => $namaKategori])->update();
+        }
+
+        return $this->respondJsonOrRedirect("Kategori alat '{$namaKategori}' berhasil diperbarui.");
+    }
+
+    public function deleteKategori($id)
+    {
+        $kat = $this->kategoriAlatModel->find($id);
+        if (!$kat) {
+            return $this->respondJsonOrRedirect('Kategori alat tidak ditemukan.', false);
+        }
+
+        $namaKategori = $kat['nama_kategori'];
+
+        // Prevent deletion if items are using this category
+        $count = $this->alatModel->where('kategori', $namaKategori)->countAllResults();
+        if ($count > 0) {
+            return $this->respondJsonOrRedirect("Kategori '{$namaKategori}' masih digunakan oleh {$count} data alat inventaris. Ubah kategori alat tersebut terlebih dahulu sebelum menghapus.", false);
+        }
+
+        $this->kategoriAlatModel->delete($id);
+        return $this->respondJsonOrRedirect("Kategori alat '{$namaKategori}' berhasil dihapus.");
     }
 
     public function storeAlat()

@@ -485,6 +485,10 @@
                         <i class="fa-solid fa-tags text-emerald-600"></i>
                         <span>Kelola Tipe Unit</span>
                     </button>
+                    <button type="button" onclick="openModalKelolaKategoriPengaturan()" class="px-4 py-2.5 rounded-2xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-emerald-700 font-heading font-extrabold text-xs transition shadow-2xs flex items-center gap-2">
+                        <i class="fa-solid fa-boxes-stacked text-teal-600"></i>
+                        <span>Kelola Kategori Alat</span>
+                    </button>
                     <button type="button" onclick="openModalTambahUnit()" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 flex items-center gap-2 flex-shrink-0">
                         <i class="fa-solid fa-plus"></i>
                         <span>Tambah Unit Baru</span>
@@ -773,14 +777,44 @@
                 </div>
             </div>
 
-            <div>
-                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Tautkan Akun Penanggung Jawab (PJ)</label>
-                <select name="pj_user_id" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                    <option value="">-- Pilih Akun Penanggung Jawab (PJ) --</option>
+            <!-- Searchable PJ User Picker for Modal Tambah Unit -->
+            <div class="relative">
+                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>Akun Penanggung Jawab (PJ)</span>
+                    <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                        <i class="fa-solid fa-magnifying-glass text-[9px]"></i> Bisa dicari
+                    </span>
+                </label>
+                <input type="hidden" id="add_pj_user_id" name="pj_user_id" value="">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+                    <input type="text" id="add_pj_user_search" placeholder="Cari nama PJ, @username, atau role..." autocomplete="off" onfocus="openAddPjDropdown()" oninput="filterAddPjOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
+                    <button type="button" onclick="toggleAddPjDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                        <i id="addPjIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                    </button>
+                </div>
+                <!-- Dropdown List -->
+                <div id="addPjDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-52 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                    <div class="add-pj-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer font-bold text-xs text-slate-500" data-id="" data-name="" data-nama="" data-hp="" onclick="selectAddPj(this)">
+                        <span class="text-slate-500 italic">-- Tanpa Akun PJ Terhubung / Pilih Nanti --</span>
+                    </div>
                     <?php foreach ($usersList as $u): ?>
-                        <option value="<?= $u['id'] ?>"><?= esc($u['nama_lengkap']) ?> (@<?= esc($u['username']) ?>) - <?= esc($u['role']) ?></option>
+                        <div class="add-pj-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $u['id'] ?>" data-name="<?= esc($u['nama_lengkap']) ?> (@<?= esc($u['username']) ?>)" data-nama="<?= esc($u['nama_lengkap']) ?>" data-hp="<?= esc($u['no_hp'] ?? '') ?>" onclick="selectAddPj(this)">
+                            <div>
+                                <div class="font-extrabold text-xs text-slate-800"><?= esc($u['nama_lengkap']) ?></div>
+                                <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
+                                    <span class="text-emerald-700 font-bold">@<?= esc($u['username']) ?></span>
+                                    <span>&bull;</span>
+                                    <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[9px] font-extrabold border border-slate-200/80"><?= esc($u['role']) ?></span>
+                                </div>
+                            </div>
+                            <span class="text-xs text-slate-300 group-hover:text-emerald-600"><i class="fa-solid fa-check text-[10px]"></i></span>
+                        </div>
                     <?php endforeach; ?>
-                </select>
+                    <div id="noAddPjFound" class="px-4 py-4 text-center text-slate-400 text-xs italic font-medium hidden">
+                        Tidak ditemukan akun pengguna yang sesuai.
+                    </div>
+                </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -860,14 +894,44 @@
                 </div>
             </div>
 
-            <div>
-                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Akun Penanggung Jawab (PJ)</label>
-                <select id="edit_pj_user_id" name="pj_user_id" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                    <option value="">-- Pilih Akun Penanggung Jawab (PJ) --</option>
+            <!-- Searchable PJ User Picker for Modal Edit Unit -->
+            <div class="relative">
+                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>Akun Penanggung Jawab (PJ)</span>
+                    <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                        <i class="fa-solid fa-magnifying-glass text-[9px]"></i> Bisa dicari
+                    </span>
+                </label>
+                <input type="hidden" id="edit_pj_user_id" name="pj_user_id" value="">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+                    <input type="text" id="edit_pj_user_search" placeholder="Cari nama PJ, @username, atau role..." autocomplete="off" onfocus="openEditPjDropdown()" oninput="filterEditPjOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
+                    <button type="button" onclick="toggleEditPjDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                        <i id="editPjIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                    </button>
+                </div>
+                <!-- Dropdown List -->
+                <div id="editPjDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-52 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                    <div class="edit-pj-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer font-bold text-xs text-slate-500" data-id="" data-name="" data-nama="" data-hp="" onclick="selectEditPj(this)">
+                        <span class="text-slate-500 italic">-- Tanpa Akun PJ Terhubung / Pilih Nanti --</span>
+                    </div>
                     <?php foreach ($usersList as $u): ?>
-                        <option value="<?= $u['id'] ?>"><?= esc($u['nama_lengkap']) ?> (@<?= esc($u['username']) ?>) - <?= esc($u['role']) ?></option>
+                        <div class="edit-pj-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $u['id'] ?>" data-name="<?= esc($u['nama_lengkap']) ?> (@<?= esc($u['username']) ?>)" data-nama="<?= esc($u['nama_lengkap']) ?>" data-hp="<?= esc($u['no_hp'] ?? '') ?>" onclick="selectEditPj(this)">
+                            <div>
+                                <div class="font-extrabold text-xs text-slate-800"><?= esc($u['nama_lengkap']) ?></div>
+                                <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
+                                    <span class="text-emerald-700 font-bold">@<?= esc($u['username']) ?></span>
+                                    <span>&bull;</span>
+                                    <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[9px] font-extrabold border border-slate-200/80"><?= esc($u['role']) ?></span>
+                                </div>
+                            </div>
+                            <span class="text-xs text-slate-300 group-hover:text-emerald-600"><i class="fa-solid fa-check text-[10px]"></i></span>
+                        </div>
                     <?php endforeach; ?>
-                </select>
+                    <div id="noEditPjFound" class="px-4 py-4 text-center text-slate-400 text-xs italic font-medium hidden">
+                        Tidak ditemukan akun pengguna yang sesuai.
+                    </div>
+                </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -1009,6 +1073,122 @@
 
         <div class="pt-3 flex justify-end border-t border-slate-100">
             <button type="button" onclick="closeModalKelolaTipe()" class="px-5 py-2.5 rounded-2xl bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 transition">Tutup</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Kelola Kategori Alat di Pengaturan -->
+<div id="modalKelolaKategoriPengaturan" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl space-y-5 border border-slate-100 animate-in fade-in zoom-in duration-200">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-xl bg-teal-100/80 text-teal-700 flex items-center justify-center text-sm shadow-2xs">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </span>
+                <div>
+                    <h3 class="font-heading font-extrabold text-lg text-slate-900">
+                        Kelola Kategori Alat Kebersihan
+                    </h3>
+                    <p class="text-xs text-slate-500 font-medium">Tambah, ubah nama, atau hapus kategori kelompok peralatan inventaris.</p>
+                </div>
+            </div>
+            <button onclick="closeModalKelolaKategoriPengaturan()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Form Tambah / Edit Kategori Alat -->
+        <form id="formKategoriAlatPengaturan" action="<?= base_url('pengaturan/kategori-alat/store') ?>" method="POST" class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+            <div class="flex items-center justify-between">
+                <span id="formKategoriAlatTitle" class="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus-circle text-teal-600"></i> Form Tambah Kategori Alat
+                </span>
+                <button type="button" id="btnCancelEditKategoriAlat" onclick="resetFormKategoriAlat()" class="hidden text-[11px] font-bold text-slate-500 hover:text-slate-800 underline">
+                    Batal Edit
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="sm:col-span-2">
+                    <label class="block text-[11px] font-extrabold text-slate-600 uppercase tracking-wider mb-1">Nama Kategori <span class="text-rose-500">*</span></label>
+                    <input type="text" id="input_nama_kategori_p" name="nama_kategori" placeholder="Misal: Sapu & Pel / Wadah Sampah / Mesin" required class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:ring-2 focus:ring-teal-500 transition shadow-2xs">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-extrabold text-slate-600 uppercase tracking-wider mb-1">Urutan</label>
+                    <input type="number" id="input_urutan_kategori_p" name="urutan" value="0" min="0" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold text-center bg-white focus:ring-2 focus:ring-teal-500 transition shadow-2xs">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-extrabold text-slate-600 uppercase tracking-wider mb-1">Keterangan Singkat (Opsional)</label>
+                <input type="text" id="input_keterangan_kategori_p" name="keterangan" placeholder="Keterangan peruntukan kelompok alat..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:ring-2 focus:ring-teal-500 transition shadow-2xs">
+            </div>
+
+            <div class="flex justify-end pt-1">
+                <button type="submit" id="btnSubmitKategoriAlat" class="px-5 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-heading font-extrabold text-xs hover:from-teal-700 hover:to-emerald-700 transition shadow-md shadow-teal-600/20 flex items-center gap-1.5">
+                    <i class="fa-solid fa-save"></i>
+                    <span>Simpan Kategori</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- Tabel Daftar Kategori Alat -->
+        <div class="space-y-2">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Daftar Kategori Tersedia</span>
+                <span class="text-[11px] font-extrabold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200/80">
+                    <?= count($kategoriAlatList ?? []) ?> Kategori
+                </span>
+            </div>
+
+            <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-2xs max-h-60 overflow-y-auto">
+                <table class="w-full text-left text-xs font-semibold">
+                    <thead class="bg-slate-100 text-slate-700 font-heading font-extrabold uppercase text-[10px] tracking-wider border-b border-slate-200 sticky top-0 bg-white">
+                        <tr>
+                            <th width="8%" class="py-2.5 px-3 text-center">NO</th>
+                            <th width="35%" class="py-2.5 px-4">NAMA KATEGORI</th>
+                            <th width="40%" class="py-2.5 px-4">KETERANGAN</th>
+                            <th width="17%" class="py-2.5 px-3 text-center">AKSI</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-white">
+                        <?php if (!empty($kategoriAlatList)): ?>
+                            <?php foreach ($kategoriAlatList as $idx => $kat): ?>
+                                <tr class="hover:bg-slate-50/80 transition">
+                                    <td class="py-3 px-3 text-center font-extrabold text-slate-400"><?= $idx + 1 ?></td>
+                                    <td class="py-3 px-4 font-extrabold text-slate-900">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-teal-50 text-teal-800 border border-teal-200/80 text-xs shadow-2xs">
+                                            <i class="fa-solid fa-layer-group text-teal-600 text-[10px]"></i>
+                                            <?= esc($kat['nama_kategori']) ?>
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-4 text-slate-500 font-medium text-[11px]">
+                                        <?= esc($kat['keterangan'] ?: '-') ?>
+                                    </td>
+                                    <td class="py-3 px-3 text-center">
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            <button type="button" onclick="editKategoriAlatItem(<?= htmlspecialchars(json_encode($kat)) ?>)" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 hover:text-teal-700 hover:bg-teal-50 border border-slate-200/70 flex items-center justify-center transition shadow-2xs" title="Edit Kategori">
+                                                <i class="fa-solid fa-pen text-[10px]"></i>
+                                            </button>
+                                            <a href="<?= base_url('pengaturan/kategori-alat/delete/' . $kat['id']) ?>" data-confirm-msg="Hapus kategori '<?= esc($kat['nama_kategori']) ?>'?" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/70 flex items-center justify-center transition shadow-2xs" title="Hapus Kategori">
+                                                <i class="fa-solid fa-trash text-[10px]"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="4" class="py-6 text-center text-slate-400 font-medium italic">Belum ada data kategori alat.</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="pt-3 flex justify-end border-t border-slate-100">
+            <button type="button" onclick="closeModalKelolaKategoriPengaturan()" class="px-5 py-2.5 rounded-2xl bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 transition">Tutup</button>
         </div>
     </div>
 </div>
@@ -1207,7 +1387,23 @@
     }
     window.goToUnitPage = goToUnitPage;
 
+    const allUsersDataPengaturan = <?= json_encode(array_map(function($u) {
+        return [
+            'id' => (string)$u['id'],
+            'nama_lengkap' => $u['nama_lengkap'],
+            'username' => $u['username'],
+            'role' => $u['role'],
+            'no_hp' => $u['no_hp'] ?? ''
+        ];
+    }, $usersList ?? [])) ?>;
+
     function openModalTambahUnit() {
+        const idEl = document.getElementById('add_pj_user_id');
+        if (idEl) idEl.value = '';
+        const searchEl = document.getElementById('add_pj_user_search');
+        if (searchEl) searchEl.value = '';
+        filterAddPjOptions('');
+        closeAddPjDropdown();
         const modal = document.getElementById('modalTambahUnit');
         if (modal) modal.classList.remove('hidden');
     }
@@ -1216,6 +1412,7 @@
     function closeModalTambahUnit() {
         const modal = document.getElementById('modalTambahUnit');
         if (modal) modal.classList.add('hidden');
+        closeAddPjDropdown();
     }
     window.closeModalTambahUnit = closeModalTambahUnit;
 
@@ -1228,8 +1425,29 @@
         if (tipeEl) tipeEl.value = unit.tipe || 'Asrama Santri';
         const kodeEl = document.getElementById('edit_kode_unit');
         if (kodeEl) kodeEl.value = unit.kode_unit || '';
+        
+        // Populate PJ user in Searchable picker
         const pjUserEl = document.getElementById('edit_pj_user_id');
+        const pjSearchEl = document.getElementById('edit_pj_user_search');
         if (pjUserEl) pjUserEl.value = unit.pj_user_id || '';
+        
+        if (pjSearchEl) {
+            if (unit.pj_user_id) {
+                const found = allUsersDataPengaturan.find(u => u.id == unit.pj_user_id);
+                if (found) {
+                    pjSearchEl.value = `${found.nama_lengkap} (@${found.username})`;
+                } else if (unit.pj_nama) {
+                    pjSearchEl.value = unit.pj_nama;
+                } else {
+                    pjSearchEl.value = '';
+                }
+            } else {
+                pjSearchEl.value = '';
+            }
+        }
+        filterEditPjOptions('');
+        closeEditPjDropdown();
+
         const pjNamaEl = document.getElementById('edit_pj_nama');
         if (pjNamaEl) pjNamaEl.value = unit.pj_nama || '';
         const pjKontakEl = document.getElementById('edit_pj_kontak');
@@ -1249,8 +1467,178 @@
     function closeModalEditUnit() {
         const modal = document.getElementById('modalEditUnit');
         if (modal) modal.classList.add('hidden');
+        closeEditPjDropdown();
     }
     window.closeModalEditUnit = closeModalEditUnit;
+
+    // Searchable PJ Picker Functions for Tambah Unit
+    function openAddPjDropdown() {
+        const list = document.getElementById('addPjDropdownList');
+        const icon = document.getElementById('addPjIcon');
+        if (list) list.classList.remove('hidden');
+        if (icon) icon.classList.add('rotate-180');
+    }
+    window.openAddPjDropdown = openAddPjDropdown;
+
+    function closeAddPjDropdown() {
+        const list = document.getElementById('addPjDropdownList');
+        const icon = document.getElementById('addPjIcon');
+        if (list) list.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+    }
+    window.closeAddPjDropdown = closeAddPjDropdown;
+
+    function toggleAddPjDropdown() {
+        const list = document.getElementById('addPjDropdownList');
+        if (list && list.classList.contains('hidden')) {
+            openAddPjDropdown();
+        } else {
+            closeAddPjDropdown();
+        }
+    }
+    window.toggleAddPjDropdown = toggleAddPjDropdown;
+
+    function filterAddPjOptions(val) {
+        val = (val || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.add-pj-item');
+        let visibleCount = 0;
+        items.forEach(item => {
+            const id = item.getAttribute('data-id');
+            if (!id) {
+                item.style.display = 'flex';
+                return;
+            }
+            const text = item.innerText.toLowerCase();
+            if (!val || text.includes(val)) {
+                item.style.display = 'flex';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        const noFound = document.getElementById('noAddPjFound');
+        if (noFound) {
+            noFound.classList.toggle('hidden', visibleCount > 0 || !val);
+        }
+        openAddPjDropdown();
+    }
+    window.filterAddPjOptions = filterAddPjOptions;
+
+    function selectAddPj(el) {
+        const id = el.getAttribute('data-id') || '';
+        const name = el.getAttribute('data-name') || '';
+        const nama = el.getAttribute('data-nama') || '';
+        const hp = el.getAttribute('data-hp') || '';
+
+        const idEl = document.getElementById('add_pj_user_id');
+        const searchEl = document.getElementById('add_pj_user_search');
+        if (idEl) idEl.value = id;
+        if (searchEl) searchEl.value = name;
+
+        // Auto-fill manual PJ inputs if empty
+        const form = document.getElementById('modalTambahUnit');
+        if (form) {
+            const pjNamaInput = form.querySelector('input[name="pj_nama"]');
+            const pjKontakInput = form.querySelector('input[name="pj_kontak"]');
+            if (pjNamaInput && nama && (!pjNamaInput.value || pjNamaInput.value.trim() === '')) {
+                pjNamaInput.value = nama;
+            }
+            if (pjKontakInput && hp && (!pjKontakInput.value || pjKontakInput.value.trim() === '')) {
+                pjKontakInput.value = hp;
+            }
+        }
+        closeAddPjDropdown();
+    }
+    window.selectAddPj = selectAddPj;
+
+    // Searchable PJ Picker Functions for Edit Unit
+    function openEditPjDropdown() {
+        const list = document.getElementById('editPjDropdownList');
+        const icon = document.getElementById('editPjIcon');
+        if (list) list.classList.remove('hidden');
+        if (icon) icon.classList.add('rotate-180');
+    }
+    window.openEditPjDropdown = openEditPjDropdown;
+
+    function closeEditPjDropdown() {
+        const list = document.getElementById('editPjDropdownList');
+        const icon = document.getElementById('editPjIcon');
+        if (list) list.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+    }
+    window.closeEditPjDropdown = closeEditPjDropdown;
+
+    function toggleEditPjDropdown() {
+        const list = document.getElementById('editPjDropdownList');
+        if (list && list.classList.contains('hidden')) {
+            openEditPjDropdown();
+        } else {
+            closeEditPjDropdown();
+        }
+    }
+    window.toggleEditPjDropdown = toggleEditPjDropdown;
+
+    function filterEditPjOptions(val) {
+        val = (val || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.edit-pj-item');
+        let visibleCount = 0;
+        items.forEach(item => {
+            const id = item.getAttribute('data-id');
+            if (!id) {
+                item.style.display = 'flex';
+                return;
+            }
+            const text = item.innerText.toLowerCase();
+            if (!val || text.includes(val)) {
+                item.style.display = 'flex';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        const noFound = document.getElementById('noEditPjFound');
+        if (noFound) {
+            noFound.classList.toggle('hidden', visibleCount > 0 || !val);
+        }
+        openEditPjDropdown();
+    }
+    window.filterEditPjOptions = filterEditPjOptions;
+
+    function selectEditPj(el) {
+        const id = el.getAttribute('data-id') || '';
+        const name = el.getAttribute('data-name') || '';
+        const nama = el.getAttribute('data-nama') || '';
+        const hp = el.getAttribute('data-hp') || '';
+
+        const idEl = document.getElementById('edit_pj_user_id');
+        const searchEl = document.getElementById('edit_pj_user_search');
+        if (idEl) idEl.value = id;
+        if (searchEl) searchEl.value = name;
+
+        // Auto-fill manual PJ inputs if empty
+        const pjNamaInput = document.getElementById('edit_pj_nama');
+        const pjKontakInput = document.getElementById('edit_pj_kontak');
+        if (pjNamaInput && nama && (!pjNamaInput.value || pjNamaInput.value.trim() === '')) {
+            pjNamaInput.value = nama;
+        }
+        if (pjKontakInput && hp && (!pjKontakInput.value || pjKontakInput.value.trim() === '')) {
+            pjKontakInput.value = hp;
+        }
+        closeEditPjDropdown();
+    }
+    window.selectEditPj = selectEditPj;
+
+    // Close searchable dropdowns on outside click
+    document.addEventListener('click', function(e) {
+        const addPjContainer = document.getElementById('add_pj_user_search')?.closest('.relative');
+        if (addPjContainer && !addPjContainer.contains(e.target)) {
+            closeAddPjDropdown();
+        }
+        const editPjContainer = document.getElementById('edit_pj_user_search')?.closest('.relative');
+        if (editPjContainer && !editPjContainer.contains(e.target)) {
+            closeEditPjDropdown();
+        }
+    });
 
     function openModalKelolaTipe() {
         resetFormTipe();
@@ -1303,6 +1691,58 @@
         if (btnCancel) btnCancel.classList.add('hidden');
     }
     window.resetFormTipe = resetFormTipe;
+
+    function openModalKelolaKategoriPengaturan() {
+        resetFormKategoriAlat();
+        const modal = document.getElementById('modalKelolaKategoriPengaturan');
+        if (modal) modal.classList.remove('hidden');
+    }
+    window.openModalKelolaKategoriPengaturan = openModalKelolaKategoriPengaturan;
+
+    function closeModalKelolaKategoriPengaturan() {
+        const modal = document.getElementById('modalKelolaKategoriPengaturan');
+        if (modal) modal.classList.add('hidden');
+    }
+    window.closeModalKelolaKategoriPengaturan = closeModalKelolaKategoriPengaturan;
+
+    function editKategoriAlatItem(kat) {
+        const form = document.getElementById('formKategoriAlatPengaturan');
+        if (form) form.action = "<?= base_url('pengaturan/kategori-alat/update/') ?>" + kat.id;
+        const namaEl = document.getElementById('input_nama_kategori_p');
+        if (namaEl) namaEl.value = kat.nama_kategori || '';
+        const ketEl = document.getElementById('input_keterangan_kategori_p');
+        if (ketEl) ketEl.value = kat.keterangan || '';
+        const urutEl = document.getElementById('input_urutan_kategori_p');
+        if (urutEl) urutEl.value = kat.urutan || 0;
+        
+        const titleEl = document.getElementById('formKategoriAlatTitle');
+        if (titleEl) titleEl.innerHTML = '<i class="fa-solid fa-pen-to-square text-amber-600"></i> Form Edit Kategori Alat';
+        const btnSubmit = document.getElementById('btnSubmitKategoriAlat');
+        if (btnSubmit) btnSubmit.innerHTML = '<i class="fa-solid fa-save"></i><span>Simpan Perubahan</span>';
+        const btnCancel = document.getElementById('btnCancelEditKategoriAlat');
+        if (btnCancel) btnCancel.classList.remove('hidden');
+        if (namaEl) namaEl.focus();
+    }
+    window.editKategoriAlatItem = editKategoriAlatItem;
+
+    function resetFormKategoriAlat() {
+        const form = document.getElementById('formKategoriAlatPengaturan');
+        if (form) form.action = "<?= base_url('pengaturan/kategori-alat/store') ?>";
+        const namaEl = document.getElementById('input_nama_kategori_p');
+        if (namaEl) namaEl.value = '';
+        const ketEl = document.getElementById('input_keterangan_kategori_p');
+        if (ketEl) ketEl.value = '';
+        const urutEl = document.getElementById('input_urutan_kategori_p');
+        if (urutEl) urutEl.value = '0';
+
+        const titleEl = document.getElementById('formKategoriAlatTitle');
+        if (titleEl) titleEl.innerHTML = '<i class="fa-solid fa-plus-circle text-teal-600"></i> Form Tambah Kategori Alat';
+        const btnSubmit = document.getElementById('btnSubmitKategoriAlat');
+        if (btnSubmit) btnSubmit.innerHTML = '<i class="fa-solid fa-save"></i><span>Simpan Kategori</span>';
+        const btnCancel = document.getElementById('btnCancelEditKategoriAlat');
+        if (btnCancel) btnCancel.classList.add('hidden');
+    }
+    window.resetFormKategoriAlat = resetFormKategoriAlat;
 
     // Auto activate tab on initial page load
     document.addEventListener("DOMContentLoaded", function() {

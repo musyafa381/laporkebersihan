@@ -25,24 +25,31 @@
 
             <!-- Right: Status Control & Action Buttons -->
             <div class="flex items-center gap-3 self-start lg:self-center flex-shrink-0">
-                <form action="<?= base_url('buku/update-status/' . $buku['id']) ?>" method="POST" class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:inline">Status:</span>
-                    <div class="relative">
-                        <select name="status" onchange="this.form.submit()" class="appearance-none pl-3.5 pr-8 py-2.5 rounded-xl border border-slate-200 text-xs font-extrabold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 shadow-2xs cursor-pointer">
-                            <option value="Aktif" <?= ($buku['status'] === 'Aktif' || $buku['status'] === 'AKTIF' || $buku['status'] === 'Berjalan' || empty($buku['status'])) ? 'selected' : '' ?>>🟢 Aktif</option>
-                            <option value="Draft Proker" <?= ($buku['status'] === 'Draft Proker') ? 'selected' : '' ?>>🟠 Draft Proker</option>
-                            <option value="Selesai" <?= ($buku['status'] === 'Selesai') ? 'selected' : '' ?>>🔵 Selesai</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
-                            <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                <?php if (session()->get('role') === 'Admin'): ?>
+                    <form action="<?= base_url('buku/update-status/' . $buku['id']) ?>" method="POST" class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:inline">Status:</span>
+                        <div class="relative">
+                            <select name="status" onchange="this.form.submit()" class="appearance-none pl-3.5 pr-8 py-2.5 rounded-xl border border-slate-200 text-xs font-extrabold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 shadow-2xs cursor-pointer">
+                                <option value="Aktif" <?= ($buku['status'] === 'Aktif' || $buku['status'] === 'AKTIF' || $buku['status'] === 'Berjalan' || empty($buku['status'])) ? 'selected' : '' ?>>🟢 Aktif</option>
+                                <option value="Draft Proker" <?= ($buku['status'] === 'Draft Proker') ? 'selected' : '' ?>>🟠 Draft Proker</option>
+                                <option value="Selesai" <?= ($buku['status'] === 'Selesai') ? 'selected' : '' ?>>🔵 Selesai</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                                <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                            </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
 
-                <button onclick="openModalImportKeuangan()" class="px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-extrabold text-xs transition border border-emerald-200/90 shadow-2xs flex items-center gap-2">
-                    <i class="fa-solid fa-file-import text-emerald-600"></i>
-                    <span>Import Keuangan</span>
-                </button>
+                    <button onclick="openModalImportKeuangan()" class="px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-extrabold text-xs transition border border-emerald-200/90 shadow-2xs flex items-center gap-2">
+                        <i class="fa-solid fa-file-import text-emerald-600"></i>
+                        <span>Import Keuangan</span>
+                    </button>
+                <?php else: ?>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 font-extrabold text-xs border border-slate-200">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        Status: <?= esc($buku['status'] ?: 'Aktif') ?>
+                    </span>
+                <?php endif; ?>
 
                 <a href="<?= base_url('buku/cetak/' . $buku['id']) ?>" target="_blank" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-bold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 flex items-center gap-2 shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:-translate-y-0.5">
                     <i class="fa-solid fa-print"></i>

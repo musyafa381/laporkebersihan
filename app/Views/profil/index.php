@@ -20,6 +20,7 @@
                 </p>
             </div>
 
+            <?php if (session()->get('role') === 'Admin'): ?>
             <div class="flex-shrink-0">
                 <button type="button" onclick="openModalTambahUser()" class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-white text-emerald-900 font-heading font-bold text-sm hover:bg-emerald-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 group">
                     <div class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition">
@@ -28,6 +29,7 @@
                     <span>Daftarkan Akun Baru</span>
                 </button>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -66,8 +68,10 @@
                         <th width="18%" class="py-3.5 px-4">USERNAME</th>
                         <th width="28%" class="py-3.5 px-4">NAMA LENGKAP</th>
                         <th width="16%" class="py-3.5 px-4 text-center">ROLE AKSES</th>
-                        <th width="24%" class="py-3.5 px-4">UNIT / INSTANSI</th>
-                        <th width="10%" class="py-3.5 px-3 text-center">AKSI</th>
+                        <th width="<?= (session()->get('role') === 'Admin') ? '24%' : '34%' ?>" class="py-3.5 px-4">UNIT / INSTANSI</th>
+                        <?php if (session()->get('role') === 'Admin'): ?>
+                            <th width="10%" class="py-3.5 px-3 text-center">AKSI</th>
+                        <?php endif; ?>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 bg-white">
@@ -125,16 +129,20 @@
                                         <span><?= esc($u['nama_unit'] ?: 'Gudang / Pusat K3L') ?></span>
                                     </div>
                                 </td>
+                                <?php if (session()->get('role') === 'Admin'): ?>
                                 <td class="py-3.5 px-3 text-center">
                                     <div class="flex items-center justify-center gap-1.5">
                                         <button type="button" onclick="openModalEditUser(<?= htmlspecialchars(json_encode($u)) ?>)" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200/70 flex items-center justify-center transition hover:scale-105 shadow-2xs" title="Edit Akun">
-                                            <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                            <i class="fa-solid fa-pen text-xs"></i>
                                         </button>
-                                        <a href="<?= base_url('profil/delete/' . $u['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus akun pengguna ini?" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/70 flex items-center justify-center transition hover:scale-105 shadow-2xs" title="Hapus Akun">
-                                            <i class="fa-solid fa-trash text-xs"></i>
-                                        </a>
+                                        <?php if ($u['id'] != session()->get('user_id')): ?>
+                                            <a href="<?= base_url('profil/delete/' . $u['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus akun pengguna '<?= esc($u['nama_lengkap']) ?>'?" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/70 flex items-center justify-center transition hover:scale-105 shadow-2xs" title="Hapus Akun">
+                                                <i class="fa-solid fa-trash text-xs"></i>
+                                            </a>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
+                                <?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -185,14 +193,19 @@
                 <input type="text" name="nama_lengkap" placeholder="Misal: Kang Ahmad / Ibu Halimah" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Username Login</label>
                     <input type="text" name="username" placeholder="ahmad123" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
                 </div>
                 <div>
                     <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Password</label>
-                    <input type="password" name="password" placeholder="••••••••" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                    <div class="relative">
+                        <input type="password" id="add_password" name="password" placeholder="••••••••" required class="w-full pl-4 pr-10 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                        <button type="button" onclick="togglePasswordVisibility('add_password', 'toggle_add_pwd_icon')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs focus:outline-none transition" title="Lihat/Sembunyikan Sandi">
+                            <i id="toggle_add_pwd_icon" class="fa-solid fa-eye text-xs"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -265,9 +278,20 @@
                 <input type="text" id="edit_nama_lengkap" name="nama_lengkap" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
             </div>
 
-            <div>
-                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Ganti Password (Kosongkan jika tidak diganti)</label>
-                <input type="password" name="password" placeholder="••••••••" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Username Login</label>
+                    <input type="text" id="edit_username" name="username" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Ganti Password</label>
+                    <div class="relative">
+                        <input type="password" id="edit_password" name="password" placeholder="Kosongkan jika tetap" class="w-full pl-4 pr-10 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                        <button type="button" onclick="togglePasswordVisibility('edit_password', 'toggle_edit_pwd_icon')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs focus:outline-none transition" title="Lihat/Sembunyikan Sandi">
+                            <i id="toggle_edit_pwd_icon" class="fa-solid fa-eye text-xs"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div>
@@ -359,6 +383,10 @@
         if (modal) modal.classList.remove('hidden');
         document.getElementById('add_user_unit_id').value = '';
         document.getElementById('add_user_unit_search').value = '';
+        const pwdAdd = document.getElementById('add_password');
+        if (pwdAdd) { pwdAdd.value = ''; pwdAdd.type = 'password'; }
+        const iconAdd = document.getElementById('toggle_add_pwd_icon');
+        if (iconAdd) { iconAdd.className = 'fa-solid fa-eye text-xs'; }
         closeAddUserUnitDropdown();
     }
     window.openModalTambahUser = openModalTambahUser;
@@ -451,6 +479,8 @@
         if (form) form.action = "<?= base_url('profil/update/') ?>" + user.id;
         const namaEl = document.getElementById('edit_nama_lengkap');
         if (namaEl) namaEl.value = user.nama_lengkap || '';
+        const userEl = document.getElementById('edit_username');
+        if (userEl) userEl.value = user.username || '';
         const roleEl = document.getElementById('edit_role');
         if (roleEl) roleEl.value = user.role || 'Pengurus';
         
@@ -465,8 +495,28 @@
 
         const modal = document.getElementById('modalEditUser');
         if (modal) modal.classList.remove('hidden');
+        const pwdEdit = document.getElementById('edit_password');
+        if (pwdEdit) { pwdEdit.value = ''; pwdEdit.type = 'password'; }
+        const iconEdit = document.getElementById('toggle_edit_pwd_icon');
+        if (iconEdit) { iconEdit.className = 'fa-solid fa-eye text-xs'; }
     }
     window.openModalEditUser = openModalEditUser;
+
+    function togglePasswordVisibility(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (!input || !icon) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+    window.togglePasswordVisibility = togglePasswordVisibility;
 
     function closeModalEditUser() {
         const modal = document.getElementById('modalEditUser');

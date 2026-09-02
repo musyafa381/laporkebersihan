@@ -3,9 +3,15 @@
 <?= $this->section('content') ?>
 <div class="space-y-6">
 
-<?php if (!$isUserAdminOrAuditor): ?>
+<?php 
+    $userRole = session()->get('role');
+    $isAuditor = ($userRole === 'Auditor');
+    $isAdmin   = ($userRole === 'Admin');
+?>
+
+<?php if (!$isUserAdminOrAuditor || $isAuditor): ?>
     <!-- ========================================== -->
-    <!-- 🌐 TAMPILAN CS UMUM (PUBLIK SANTRI & UMUM) -->
+    <!-- 🌐 TAMPILAN FORM CS (PUBLIK & AUDITOR)     -->
     <!-- ========================================== -->
     <!-- Hero Banner / Page Header -->
     <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-700 to-emerald-900 text-white p-6 sm:p-10 shadow-2xl shadow-emerald-900/20 border border-emerald-600/30">
@@ -40,7 +46,7 @@
                 </span>
             </div>
 
-            <form action="<?= base_url('cs/public/store') ?>" method="POST" enctype="multipart/form-data" class="space-y-4">
+            <form action="<?= base_url('cs/public/store') ?>" method="POST" enctype="multipart/form-data" class="space-y-4 allow-auditor" id="formLaporCsPublic">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Nama Lengkap Pengirim</label>
@@ -57,15 +63,62 @@
                         <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Lokasi / Unit Terkait</label>
                         <input type="text" name="unit_lokasi" placeholder="Misal: Asrama Kitab Putra" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
                     </div>
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Kategori Pengaduan</label>
-                        <select name="kategori" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                            <option value="Kendala Kebersihan">Kendala Kebersihan / Sampah Penuh</option>
-                            <option value="Fasilitas Rusak">Fasilitas Tempat Kebersihan Rusak</option>
-                            <option value="Pertanyaan/Konsultasi">Pertanyaan / Konsultasi</option>
-                            <option value="Lainnya">Lainnya</option>
-                        </select>
+                    <!-- Searchable Wilayah Picker in CS Form -->
+                    <div class="relative">
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                            <span>Wilayah Pemetaan (Opsional)</span>
+                            <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                                <i class="fa-solid fa-magnifying-glass text-[9px]"></i> Bisa dicari
+                            </span>
+                        </label>
+                        <input type="hidden" id="cs_wilayah_id" name="wilayah_id" value="">
+                        <div class="relative">
+                            <i class="fa-solid fa-map-location-dot absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-600 text-xs pointer-events-none"></i>
+                            <input type="text" id="cs_wilayah_search" placeholder="Cari nama wilayah pemetaan / area..." autocomplete="off" onfocus="openCsWilayahDropdown()" oninput="filterCsWilayahOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
+                            <button type="button" onclick="toggleCsWilayahDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                                <i id="csWilayahIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                            </button>
+                        </div>
+                        <!-- Dropdown List -->
+                        <div id="csWilayahDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                            <div class="cs-wilayah-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="" data-name="" onclick="selectCsWilayah(this)">
+                                <div>
+                                    <div class="font-extrabold text-xs text-slate-600 italic">-- Bukan Wilayah Khusus / Umum --</div>
+                                    <div class="text-[10px] text-slate-400 font-medium">Laporan umum tidak terikat spot wilayah pemetaan tertentu</div>
+                                </div>
+                            </div>
+                            <?php if (!empty($wilayahList)): ?>
+                                <?php foreach ($wilayahList as $w): ?>
+                                    <div class="cs-wilayah-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $w['id'] ?>" data-name="<?= esc($w['nama_wilayah']) ?> (<?= esc($w['kategori_area']) ?>)" onclick="selectCsWilayah(this)">
+                                        <div>
+                                            <div class="font-extrabold text-xs text-slate-900"><?= esc($w['nama_wilayah']) ?></div>
+                                            <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
+                                                <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/60"><?= esc($w['kategori_area']) ?></span>
+                                                <?php if (!empty($w['lokasi_gedung'])): ?>
+                                                    <span>&bull;</span>
+                                                    <span><i class="fa-solid fa-location-dot text-rose-500 mr-0.5"></i><?= esc($w['lokasi_gedung']) ?></span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                        <span class="text-[10px] font-mono font-bold text-slate-400"><?= esc($w['kode_wilayah'] ?: 'WIL-' . $w['id']) ?></span>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                            <div id="noCsWilayahFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
+                                Tidak ditemukan wilayah pemetaan yang sesuai.
+                            </div>
+                        </div>
                     </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Kategori Pengaduan</label>
+                    <select name="kategori" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                        <option value="Kendala Kebersihan">Kendala Kebersihan / Sampah Penuh</option>
+                        <option value="Fasilitas Rusak">Fasilitas Tempat Kebersihan Rusak</option>
+                        <option value="Pertanyaan/Konsultasi">Pertanyaan / Konsultasi</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
                 </div>
 
                 <div>
@@ -124,7 +177,7 @@
                     <p class="text-[10px] text-slate-500 font-medium">Jawab pertanyaan penjumlahan matematika sederhana di atas untuk membuktikan Anda bukan bot spam.</p>
                 </div>
 
-                <button type="submit" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
+                <button type="submit" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 allow-auditor">
                     <i class="fa-solid fa-paper-plane"></i>
                     <span>Kirim Pengaduan Ke Tim CS Kebersihan</span>
                 </button>
@@ -168,13 +221,15 @@
             </div>
         </div>
     </div>
+<?php endif; ?>
 
-<?php else: ?>
+<?php if ($isUserAdminOrAuditor): ?>
 
     <!-- ========================================== -->
-    <!-- 👑 TAMPILAN CS ADMIN (KHUSUS ADMIN & AUDITOR) -->
+    <!-- 👑 TAMPILAN INBOX CS (ADMIN & AUDITOR)     -->
     <!-- ========================================== -->
-    <!-- Hero Banner / Page Header -->
+    <!-- Hero Banner / Page Header (Only show for Admin if not Auditor) -->
+    <?php if ($isAdmin): ?>
     <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-700 to-emerald-900 text-white p-8 sm:p-10 shadow-2xl shadow-emerald-900/20 border border-emerald-600/30">
         <div class="absolute -right-10 -bottom-10 opacity-10 text-white pointer-events-none">
             <i class="fa-solid fa-headset text-[240px]"></i>
@@ -193,22 +248,23 @@
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
     <!-- Admin Inbox CS Reports & Pengajuan Alat Panel -->
-    <div class="space-y-8">
+    <div class="space-y-8 w-full">
         <!-- Panel 1: Inbox Laporan CS Masuk -->
         <div class="glass-card rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-5">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-                <div class="flex items-center gap-3.5">
+                <div class="flex items-center gap-3.5 flex-wrap">
                     <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-lg shadow-lg shadow-emerald-500/20 flex-shrink-0">
                         <i class="fa-solid fa-inbox"></i>
                     </div>
                     <div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
                             <h3 class="font-heading font-extrabold text-lg text-slate-900">
                                 Inbox Laporan CS & Pengaduan Masuk
                             </h3>
-                            <span class="text-[11px] font-extrabold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/90 shadow-2xs">
+                            <span class="text-[11px] font-extrabold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/90 shadow-2xs whitespace-nowrap">
                                 <?= count($reportsList) ?> Laporan
                             </span>
                         </div>
@@ -217,23 +273,25 @@
                 </div>
 
                 <!-- Search Input for CS Reports -->
-                <div class="relative w-full sm:w-64">
+                <div class="relative w-full sm:w-64 flex-shrink-0">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
                     <input type="text" id="searchCsReportsInput" onkeyup="filterCsReportsTable()" placeholder="Cari pengirim / lokasi / isi..." class="w-full pl-9 pr-4 py-2 rounded-2xl border border-slate-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 focus:bg-white transition shadow-2xs">
                 </div>
             </div>
 
             <div class="overflow-x-auto rounded-2xl border border-emerald-800/20 shadow-2xs">
-                <table id="tableCsReports" class="w-full text-left text-xs font-semibold">
+                <table id="tableCsReports" class="w-full min-w-[760px] text-left text-xs font-semibold">
                     <thead class="bg-gradient-to-r from-emerald-800 to-teal-800 text-white font-heading font-extrabold uppercase text-[10px] tracking-wider">
                         <tr>
                             <th width="4%" class="py-3.5 px-3 text-center">NO</th>
                             <th width="13%" class="py-3.5 px-4">TANGGAL</th>
                             <th width="20%" class="py-3.5 px-4">PENGIRIM & KONTAK</th>
                             <th width="15%" class="py-3.5 px-4">LOKASI / UNIT</th>
-                            <th width="27%" class="py-3.5 px-4">ISI LAPORAN & TANGGAPAN</th>
+                            <th width="<?= $isAdmin ? '27%' : '37%' ?>" class="py-3.5 px-4">ISI LAPORAN & TANGGAPAN</th>
                             <th width="11%" class="py-3.5 px-4 text-center">STATUS</th>
-                            <th width="10%" class="py-3.5 px-3 text-center">AKSI</th>
+                            <?php if ($isAdmin): ?>
+                                <th width="10%" class="py-3.5 px-3 text-center">AKSI</th>
+                            <?php endif; ?>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 bg-white">
@@ -285,9 +343,17 @@
                                             <i class="fa-solid fa-location-dot text-emerald-600 text-[10px]"></i>
                                             <span><?= esc($r['unit_lokasi']) ?></span>
                                         </div>
-                                        <span class="inline-block px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[10px] font-bold mt-1 border border-emerald-200/70">
-                                            <?= esc($r['kategori']) ?>
-                                        </span>
+                                        <div class="flex flex-wrap items-center gap-1 mt-1">
+                                            <span class="inline-block px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200/70">
+                                                <?= esc($r['kategori']) ?>
+                                            </span>
+                                            <?php if (!empty($r['nama_wilayah'])): ?>
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 border border-teal-200/80 text-[10px] font-extrabold shadow-2xs">
+                                                    <i class="fa-solid fa-map-location-dot text-teal-600 text-[9px]"></i>
+                                                    <span><?= esc($r['nama_wilayah']) ?></span>
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
                                     </td>
                                     <td class="py-4 px-4">
                                         <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/70 text-slate-800 text-xs font-medium leading-relaxed shadow-2xs">
@@ -348,17 +414,19 @@
                                             </span>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="py-4 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <button type="button" onclick="openModalTanggapiCs(<?= htmlspecialchars(json_encode($r)) ?>)" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-1.5" title="Tanggapi & Ubah Status">
-                                                <i class="fa-solid fa-pen-to-square"></i>
-                                                <span>Tanggapi</span>
-                                            </button>
-                                            <a href="<?= base_url('cs/report/delete/' . $r['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus laporan ini?" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 border border-slate-200 flex items-center justify-center transition shadow-2xs" title="Hapus Laporan">
-                                                <i class="fa-solid fa-trash-can text-xs"></i>
-                                            </a>
-                                        </div>
-                                    </td>
+                                    <?php if ($isAdmin): ?>
+                                        <td class="py-4 px-3 text-center">
+                                            <div class="flex items-center justify-center gap-1.5">
+                                                <button type="button" onclick="openModalTanggapiCs(<?= htmlspecialchars(json_encode($r)) ?>)" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-1.5" title="Tanggapi & Ubah Status">
+                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                    <span>Tanggapi</span>
+                                                </button>
+                                                <a href="<?= base_url('cs/report/delete/' . $r['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus laporan ini?" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 border border-slate-200 flex items-center justify-center transition shadow-2xs" title="Hapus Laporan">
+                                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    <?php endif; ?>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -388,16 +456,16 @@
         <!-- Panel 2: Inbox Pengajuan Alat dari Pengurus & Kader -->
         <div class="glass-card rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-5">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-                <div class="flex items-center gap-3.5">
+                <div class="flex items-center gap-3.5 flex-wrap">
                     <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-lg shadow-lg shadow-emerald-500/20 flex-shrink-0">
                         <i class="fa-solid fa-box-open"></i>
                     </div>
                     <div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
                             <h3 class="font-heading font-extrabold text-lg text-slate-900">
                                 Inbox Permohonan Pengajuan Alat Kebersihan
                             </h3>
-                            <span class="text-[11px] font-extrabold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/90 shadow-2xs">
+                            <span class="text-[11px] font-extrabold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/90 shadow-2xs whitespace-nowrap">
                                 <?= count($pengajuanList) ?> Permohonan
                             </span>
                         </div>
@@ -406,23 +474,25 @@
                 </div>
 
                 <!-- Search Input for Pengajuan Alat -->
-                <div class="relative w-full sm:w-64">
+                <div class="relative w-full sm:w-64 flex-shrink-0">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
                     <input type="text" id="searchPengajuanInput" onkeyup="filterPengajuanTable()" placeholder="Cari pemohon / alat / keperluan..." class="w-full pl-9 pr-4 py-2 rounded-2xl border border-slate-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 focus:bg-white transition shadow-2xs">
                 </div>
             </div>
 
             <div class="overflow-x-auto rounded-2xl border border-emerald-800/20 shadow-2xs">
-                <table id="tablePengajuanAlat" class="w-full text-left text-xs font-semibold">
+                <table id="tablePengajuanAlat" class="w-full min-w-[760px] text-left text-xs font-semibold">
                     <thead class="bg-gradient-to-r from-emerald-800 to-teal-800 text-white font-heading font-extrabold uppercase text-[10px] tracking-wider">
                         <tr>
                             <th width="4%" class="py-3.5 px-3 text-center">NO</th>
                             <th width="13%" class="py-3.5 px-4">TANGGAL</th>
                             <th width="18%" class="py-3.5 px-4">PEMOHON (USER)</th>
                             <th width="20%" class="py-3.5 px-4">PERALATAN PERMOHONAN</th>
-                            <th width="24%" class="py-3.5 px-4">ALASAN KEPERLUAN & CATATAN</th>
+                            <th width="<?= $isAdmin ? '24%' : '34%' ?>" class="py-3.5 px-4">ALASAN KEPERLUAN & CATATAN</th>
                             <th width="11%" class="py-3.5 px-4 text-center">STATUS</th>
-                            <th width="10%" class="py-3.5 px-3 text-center">PROSES</th>
+                            <?php if ($isAdmin): ?>
+                                <th width="10%" class="py-3.5 px-3 text-center">PROSES</th>
+                            <?php endif; ?>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 bg-white">
@@ -492,17 +562,19 @@
                                             </span>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="py-4 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <button type="button" onclick="openModalProsesPengajuan(<?= htmlspecialchars(json_encode($p)) ?>)" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-1.5" title="Proses Pengajuan">
-                                                <i class="fa-solid fa-sliders"></i>
-                                                <span>Proses</span>
-                                            </button>
-                                            <a href="<?= base_url('cs/pengajuan/delete/' . $p['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus pengajuan alat ini?" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 border border-slate-200 flex items-center justify-center transition shadow-2xs" title="Hapus Pengajuan">
-                                                <i class="fa-solid fa-trash-can text-xs"></i>
-                                            </a>
-                                        </div>
-                                    </td>
+                                    <?php if ($isAdmin): ?>
+                                        <td class="py-4 px-3 text-center">
+                                            <div class="flex items-center justify-center gap-1.5">
+                                                <button type="button" onclick="openModalProsesPengajuan(<?= htmlspecialchars(json_encode($p)) ?>)" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-1.5" title="Proses Pengajuan">
+                                                    <i class="fa-solid fa-sliders"></i>
+                                                    <span>Proses</span>
+                                                </button>
+                                                <a href="<?= base_url('cs/pengajuan/delete/' . $p['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus pengajuan alat ini?" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 border border-slate-200 flex items-center justify-center transition shadow-2xs" title="Hapus Pengajuan">
+                                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    <?php endif; ?>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -579,17 +651,35 @@
                         <input type="text" id="cs_lokasi" name="unit_lokasi" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50/80 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                            <i class="fa-solid fa-tag text-emerald-600 text-[10px]"></i>
-                            <span>Kategori Laporan</span>
+                        <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                            <span class="flex items-center gap-1">
+                                <i class="fa-solid fa-map-location-dot text-teal-600 text-[10px]"></i>
+                                <span>Wilayah Pemetaan (Opsional)</span>
+                            </span>
+                            <span class="text-[9px] text-slate-400 font-semibold lowercase">Opsional</span>
                         </label>
-                        <select id="cs_kategori" name="kategori" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50/80 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs">
-                            <option value="Kendala Kebersihan">Kendala Kebersihan</option>
-                            <option value="Fasilitas Rusak">Fasilitas Rusak</option>
-                            <option value="Pertanyaan/Konsultasi">Pertanyaan/Konsultasi</option>
-                            <option value="Lainnya">Lainnya</option>
+                        <select id="cs_wilayah_id" name="wilayah_id" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50/80 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs">
+                            <option value="">-- Bukan Wilayah Khusus / Umum --</option>
+                            <?php if (!empty($wilayahList)): ?>
+                                <?php foreach ($wilayahList as $w): ?>
+                                    <option value="<?= $w['id'] ?>"><?= esc($w['nama_wilayah']) ?> (<?= esc($w['kategori_area']) ?>)</option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </select>
                     </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                        <i class="fa-solid fa-tag text-emerald-600 text-[10px]"></i>
+                        <span>Kategori Laporan</span>
+                    </label>
+                    <select id="cs_kategori" name="kategori" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50/80 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs">
+                        <option value="Kendala Kebersihan">Kendala Kebersihan</option>
+                        <option value="Fasilitas Rusak">Fasilitas Rusak</option>
+                        <option value="Pertanyaan/Konsultasi">Pertanyaan/Konsultasi</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
                 </div>
 
                 <div>
@@ -895,6 +985,8 @@
             if (kontakEl) kontakEl.value = report.kontak_hp || '';
             const lokasiEl = document.getElementById('cs_lokasi');
             if (lokasiEl) lokasiEl.value = report.unit_lokasi || '';
+            const wilEl = document.getElementById('cs_wilayah_id');
+            if (wilEl) wilEl.value = report.wilayah_id || '';
             const katEl = document.getElementById('cs_kategori');
             if (katEl) katEl.value = report.kategori || 'Kendala Kebersihan';
             const isiEl = document.getElementById('cs_isi');
@@ -1083,6 +1175,69 @@
         });
     }
     window.renderPublicPreviews = renderPublicPreviews;
+
+    // Searchable Wilayah Picker Logic in CS Form
+    function openCsWilayahDropdown() {
+        const dd = document.getElementById('csWilayahDropdownList');
+        const icon = document.getElementById('csWilayahIcon');
+        if (dd) dd.classList.remove('hidden');
+        if (icon) icon.classList.add('rotate-180');
+    }
+    window.openCsWilayahDropdown = openCsWilayahDropdown;
+
+    function toggleCsWilayahDropdown() {
+        const dd = document.getElementById('csWilayahDropdownList');
+        const icon = document.getElementById('csWilayahIcon');
+        if (dd) {
+            dd.classList.toggle('hidden');
+            if (icon) icon.classList.toggle('rotate-180', !dd.classList.contains('hidden'));
+        }
+    }
+    window.toggleCsWilayahDropdown = toggleCsWilayahDropdown;
+
+    function filterCsWilayahOptions(query) {
+        openCsWilayahDropdown();
+        query = (query || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.cs-wilayah-item');
+        let found = 0;
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            if (!query || text.includes(query)) {
+                item.style.display = 'flex';
+                found++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        const noFound = document.getElementById('noCsWilayahFound');
+        if (noFound) noFound.classList.toggle('hidden', found > 0);
+    }
+    window.filterCsWilayahOptions = filterCsWilayahOptions;
+
+    function selectCsWilayah(el) {
+        const id = el.dataset.id || '';
+        const name = el.dataset.name || '';
+        document.getElementById('cs_wilayah_id').value = id;
+        document.getElementById('cs_wilayah_search').value = name ? name : '';
+        if (!id) {
+            document.getElementById('cs_wilayah_search').placeholder = '-- Bukan Wilayah Khusus / Umum --';
+        }
+        const dd = document.getElementById('csWilayahDropdownList');
+        const icon = document.getElementById('csWilayahIcon');
+        if (dd) dd.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+    }
+    window.selectCsWilayah = selectCsWilayah;
+
+    document.addEventListener('click', function(e) {
+        const searchInput = document.getElementById('cs_wilayah_search');
+        const dd = document.getElementById('csWilayahDropdownList');
+        if (dd && searchInput && !searchInput.contains(e.target) && !dd.contains(e.target)) {
+            dd.classList.add('hidden');
+            const icon = document.getElementById('csWilayahIcon');
+            if (icon) icon.classList.remove('rotate-180');
+        }
+    });
 </script>
 
 </div>

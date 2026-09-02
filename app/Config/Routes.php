@@ -61,6 +61,11 @@ $routes->get('/alat/delete/(:num)', 'Alat::deleteAlat/$1');
 $routes->post('/alat/transaksi/store', 'Alat::storeTransaksi');
 $routes->get('/alat/transaksi/delete/(:num)', 'Alat::deleteTransaksi/$1');
 
+// Routes Kategori Alat Kebersihan
+$routes->post('/alat/kategori/store', 'Alat::storeKategori');
+$routes->post('/alat/kategori/update/(:num)', 'Alat::updateKategori/$1');
+$routes->get('/alat/kategori/delete/(:num)', 'Alat::deleteKategori/$1');
+
 // Auth & User Profile Management (Admin Only Registration)
 $routes->get('/login', 'Auth::login');
 $routes->post('/login/process', 'Auth::processLogin');
@@ -75,10 +80,13 @@ $routes->post('/pengaturan/unit/update/(:num)', 'Pengaturan::updateUnit/$1');
 $routes->get('/pengaturan/unit/delete/(:num)', 'Pengaturan::deleteUnit/$1');
 $routes->get('/pengaturan/unit/detail/(:num)', 'Unit::detail/$1');
 
-// Routes CRUD Tipe Unit
+// Routes CRUD Tipe Unit & Kategori Alat di Pengaturan
 $routes->post('/pengaturan/tipe/store', 'Pengaturan::storeTipe');
 $routes->post('/pengaturan/tipe/update/(:num)', 'Pengaturan::updateTipe/$1');
 $routes->get('/pengaturan/tipe/delete/(:num)', 'Pengaturan::deleteTipe/$1');
+$routes->post('/pengaturan/kategori-alat/store', 'Pengaturan::storeKategoriAlat');
+$routes->post('/pengaturan/kategori-alat/update/(:num)', 'Pengaturan::updateKategoriAlat/$1');
+$routes->get('/pengaturan/kategori-alat/delete/(:num)', 'Pengaturan::deleteKategoriAlat/$1');
 
 // Standalone Modul & Halaman Detail Instansi / Unit
 $routes->get('/unit/detail/(:num)', 'Unit::detail/$1');
@@ -133,6 +141,28 @@ $routes->get('/program-kerja/delete/(:num)', 'ProgramKerja::delete/$1');
 $routes->post('/program-kerja/upload-foto/(:num)', 'ProgramKerja::uploadFoto/$1');
 $routes->get('/program-kerja/delete-foto/(:num)/(:any)', 'ProgramKerja::deleteFoto/$1/$2');
 $routes->get('/program-kerja/sync-lpj/(:num)', 'ProgramKerja::syncFromLpj/$1');
+
+// Menu & CRUD Pemetaan Wilayah Kebersihan (Admin & Auditor)
+$routes->get('/wilayah', 'Wilayah::index');
+$routes->get('/wilayah/detail/(:num)', 'Wilayah::detail/$1');
+$routes->post('/wilayah/store', 'Wilayah::store');
+$routes->post('/wilayah/update/(:num)', 'Wilayah::update/$1');
+$routes->get('/wilayah/delete/(:num)', 'Wilayah::delete/$1');
+$routes->post('/wilayah/upload-foto/(:num)', 'Wilayah::uploadFoto/$1');
+$routes->get('/wilayah/delete-foto/(:num)', 'Wilayah::deleteFoto/$1');
+$routes->get('/wilayah/set-primary-foto/(:num)', 'Wilayah::setPrimaryFoto/$1');
+$routes->post('/wilayah/penugasan/store/(:num)', 'Wilayah::storePenugasan/$1');
+$routes->post('/wilayah/penugasan/update/(:num)', 'Wilayah::updatePenugasan/$1');
+$routes->get('/wilayah/penugasan/delete/(:num)', 'Wilayah::deletePenugasan/$1');
+$routes->get('/wilayah/laporan', 'Wilayah::laporan');
+$routes->get('/wilayah/laporan/delete/(:num)', 'Wilayah::deleteLaporan/$1');
+
+// Lapor Kebersihan Wilayah untuk Pengurus & Kader (Mobile Portal)
+$routes->get('/app/lapor-wilayah', 'AppPortal::laporWilayah');
+$routes->post('/app/lapor-wilayah/store', 'AppPortal::storeLaporWilayah');
+$routes->post('/app/wilayah-tugas/store', 'AppPortal::storeWilayahTugas');
+$routes->get('/app/wilayah-tugas/delete/(:num)', 'AppPortal::deleteWilayahTugas/$1');
+
 
 
 

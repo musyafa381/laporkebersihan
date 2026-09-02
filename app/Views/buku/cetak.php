@@ -958,7 +958,7 @@
                     </div>
                     <div class="cover-org-block">
                         <h2 class="cover-org-title">YAYASAN PONDOK PESANTREN ASSALAFIYYAH</h2>
-                        <h3 class="cover-org-subtitle">DIVISI KEBERSIHAN & KESELAMATAN LINGKUNGAN (K3L)</h3>
+                        <h3 class="cover-org-subtitle">DIVISI KEBERSIHAN YAYASAN</h3>
                         <p class="cover-org-address">Mlangi, Nogotirto, Gamping, Sleman, D.I. Yogyakarta 55292</p>
                     </div>
                     <div class="cover-divider">
@@ -999,7 +999,7 @@
                                 <td class="cover-meta-icon"><i class="fa-solid fa-users-gear"></i></td>
                                 <td class="cover-meta-label">Penyusun / Pelaksana</td>
                                 <td class="cover-meta-colon">:</td>
-                                <td class="cover-meta-val">Divisi Kebersihan & K3L (Tim Gemerlap)</td>
+                                <td class="cover-meta-val">Sekertaris Kebersihan</td>
                             </tr>
                             <tr>
                                 <td class="cover-meta-icon"><i class="fa-solid fa-user-check"></i></td>

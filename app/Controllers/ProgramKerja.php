@@ -214,10 +214,9 @@ class ProgramKerja extends BaseController
 
         $session = session();
         $isLoggedIn = $session->get('isLoggedIn');
-        $userRole   = $session->get('role');
-        $userUnitId = (int)$session->get('unit_id');
-        $isAdminOrAuditor = $isLoggedIn && in_array($userRole, ['Admin', 'Auditor']);
-        $canEdit = $isAdminOrAuditor || ($isLoggedIn && $userUnitId && (int)$proker['unit_id'] === $userUnitId);
+        $isAuditor = ($userRole === 'Auditor');
+        $isAdmin   = ($userRole === 'Admin');
+        $canEdit   = ($isLoggedIn && $isAdmin) || ($isLoggedIn && !$isAuditor && $userUnitId && (int)$proker['unit_id'] === $userUnitId);
 
         $data = [
             'title'            => 'Detail Program Kerja: ' . $proker['nama_program'],

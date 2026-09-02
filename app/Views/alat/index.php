@@ -19,6 +19,7 @@
                 </p>
             </div>
 
+            <?php if (session()->get('role') === 'Admin'): ?>
             <!-- Right Action Buttons -->
             <div class="flex flex-wrap items-center gap-2.5 self-start lg:self-center flex-shrink-0">
                 <button type="button" onclick="openModalTambahAlat()" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 flex items-center gap-2">
@@ -26,16 +27,22 @@
                     <span>Tambah Alat Baru</span>
                 </button>
 
-                <button type="button" onclick="openModalCatatKeluar()" class="px-4 py-2.5 rounded-2xl bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/80 font-heading font-extrabold text-xs transition shadow-2xs flex items-center gap-2">
+                <button type="button" onclick="openModalKelolaKategori()" class="px-4 py-2.5 rounded-2xl bg-teal-50 text-teal-800 hover:bg-teal-100 border border-teal-200/80 font-heading font-extrabold text-xs transition shadow-2xs hover:-translate-y-0.5 flex items-center gap-2">
+                    <i class="fa-solid fa-tags text-teal-600"></i>
+                    <span>Kelola Kategori</span>
+                </button>
+
+                <button type="button" onclick="openModalCatatKeluar()" class="px-4 py-2.5 rounded-2xl bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/80 font-heading font-extrabold text-xs transition shadow-2xs hover:-translate-y-0.5 flex items-center gap-2">
                     <i class="fa-solid fa-circle-up"></i>
                     <span>Catat Barang Keluar</span>
                 </button>
 
-                <button type="button" onclick="openModalCatatMasuk()" class="px-4 py-2.5 rounded-2xl bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200/80 font-heading font-extrabold text-xs transition shadow-2xs flex items-center gap-2">
+                <button type="button" onclick="openModalCatatMasuk()" class="px-4 py-2.5 rounded-2xl bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200/80 font-heading font-extrabold text-xs transition shadow-2xs hover:-translate-y-0.5 flex items-center gap-2">
                     <i class="fa-solid fa-circle-down"></i>
                     <span>Catat Barang Masuk</span>
                 </button>
             </div>
+            <?php endif; ?>
         </div>
 
         <!-- 4 Metric Cards Row -->
@@ -112,9 +119,22 @@
                 <h3 class="font-heading font-extrabold text-lg text-slate-900 flex items-center gap-2">
                     <i class="fa-solid fa-list-check text-emerald-600"></i> Master Daftar Peralatan Kebersihan
                 </h3>
-                <div class="relative w-full sm:w-72">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
-                    <input type="text" id="searchAlatInput" onkeyup="filterAlatTable()" placeholder="Cari nama alat / kode / lokasi..." class="w-full pl-9 pr-4 py-2 rounded-2xl border border-slate-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 focus:bg-white transition shadow-2xs">
+                <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full sm:w-auto">
+                    <!-- Filter Kategori Dropdown -->
+                    <div class="relative w-full sm:w-48">
+                        <select id="filterKategoriAlat" onchange="filterAlatTable()" class="w-full px-3.5 py-2 rounded-2xl border border-slate-200 text-xs font-bold text-slate-700 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                            <option value="">Semua Kategori (<?= count($alatList) ?>)</option>
+                            <?php foreach ($kategoriList as $k): ?>
+                                <option value="<?= esc($k['nama_kategori']) ?>"><?= esc($k['nama_kategori']) ?> (<?= $categoryCounts[$k['nama_kategori']] ?? 0 ?>)</option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="relative w-full sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                        <input type="text" id="searchAlatInput" onkeyup="filterAlatTable()" placeholder="Cari nama alat / kode / lokasi..." class="w-full pl-9 pr-4 py-2 rounded-2xl border border-slate-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 focus:bg-white transition shadow-2xs">
+                    </div>
                 </div>
             </div>
 
@@ -131,7 +151,9 @@
                             <th width="7%" class="py-3.5 px-3 text-center">KELUAR</th>
                             <th width="11%" class="py-3.5 px-4 text-center">SISA GUDANG</th>
                             <th width="14%" class="py-3.5 px-4 text-center">KONDISI</th>
-                            <th width="8%" class="py-3.5 px-3 text-center">AKSI</th>
+                            <?php if (session()->get('role') === 'Admin'): ?>
+                                <th width="8%" class="py-3.5 px-3 text-center">AKSI</th>
+                            <?php endif; ?>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 bg-white">
@@ -202,6 +224,7 @@
                                             </span>
                                         <?php endif; ?>
                                     </td>
+                                    <?php if (session()->get('role') === 'Admin'): ?>
                                     <td class="py-3.5 px-3 text-center">
                                         <div class="flex items-center justify-center gap-1.5">
                                             <button type="button" onclick="openModalEditAlat(<?= htmlspecialchars(json_encode($a)) ?>)" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 flex items-center justify-center transition shadow-2xs" title="Edit Alat">
@@ -212,6 +235,7 @@
                                             </a>
                                         </div>
                                     </td>
+                                    <?php endif; ?>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -249,10 +273,12 @@
                     </h3>
                     <p class="text-xs text-slate-500 font-medium">Pencatatan alat kebersihan yang didistribusikan kepada kader / pengurus unit.</p>
                 </div>
+                <?php if (session()->get('role') === 'Admin'): ?>
                 <button type="button" onclick="openModalCatatKeluar()" class="px-4 py-2 rounded-2xl bg-rose-600 text-white font-extrabold text-xs hover:bg-rose-700 transition shadow-md shadow-rose-600/20 flex items-center gap-2">
                     <i class="fa-solid fa-plus"></i>
                     <span>Catat Barang Keluar</span>
                 </button>
+                <?php endif; ?>
             </div>
 
             <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-2xs">
@@ -265,7 +291,9 @@
                             <th width="10%" class="py-3 px-3 text-center">JUMLAH KELUAR</th>
                             <th width="20%" class="py-3 px-4">DIBERIKAN KEPADA (PENERIMA)</th>
                             <th width="20%" class="py-3 px-4">UNIT / PERUNTUKAN</th>
-                            <th width="10%" class="py-3 px-3 text-center">AKSI</th>
+                            <?php if (session()->get('role') === 'Admin'): ?>
+                                <th width="10%" class="py-3 px-3 text-center">AKSI</th>
+                            <?php endif; ?>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 bg-white">
@@ -289,11 +317,13 @@
                                     <td class="py-3 px-4 font-bold text-emerald-800">
                                         <i class="fa-solid fa-building-user text-emerald-600 mr-1.5"></i><?= esc($tk['unit_tujuan']) ?>
                                     </td>
+                                    <?php if (session()->get('role') === 'Admin'): ?>
                                     <td class="py-3 px-3 text-center">
                                         <a href="<?= base_url('alat/transaksi/delete/' . $tk['id']) ?>" data-confirm-msg="Hapus riwayat barang keluar ini dan kembalikan stok?" class="w-7 h-7 rounded-xl bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition mx-auto" title="Hapus Riwayat">
                                             <i class="fa-solid fa-trash text-xs"></i>
                                         </a>
                                     </td>
+                                    <?php endif; ?>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -331,10 +361,12 @@
                     </h3>
                     <p class="text-xs text-slate-500 font-medium">Pencatatan pembelian baru, pasokan, atau hibah alat ke gudang K3L.</p>
                 </div>
+                <?php if (session()->get('role') === 'Admin'): ?>
                 <button type="button" onclick="openModalCatatMasuk()" class="px-4 py-2 rounded-2xl bg-blue-600 text-white font-extrabold text-xs hover:bg-blue-700 transition shadow-md shadow-blue-600/20 flex items-center gap-2">
                     <i class="fa-solid fa-plus"></i>
                     <span>Catat Barang Masuk</span>
                 </button>
+                <?php endif; ?>
             </div>
 
             <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-2xs">
@@ -347,7 +379,9 @@
                             <th width="12%" class="py-3 px-3 text-center">JUMLAH MASUK</th>
                             <th width="20%" class="py-3 px-4">SUMBER / SUPPLIER</th>
                             <th width="18%" class="py-3 px-4">KETERANGAN</th>
-                            <th width="8%" class="py-3 px-3 text-center">AKSI</th>
+                            <?php if (session()->get('role') === 'Admin'): ?>
+                                <th width="8%" class="py-3 px-3 text-center">AKSI</th>
+                            <?php endif; ?>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 bg-white">
@@ -369,11 +403,13 @@
                                         <i class="fa-solid fa-store text-slate-400 mr-1.5"></i><?= esc($tm['penerima_penyerah'] ?: '-') ?>
                                     </td>
                                     <td class="py-3 px-4 text-slate-600"><?= esc($tm['keterangan'] ?: '-') ?></td>
+                                    <?php if (session()->get('role') === 'Admin'): ?>
                                     <td class="py-3 px-3 text-center">
                                         <a href="<?= base_url('alat/transaksi/delete/' . $tm['id']) ?>" data-confirm-msg="Hapus riwayat barang masuk ini?" class="w-7 h-7 rounded-xl bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition mx-auto" title="Hapus Riwayat">
                                             <i class="fa-solid fa-trash text-xs"></i>
                                         </a>
                                     </td>
+                                    <?php endif; ?>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -421,13 +457,24 @@
                     <input type="text" name="kode_alat" placeholder="ALT-007" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
                 </div>
                 <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Kategori</label>
-                    <select name="kategori" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                        <option value="Sapu & Pel">Sapu & Pel</option>
-                        <option value="Wadah Sampah">Wadah Sampah</option>
-                        <option value="Cairan & Bahan Kimia">Cairan & Bahan Kimia</option>
-                        <option value="Mesin & Alat Berat">Mesin & Alat Berat</option>
-                        <option value="Lainnya">Lainnya</option>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider">Kategori</label>
+                        <button type="button" onclick="openModalKelolaKategori()" class="text-[11px] font-bold text-emerald-600 hover:text-emerald-800 hover:underline flex items-center gap-1">
+                            <i class="fa-solid fa-gear text-[10px]"></i> Atur Kategori
+                        </button>
+                    </div>
+                    <select name="kategori" id="add_kategori" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                        <?php if (!empty($kategoriList)): ?>
+                            <?php foreach ($kategoriList as $k): ?>
+                                <option value="<?= esc($k['nama_kategori']) ?>"><?= esc($k['nama_kategori']) ?></option>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <option value="Sapu & Pel">Sapu & Pel</option>
+                            <option value="Wadah Sampah">Wadah Sampah</option>
+                            <option value="Cairan & Bahan Kimia">Cairan & Bahan Kimia</option>
+                            <option value="Mesin & Alat Berat">Mesin & Alat Berat</option>
+                            <option value="Lainnya">Lainnya</option>
+                        <?php endif; ?>
                     </select>
                 </div>
             </div>
@@ -488,13 +535,24 @@
                     <input type="text" id="edit_kode_alat" name="kode_alat" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
                 </div>
                 <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Kategori</label>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider">Kategori</label>
+                        <button type="button" onclick="openModalKelolaKategori()" class="text-[11px] font-bold text-emerald-600 hover:text-emerald-800 hover:underline flex items-center gap-1">
+                            <i class="fa-solid fa-gear text-[10px]"></i> Atur Kategori
+                        </button>
+                    </div>
                     <select id="edit_kategori" name="kategori" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                        <option value="Sapu & Pel">Sapu & Pel</option>
-                        <option value="Wadah Sampah">Wadah Sampah</option>
-                        <option value="Cairan & Bahan Kimia">Cairan & Bahan Kimia</option>
-                        <option value="Mesin & Alat Berat">Mesin & Alat Berat</option>
-                        <option value="Lainnya">Lainnya</option>
+                        <?php if (!empty($kategoriList)): ?>
+                            <?php foreach ($kategoriList as $k): ?>
+                                <option value="<?= esc($k['nama_kategori']) ?>"><?= esc($k['nama_kategori']) ?></option>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <option value="Sapu & Pel">Sapu & Pel</option>
+                            <option value="Wadah Sampah">Wadah Sampah</option>
+                            <option value="Cairan & Bahan Kimia">Cairan & Bahan Kimia</option>
+                            <option value="Mesin & Alat Berat">Mesin & Alat Berat</option>
+                            <option value="Lainnya">Lainnya</option>
+                        <?php endif; ?>
                     </select>
                 </div>
             </div>
@@ -653,6 +711,130 @@
     </div>
 </div>
 
+<!-- Modal Kelola Kategori Alat Kebersihan (CRUD Master Kategori) -->
+<div id="modalKelolaKategori" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl space-y-5 border border-slate-100 animate-in fade-in zoom-in duration-200">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-xl bg-teal-100/80 text-teal-700 flex items-center justify-center text-sm shadow-2xs">
+                    <i class="fa-solid fa-tags"></i>
+                </span>
+                <div>
+                    <h3 class="font-heading font-extrabold text-lg text-slate-900">
+                        Kelola Kategori Alat Kebersihan
+                    </h3>
+                    <p class="text-xs text-slate-500 font-medium">Tambah, ubah nama, atau hapus kategori kelompok inventaris alat.</p>
+                </div>
+            </div>
+            <button onclick="closeModalKelolaKategori()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Form Tambah / Edit Kategori Alat -->
+        <form id="formKategoriAlat" action="<?= base_url('alat/kategori/store') ?>" method="POST" class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+            <div class="flex items-center justify-between">
+                <span id="formKategoriTitle" class="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus-circle text-teal-600"></i> Form Tambah Kategori Alat
+                </span>
+                <button type="button" id="btnCancelEditKategori" onclick="resetFormKategori()" class="hidden text-[11px] font-bold text-slate-500 hover:text-slate-800 underline">
+                    Batal Edit
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="sm:col-span-2">
+                    <label class="block text-[11px] font-extrabold text-slate-600 uppercase tracking-wider mb-1">Nama Kategori <span class="text-rose-500">*</span></label>
+                    <input type="text" id="input_nama_kategori" name="nama_kategori" placeholder="Misal: Sapu & Pel / Wadah Sampah / Mesin" required class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:ring-2 focus:ring-teal-500 transition shadow-2xs">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-extrabold text-slate-600 uppercase tracking-wider mb-1">Urutan</label>
+                    <input type="number" id="input_urutan_kategori" name="urutan" value="0" min="0" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold text-center bg-white focus:ring-2 focus:ring-teal-500 transition shadow-2xs">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-extrabold text-slate-600 uppercase tracking-wider mb-1">Keterangan Singkat (Opsional)</label>
+                <input type="text" id="input_keterangan_kategori" name="keterangan" placeholder="Contoh: Alat kebersihan lantai, ember, pel..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:ring-2 focus:ring-teal-500 transition shadow-2xs">
+            </div>
+
+            <div class="flex justify-end pt-1">
+                <button type="submit" id="btnSubmitKategori" class="px-5 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-heading font-extrabold text-xs hover:from-teal-700 hover:to-emerald-700 transition shadow-md shadow-teal-600/20 flex items-center gap-1.5">
+                    <i class="fa-solid fa-save"></i>
+                    <span>Simpan Kategori</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- Tabel Daftar Kategori Alat -->
+        <div class="space-y-2">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Daftar Kategori Tersedia</span>
+                <span class="text-[11px] font-extrabold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200/80">
+                    <?= count($kategoriList ?? []) ?> Kategori
+                </span>
+            </div>
+
+            <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-2xs max-h-60 overflow-y-auto">
+                <table class="w-full text-left text-xs font-semibold">
+                    <thead class="bg-slate-100 text-slate-700 font-heading font-extrabold uppercase text-[10px] tracking-wider border-b border-slate-200 sticky top-0 bg-white">
+                        <tr>
+                            <th width="8%" class="py-2.5 px-3 text-center">NO</th>
+                            <th width="35%" class="py-2.5 px-4">NAMA KATEGORI</th>
+                            <th width="32%" class="py-2.5 px-4">KETERANGAN</th>
+                            <th width="12%" class="py-2.5 px-2 text-center">ALAT</th>
+                            <th width="13%" class="py-2.5 px-3 text-center">AKSI</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-white">
+                        <?php if (!empty($kategoriList)): ?>
+                            <?php foreach ($kategoriList as $idx => $kat): ?>
+                                <tr class="hover:bg-slate-50/80 transition">
+                                    <td class="py-3 px-3 text-center font-extrabold text-slate-400"><?= $idx + 1 ?></td>
+                                    <td class="py-3 px-4 font-extrabold text-slate-900">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-teal-50 text-teal-800 border border-teal-200/80 text-xs shadow-2xs">
+                                            <i class="fa-solid fa-layer-group text-[10px] text-teal-600"></i>
+                                            <?= esc($kat['nama_kategori']) ?>
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-4 text-slate-500 text-xs font-medium">
+                                        <?= esc($kat['keterangan'] ?: '-') ?>
+                                    </td>
+                                    <td class="py-3 px-2 text-center font-bold text-slate-600">
+                                        <span class="px-2 py-0.5 rounded-md bg-slate-100 text-[11px] font-extrabold text-slate-700 border border-slate-200">
+                                            <?= $categoryCounts[$kat['nama_kategori']] ?? 0 ?>
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-3 text-center">
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            <button type="button" onclick="editKategoriRow(<?= htmlspecialchars(json_encode($kat)) ?>)" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 hover:text-teal-700 hover:bg-teal-50 border border-slate-200/80 flex items-center justify-center transition" title="Edit Kategori">
+                                                <i class="fa-solid fa-pen text-[10px]"></i>
+                                            </button>
+                                            <a href="<?= base_url('alat/kategori/delete/' . $kat['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus kategori '<?= esc($kat['nama_kategori']) ?>'?" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/80 flex items-center justify-center transition" title="Hapus Kategori">
+                                                <i class="fa-solid fa-trash text-[10px]"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="5" class="py-6 text-center text-slate-400 font-bold text-xs">Belum ada kategori alat.</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="pt-2 flex justify-end border-t border-slate-100">
+            <button type="button" onclick="closeModalKelolaKategori()" class="px-5 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-heading font-extrabold text-xs transition">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
     var paginatorStok, paginatorKeluar, paginatorMasuk;
 
@@ -700,13 +882,15 @@
 
     function filterAlatTable() {
         const input = document.getElementById('searchAlatInput');
-        if (!input) return;
-        const filter = input.value.toLowerCase();
+        const filterKat = (document.getElementById('filterKategoriAlat')?.value || '').toLowerCase();
+        const filter = input ? input.value.toLowerCase() : '';
         const rows = document.querySelectorAll('#tableAlatMaster tbody tr.alat-row');
 
         rows.forEach(row => {
             const text = row.innerText.toLowerCase();
-            row.dataset.searchFiltered = text.includes(filter) ? 'true' : 'false';
+            const matchesText = !filter || text.includes(filter);
+            const matchesCategory = !filterKat || text.includes(filterKat);
+            row.dataset.searchFiltered = (matchesText && matchesCategory) ? 'true' : 'false';
         });
 
         if (paginatorStok) {
@@ -727,6 +911,45 @@
         if (modal) modal.classList.add('hidden');
     }
     window.closeModalTambahAlat = closeModalTambahAlat;
+
+    function openModalKelolaKategori() {
+        const modal = document.getElementById('modalKelolaKategori');
+        if (modal) modal.classList.remove('hidden');
+        resetFormKategori();
+    }
+    window.openModalKelolaKategori = openModalKelolaKategori;
+
+    function closeModalKelolaKategori() {
+        const modal = document.getElementById('modalKelolaKategori');
+        if (modal) modal.classList.add('hidden');
+    }
+    window.closeModalKelolaKategori = closeModalKelolaKategori;
+
+    function editKategoriRow(kat) {
+        const form = document.getElementById('formKategoriAlat');
+        if (form) form.action = "<?= base_url('alat/kategori/update/') ?>" + kat.id;
+        
+        document.getElementById('formKategoriTitle').innerHTML = '<i class="fa-solid fa-pen text-amber-500"></i> Edit Kategori: ' + kat.nama_kategori;
+        document.getElementById('input_nama_kategori').value = kat.nama_kategori || '';
+        document.getElementById('input_urutan_kategori').value = kat.urutan || 0;
+        document.getElementById('input_keterangan_kategori').value = kat.keterangan || '';
+        document.getElementById('btnSubmitKategori').innerHTML = '<i class="fa-solid fa-check"></i><span>Update Kategori</span>';
+        document.getElementById('btnCancelEditKategori').classList.remove('hidden');
+    }
+    window.editKategoriRow = editKategoriRow;
+
+    function resetFormKategori() {
+        const form = document.getElementById('formKategoriAlat');
+        if (form) form.action = "<?= base_url('alat/kategori/store') ?>";
+        
+        document.getElementById('formKategoriTitle').innerHTML = '<i class="fa-solid fa-plus-circle text-teal-600"></i> Form Tambah Kategori Alat';
+        document.getElementById('input_nama_kategori').value = '';
+        document.getElementById('input_urutan_kategori').value = 0;
+        document.getElementById('input_keterangan_kategori').value = '';
+        document.getElementById('btnSubmitKategori').innerHTML = '<i class="fa-solid fa-save"></i><span>Simpan Kategori</span>';
+        document.getElementById('btnCancelEditKategori').classList.add('hidden');
+    }
+    window.resetFormKategori = resetFormKategori;
 
     function openModalCatatKeluar() {
         const modal = document.getElementById('modalCatatKeluar');
@@ -760,7 +983,7 @@
         const namaEl = document.getElementById('edit_nama_alat');
         if (namaEl) namaEl.value = alat.nama_alat || '';
         const katEl = document.getElementById('edit_kategori');
-        if (katEl) katEl.value = alat.kategori || 'Sapu & Pel';
+        if (katEl) katEl.value = alat.kategori || (katEl.options[0]?.value || '');
         const stokEl = document.getElementById('edit_stok_awal');
         if (stokEl) stokEl.value = alat.stok_awal || 0;
         const satEl = document.getElementById('edit_satuan');

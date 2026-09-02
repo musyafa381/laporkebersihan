@@ -151,6 +151,7 @@
                 </table>
             </div>
 
+            <?php if (session()->get('role') === 'Admin'): ?>
             <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
                 <button type="button" onclick="addKpRow()" class="w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-heading font-extrabold text-xs hover:bg-emerald-100 transition shadow-2xs flex items-center justify-center gap-2">
                     <i class="fa-solid fa-plus-circle"></i>
@@ -162,6 +163,7 @@
                     <span>Simpan Laporan Item Pembelian</span>
                 </button>
             </div>
+            <?php endif; ?>
         </form>
     </div>
 
@@ -241,6 +243,7 @@
                 </table>
             </div>
 
+            <?php if (session()->get('role') === 'Admin'): ?>
             <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
                 <button type="button" onclick="addKmRow()" class="w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-heading font-extrabold text-xs hover:bg-emerald-100 transition shadow-2xs flex items-center justify-center gap-2">
                     <i class="fa-solid fa-plus-circle"></i>
@@ -252,6 +255,7 @@
                     <span>Simpan Informasi Dana Masuk</span>
                 </button>
             </div>
+            <?php endif; ?>
         </form>
     </div>
 </div>

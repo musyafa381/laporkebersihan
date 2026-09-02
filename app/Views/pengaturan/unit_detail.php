@@ -418,16 +418,43 @@
         </div>
 
         <form action="<?= base_url('pengaturan/unit/pj/add/' . $unit['id']) ?>" method="POST" class="space-y-4">
-            <div>
-                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Pilih Akun Terdaftar (Opsional)</label>
-                <select name="user_id" onchange="fillPjFromUser(this)" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                    <option value="">-- Pilih Akun Terdaftar --</option>
+            <!-- Searchable User Picker for Add PJ -->
+            <div class="relative">
+                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>Pilih Akun Terdaftar (Opsional)</span>
+                    <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                        <i class="fa-solid fa-magnifying-glass text-[9px]"></i> Bisa dicari
+                    </span>
+                </label>
+                <input type="hidden" id="add_pj_user_id" name="user_id" value="">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+                    <input type="text" id="add_pj_user_search" placeholder="Cari nama akun, username, role..." autocomplete="off" onfocus="openAddPjDropdown()" oninput="filterAddPjOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
+                    <button type="button" onclick="toggleAddPjDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                        <i id="addPjIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                    </button>
+                </div>
+                <!-- Dropdown List -->
+                <div id="addPjDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-48 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                    <div class="add-pj-item px-4 py-2 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer font-bold text-xs text-slate-500" data-id="" data-name="" data-nama="" data-hp="" onclick="selectAddPj(this)">
+                        <span class="italic text-slate-400">-- Input Manual Tanpa Akun Terdaftar --</span>
+                    </div>
                     <?php foreach ($usersList as $u): ?>
-                        <option value="<?= $u['id'] ?>" data-nama="<?= esc($u['nama_lengkap']) ?>" data-hp="<?= esc($u['no_hp']) ?>">
-                            <?= esc($u['nama_lengkap']) ?> (@<?= esc($u['username']) ?>) - <?= esc($u['role']) ?>
-                        </option>
+                        <div class="add-pj-item px-4 py-2 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $u['id'] ?>" data-name="<?= esc($u['nama_lengkap']) ?> (@<?= esc($u['username']) ?>)" data-nama="<?= esc($u['nama_lengkap']) ?>" data-hp="<?= esc($u['no_hp'] ?? '') ?>" onclick="selectAddPj(this)">
+                            <div>
+                                <div class="font-extrabold text-xs text-slate-800"><?= esc($u['nama_lengkap']) ?></div>
+                                <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5">
+                                    <span class="text-emerald-700 font-bold">@<?= esc($u['username']) ?></span>
+                                    <span>&bull;</span>
+                                    <span class="px-1.5 py-0.2 rounded bg-slate-100 text-[9px]"><?= esc($u['role']) ?></span>
+                                </div>
+                            </div>
+                        </div>
                     <?php endforeach; ?>
-                </select>
+                    <div id="noAddPjFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
+                        Tidak ditemukan akun pengguna yang sesuai.
+                    </div>
+                </div>
             </div>
 
             <div>
@@ -482,6 +509,12 @@
     window.switchDetailTab = switchDetailTab;
 
     function openModalAddPj() {
+        const idEl = document.getElementById('add_pj_user_id');
+        if (idEl) idEl.value = '';
+        const searchEl = document.getElementById('add_pj_user_search');
+        if (searchEl) searchEl.value = '';
+        filterAddPjOptions('');
+        closeAddPjDropdown();
         const modal = document.getElementById('modalAddPj');
         if (modal) modal.classList.remove('hidden');
     }
@@ -490,20 +523,87 @@
     function closeModalAddPj() {
         const modal = document.getElementById('modalAddPj');
         if (modal) modal.classList.add('hidden');
+        closeAddPjDropdown();
     }
     window.closeModalAddPj = closeModalAddPj;
 
-    function fillPjFromUser(selectEl) {
-        const selectedOption = selectEl.options[selectEl.selectedIndex];
-        if (selectedOption && selectedOption.value !== '') {
-            const nama = selectedOption.getAttribute('data-nama') || '';
-            const hp   = selectedOption.getAttribute('data-hp') || '';
-            const namaEl = document.getElementById('add_pj_nama');
-            if (namaEl) namaEl.value = nama;
-            const kontakEl = document.getElementById('add_pj_kontak');
-            if (kontakEl) kontakEl.value = hp;
+    function openAddPjDropdown() {
+        const list = document.getElementById('addPjDropdownList');
+        const icon = document.getElementById('addPjIcon');
+        if (list) list.classList.remove('hidden');
+        if (icon) icon.classList.add('rotate-180');
+    }
+    window.openAddPjDropdown = openAddPjDropdown;
+
+    function closeAddPjDropdown() {
+        const list = document.getElementById('addPjDropdownList');
+        const icon = document.getElementById('addPjIcon');
+        if (list) list.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+    }
+    window.closeAddPjDropdown = closeAddPjDropdown;
+
+    function toggleAddPjDropdown() {
+        const list = document.getElementById('addPjDropdownList');
+        if (list && list.classList.contains('hidden')) {
+            openAddPjDropdown();
+        } else {
+            closeAddPjDropdown();
         }
     }
-    window.fillPjFromUser = fillPjFromUser;
+    window.toggleAddPjDropdown = toggleAddPjDropdown;
+
+    function filterAddPjOptions(val) {
+        val = (val || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.add-pj-item');
+        let visibleCount = 0;
+        items.forEach(item => {
+            const id = item.getAttribute('data-id');
+            if (!id) {
+                item.style.display = 'flex';
+                return;
+            }
+            const text = item.innerText.toLowerCase();
+            if (!val || text.includes(val)) {
+                item.style.display = 'flex';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        const noFound = document.getElementById('noAddPjFound');
+        if (noFound) {
+            noFound.classList.toggle('hidden', visibleCount > 0 || !val);
+        }
+        openAddPjDropdown();
+    }
+    window.filterAddPjOptions = filterAddPjOptions;
+
+    function selectAddPj(el) {
+        const id = el.getAttribute('data-id') || '';
+        const name = el.getAttribute('data-name') || '';
+        const nama = el.getAttribute('data-nama') || '';
+        const hp = el.getAttribute('data-hp') || '';
+
+        const idEl = document.getElementById('add_pj_user_id');
+        const searchEl = document.getElementById('add_pj_user_search');
+        if (idEl) idEl.value = id;
+        if (searchEl) searchEl.value = name;
+
+        const namaEl = document.getElementById('add_pj_nama');
+        if (namaEl && nama) namaEl.value = nama;
+        const kontakEl = document.getElementById('add_pj_kontak');
+        if (kontakEl && hp) kontakEl.value = hp;
+
+        closeAddPjDropdown();
+    }
+    window.selectAddPj = selectAddPj;
+
+    document.addEventListener('click', function(e) {
+        const addPjContainer = document.getElementById('add_pj_user_search')?.closest('.relative');
+        if (addPjContainer && !addPjContainer.contains(e.target)) {
+            closeAddPjDropdown();
+        }
+    });
 </script>
 <?= $this->endSection() ?>

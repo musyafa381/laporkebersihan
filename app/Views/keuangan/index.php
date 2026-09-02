@@ -21,6 +21,7 @@
                 </p>
             </div>
 
+            <?php if (session()->get('role') === 'Admin'): ?>
             <div class="flex-shrink-0">
                 <button onclick="openModalCreateKeuangan()" class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-white text-emerald-900 font-heading font-bold text-sm hover:bg-emerald-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 group">
                     <div class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition">
@@ -29,6 +30,7 @@
                     <span>Buat Buku Keuangan Baru</span>
                 </button>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -49,6 +51,7 @@
                                 <?= esc($buku['kode_keuangan'] ?: 'KUG-' . $buku['tahun']) ?>
                             </span>
 
+                            <?php if (session()->get('role') === 'Admin'): ?>
                             <div class="flex items-center gap-1">
                                 <button onclick="openModalEditKeuangan(<?= $buku['id'] ?>, '<?= esc(addslashes($buku['kode_keuangan'] ?? '')) ?>', '<?= esc($buku['bulan']) ?>', <?= esc($buku['tahun']) ?>)" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition flex items-center justify-center text-xs" title="Edit Buku Keuangan">
                                     <i class="fa-solid fa-pen-to-square"></i>
@@ -57,6 +60,7 @@
                                     <i class="fa-solid fa-trash-can"></i>
                                 </a>
                             </div>
+                            <?php endif; ?>
                         </div>
 
                         <!-- Card Content Body -->

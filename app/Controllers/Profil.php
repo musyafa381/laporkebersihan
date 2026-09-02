@@ -85,16 +85,24 @@ class Profil extends BaseController
             return $this->respondJsonOrRedirect('Akun pengguna tidak ditemukan.', false);
         }
 
-        $nama   = trim($this->request->getPost('nama_lengkap') ?? '');
-        $role   = $this->request->getPost('role') ?: $user['role'];
-        $unitId = $this->request->getPost('unit_id') ?: null;
-        $pass   = trim($this->request->getPost('password') ?? '');
+        $username = trim($this->request->getPost('username') ?? '');
+        $nama     = trim($this->request->getPost('nama_lengkap') ?? '');
+        $role     = $this->request->getPost('role') ?: $user['role'];
+        $unitId   = $this->request->getPost('unit_id') ?: null;
+        $pass     = trim($this->request->getPost('password') ?? '');
 
-        if (empty($nama)) {
-            return $this->respondJsonOrRedirect('Nama lengkap tidak boleh kosong.', false);
+        if (empty($nama) || empty($username)) {
+            return $this->respondJsonOrRedirect('Nama lengkap dan username tidak boleh kosong.', false);
+        }
+
+        // Check if username already exists for other users
+        $exist = $this->userModel->where('username', $username)->where('id !=', $id)->first();
+        if ($exist) {
+            return $this->respondJsonOrRedirect("Username '{$username}' sudah digunakan oleh akun lain. Gunakan username lain.", false);
         }
 
         $data = [
+            'username'     => $username,
             'nama_lengkap' => $nama,
             'role'         => $role,
             'unit_id'      => $unitId,
@@ -105,7 +113,18 @@ class Profil extends BaseController
         }
 
         $this->userModel->update($id, $data);
-        return $this->respondJsonOrRedirect("Berhasil memperbarui data akun '{$user['username']}'!");
+
+        // Update session if editing currently logged in user
+        if (session()->get('userId') == $id) {
+            session()->set([
+                'username'     => $username,
+                'nama_lengkap' => $nama,
+                'role'         => $role,
+                'unit_id'      => $unitId,
+            ]);
+        }
+
+        return $this->respondJsonOrRedirect("Berhasil memperbarui data akun '{$username}'!");
     }
 
     public function deleteUser($id)

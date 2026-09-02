@@ -24,6 +24,12 @@ class AuditorReadonlyFilter implements FilterInterface
             $isMutatingMethod = in_array($method, ['POST', 'PUT', 'DELETE', 'PATCH']);
             $isDeleteUri      = (strpos($uri, 'delete') !== false || strpos($uri, 'unlink') !== false);
 
+            // Allow Auditor to submit CS reports (Lapor Kendala Kebersihan)
+            $isCsReportSubmission = (strpos($uri, 'cs/public/store') !== false);
+            if ($isCsReportSubmission) {
+                return; // Allowed for Auditor!
+            }
+
             if ($isMutatingMethod || $isDeleteUri) {
                 if ($request->isAJAX() || $request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
                     $response = service('response');

@@ -27,7 +27,7 @@
                 <?php endif; ?>
             </div>
 
-            <?php if ($isLoggedIn): ?>
+            <?php if ($isLoggedIn && session()->get('role') !== 'Auditor'): ?>
                 <div class="flex-shrink-0">
                     <a href="<?= base_url('program-kerja/create') ?>" class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-white text-emerald-900 font-heading font-bold text-sm hover:bg-emerald-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 group">
                         <div class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition">
@@ -193,8 +193,9 @@
                 <tbody class="divide-y divide-slate-100 text-xs">
                     <?php if (!empty($prokerList)): ?>
                         <?php foreach ($prokerList as $idx => $p): 
-                            // Hak Edit: Admin / Auditor atau Pengurus milik unit bersangkutan
-                            $canEditThis = $isAdminOrAuditor || ($isLoggedIn && $userUnitId && (int)$p['unit_id'] === (int)$userUnitId);
+                            // Hak Edit: Admin atau Pengurus milik unit bersangkutan (Auditor Read-Only)
+                            $userRole = session()->get('role');
+                            $canEditThis = ($isLoggedIn && $userRole === 'Admin') || ($isLoggedIn && $userRole !== 'Auditor' && $userUnitId && (int)$p['unit_id'] === (int)$userUnitId);
                             
                             $statusBadge = match($p['status']) {
                                 'Terlaksana Rutin' => 'bg-emerald-50 text-emerald-800 border-emerald-200',

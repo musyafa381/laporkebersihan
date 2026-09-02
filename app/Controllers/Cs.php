@@ -69,11 +69,17 @@ class Cs extends BaseController
         $pengaturanModel = new \App\Models\PengaturanModel();
         $settings = $pengaturanModel->getAllAsMap();
 
+        $wilayahModel = new \App\Models\WilayahModel();
+        $wilayahList  = $wilayahModel->where('status', 'Aktif')->orderBy('nama_wilayah', 'ASC')->findAll();
+
         $data = [
             'title'                => $isUserAdminOrAuditor ? 'Inbox Customer Service Admin K3L' : 'Lapor Kebersihan & Layanan Bantuan (CS)',
             'isUserAdminOrAuditor' => $isUserAdminOrAuditor,
+            'isAuditor'            => ($session->get('role') === 'Auditor'),
+            'isAdmin'              => ($session->get('role') === 'Admin'),
             'reportsList'          => $reportsList,
             'pengajuanList'        => $pengajuanList,
+            'wilayahList'          => $wilayahList,
             'settings'             => $settings,
             'captcha_num1'         => $session->get('captcha_num1'),
             'captcha_num2'         => $session->get('captcha_num2'),
@@ -202,10 +208,21 @@ class Cs extends BaseController
             }
         }
 
+        $wilayahId   = $this->request->getPost('wilayah_id') ? (int)$this->request->getPost('wilayah_id') : null;
+        $namaWilayah = null;
+        if ($wilayahId) {
+            $wRecord = (new \App\Models\WilayahModel())->find($wilayahId);
+            if ($wRecord) {
+                $namaWilayah = $wRecord['nama_wilayah'];
+            }
+        }
+
         $data = [
             'nama_pengirim' => $nama,
             'kontak_hp'     => $kontak,
-            'unit_lokasi'   => $lokasi ?: 'Umum / Pesantren',
+            'unit_lokasi'   => $lokasi ?: ($namaWilayah ?: 'Umum / Pesantren'),
+            'wilayah_id'    => $wilayahId,
+            'nama_wilayah'  => $namaWilayah,
             'kategori'      => $kategori,
             'isi_laporan'   => $laporan,
             'foto_lampiran' => !empty($fotoPaths) ? json_encode($fotoPaths) : null,
@@ -229,6 +246,14 @@ class Cs extends BaseController
         $namaPengirim = trim($this->request->getPost('nama_pengirim') ?? $report['nama_pengirim']);
         $kontakHp     = trim($this->request->getPost('kontak_hp') ?? $report['kontak_hp']);
         $unitLokasi   = trim($this->request->getPost('unit_lokasi') ?? $report['unit_lokasi']);
+        $wilayahId    = $this->request->getPost('wilayah_id') !== null ? ($this->request->getPost('wilayah_id') === '' ? null : (int)$this->request->getPost('wilayah_id')) : ($report['wilayah_id'] ?? null);
+        $namaWilayah  = null;
+        if ($wilayahId) {
+            $wRecord = (new \App\Models\WilayahModel())->find($wilayahId);
+            if ($wRecord) {
+                $namaWilayah = $wRecord['nama_wilayah'];
+            }
+        }
         $kategori     = trim($this->request->getPost('kategori') ?? $report['kategori']);
         $isiLaporan   = trim($this->request->getPost('isi_laporan') ?? $report['isi_laporan']);
         $status       = $this->request->getPost('status') ?: $report['status'];
@@ -282,6 +307,8 @@ class Cs extends BaseController
             'nama_pengirim'   => $namaPengirim,
             'kontak_hp'       => $kontakHp,
             'unit_lokasi'     => $unitLokasi,
+            'wilayah_id'      => $wilayahId,
+            'nama_wilayah'    => $namaWilayah,
             'kategori'        => $kategori,
             'isi_laporan'     => $isiLaporan,
             'foto_lampiran'   => !empty($existingFotos) ? json_encode(array_values($existingFotos)) : null,

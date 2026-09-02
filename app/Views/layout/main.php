@@ -89,6 +89,39 @@
             transform: translateX(0);
         }
 
+        /* Brand Logo Expanding Animation on Hover (Like Navbar Menu Items) */
+        .brand-logo-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0;
+            padding: 0.35rem 0.5rem;
+            border-radius: 1.25rem;
+            transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .brand-logo-btn:hover {
+            gap: 0.65rem;
+            background: rgba(240, 253, 244, 0.85);
+            border: 1px solid rgba(187, 247, 208, 0.8);
+            box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.12);
+        }
+        .brand-text-label {
+            display: inline-flex;
+            flex-direction: column;
+            max-width: 0;
+            opacity: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            transform: translateX(-10px);
+            transition: max-width 450ms cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 350ms ease-out,
+                        transform 450ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .brand-logo-btn:hover .brand-text-label {
+            max-width: 320px;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
         /* Dynamic Badge Visibility: Dot on Icon in Default Mode, Pill on Right when Expanded/Hover/Active */
         .nav-icon-badge {
             transition: opacity 250ms ease, transform 250ms ease;
@@ -199,12 +232,14 @@
         $isHomeActive       = ($uriStr === '' || $uriStr === '/' || $uriStr === 'home');
         $isAppActive        = (strpos($uriStr, 'app') !== false && strpos($uriStr, 'app/') === false);
         $isAppLpjActive     = (strpos($uriStr, 'app/lpj') !== false);
+        $isAppWilayahActive = (strpos($uriStr, 'app/lapor-wilayah') !== false);
         $isAppAlatActive    = (strpos($uriStr, 'app/pengajuan-alat') !== false);
         $isAppLaporActive   = (strpos($uriStr, 'app/laporan-kebersihan') !== false);
 
         $isBukuActive       = (strpos($uriStr, 'buku') !== false);
         $isKeuanganActive   = (strpos($uriStr, 'keuangan') !== false);
         $isAlatActive       = (strpos($uriStr, 'alat') !== false);
+        $isWilayahActive    = (strpos($uriStr, 'wilayah') !== false);
         $isPengaturanActive = (strpos($uriStr, 'pengaturan') !== false);
         $isProfilActive     = (strpos($uriStr, 'profil') !== false || strpos($uriStr, 'akun') !== false);
         $isCsActive         = (strpos($uriStr, 'cs') !== false || strpos($uriStr, 'bantuan') !== false);
@@ -264,6 +299,12 @@
                     'active' => $isAlatActive,
                 ],
                 [
+                    'url'    => base_url('wilayah'),
+                    'icon'   => 'fa-solid fa-map-location-dot',
+                    'label'  => 'Pemetaan Wilayah',
+                    'active' => $isWilayahActive,
+                ],
+                [
                     'url'    => base_url('program-kerja'),
                     'icon'   => 'fa-solid fa-list-check',
                     'label'  => 'Program Kerja',
@@ -321,6 +362,12 @@
                     'icon'   => 'fa-solid fa-pen-to-square',
                     'label'  => 'Isi LPJ Unit',
                     'active' => $isAppLpjActive,
+                ],
+                [
+                    'url'    => base_url('app/lapor-wilayah'),
+                    'icon'   => 'fa-solid fa-map-location-dot',
+                    'label'  => 'Lapor Wilayah',
+                    'active' => $isAppWilayahActive,
                 ],
                 [
                     'url'    => base_url('program-kerja'),
@@ -392,14 +439,14 @@
     <header class="sticky top-0 z-30 glass-card shadow-sm border-b border-slate-200/80">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 sm:h-20 gap-3">
-                <!-- Logo & Brand -->
-                <a href="<?= base_url('/') ?>" class="flex items-center gap-2.5 sm:gap-3 group">
-                    <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition">
+                <!-- Logo & Brand with Smooth Expanding Text on Hover -->
+                <a href="<?= base_url('/') ?>" title="LAPOR KEBERSIHAN - Web Manajemen Kebersihan" class="brand-logo-btn group">
+                    <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition flex-shrink-0">
                         <i class="fa-solid fa-leaf text-base sm:text-xl"></i>
                     </div>
-                    <div>
-                        <h1 class="font-heading font-extrabold text-base sm:text-lg text-slate-900 tracking-tight leading-none group-hover:text-emerald-600 transition">LAPOR KEBERSIHAN</h1>
-                        <p class="text-[10px] sm:text-[11px] text-emerald-600 font-semibold tracking-wide mt-0.5">Web Manajemen Kebersihan</p>
+                    <div class="brand-text-label">
+                        <h1 class="font-heading font-extrabold text-base sm:text-lg text-slate-900 tracking-tight leading-none group-hover:text-emerald-600 transition whitespace-nowrap">LAPOR KEBERSIHAN</h1>
+                        <p class="text-[10px] sm:text-[11px] text-emerald-600 font-semibold tracking-wide mt-0.5 whitespace-nowrap">Web Manajemen Kebersihan</p>
                     </div>
                 </a>
 
@@ -642,15 +689,19 @@
             </div>
             <style>
                 /* Auto-hide or disable modifying buttons for Auditor */
-                body.role-auditor form button[type="submit"]:not(.allow-auditor),
+                body.role-auditor form:not(.allow-auditor) button[type="submit"]:not(.allow-auditor),
                 body.role-auditor .btn-crud-action:not(.allow-auditor),
                 body.role-auditor a[href*="/delete/"]:not(.allow-auditor),
-                body.role-auditor button[onclick*="openModalTambah"]:not(.allow-auditor),
-                body.role-auditor button[onclick*="openModalCreate"]:not(.allow-auditor),
-                body.role-auditor button[onclick*="openModalEdit"]:not(.allow-auditor),
-                body.role-auditor button[onclick*="openAddStrukturModal"]:not(.allow-auditor),
-                body.role-auditor button[onclick*="openModalCatat"]:not(.allow-auditor),
-                body.role-auditor button[onclick*="openModalKelolaTipe"]:not(.allow-auditor),
+                body.role-auditor a[href*="/delete-"]:not(.allow-auditor),
+                body.role-auditor a[href*="/set-primary-foto/"]:not(.allow-auditor),
+                body.role-auditor a[href*="program-kerja/create"]:not(.allow-auditor),
+                body.role-auditor a[href*="program-kerja/edit"]:not(.allow-auditor),
+                body.role-auditor a[href*="sop/create"]:not(.allow-auditor),
+                body.role-auditor a[href*="sop/edit"]:not(.allow-auditor),
+                body.role-auditor button[onclick*="openModal"]:not(.allow-auditor),
+                body.role-auditor button[onclick*="openAdd"]:not(.allow-auditor),
+                body.role-auditor button[onclick*="addKpRow"]:not(.allow-auditor),
+                body.role-auditor button[onclick*="addKmRow"]:not(.allow-auditor),
                 body.role-auditor button[onclick*="remove"]:not(.allow-auditor) {
                     display: none !important;
                 }
@@ -658,10 +709,11 @@
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
                     document.body.classList.add('role-auditor');
-                    // Disable all form inputs except search and selects used for filters
+                    // Disable all form inputs except search, filter, and allowed-for-auditor forms (like CS Lapor Kendala)
                     document.querySelectorAll('form').forEach(f => {
-                        const isSearchOrFilter = f.id === 'searchForm' || f.classList.contains('filter-form');
-                        if (!isSearchOrFilter) {
+                        const isSearchOrFilter = f.id === 'searchForm' || f.classList.contains('filter-form') || (f.method && f.method.toUpperCase() === 'GET');
+                        const isAllowedForAuditor = f.classList.contains('allow-auditor') || f.id === 'formLaporCsPublic' || (f.action && f.action.includes('cs/public/store'));
+                        if (!isSearchOrFilter && !isAllowedForAuditor) {
                             f.querySelectorAll('input:not([type="search"]):not([id*="Search"]):not([id*="search"]), select:not([id*="Filter"]):not([id*="PerPage"]):not([id*="pageSize"]), textarea').forEach(el => {
                                 el.setAttribute('readonly', 'readonly');
                                 el.setAttribute('disabled', 'disabled');

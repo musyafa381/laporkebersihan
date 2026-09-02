@@ -14,6 +14,8 @@ class CsReportModel extends Model
         'nama_pengirim',
         'kontak_hp',
         'unit_lokasi',
+        'wilayah_id',
+        'nama_wilayah',
         'kategori',
         'isi_laporan',
         'foto_lampiran',
@@ -42,6 +44,22 @@ class CsReportModel extends Model
             $forge = \Config\Database::forge();
 
             $newCols = [];
+            if (!in_array('wilayah_id', $fields)) {
+                $newCols['wilayah_id'] = [
+                    'type'       => 'INT',
+                    'constraint' => 11,
+                    'null'       => true,
+                    'after'      => 'unit_lokasi'
+                ];
+            }
+            if (!in_array('nama_wilayah', $fields)) {
+                $newCols['nama_wilayah'] = [
+                    'type'       => 'VARCHAR',
+                    'constraint' => 150,
+                    'null'       => true,
+                    'after'      => 'wilayah_id'
+                ];
+            }
             if (!in_array('foto_lampiran', $fields)) {
                 $newCols['foto_lampiran'] = [
                     'type'  => 'TEXT',

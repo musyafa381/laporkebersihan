@@ -21,6 +21,7 @@
                 </p>
             </div>
 
+            <?php if (session()->get('role') === 'Admin'): ?>
             <div class="flex-shrink-0">
                 <button onclick="openModalCreate()" class="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-white text-emerald-900 font-heading font-bold text-xs sm:text-sm hover:bg-emerald-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 group">
                     <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition">
@@ -29,6 +30,7 @@
                     <span>Buat Buku Bulan Baru</span>
                 </button>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -60,6 +62,7 @@
                             </span>
 
                             <!-- Card Edit & Delete Dropdown Buttons -->
+                            <?php if (session()->get('role') === 'Admin'): ?>
                             <div class="flex items-center gap-1">
                                 <button onclick="openModalEdit(<?= $buku['id'] ?>, '<?= esc(addslashes($buku['judul'])) ?>', '<?= esc($buku['bulan']) ?>', <?= esc($buku['tahun']) ?>, '<?= esc($buku['status']) ?>')" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition flex items-center justify-center text-xs" title="Edit Informasi Buku">
                                     <i class="fa-solid fa-pen-to-square"></i>
@@ -68,6 +71,7 @@
                                     <i class="fa-solid fa-trash-can"></i>
                                 </a>
                             </div>
+                            <?php endif; ?>
                         </div>
 
                         <!-- Card Content Body -->
