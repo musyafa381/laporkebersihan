@@ -52,19 +52,51 @@
                         <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Lokasi / Unit Terkait</label>
                         <input type="text" name="unit_lokasi" placeholder="Misal: Asrama Kitab Putra" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
                     </div>
-                    <div>
+                    <!-- Searchable Wilayah Picker in Portal Form -->
+                    <div class="relative">
                         <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                             <span>Wilayah Pemetaan (Opsional)</span>
-                            <span class="text-[10px] text-slate-400 font-semibold lowercase">Opsional</span>
+                            <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                                <i class="fa-solid fa-magnifying-glass text-[9px]"></i> Bisa dicari
+                            </span>
                         </label>
-                        <select name="wilayah_id" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                            <option value="">-- Bukan Wilayah Khusus / Umum --</option>
+                        <input type="hidden" id="portal_wilayah_id" name="wilayah_id" value="">
+                        <div class="relative">
+                            <i class="fa-solid fa-map-location-dot absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-600 text-xs pointer-events-none"></i>
+                            <input type="text" id="portal_wilayah_search" placeholder="Cari nama wilayah pemetaan / area..." autocomplete="off" onfocus="openPortalWilayahDropdown()" oninput="filterPortalWilayahOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
+                            <button type="button" onclick="togglePortalWilayahDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                                <i id="portalWilayahIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                            </button>
+                        </div>
+                        <!-- Dropdown List -->
+                        <div id="portalWilayahDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                            <div class="portal-wilayah-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="" data-name="" onclick="selectPortalWilayah(this)">
+                                <div>
+                                    <div class="font-extrabold text-xs text-slate-600 italic">-- Bukan Wilayah Khusus / Umum --</div>
+                                    <div class="text-[10px] text-slate-400 font-medium">Laporan umum tidak terikat spot wilayah pemetaan tertentu</div>
+                                </div>
+                            </div>
                             <?php if (!empty($wilayahList)): ?>
                                 <?php foreach ($wilayahList as $w): ?>
-                                    <option value="<?= $w['id'] ?>"><?= esc($w['nama_wilayah']) ?> (<?= esc($w['kategori_area']) ?>)</option>
+                                    <div class="portal-wilayah-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $w['id'] ?>" data-name="<?= esc($w['nama_wilayah']) ?> (<?= esc($w['kategori_area']) ?>)" onclick="selectPortalWilayah(this)">
+                                        <div>
+                                            <div class="font-extrabold text-xs text-slate-900"><?= esc($w['nama_wilayah']) ?></div>
+                                            <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
+                                                <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/60"><?= esc($w['kategori_area']) ?></span>
+                                                <?php if (!empty($w['lokasi_gedung'])): ?>
+                                                    <span>&bull;</span>
+                                                    <span><i class="fa-solid fa-location-dot text-rose-500 mr-0.5"></i><?= esc($w['lokasi_gedung']) ?></span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                        <span class="text-[10px] font-mono font-bold text-slate-400"><?= esc($w['kode_wilayah'] ?: 'WIL-' . $w['id']) ?></span>
+                                    </div>
                                 <?php endforeach; ?>
                             <?php endif; ?>
-                        </select>
+                            <div id="noPortalWilayahFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
+                                Tidak ditemukan wilayah pemetaan yang sesuai.
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -433,5 +465,68 @@
         });
     }
     window.renderPortalPreviews = renderPortalPreviews;
+
+    // Searchable Wilayah Picker Logic in Portal Form
+    function openPortalWilayahDropdown() {
+        const dd = document.getElementById('portalWilayahDropdownList');
+        const icon = document.getElementById('portalWilayahIcon');
+        if (dd) dd.classList.remove('hidden');
+        if (icon) icon.classList.add('rotate-180');
+    }
+    window.openPortalWilayahDropdown = openPortalWilayahDropdown;
+
+    function togglePortalWilayahDropdown() {
+        const dd = document.getElementById('portalWilayahDropdownList');
+        const icon = document.getElementById('portalWilayahIcon');
+        if (dd) {
+            dd.classList.toggle('hidden');
+            if (icon) icon.classList.toggle('rotate-180', !dd.classList.contains('hidden'));
+        }
+    }
+    window.togglePortalWilayahDropdown = togglePortalWilayahDropdown;
+
+    function filterPortalWilayahOptions(query) {
+        openPortalWilayahDropdown();
+        query = (query || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.portal-wilayah-item');
+        let found = 0;
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            if (!query || text.includes(query)) {
+                item.style.display = 'flex';
+                found++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        const noFound = document.getElementById('noPortalWilayahFound');
+        if (noFound) noFound.classList.toggle('hidden', found > 0);
+    }
+    window.filterPortalWilayahOptions = filterPortalWilayahOptions;
+
+    function selectPortalWilayah(el) {
+        const id = el.dataset.id || '';
+        const name = el.dataset.name || '';
+        document.getElementById('portal_wilayah_id').value = id;
+        document.getElementById('portal_wilayah_search').value = name ? name : '';
+        if (!id) {
+            document.getElementById('portal_wilayah_search').placeholder = '-- Bukan Wilayah Khusus / Umum --';
+        }
+        const dd = document.getElementById('portalWilayahDropdownList');
+        const icon = document.getElementById('portalWilayahIcon');
+        if (dd) dd.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+    }
+    window.selectPortalWilayah = selectPortalWilayah;
+
+    document.addEventListener('click', function(e) {
+        const searchInput = document.getElementById('portal_wilayah_search');
+        const dd = document.getElementById('portalWilayahDropdownList');
+        if (dd && searchInput && !searchInput.contains(e.target) && !dd.contains(e.target)) {
+            dd.classList.add('hidden');
+            const icon = document.getElementById('portalWilayahIcon');
+            if (icon) icon.classList.remove('rotate-180');
+        }
+    });
 </script>
 <?= $this->endSection() ?>

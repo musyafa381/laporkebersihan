@@ -18,6 +18,24 @@ class App extends BaseConfig
      */
     public string $baseURL = 'http://localhost/adminkebersihan/';
 
+    public function __construct()
+    {
+        parent::__construct();
+
+        // Auto-detect baseURL if accessed from web browser on domain hosting
+        if (isset($_SERVER['HTTP_HOST']) && PHP_SAPI !== 'cli') {
+            $isHttps = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on')
+                || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+                || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443);
+            $protocol = $isHttps ? 'https://' : 'http://';
+            
+            // If on production domain (e.g. laporkebersihan.online) and not localhost, set dynamically:
+            if (empty($this->baseURL) || (strpos($this->baseURL, 'localhost') !== false && $_SERVER['HTTP_HOST'] !== 'localhost' && $_SERVER['HTTP_HOST'] !== '127.0.0.1')) {
+                $this->baseURL = $protocol . $_SERVER['HTTP_HOST'] . '/';
+            }
+        }
+    }
+
     /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.
      * If you want to accept multiple Hostnames, set this.

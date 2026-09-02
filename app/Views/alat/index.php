@@ -609,16 +609,45 @@
         <form action="<?= base_url('alat/transaksi/store') ?>" method="POST" class="space-y-4">
             <input type="hidden" name="jenis_transaksi" value="Keluar">
 
-            <div>
-                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Pilih Peralatan (Dari Gudang)</label>
-                <select name="alat_id" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                    <option value="">-- Pilih Alat --</option>
+            <!-- Searchable Alat Picker for Catat Keluar -->
+            <div class="relative">
+                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>Pilih Peralatan (Dari Gudang) <span class="text-rose-500">*</span></span>
+                    <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                        <i class="fa-solid fa-magnifying-glass text-[9px]"></i> Bisa dicari
+                    </span>
+                </label>
+                <input type="hidden" id="keluar_alat_id" name="alat_id" required value="">
+                <div class="relative">
+                    <i class="fa-solid fa-barcode absolute left-3.5 top-1/2 -translate-y-1/2 text-rose-600 text-xs pointer-events-none"></i>
+                    <input type="text" id="keluar_alat_search" placeholder="Cari nama atau kode alat..." autocomplete="off" onfocus="openKeluarAlatDropdown()" oninput="filterKeluarAlatOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-rose-500 transition shadow-2xs cursor-pointer placeholder-slate-400" required>
+                    <button type="button" onclick="toggleKeluarAlatDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                        <i id="keluarAlatIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                    </button>
+                </div>
+                <!-- Dropdown List -->
+                <div id="keluarAlatDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
                     <?php foreach ($alatList as $a): ?>
-                        <option value="<?= $a['id'] ?>">
-                            <?= esc($a['kode_alat']) ?> &bull; <?= esc($a['nama_alat']) ?> (Sisa: <?= $a['stok_sisa'] ?> <?= esc($a['satuan']) ?>)
-                        </option>
+                        <div class="keluar-alat-item px-4 py-2.5 hover:bg-rose-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $a['id'] ?>" data-name="<?= esc($a['kode_alat']) ?> • <?= esc($a['nama_alat']) ?> (Sisa: <?= $a['stok_sisa'] ?> <?= esc($a['satuan']) ?>)" onclick="selectKeluarAlat(this)">
+                            <div>
+                                <div class="font-extrabold text-xs text-slate-900"><?= esc($a['nama_alat']) ?></div>
+                                <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
+                                    <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 font-mono font-bold border border-emerald-200/60"><?= esc($a['kode_alat']) ?></span>
+                                    <span>&bull;</span>
+                                    <span><?= esc($a['kategori']) ?></span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold <?= $a['stok_sisa'] > 3 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200' ?>">
+                                    Sisa: <?= $a['stok_sisa'] ?> <?= esc($a['satuan']) ?>
+                                </span>
+                            </div>
+                        </div>
                     <?php endforeach; ?>
-                </select>
+                    <div id="noKeluarAlatFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
+                        Tidak ditemukan peralatan yang sesuai.
+                    </div>
+                </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -670,16 +699,45 @@
         <form action="<?= base_url('alat/transaksi/store') ?>" method="POST" class="space-y-4">
             <input type="hidden" name="jenis_transaksi" value="Masuk">
 
-            <div>
-                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Pilih Peralatan</label>
-                <select name="alat_id" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                    <option value="">-- Pilih Alat --</option>
+            <!-- Searchable Alat Picker for Catat Masuk -->
+            <div class="relative">
+                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>Pilih Peralatan <span class="text-blue-500">*</span></span>
+                    <span class="text-[10px] text-blue-600 font-bold lowercase bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200/60 flex items-center gap-1">
+                        <i class="fa-solid fa-magnifying-glass text-[9px]"></i> Bisa dicari
+                    </span>
+                </label>
+                <input type="hidden" id="masuk_alat_id" name="alat_id" required value="">
+                <div class="relative">
+                    <i class="fa-solid fa-barcode absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-600 text-xs pointer-events-none"></i>
+                    <input type="text" id="masuk_alat_search" placeholder="Cari nama atau kode alat..." autocomplete="off" onfocus="openMasukAlatDropdown()" oninput="filterMasukAlatOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 transition shadow-2xs cursor-pointer placeholder-slate-400" required>
+                    <button type="button" onclick="toggleMasukAlatDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                        <i id="masukAlatIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                    </button>
+                </div>
+                <!-- Dropdown List -->
+                <div id="masukAlatDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
                     <?php foreach ($alatList as $a): ?>
-                        <option value="<?= $a['id'] ?>">
-                            <?= esc($a['kode_alat']) ?> &bull; <?= esc($a['nama_alat']) ?>
-                        </option>
+                        <div class="masuk-alat-item px-4 py-2.5 hover:bg-blue-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $a['id'] ?>" data-name="<?= esc($a['kode_alat']) ?> • <?= esc($a['nama_alat']) ?>" onclick="selectMasukAlat(this)">
+                            <div>
+                                <div class="font-extrabold text-xs text-slate-900"><?= esc($a['nama_alat']) ?></div>
+                                <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
+                                    <span class="px-1.5 py-0.5 rounded bg-blue-50 text-blue-800 font-mono font-bold border border-blue-200/60"><?= esc($a['kode_alat']) ?></span>
+                                    <span>&bull;</span>
+                                    <span><?= esc($a['kategori']) ?></span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700">
+                                    Gudang: <?= $a['stok_sisa'] ?> <?= esc($a['satuan']) ?>
+                                </span>
+                            </div>
+                        </div>
                     <?php endforeach; ?>
-                </select>
+                    <div id="noMasukAlatFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
+                        Tidak ditemukan peralatan yang sesuai.
+                    </div>
+                </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -1003,5 +1061,125 @@
         if (modal) modal.classList.add('hidden');
     }
     window.closeModalEditAlat = closeModalEditAlat;
+
+    // Searchable Alat Picker Logic for Catat Keluar
+    function openKeluarAlatDropdown() {
+        const dd = document.getElementById('keluarAlatDropdownList');
+        const icon = document.getElementById('keluarAlatIcon');
+        if (dd) dd.classList.remove('hidden');
+        if (icon) icon.classList.add('rotate-180');
+    }
+    window.openKeluarAlatDropdown = openKeluarAlatDropdown;
+
+    function toggleKeluarAlatDropdown() {
+        const dd = document.getElementById('keluarAlatDropdownList');
+        const icon = document.getElementById('keluarAlatIcon');
+        if (dd) {
+            dd.classList.toggle('hidden');
+            if (icon) icon.classList.toggle('rotate-180', !dd.classList.contains('hidden'));
+        }
+    }
+    window.toggleKeluarAlatDropdown = toggleKeluarAlatDropdown;
+
+    function filterKeluarAlatOptions(query) {
+        openKeluarAlatDropdown();
+        query = (query || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.keluar-alat-item');
+        let found = 0;
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            if (!query || text.includes(query)) {
+                item.style.display = 'flex';
+                found++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        const noFound = document.getElementById('noKeluarAlatFound');
+        if (noFound) noFound.classList.toggle('hidden', found > 0);
+    }
+    window.filterKeluarAlatOptions = filterKeluarAlatOptions;
+
+    function selectKeluarAlat(el) {
+        const id = el.dataset.id || '';
+        const name = el.dataset.name || '';
+        document.getElementById('keluar_alat_id').value = id;
+        document.getElementById('keluar_alat_search').value = name;
+        const dd = document.getElementById('keluarAlatDropdownList');
+        const icon = document.getElementById('keluarAlatIcon');
+        if (dd) dd.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+    }
+    window.selectKeluarAlat = selectKeluarAlat;
+
+    // Searchable Alat Picker Logic for Catat Masuk
+    function openMasukAlatDropdown() {
+        const dd = document.getElementById('masukAlatDropdownList');
+        const icon = document.getElementById('masukAlatIcon');
+        if (dd) dd.classList.remove('hidden');
+        if (icon) icon.classList.add('rotate-180');
+    }
+    window.openMasukAlatDropdown = openMasukAlatDropdown;
+
+    function toggleMasukAlatDropdown() {
+        const dd = document.getElementById('masukAlatDropdownList');
+        const icon = document.getElementById('masukAlatIcon');
+        if (dd) {
+            dd.classList.toggle('hidden');
+            if (icon) icon.classList.toggle('rotate-180', !dd.classList.contains('hidden'));
+        }
+    }
+    window.toggleMasukAlatDropdown = toggleMasukAlatDropdown;
+
+    function filterMasukAlatOptions(query) {
+        openMasukAlatDropdown();
+        query = (query || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.masuk-alat-item');
+        let found = 0;
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            if (!query || text.includes(query)) {
+                item.style.display = 'flex';
+                found++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        const noFound = document.getElementById('noMasukAlatFound');
+        if (noFound) noFound.classList.toggle('hidden', found > 0);
+    }
+    window.filterMasukAlatOptions = filterMasukAlatOptions;
+
+    function selectMasukAlat(el) {
+        const id = el.dataset.id || '';
+        const name = el.dataset.name || '';
+        document.getElementById('masuk_alat_id').value = id;
+        document.getElementById('masuk_alat_search').value = name;
+        const dd = document.getElementById('masukAlatDropdownList');
+        const icon = document.getElementById('masukAlatIcon');
+        if (dd) dd.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+    }
+    window.selectMasukAlat = selectMasukAlat;
+
+    document.addEventListener('click', function(e) {
+        // Dismiss Keluar Dropdown
+        const keluarSearch = document.getElementById('keluar_alat_search');
+        const keluarDd = document.getElementById('keluarAlatDropdownList');
+        if (keluarDd && keluarSearch && !keluarSearch.contains(e.target) && !keluarDd.contains(e.target)) {
+            keluarDd.classList.add('hidden');
+            const icon = document.getElementById('keluarAlatIcon');
+            if (icon) icon.classList.remove('rotate-180');
+        }
+
+        // Dismiss Masuk Dropdown
+        const masukSearch = document.getElementById('masuk_alat_search');
+        const masukDd = document.getElementById('masukAlatDropdownList');
+        if (masukDd && masukSearch && !masukSearch.contains(e.target) && !masukDd.contains(e.target)) {
+            masukDd.classList.add('hidden');
+            const icon = document.getElementById('masukAlatIcon');
+            if (icon) icon.classList.remove('rotate-180');
+        }
+    });
 </script>
 <?= $this->endSection() ?>

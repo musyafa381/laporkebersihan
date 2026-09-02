@@ -30,16 +30,47 @@
             </h3>
 
             <form action="<?= base_url('app/pengajuan-alat/store') ?>" method="POST" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Pilih Peralatan Yang Dibutuhkan</label>
-                    <select name="alat_id" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                        <option value="">-- Pilih Alat --</option>
+                <!-- Searchable Alat Picker -->
+                <div class="relative">
+                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                        <span>Pilih Peralatan Yang Dibutuhkan <span class="text-rose-500">*</span></span>
+                        <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                            <i class="fa-solid fa-magnifying-glass text-[9px]"></i> Bisa dicari
+                        </span>
+                    </label>
+                    <input type="hidden" id="pengajuan_alat_id" name="alat_id" required value="">
+                    <div class="relative">
+                        <i class="fa-solid fa-broom-ball absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-600 text-xs pointer-events-none"></i>
+                        <input type="text" id="pengajuan_alat_search" placeholder="Cari nama alat kebersihan..." autocomplete="off" onfocus="openAlatPickerDropdown()" oninput="filterAlatPickerOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400" required>
+                        <button type="button" onclick="toggleAlatPickerDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                            <i id="alatPickerIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                        </button>
+                    </div>
+                    <!-- Dropdown List -->
+                    <div id="alatPickerDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
                         <?php foreach ($alatList as $a): ?>
-                            <option value="<?= $a['id'] ?>">
-                                <?= esc($a['nama_alat']) ?> (Stok Gudang: <?= $a['stok_sisa'] ?> <?= esc($a['satuan']) ?>)
-                            </option>
+                            <div class="alat-picker-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $a['id'] ?>" data-name="<?= esc($a['nama_alat']) ?> (Stok: <?= $a['stok_sisa'] ?> <?= esc($a['satuan']) ?>)" onclick="selectAlatPicker(this)">
+                                <div>
+                                    <div class="font-extrabold text-xs text-slate-900"><?= esc($a['nama_alat']) ?></div>
+                                    <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
+                                        <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200/60"><?= esc($a['kategori'] ?? 'Umum') ?></span>
+                                        <?php if (!empty($a['lokasi_gudang'])): ?>
+                                            <span>&bull;</span>
+                                            <span><i class="fa-solid fa-warehouse text-emerald-600 mr-0.5"></i><?= esc($a['lokasi_gudang']) ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold <?= $a['stok_sisa'] > 3 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200' ?>">
+                                        Stok: <?= $a['stok_sisa'] ?> <?= esc($a['satuan']) ?>
+                                    </span>
+                                </div>
+                            </div>
                         <?php endforeach; ?>
-                    </select>
+                        <div id="noAlatPickerFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
+                            Tidak ditemukan alat kebersihan yang sesuai.
+                        </div>
+                    </div>
                 </div>
 
                 <div>
@@ -202,5 +233,65 @@
         }
     }
     window.filterMyPengajuanPageTable = filterMyPengajuanPageTable;
+
+    // Searchable Alat Picker Logic
+    function openAlatPickerDropdown() {
+        const dd = document.getElementById('alatPickerDropdownList');
+        const icon = document.getElementById('alatPickerIcon');
+        if (dd) dd.classList.remove('hidden');
+        if (icon) icon.classList.add('rotate-180');
+    }
+    window.openAlatPickerDropdown = openAlatPickerDropdown;
+
+    function toggleAlatPickerDropdown() {
+        const dd = document.getElementById('alatPickerDropdownList');
+        const icon = document.getElementById('alatPickerIcon');
+        if (dd) {
+            dd.classList.toggle('hidden');
+            if (icon) icon.classList.toggle('rotate-180', !dd.classList.contains('hidden'));
+        }
+    }
+    window.toggleAlatPickerDropdown = toggleAlatPickerDropdown;
+
+    function filterAlatPickerOptions(query) {
+        openAlatPickerDropdown();
+        query = (query || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.alat-picker-item');
+        let found = 0;
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            if (!query || text.includes(query)) {
+                item.style.display = 'flex';
+                found++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        const noFound = document.getElementById('noAlatPickerFound');
+        if (noFound) noFound.classList.toggle('hidden', found > 0);
+    }
+    window.filterAlatPickerOptions = filterAlatPickerOptions;
+
+    function selectAlatPicker(el) {
+        const id = el.dataset.id || '';
+        const name = el.dataset.name || '';
+        document.getElementById('pengajuan_alat_id').value = id;
+        document.getElementById('pengajuan_alat_search').value = name;
+        const dd = document.getElementById('alatPickerDropdownList');
+        const icon = document.getElementById('alatPickerIcon');
+        if (dd) dd.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+    }
+    window.selectAlatPicker = selectAlatPicker;
+
+    document.addEventListener('click', function(e) {
+        const searchInput = document.getElementById('pengajuan_alat_search');
+        const dd = document.getElementById('alatPickerDropdownList');
+        if (dd && searchInput && !searchInput.contains(e.target) && !dd.contains(e.target)) {
+            dd.classList.add('hidden');
+            const icon = document.getElementById('alatPickerIcon');
+            if (icon) icon.classList.remove('rotate-180');
+        }
+    });
 </script>
 <?= $this->endSection() ?>

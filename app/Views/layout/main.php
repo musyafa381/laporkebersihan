@@ -616,52 +616,33 @@
                 if (!container || !drawer || !backdrop) return;
 
                 if (open) {
-                    // Clear any pending close timer
                     if (drawerCloseTimer) { clearTimeout(drawerCloseTimer); drawerCloseTimer = null; }
 
-                    // Make container visible and interactive
-                    container.style.visibility = 'visible';
-                    container.style.display = '';
                     container.classList.remove('hidden');
+                    container.style.display = 'block';
                     container.style.pointerEvents = 'auto';
+                    document.body.classList.add('overflow-hidden');
 
-                    // Lock body scroll
-                    document.body.style.overflow = 'hidden';
-                    document.body.style.position = 'fixed';
-                    document.body.style.width = '100%';
-                    document.body.style.top = '-' + window.scrollY + 'px';
-                    document.body.setAttribute('data-scroll-y', window.scrollY);
-
-                    // Animate in on next frame
                     requestAnimationFrame(function() {
                         backdrop.style.opacity = '1';
                         drawer.style.transform = 'translateX(0)';
                     });
                 } else {
-                    // === CLOSE ===
-                    // 1. Animate drawer and backdrop out
                     backdrop.style.opacity = '0';
                     drawer.style.transform = 'translateX(100%)';
-
-                    // 2. IMMEDIATELY make container non-interactive and invisible to touch
                     container.style.pointerEvents = 'none';
-                    container.style.visibility = 'hidden';
-
-                    // 3. Restore body scroll IMMEDIATELY
-                    var scrollY = parseInt(document.body.getAttribute('data-scroll-y') || '0', 10);
+                    document.body.classList.remove('overflow-hidden');
                     document.body.style.overflow = '';
                     document.body.style.position = '';
-                    document.body.style.width = '';
-                    document.body.style.top = '';
-                    document.body.removeAttribute('data-scroll-y');
-                    window.scrollTo(0, scrollY);
 
-                    // 4. After animation ends, fully hide
                     drawerCloseTimer = setTimeout(function() {
                         container.classList.add('hidden');
                         container.style.display = 'none';
                         drawerCloseTimer = null;
-                    }, 350);
+                        document.body.classList.remove('overflow-hidden');
+                        document.body.style.overflow = '';
+                        document.body.style.position = '';
+                    }, 300);
                 }
             }
 
@@ -1177,21 +1158,32 @@
 
         // Lightweight Modal Helper (Locks Body Scroll when modal is open)
         function checkModalState() {
-            const hasOpenModal = document.querySelector('.fixed.inset-0:not(.hidden)');
-            if (hasOpenModal) {
+            const hasOpenModal = document.querySelector('.fixed.inset-0:not(#mobileDrawerContainer):not(.hidden)');
+            const drawerContainer = document.getElementById('mobileDrawerContainer');
+            const isDrawerOpen = drawerContainer && !drawerContainer.classList.contains('hidden') && drawerContainer.style.display !== 'none';
+            if (hasOpenModal || isDrawerOpen) {
                 document.body.classList.add('overflow-hidden');
             } else {
                 document.body.classList.remove('overflow-hidden');
+                document.body.style.overflow = '';
+                document.body.style.position = '';
             }
         }
 
         // Global delegate listener for modal backdrop clicks & body scroll lock
         document.addEventListener('click', function(e) {
-            const activeModal = e.target.closest('.fixed.inset-0:not(.hidden)');
+            const activeModal = e.target.closest('.fixed.inset-0:not(#mobileDrawerContainer):not(.hidden)');
             if (activeModal && e.target === activeModal) {
                 activeModal.classList.add('hidden');
             }
             setTimeout(checkModalState, 50);
+        });
+
+        // Ensure clean initial scroll state on load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.remove('overflow-hidden');
+            document.body.style.overflow = '';
+            document.body.style.position = '';
         });
 
         // ==========================================
