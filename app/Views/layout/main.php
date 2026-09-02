@@ -591,12 +591,12 @@
             <!-- Drawer Footer Auth Action -->
             <div class="p-5 border-t border-slate-100 bg-slate-50/50">
                 <?php if (session()->get('isLoggedIn')): ?>
-                    <a href="<?= base_url('logout') ?>" data-confirm-msg="Apakah Anda yakin ingin keluar/logout?" class="w-full py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-heading font-extrabold text-xs border border-rose-200 transition shadow-2xs flex items-center justify-center gap-2">
+                    <a href="<?= base_url('logout') ?>" onclick="toggleMobileDrawer(false)" data-confirm-msg="Apakah Anda yakin ingin keluar/logout?" class="w-full py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-heading font-extrabold text-xs border border-rose-200 transition shadow-2xs flex items-center justify-center gap-2">
                         <i class="fa-solid fa-right-from-bracket"></i>
                         <span>Keluar / Logout</span>
                     </a>
                 <?php else: ?>
-                    <a href="<?= base_url('login') ?>" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-heading font-extrabold text-xs transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
+                    <a href="<?= base_url('login') ?>" onclick="toggleMobileDrawer(false)" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-heading font-extrabold text-xs transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
                         <i class="fa-solid fa-right-to-bracket"></i>
                         <span>Masuk / Login Sistem</span>
                     </a>
@@ -820,6 +820,18 @@
                 const currentHeaderNav = document.querySelector('header');
                 if (currentHeaderNav && newHeaderNav) {
                     currentHeaderNav.innerHTML = newHeaderNav.innerHTML;
+                }
+
+                // Update Mobile Drawer Navigation and Profile Synchronously
+                const currentDrawer = document.getElementById('mobileDrawer');
+                const newDrawer = newDoc.querySelector('#mobileDrawer');
+                if (currentDrawer && newDrawer) {
+                    currentDrawer.innerHTML = newDrawer.innerHTML;
+                }
+
+                // Automatically close mobile sidebar on navigation
+                if (typeof toggleMobileDrawer === 'function') {
+                    toggleMobileDrawer(false);
                 }
 
                 if (window.location.href !== url) {
