@@ -14,13 +14,20 @@ class CsReportModel extends Model
         'nama_pengirim',
         'kontak_hp',
         'unit_lokasi',
+        'unit_id',
         'wilayah_id',
         'nama_wilayah',
+        'shift',
         'kategori',
         'isi_laporan',
         'foto_lampiran',
         'status',
         'tanggapan_admin',
+        'tanggapan_unit',
+        'foto_tindakan_unit',
+        'nama_penanggap_unit',
+        'ditanggapi_unit_user_id',
+        'ditanggapi_unit_at',
         'ip_address',
         'user_agent',
         'is_flagged',
@@ -44,12 +51,20 @@ class CsReportModel extends Model
             $forge = \Config\Database::forge();
 
             $newCols = [];
+            if (!in_array('unit_id', $fields)) {
+                $newCols['unit_id'] = [
+                    'type'       => 'INT',
+                    'constraint' => 11,
+                    'null'       => true,
+                    'after'      => 'unit_lokasi'
+                ];
+            }
             if (!in_array('wilayah_id', $fields)) {
                 $newCols['wilayah_id'] = [
                     'type'       => 'INT',
                     'constraint' => 11,
                     'null'       => true,
-                    'after'      => 'unit_lokasi'
+                    'after'      => 'unit_id'
                 ];
             }
             if (!in_array('nama_wilayah', $fields)) {
@@ -60,6 +75,14 @@ class CsReportModel extends Model
                     'after'      => 'wilayah_id'
                 ];
             }
+            if (!in_array('shift', $fields)) {
+                $newCols['shift'] = [
+                    'type'       => 'VARCHAR',
+                    'constraint' => 50,
+                    'null'       => true,
+                    'after'      => 'nama_wilayah'
+                ];
+            }
             if (!in_array('foto_lampiran', $fields)) {
                 $newCols['foto_lampiran'] = [
                     'type'  => 'TEXT',
@@ -67,12 +90,49 @@ class CsReportModel extends Model
                     'after' => 'isi_laporan'
                 ];
             }
+            if (!in_array('tanggapan_unit', $fields)) {
+                $newCols['tanggapan_unit'] = [
+                    'type'  => 'TEXT',
+                    'null'  => true,
+                    'after' => 'tanggapan_admin'
+                ];
+            }
+            if (!in_array('foto_tindakan_unit', $fields)) {
+                $newCols['foto_tindakan_unit'] = [
+                    'type'  => 'TEXT',
+                    'null'  => true,
+                    'after' => 'tanggapan_unit'
+                ];
+            }
+            if (!in_array('nama_penanggap_unit', $fields)) {
+                $newCols['nama_penanggap_unit'] = [
+                    'type'       => 'VARCHAR',
+                    'constraint' => 150,
+                    'null'       => true,
+                    'after'      => 'foto_tindakan_unit'
+                ];
+            }
+            if (!in_array('ditanggapi_unit_user_id', $fields)) {
+                $newCols['ditanggapi_unit_user_id'] = [
+                    'type'       => 'INT',
+                    'constraint' => 11,
+                    'null'       => true,
+                    'after'      => 'nama_penanggap_unit'
+                ];
+            }
+            if (!in_array('ditanggapi_unit_at', $fields)) {
+                $newCols['ditanggapi_unit_at'] = [
+                    'type'  => 'DATETIME',
+                    'null'  => true,
+                    'after' => 'ditanggapi_unit_user_id'
+                ];
+            }
             if (!in_array('ip_address', $fields)) {
                 $newCols['ip_address'] = [
                     'type'       => 'VARCHAR',
                     'constraint' => 45,
                     'null'       => true,
-                    'after'      => 'tanggapan_admin'
+                    'after'      => 'ditanggapi_unit_at'
                 ];
             }
             if (!in_array('user_agent', $fields)) {

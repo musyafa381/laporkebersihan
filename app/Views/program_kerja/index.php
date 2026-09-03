@@ -212,9 +212,9 @@
                                 </td>
                                 <td class="py-4 px-4">
                                     <div class="space-y-0.5">
-                                        <div class="font-extrabold text-slate-900 group-hover:text-emerald-700 transition">
+                                        <a href="<?= base_url('program-kerja/detail/' . $p['id']) ?>" class="font-extrabold text-slate-900 group-hover:text-emerald-700 transition hover:underline block">
                                             <?= esc($p['nama_program']) ?>
-                                        </div>
+                                        </a>
                                         <?php if (!empty($p['sub_kegiatan'])): ?>
                                             <div class="text-[11px] font-bold text-slate-500">
                                                 <?= esc($p['sub_kegiatan']) ?>

@@ -183,7 +183,7 @@
     <?php if (!empty($sopList)): ?>
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200/80 px-1 mt-6" id="pagination-container-sop">
         <div class="text-xs font-semibold text-slate-500 flex items-center gap-2">
-            <span id="page-info-sop">Menampilkan 0 data</span>
+            <span id="page-info-sop">Menampilkan <?= !empty($sopList) ? ('1 - ' . min(6, count($sopList)) . ' dari ' . count($sopList) . ' data') : '0 data' ?></span>
             <select id="pageSize-sop" class="ml-2 px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs">
                 <option value="6" selected>6 / hal</option>
                 <option value="9">9 / hal</option>
@@ -540,11 +540,18 @@
     }
 
     var paginatorSop = null;
-    document.addEventListener('DOMContentLoaded', function() {
+    function initSopPaginator() {
         if (document.querySelectorAll('.sop-card').length > 0) {
             paginatorSop = new SopPaginator('.sop-card', 'page-info-sop', 'page-buttons-sop', 'pageSize-sop');
         }
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSopPaginator);
+    } else {
+        initSopPaginator();
+    }
+    setTimeout(initSopPaginator, 50);
 </script>
 
 <?= $this->endSection() ?>

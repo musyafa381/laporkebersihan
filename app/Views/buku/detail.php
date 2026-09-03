@@ -51,9 +51,14 @@
                     </span>
                 <?php endif; ?>
 
-                <a href="<?= base_url('buku/cetak/' . $buku['id']) ?>" target="_blank" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-bold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 flex items-center gap-2 shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:-translate-y-0.5">
+                <button type="button" onclick="openModalPreviewDoc(<?= $buku['id'] ?>, 'Buku LPJ <?= esc(addslashes($buku['bulan'] . ' ' . $buku['tahun'])) ?>')" class="px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-extrabold text-xs transition border border-emerald-200/90 shadow-2xs flex items-center gap-2" title="Preview Dokumen LPJ Langsung">
+                    <i class="fa-solid fa-eye text-emerald-600"></i>
+                    <span>Preview Dokumen</span>
+                </button>
+
+                <a href="<?= base_url('buku/cetak/' . $buku['id']) ?>" target="_blank" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-bold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 flex items-center gap-2 shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:-translate-y-0.5" title="Buka Halaman Cetak (Tab Baru)">
                     <i class="fa-solid fa-print"></i>
-                    <span>Cetak / Export PDF</span>
+                    <span>Cetak / PDF</span>
                 </a>
             </div>
         </div>
@@ -1703,6 +1708,109 @@
         const modal = document.getElementById('modalImportKeuangan');
         if (modal) modal.classList.add('hidden');
     }
+
+    // Quick Preview Modal Functions
+    function openModalPreviewDoc(id, title) {
+        const modal = document.getElementById('modalPreviewDoc');
+        const iframe = document.getElementById('previewDocIframe');
+        const loader = document.getElementById('previewIframeLoader');
+        const titleEl = document.getElementById('previewDocTitle');
+        const tabBtn = document.getElementById('previewOpenTabBtn');
+        const rawUrl = '<?= base_url('buku/cetak/') ?>' + id;
+        const embedUrl = rawUrl + '?embed=1';
+
+        if (titleEl) titleEl.innerText = 'Preview: ' + title;
+        if (tabBtn) tabBtn.href = rawUrl;
+        if (loader) loader.classList.remove('hidden');
+
+        if (iframe) {
+            iframe.src = embedUrl;
+        }
+
+        if (modal) modal.classList.remove('hidden');
+    }
+    window.openModalPreviewDoc = openModalPreviewDoc;
+
+    function handleIframeLoaded() {
+        const loader = document.getElementById('previewIframeLoader');
+        if (loader) loader.classList.add('hidden');
+    }
+    window.handleIframeLoaded = handleIframeLoaded;
+
+    function closeModalPreviewDoc() {
+        const modal = document.getElementById('modalPreviewDoc');
+        const iframe = document.getElementById('previewDocIframe');
+        if (iframe) iframe.src = '';
+        if (modal) modal.classList.add('hidden');
+    }
+    window.closeModalPreviewDoc = closeModalPreviewDoc;
+
+    function printPreviewIframe() {
+        const iframe = document.getElementById('previewDocIframe');
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+        }
+    }
+    window.printPreviewIframe = printPreviewIframe;
+
+    // Close preview modal on ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModalPreviewDoc();
+        }
+    });
 </script>
+
+<!-- Modal Quick Preview Dokumen LPJ -->
+<div id="modalPreviewDoc" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md hidden flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden">
+    <div class="bg-white rounded-3xl max-w-5xl w-full h-[92vh] max-h-[900px] shadow-2xl flex flex-col border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200">
+        <!-- Preview Modal Header -->
+        <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 bg-slate-50/80 flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-cyan-600 to-teal-500 text-white flex items-center justify-center shadow-md shadow-cyan-600/20 flex-shrink-0">
+                    <i class="fa-solid fa-file-invoice text-sm"></i>
+                </div>
+                <div>
+                    <h3 id="previewDocTitle" class="font-heading font-extrabold text-sm sm:text-base text-slate-900 leading-tight">
+                        Preview Dokumen LPJ
+                    </h3>
+                    <p class="text-[11px] text-slate-500 font-medium">Tampilan langsung hasil dokumen tanpa meninggalkan halaman</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <a id="previewOpenTabBtn" href="#" target="_blank" class="py-2 px-3 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition border border-slate-200 shadow-2xs" title="Buka di tab baru">
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-slate-500"></i>
+                    <span class="hidden sm:inline">Tab Baru</span>
+                </a>
+                <button type="button" onclick="printPreviewIframe()" class="py-2 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition" title="Cetak Dokumen">
+                    <i class="fa-solid fa-print"></i>
+                    <span class="hidden sm:inline">Cetak</span>
+                </button>
+                <button type="button" onclick="closeModalPreviewDoc()" class="w-8 h-8 rounded-xl bg-slate-200/80 hover:bg-rose-100 hover:text-rose-600 text-slate-500 flex items-center justify-center transition" title="Tutup Preview">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Preview Modal Body (Iframe) -->
+        <div class="flex-1 w-full bg-slate-100 overflow-hidden relative">
+            <!-- Loading Indicator -->
+            <div id="previewIframeLoader" class="absolute inset-0 flex flex-col items-center justify-center bg-white/95 z-10 gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i>
+                </div>
+                <div class="text-center">
+                    <div class="text-xs font-extrabold text-slate-800">Memuat Tampilan Dokumen LPJ...</div>
+                    <div class="text-[11px] text-slate-400 font-medium mt-0.5">Menyiapkan layout lembar laporan</div>
+                </div>
+            </div>
+
+            <!-- Preview Iframe -->
+            <iframe id="previewDocIframe" src="" class="w-full h-full border-0 bg-white" onload="handleIframeLoaded()"></iframe>
+        </div>
+    </div>
+</div>
 
 <?= $this->endSection() ?>

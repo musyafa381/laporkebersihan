@@ -5,18 +5,21 @@ namespace App\Controllers;
 use App\Models\AlatModel;
 use App\Models\AlatTransaksiModel;
 use App\Models\KategoriAlatModel;
+use App\Models\MasterUnitModel;
 
 class Alat extends BaseController
 {
     protected $alatModel;
     protected $transaksiModel;
     protected $kategoriAlatModel;
+    protected $unitModel;
 
     public function __construct()
     {
         $this->alatModel         = new AlatModel();
         $this->transaksiModel    = new AlatTransaksiModel();
         $this->kategoriAlatModel = new KategoriAlatModel();
+        $this->unitModel         = new MasterUnitModel();
     }
 
     private function respondJsonOrRedirect($message, $success = true, $redirectUrl = null)
@@ -111,11 +114,14 @@ class Alat extends BaseController
             $categoryCounts[$kat] = ($categoryCounts[$kat] ?? 0) + 1;
         }
 
+        $unitList = $this->unitModel->orderBy('nama_unit', 'ASC')->findAll();
+
         $data = [
             'title'           => 'Inventaris & Peralatan Kebersihan',
             'alatList'        => $alatList,
             'kategoriList'    => $kategoriList,
             'categoryCounts'  => $categoryCounts,
+            'unitList'        => $unitList,
             'transaksiKeluar' => $transaksiKeluar,
             'transaksiMasuk'  => $transaksiMasuk,
             'totalJenis'      => $totalJenis,

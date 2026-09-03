@@ -71,12 +71,25 @@ class AppPortal extends BaseController
             ->orderBy('id', 'DESC')
             ->findAll();
 
+        $unitAssignedReports = [];
+        if ($unitId || $userUnit) {
+            $uName = $userUnit['nama_unit'] ?? '';
+            $unitAssignedReports = $this->csModel
+                ->groupStart()
+                    ->where('unit_id', $unitId)
+                    ->orWhere('unit_lokasi', $uName)
+                ->groupEnd()
+                ->orderBy('id', 'DESC')
+                ->findAll();
+        }
+
         $data = [
-            'title'       => 'Portal Mobile - GEMERLAP K3L',
-            'userUnit'    => $userUnit,
-            'bukuAktif'   => $bukuAktif,
-            'myPengajuan' => $myPengajuan,
-            'myReports'   => $myReports,
+            'title'               => 'Portal Mobile - GEMERLAP K3L',
+            'userUnit'            => $userUnit,
+            'bukuAktif'           => $bukuAktif,
+            'myPengajuan'         => $myPengajuan,
+            'myReports'           => $myReports,
+            'unitAssignedReports' => $unitAssignedReports,
         ];
 
         return view('app_portal/index', $data);
@@ -169,26 +182,168 @@ class AppPortal extends BaseController
             $session->set('captcha_answer', $num1 + $num2);
         }
 
+        $unitId = $session->get('unit_id');
+        $userUnit = $unitId ? $this->unitModel->find($unitId) : null;
+        $unitAssignedReports = [];
+        if ($unitId || $userUnit) {
+            $uName = $userUnit['nama_unit'] ?? '';
+            $unitAssignedReports = $this->csModel
+                ->select('cs_reports.*, tbl_wilayah_kebersihan.nama_wilayah, tbl_wilayah_kebersihan.lokasi_gedung')
+                ->join('tbl_wilayah_kebersihan', 'tbl_wilayah_kebersihan.id = cs_reports.wilayah_id', 'left')
+                ->groupStart()
+                    ->where('cs_reports.unit_id', $unitId)
+                    ->orWhere('cs_reports.unit_lokasi', $uName)
+                ->groupEnd()
+                ->groupBy('cs_reports.id')
+                ->orderBy('cs_reports.id', 'DESC')
+                ->findAll();
+        }
+
         $myReports = $this->csModel
-            ->where('nama_pengirim', $session->get('nama_lengkap'))
-            ->orderBy('id', 'DESC')
+            ->select('cs_reports.*, tbl_wilayah_kebersihan.nama_wilayah, tbl_wilayah_kebersihan.lokasi_gedung')
+            ->join('tbl_wilayah_kebersihan', 'tbl_wilayah_kebersihan.id = cs_reports.wilayah_id', 'left')
+            ->where('cs_reports.nama_pengirim', $session->get('nama_lengkap'))
+            ->groupBy('cs_reports.id')
+            ->orderBy('cs_reports.id', 'DESC')
             ->findAll();
 
         $pengaturanModel = new \App\Models\PengaturanModel();
         $settings = $pengaturanModel->getAllAsMap();
 
         $wilayahList = $this->wilayahModel->where('status', 'Aktif')->orderBy('nama_wilayah', 'ASC')->findAll();
+        $unitList    = $this->unitModel->getActiveUnitsNonKader();
+
+        $penugasanModel = new \App\Models\WilayahPenugasanModel();
+        $penugasanList  = $penugasanModel
+            ->select('tbl_wilayah_penugasan.*, master_unit.nama_unit, master_unit.kode_unit')
+            ->join('master_unit', 'master_unit.id = tbl_wilayah_penugasan.unit_id', 'left')
+            ->findAll();
 
         $data = [
-            'title'        => 'Form Laporan Kendala Kebersihan',
-            'captcha_num1' => $session->get('captcha_num1'),
-            'captcha_num2' => $session->get('captcha_num2'),
-            'settings'     => $settings,
-            'myReports'    => $myReports,
-            'wilayahList'  => $wilayahList,
+            'title'               => 'Form Laporan Kendala Kebersihan',
+            'captcha_num1'        => $session->get('captcha_num1'),
+            'captcha_num2'        => $session->get('captcha_num2'),
+            'settings'            => $settings,
+            'myReports'           => $myReports,
+            'unitAssignedReports' => $unitAssignedReports,
+            'userUnit'            => $userUnit,
+            'wilayahList'         => $wilayahList,
+            'unitList'            => $unitList,
+            'penugasanList'       => $penugasanList,
         ];
 
         return view('app_portal/laporan_kebersihan', $data);
+    }
+
+    public function tanggapiAduanUnit($id)
+    {
+        $this->checkAuth();
+        $session = session();
+        $unitId = $session->get('unit_id');
+        $userUnit = $unitId ? $this->unitModel->find($unitId) : null;
+        $report = $this->csModel->find($id);
+
+        if (!$report) {
+            return redirect()->back()->with('error', 'Laporan pengaduan tidak ditemukan.');
+        }
+
+        $uName = $userUnit['nama_unit'] ?? '';
+        $isAuthorized = ($session->get('role') === 'Admin') ||
+                        ($unitId && (int)$report['unit_id'] === (int)$unitId) ||
+                        (!empty($uName) && strtolower($report['unit_lokasi']) === strtolower($uName));
+
+        if (!$isAuthorized) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki hak akses untuk menindaklanjuti laporan unit ini.');
+        }
+
+        $tanggapanUnit = trim($this->request->getPost('tanggapan_unit') ?? '');
+        if (empty($tanggapanUnit)) {
+            return redirect()->back()->with('error', 'Keterangan tindak lanjut / respon unit wajib diisi.');
+        }
+
+        $keptExisting = $this->request->getPost('existing_foto_tindakan');
+        $fotoPaths = is_array($keptExisting) ? array_values($keptExisting) : [];
+
+        $uploadedFiles = $this->request->getFiles();
+        if (!empty($uploadedFiles['foto_tindakan_files'])) {
+            $files = is_array($uploadedFiles['foto_tindakan_files']) ? $uploadedFiles['foto_tindakan_files'] : [$uploadedFiles['foto_tindakan_files']];
+            foreach ($files as $idx => $file) {
+                if ($file->isValid() && !$file->hasMoved()) {
+                    if ($file->getSize() > 3 * 1024 * 1024) {
+                        return redirect()->back()->with('error', "File foto '{$file->getClientName()}' melebihi batas 3MB.");
+                    }
+                    $customName = 'unit_action_' . $id . '_' . ($idx + 1);
+                    $cldRes = $this->cloudinary->upload($file, 'cs_reports', $customName);
+                    if ($cldRes['success'] && !empty($cldRes['url'])) {
+                        $fotoPaths[] = $cldRes['url'];
+                    } else {
+                        $uploadDir = FCPATH . 'uploads/cs/';
+                        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+                        $cleanLocalName = 'unit_action_' . $id . '_' . substr(uniqid(), -4) . '.' . $file->guessExtension();
+                        $file->move($uploadDir, $cleanLocalName);
+                        $fotoPaths[] = $cleanLocalName;
+                    }
+                }
+            }
+        }
+
+        $statusUpdate = $this->request->getPost('status_usulan') ?: 'Diproses';
+        if (!in_array($statusUpdate, ['Diproses', 'Selesai'])) {
+            $statusUpdate = 'Diproses';
+        }
+
+        $this->csModel->update($id, [
+            'tanggapan_unit'          => $tanggapanUnit,
+            'foto_tindakan_unit'      => !empty($fotoPaths) ? json_encode(array_values($fotoPaths)) : null,
+            'nama_penanggap_unit'     => $session->get('nama_lengkap') ?: $session->get('username'),
+            'ditanggapi_unit_user_id' => $session->get('userId'),
+            'ditanggapi_unit_at'      => date('Y-m-d H:i:s'),
+            'status'                  => $statusUpdate
+        ]);
+
+        return redirect()->to(base_url('app/laporan-kebersihan') . '?tab=aduan_unit')->with('success', 'Tanggapan & tindakan dari unit berhasil disimpan!');
+    }
+
+    public function isDayActive($hariAktif, $date = null)
+    {
+        if (empty($hariAktif) || $hariAktif === 'Setiap Hari') {
+            return true;
+        }
+
+        $timestamp = $date ? strtotime($date) : time();
+        $dayNum = (int)date('N', $timestamp); // 1 = Senin, ..., 7 = Ahad
+        $dayNameIndo = match ($dayNum) {
+            1 => 'Senin',
+            2 => 'Selasa',
+            3 => 'Rabu',
+            4 => 'Kamis',
+            5 => 'Jumat',
+            6 => 'Sabtu',
+            7 => 'Ahad',
+        };
+
+        if ($hariAktif === 'Senin - Jumat' || $hariAktif === 'Senin - Jum\'at') {
+            return $dayNum >= 1 && $dayNum <= 5;
+        }
+        if ($hariAktif === 'Sabtu & Ahad' || $hariAktif === 'Sabtu - Ahad' || $hariAktif === 'Weekend' || $hariAktif === 'Sabtu & Minggu') {
+            return $dayNum === 6 || $dayNum === 7;
+        }
+        if (stripos($hariAktif, 'Jumat') !== false && (stripos($hariAktif, 'Bersih') !== false || stripos($hariAktif, 'Khusus') !== false || stripos($hariAktif, 'Tiap') !== false || stripos($hariAktif, 'Seminggu') !== false)) {
+            return $dayNum === 5;
+        }
+        if ((stripos($hariAktif, 'Ahad') !== false || stripos($hariAktif, 'Minggu') !== false) && (stripos($hariAktif, 'Bersih') !== false || stripos($hariAktif, 'Kerja Bakti') !== false || stripos($hariAktif, 'Tiap') !== false)) {
+            return $dayNum === 7;
+        }
+
+        // Check specific day name match
+        if (stripos($hariAktif, $dayNameIndo) !== false) {
+            return true;
+        }
+        if ($dayNum === 7 && stripos($hariAktif, 'Minggu') !== false) {
+            return true;
+        }
+
+        return false;
     }
 
     public function laporWilayah()
@@ -209,6 +364,8 @@ class AppPortal extends BaseController
             $penugasanList = $this->penugasanModel->getPenugasanWithUnit();
         }
 
+        $activeCountToday = 0;
+
         // Attach master photos, active CS reports, and today's report status for each assigned zone
         foreach ($penugasanList as &$p) {
             $p['fotos'] = $this->fotoModel->getByWilayah($p['wilayah_id']);
@@ -221,6 +378,13 @@ class AppPortal extends BaseController
                 ->orderBy('id', 'DESC')
                 ->findAll();
             $p['active_cs_count'] = count($p['active_cs_reports']);
+
+            // Check if active today based on flexible hari_aktif
+            $hariAktif = $p['hari_aktif'] ?? 'Setiap Hari';
+            $p['is_active_today'] = $this->isDayActive($hariAktif, $today);
+            if ($p['is_active_today']) {
+                $activeCountToday++;
+            }
 
             // Check if reported today for this shift
             $todayReport = $this->laporanModel
@@ -257,10 +421,15 @@ class AppPortal extends BaseController
                 ->findAll();
         }
 
+        // Ambil semua master wilayah untuk opsi penambahan shift ke wilayah yang sudah ada
+        $allMasterWilayah = $this->wilayahModel->orderBy('nama_wilayah', 'ASC')->findAll();
+
         $data = [
             'title'                 => 'Lapor Kebersihan Wilayah Tugas - GEMERLAP K3L',
             'userUnit'              => $userUnit,
             'penugasanList'         => $penugasanList,
+            'allMasterWilayah'      => $allMasterWilayah,
+            'activeCountToday'      => $activeCountToday,
             'myLaporanHistory'      => $myLaporanHistory,
             'csReportsForMyWilayah' => $csReportsForMyWilayah,
             'todayDate'             => $today
@@ -278,13 +447,10 @@ class AppPortal extends BaseController
         $wilayahId      = (int)$this->request->getPost('wilayah_id');
         $penugasanId    = (int)($this->request->getPost('penugasan_id') ?: 0);
         $shift          = $this->request->getPost('shift') ?: 'Pagi';
-        $tanggalLapor   = $this->request->getPost('tanggal_lapor') ?: date('Y-m-d');
         $jamLapor       = $this->request->getPost('jam_lapor') ?: date('H:i');
-        $nilaiKebersihan = (int)$this->request->getPost('nilai_kebersihan');
-        $catatan        = trim($this->request->getPost('catatan') ?: '');
-
-        if ($nilaiKebersihan < 0) $nilaiKebersihan = 0;
-        if ($nilaiKebersihan > 100) $nilaiKebersihan = 100;
+        $nilaiKebersihan= (int)($this->request->getPost('nilai_kebersihan') ?? 85);
+        $catatan        = trim($this->request->getPost('catatan') ?? '');
+        $tanggalLapor   = date('Y-m-d');
 
         $wilayah = $this->wilayahModel->find($wilayahId);
         if (!$wilayah) {
@@ -367,16 +533,46 @@ class AppPortal extends BaseController
             return redirect()->to('/app/lapor-wilayah')->with('error', 'Akun Anda belum terhubung ke unit manapun.');
         }
 
+        $isExistingMode = (int)($this->request->getPost('is_existing_wilayah') ?? 0);
+        $existingWilayahId = (int)($this->request->getPost('existing_wilayah_id') ?? 0);
+
+        $shift        = $this->request->getPost('shift') ?: 'Pagi';
+        $jamMulai     = $this->request->getPost('jam_mulai') ?: '06:00';
+        $jamSelesai   = $this->request->getPost('jam_selesai') ?: '07:30';
+        $hariAktif    = $this->request->getPost('hari_aktif') ?: 'Setiap Hari';
+        $customDays   = $this->request->getPost('hari_custom');
+        if ($hariAktif === 'Custom' && !empty($customDays) && is_array($customDays)) {
+            $hariAktif = implode(', ', $customDays);
+        }
+        $keterangan   = trim($this->request->getPost('keterangan') ?? '');
+
+        // JIKA MENAMBAHKAN SHIFT PADA WILAYAH YANG SUDAH ADA
+        if ($isExistingMode && $existingWilayahId > 0) {
+            $existingW = $this->wilayahModel->find($existingWilayahId);
+            if (!$existingW) {
+                return redirect()->to('/app/lapor-wilayah')->with('error', 'Wilayah yang dipilih tidak ditemukan.');
+            }
+
+            $this->penugasanModel->insert([
+                'wilayah_id'  => $existingWilayahId,
+                'unit_id'     => $unitId,
+                'shift'       => $shift,
+                'jam_mulai'   => $jamMulai,
+                'jam_selesai' => $jamSelesai,
+                'hari_aktif'  => $hariAktif,
+                'keterangan'  => $keterangan
+            ]);
+
+            return redirect()->to('/app/lapor-wilayah')->with('success', 'Jadwal shift baru (' . $shift . ' - ' . $hariAktif . ') untuk wilayah "' . $existingW['nama_wilayah'] . '" berhasil ditambahkan ke daftar tugas unit Anda!');
+        }
+
+        // JIKA MENDAFTARKAN MASTER WILAYAH BARU BESERTA SHIFT
         $namaWilayah  = trim($this->request->getPost('nama_wilayah') ?? '');
         $kategoriArea = $this->request->getPost('kategori_area') ?: 'Lainnya';
         $kodeWilayah  = trim($this->request->getPost('kode_wilayah') ?? '');
         $lokasiGedung = trim($this->request->getPost('lokasi_gedung') ?? '');
         $luasArea     = trim($this->request->getPost('luas_area') ?? '');
         $deskripsi    = trim($this->request->getPost('deskripsi') ?? '');
-        $shift        = $this->request->getPost('shift') ?: 'Pagi';
-        $jamMulai     = $this->request->getPost('jam_mulai') ?: '06:00';
-        $jamSelesai   = $this->request->getPost('jam_selesai') ?: '07:30';
-        $keterangan   = trim($this->request->getPost('keterangan') ?? '');
 
         if (empty($namaWilayah)) {
             return redirect()->to('/app/lapor-wilayah')->with('error', 'Nama wilayah / area wajib diisi.');
@@ -418,6 +614,7 @@ class AppPortal extends BaseController
             'shift'       => $shift,
             'jam_mulai'   => $jamMulai,
             'jam_selesai' => $jamSelesai,
+            'hari_aktif'  => $hariAktif,
             'keterangan'  => $keterangan
         ]);
 
@@ -459,7 +656,7 @@ class AppPortal extends BaseController
             }
         }
 
-        return redirect()->to('/app/lapor-wilayah')->with('success', 'Wilayah tugas baru "' . $namaWilayah . '" (Shift ' . $shift . ') berhasil ditambahkan dan langsung aktif di daftar tugas unit Anda!');
+        return redirect()->to('/app/lapor-wilayah')->with('success', 'Wilayah tugas baru "' . $namaWilayah . '" (Shift ' . $shift . ' - ' . $hariAktif . ') berhasil ditambahkan dan langsung aktif di daftar tugas unit Anda!');
     }
 
     public function deleteWilayahTugas($penugasanId)

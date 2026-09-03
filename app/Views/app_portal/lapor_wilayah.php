@@ -58,20 +58,27 @@
     <!-- Assigned Zones Section: 4 Cards Per Row -->
     <div class="space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-wrap">
-            <h2 class="font-heading font-extrabold text-base sm:text-lg text-slate-900 flex items-center gap-2">
-                <i class="fa-solid fa-list-check text-emerald-600"></i> Wilayah Tugas Kebersihan Hari Ini (<?= date('d M Y') ?>)
-            </h2>
-            <div class="flex items-center gap-2.5 flex-wrap">
+            <div>
+                <h2 class="font-heading font-extrabold text-base sm:text-lg text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-emerald-600"></i> Wilayah Tugas Kebersihan Hari Ini (<?= date('d M Y') ?>)
+                </h2>
+                <p class="text-xs text-slate-500 font-medium">Terdapat <strong class="text-emerald-700 font-bold"><?= $activeCountToday ?> wilayah</strong> yang terjadwal aktif dan wajib dilaporkan hari ini.</p>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
                 <div class="relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
-                    <input type="text" id="searchAssignedCardInput" onkeyup="filterAssignedCards()" placeholder="Cari wilayah / shift..." class="pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-2xs">
+                    <input type="text" id="searchAssignedCardInput" onkeyup="filterAssignedCards()" placeholder="Cari wilayah / shift / hari..." class="pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-2xs">
                 </div>
+                <button type="button" onclick="openModalTambahShiftExisting()" class="px-3.5 py-1.5 rounded-xl bg-white hover:bg-emerald-50 text-emerald-700 font-heading font-extrabold text-xs border border-emerald-300 transition flex items-center justify-center gap-1.5 shadow-2xs hover:-translate-y-0.5 whitespace-nowrap">
+                    <i class="fa-solid fa-clock text-emerald-600"></i>
+                    <span>+ Shift Wilayah Ada</span>
+                </button>
                 <button type="button" onclick="openModalTambahWilayahUnit()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 whitespace-nowrap">
                     <i class="fa-solid fa-plus-circle"></i>
-                    <span>Tambah Wilayah Tugas</span>
+                    <span>+ Wilayah Baru</span>
                 </button>
                 <span class="text-xs font-extrabold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200/80 whitespace-nowrap">
-                    <?= count($penugasanList ?? []) ?> Wilayah
+                    <?= $activeCountToday ?> / <?= count($penugasanList ?? []) ?> Aktif
                 </span>
             </div>
         </div>
@@ -128,6 +135,14 @@
                                         <i class="fa-solid <?= $shiftIcon ?> mr-0.5"></i> <?= esc($p['shift']) ?> (<?= esc($p['jam_mulai']) ?>-<?= esc($p['jam_selesai']) ?>)
                                     </span>
                                 </div>
+                            </div>
+
+                            <!-- Bottom Floating Badges: Hari Aktif -->
+                            <div class="absolute bottom-2 left-2 flex items-center gap-1">
+                                <span class="px-2 py-0.5 rounded-lg bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-bold shadow-2xs flex items-center gap-1">
+                                    <i class="fa-regular fa-calendar text-emerald-400 text-[8.5px]"></i>
+                                    <span><?= esc($p['hari_aktif'] ?: 'Setiap Hari') ?></span>
+                                </span>
                             </div>
 
                             <?php if (!empty($p['primary_foto'])): ?>
@@ -229,13 +244,14 @@
                                             </button>
                                         </div>
                                     </div>
-                                <?php else: ?>
+                                <?php elseif (!empty($p['is_active_today'])): ?>
+                                    <!-- Hari ini Wajib Lapor -->
                                     <div class="p-3 rounded-2xl bg-rose-50/90 border border-rose-200 space-y-2 shadow-2xs">
                                         <div class="flex items-center justify-between gap-1">
                                             <div class="inline-flex items-center gap-1.5 text-[11px] font-heading font-extrabold text-rose-900">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
                                                 <i class="fa-solid fa-clock text-rose-600 text-xs"></i>
-                                                <span>Belum Lapor</span>
+                                                <span>Belum Lapor (Wajib Hari Ini)</span>
                                             </div>
                                             <span class="text-[9px] font-bold text-rose-600 bg-rose-100 px-1.5 py-0.5 rounded-md">
                                                 Shift <?= esc($p['shift']) ?>
@@ -244,7 +260,25 @@
 
                                         <button type="button" onclick="openModalLapor(<?= htmlspecialchars(json_encode($p)) ?>)" class="w-full py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5">
                                             <i class="fa-solid fa-paper-plane text-[11px]"></i>
-                                            <span>Kirim Laporan</span>
+                                            <span>Kirim Laporan Hari Ini</span>
+                                        </button>
+                                    </div>
+                                <?php else: ?>
+                                    <!-- Hari ini Di Luar Jadwal (Tidak Wajib) -->
+                                    <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2 shadow-2xs">
+                                        <div class="flex items-center justify-between gap-1">
+                                            <div class="inline-flex items-center gap-1.5 text-[11px] font-heading font-extrabold text-slate-600">
+                                                <i class="fa-solid fa-calendar-xmark text-slate-400 text-xs"></i>
+                                                <span>Bukan Jadwal Hari Ini</span>
+                                            </div>
+                                            <span class="text-[9px] font-bold text-slate-600 bg-slate-200/80 px-1.5 py-0.5 rounded-md truncate max-w-[110px]" title="<?= esc($p['hari_aktif'] ?: 'Khusus') ?>">
+                                                <?= esc($p['hari_aktif'] ?: 'Khusus') ?>
+                                            </span>
+                                        </div>
+
+                                        <button type="button" onclick="openModalLapor(<?= htmlspecialchars(json_encode($p)) ?>)" class="w-full py-1.5 rounded-xl bg-white hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 font-heading font-extrabold text-xs transition border border-slate-200 flex items-center justify-center gap-1.5 shadow-2xs">
+                                            <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                                            <span>Lapor Ekstra (Di Luar Jadwal)</span>
                                         </button>
                                     </div>
                                 <?php endif; ?>
@@ -779,6 +813,34 @@
                                 <input type="time" name="jam_selesai" value="07:30" class="w-full px-1.5 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
                             </div>
                         </div>
+
+                        <!-- Hari Aktif Fleksibel -->
+                        <div class="pt-1 border-t border-emerald-200/60 space-y-1.5">
+                            <div>
+                                <label class="block text-[9px] font-bold text-slate-600 uppercase mb-0.5">Hari Aktif / Frekuensi Tugas</label>
+                                <select name="hari_aktif" onchange="toggleCustomDays(this, 'custom_days_new_wilayah')" class="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                                    <option value="Setiap Hari">Setiap Hari (Senin - Ahad)</option>
+                                    <option value="Senin - Jumat">Senin - Jumat (Hari Sekolah)</option>
+                                    <option value="Sabtu & Ahad">Sabtu & Ahad (Weekend)</option>
+                                    <option value="Jumat Bersih">Jumat Bersih (Seminggu Sekali)</option>
+                                    <option value="Ahad Bersih">Ahad Bersih (Seminggu Sekali)</option>
+                                    <option value="Custom">Pilih Hari Tertentu (Kustom)...</option>
+                                </select>
+                            </div>
+
+                            <div id="custom_days_new_wilayah" class="hidden p-2 rounded-xl bg-white border border-slate-200 space-y-1">
+                                <div class="text-[9px] font-bold text-slate-500 uppercase">Centang hari aktif tugas:</div>
+                                <div class="grid grid-cols-4 gap-1 text-[10px] font-extrabold text-slate-700">
+                                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Senin" class="rounded text-emerald-600"> Sen</label>
+                                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Selasa" class="rounded text-emerald-600"> Sel</label>
+                                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Rabu" class="rounded text-emerald-600"> Rab</label>
+                                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Kamis" class="rounded text-emerald-600"> Kam</label>
+                                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Jumat" class="rounded text-emerald-600"> Jum</label>
+                                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Sabtu" class="rounded text-emerald-600"> Sab</label>
+                                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Ahad" class="rounded text-emerald-600"> Ahd</label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Foto Upload Block -->
@@ -811,7 +873,137 @@
     </div>
 </div>
 
+<!-- Modal Tambah Shift pada Wilayah yang Sudah Ada -->
+<div id="modalTambahShiftExisting" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+            <div class="flex items-center gap-2.5">
+                <span class="w-9 h-9 rounded-2xl bg-teal-100/80 text-teal-700 flex items-center justify-center text-sm shadow-2xs flex-shrink-0">
+                    <i class="fa-solid fa-clock"></i>
+                </span>
+                <div>
+                    <h3 class="font-heading font-extrabold text-base sm:text-lg text-slate-900 leading-tight">
+                        Tambah Shift Wilayah Tugas
+                    </h3>
+                    <p class="text-[11px] text-slate-500 font-medium">Pilih wilayah yang sudah terdaftar, lalu tentukan jadwal shift untuk unit Anda.</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeModalTambahShiftExisting()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition flex-shrink-0">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <form action="<?= base_url('app/wilayah-tugas/store') ?>" method="POST" class="space-y-3.5">
+            <input type="hidden" name="is_existing_wilayah" value="1">
+
+            <!-- Pilih Wilayah Master Terdaftar -->
+            <div>
+                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Pilih Wilayah Kebersihan <span class="text-rose-500">*</span></label>
+                <select name="existing_wilayah_id" required class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                    <option value="">-- Pilih Wilayah / Area Spot --</option>
+                    <?php if (!empty($allMasterWilayah)): ?>
+                        <?php foreach ($allMasterWilayah as $mw): ?>
+                            <option value="<?= $mw['id'] ?>">
+                                <?= esc($mw['nama_wilayah']) ?> (<?= esc($mw['lokasi_gedung'] ?: $mw['kategori_area']) ?>) &bull; <?= esc($mw['kode_wilayah']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
+            </div>
+
+            <!-- Shift & Jam -->
+            <div class="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 space-y-2.5">
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Shift</label>
+                        <select name="shift" class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs font-extrabold bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                            <option value="Pagi">🌅 Pagi</option>
+                            <option value="Siang">☀️ Siang</option>
+                            <option value="Sore">🌇 Sore</option>
+                            <option value="Malam">🌙 Malam</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Jam Mulai</label>
+                        <input type="time" name="jam_mulai" value="06:00" class="w-full px-2 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Jam Selesai</label>
+                        <input type="time" name="jam_selesai" value="07:30" class="w-full px-2 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                    </div>
+                </div>
+
+                <!-- Hari Aktif Fleksibel -->
+                <div class="pt-2 border-t border-emerald-200/70 space-y-1.5">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Hari Aktif / Frekuensi Tugas</label>
+                        <select name="hari_aktif" onchange="toggleCustomDays(this, 'custom_days_existing_wilayah')" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                            <option value="Setiap Hari">Setiap Hari (Senin s/d Ahad)</option>
+                            <option value="Senin - Jumat">Senin - Jumat (Hari Sekolah)</option>
+                            <option value="Sabtu & Ahad">Sabtu & Ahad (Weekend)</option>
+                            <option value="Jumat Bersih">Jumat Bersih (Seminggu Sekali)</option>
+                            <option value="Ahad Bersih">Ahad Bersih (Seminggu Sekali)</option>
+                            <option value="Custom">Pilih Hari Tertentu (Kustom)...</option>
+                        </select>
+                    </div>
+
+                    <div id="custom_days_existing_wilayah" class="hidden p-2.5 rounded-xl bg-white border border-slate-200 space-y-1.5">
+                        <div class="text-[10px] font-bold text-slate-500 uppercase">Centang hari aktif tugas:</div>
+                        <div class="grid grid-cols-4 gap-1 text-[11px] font-extrabold text-slate-700">
+                            <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Senin" class="rounded text-emerald-600"> Sen</label>
+                            <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Selasa" class="rounded text-emerald-600"> Sel</label>
+                            <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Rabu" class="rounded text-emerald-600"> Rab</label>
+                            <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Kamis" class="rounded text-emerald-600"> Kam</label>
+                            <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Jumat" class="rounded text-emerald-600"> Jum</label>
+                            <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Sabtu" class="rounded text-emerald-600"> Sab</label>
+                            <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Ahad" class="rounded text-emerald-600"> Ahd</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Petunjuk / Keterangan -->
+            <div>
+                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Petunjuk Kerja / Jobdesk (Opsional)</label>
+                <input type="text" name="keterangan" placeholder="Contoh: Fokus pel lantai selasar dan bersihkan bak sampah..." class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+            </div>
+
+            <!-- Modal Footer Action Buttons -->
+            <div class="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
+                <button type="button" onclick="closeModalTambahShiftExisting()" class="px-4 py-2 rounded-xl text-slate-600 text-xs font-bold hover:bg-slate-100 transition">Batal</button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-extrabold hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>Simpan Shift Tugas</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+    function toggleCustomDays(selectEl, containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        if (selectEl.value === 'Custom') {
+            container.classList.remove('hidden');
+        } else {
+            container.classList.add('hidden');
+        }
+    }
+    window.toggleCustomDays = toggleCustomDays;
+
+    function openModalTambahShiftExisting() {
+        const modal = document.getElementById('modalTambahShiftExisting');
+        if (modal) modal.classList.remove('hidden');
+    }
+    window.openModalTambahShiftExisting = openModalTambahShiftExisting;
+
+    function closeModalTambahShiftExisting() {
+        const modal = document.getElementById('modalTambahShiftExisting');
+        if (modal) modal.classList.add('hidden');
+    }
+    window.closeModalTambahShiftExisting = closeModalTambahShiftExisting;
     function updateSliderUI(val) {
         val = parseInt(val) || 0;
         const slider = document.getElementById('scoreRangeInput');

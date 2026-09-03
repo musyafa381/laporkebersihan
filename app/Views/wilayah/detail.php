@@ -594,13 +594,28 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Hari Aktif</label>
-                    <select name="hari_aktif" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                        <option value="Setiap Hari">Setiap Hari</option>
-                        <option value="Senin - Jumat">Senin - Jumat</option>
-                        <option value="Sabtu & Ahad">Sabtu & Ahad</option>
-                        <option value="Jumat Bersih">Jumat Bersih</option>
+                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Hari Aktif / Frekuensi</label>
+                    <select name="hari_aktif" onchange="toggleCustomDays(this, 'custom_days_tambah_penugasan')" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                        <option value="Setiap Hari">Setiap Hari (Senin s/d Ahad)</option>
+                        <option value="Senin - Jumat">Senin - Jumat (Hari Sekolah/Kerja)</option>
+                        <option value="Sabtu & Ahad">Sabtu & Ahad (Weekend)</option>
+                        <option value="Jumat Bersih">Jumat Bersih (Seminggu Sekali)</option>
+                        <option value="Ahad Bersih">Ahad Bersih (Seminggu Sekali)</option>
+                        <option value="Custom">Pilih Hari Tertentu (Kustom)...</option>
                     </select>
+                </div>
+            </div>
+
+            <div id="custom_days_tambah_penugasan" class="hidden p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <div class="text-[10px] font-bold text-slate-500 uppercase">Centang hari aktif jadwal tugas ini:</div>
+                <div class="grid grid-cols-4 sm:grid-cols-7 gap-1.5 text-xs font-extrabold text-slate-700">
+                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Senin" class="rounded text-emerald-600"> Sen</label>
+                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Selasa" class="rounded text-emerald-600"> Sel</label>
+                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Rabu" class="rounded text-emerald-600"> Rab</label>
+                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Kamis" class="rounded text-emerald-600"> Kam</label>
+                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Jumat" class="rounded text-emerald-600"> Jum</label>
+                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Sabtu" class="rounded text-emerald-600"> Sab</label>
+                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Ahad" class="rounded text-emerald-600"> Ahd</label>
                 </div>
             </div>
 
@@ -690,13 +705,28 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Hari Aktif</label>
-                    <select name="hari_aktif" id="edit_penugasan_hari" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                        <option value="Setiap Hari">Setiap Hari</option>
-                        <option value="Senin - Jumat">Senin - Jumat</option>
-                        <option value="Sabtu & Ahad">Sabtu & Ahad</option>
-                        <option value="Jumat Bersih">Jumat Bersih</option>
+                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Hari Aktif / Frekuensi</label>
+                    <select name="hari_aktif" id="edit_penugasan_hari" onchange="toggleCustomDays(this, 'custom_days_edit_penugasan')" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                        <option value="Setiap Hari">Setiap Hari (Senin s/d Ahad)</option>
+                        <option value="Senin - Jumat">Senin - Jumat (Hari Sekolah/Kerja)</option>
+                        <option value="Sabtu & Ahad">Sabtu & Ahad (Weekend)</option>
+                        <option value="Jumat Bersih">Jumat Bersih (Seminggu Sekali)</option>
+                        <option value="Ahad Bersih">Ahad Bersih (Seminggu Sekali)</option>
+                        <option value="Custom">Pilih Hari Tertentu (Kustom)...</option>
                     </select>
+                </div>
+            </div>
+
+            <div id="custom_days_edit_penugasan" class="hidden p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <div class="text-[10px] font-bold text-slate-500 uppercase">Centang hari aktif jadwal tugas ini:</div>
+                <div class="grid grid-cols-4 sm:grid-cols-7 gap-1.5 text-xs font-extrabold text-slate-700">
+                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Senin" class="edit-hari-cb rounded text-emerald-600"> Sen</label>
+                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Selasa" class="edit-hari-cb rounded text-emerald-600"> Sel</label>
+                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Rabu" class="edit-hari-cb rounded text-emerald-600"> Rab</label>
+                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Kamis" class="edit-hari-cb rounded text-emerald-600"> Kam</label>
+                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Jumat" class="edit-hari-cb rounded text-emerald-600"> Jum</label>
+                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Sabtu" class="edit-hari-cb rounded text-emerald-600"> Sab</label>
+                    <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" name="hari_custom[]" value="Ahad" class="edit-hari-cb rounded text-emerald-600"> Ahd</label>
                 </div>
             </div>
 
@@ -840,6 +870,17 @@
     }
     window.closeModalTambahPenugasan = closeModalTambahPenugasan;
 
+    function toggleCustomDays(selectEl, containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        if (selectEl.value === 'Custom') {
+            container.classList.remove('hidden');
+        } else {
+            container.classList.add('hidden');
+        }
+    }
+    window.toggleCustomDays = toggleCustomDays;
+
     // Searchable Penugasan Unit Picker Logic (Tambah)
     function openPenugasanUnitDropdown() {
         const list = document.getElementById('penugasanUnitDropdownList');
@@ -917,11 +958,26 @@
         if (hiddenId) hiddenId.value = item.unit_id || '';
         if (searchInput) searchInput.value = item.nama_unit ? (item.nama_unit + (item.tipe_unit ? ' (' + item.tipe_unit + ')' : '')) : '';
 
-        const shiftEl = document.getElementById('edit_penugasan_shift');
-        if (shiftEl) shiftEl.value = item.shift || 'Pagi';
-
         const hariEl = document.getElementById('edit_penugasan_hari');
-        if (hariEl) hariEl.value = item.hari_aktif || 'Setiap Hari';
+        const customBox = document.getElementById('custom_days_edit_penugasan');
+        const standardOptions = ['Setiap Hari', 'Senin - Jumat', 'Sabtu & Ahad', 'Jumat Bersih', 'Ahad Bersih'];
+        
+        if (hariEl) {
+            const hVal = item.hari_aktif || 'Setiap Hari';
+            if (standardOptions.includes(hVal)) {
+                hariEl.value = hVal;
+                if (customBox) customBox.classList.add('hidden');
+            } else {
+                hariEl.value = 'Custom';
+                if (customBox) {
+                    customBox.classList.remove('hidden');
+                    const cbs = customBox.querySelectorAll('.edit-hari-cb');
+                    cbs.forEach(cb => {
+                        cb.checked = hVal.toLowerCase().includes(cb.value.toLowerCase());
+                    });
+                }
+            }
+        }
 
         const jamMulaiEl = document.getElementById('edit_penugasan_jam_mulai');
         if (jamMulaiEl) jamMulaiEl.value = item.jam_mulai || '06:00';

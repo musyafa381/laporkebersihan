@@ -34,11 +34,43 @@
         </div>
     </div>
 
+    <!-- Toolbar Filter & Search -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+        <!-- Status Filter Pills -->
+        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <button type="button" onclick="setBukuFilterStatus('all')" id="buku-pill-all" class="buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-200 border bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20">
+                <i class="fa-solid fa-layer-group mr-1.5"></i> Semua (<?= count($buku_list ?? []) ?>)
+            </button>
+            <button type="button" onclick="setBukuFilterStatus('aktif')" id="buku-pill-aktif" class="buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-200 border bg-white text-slate-700 border-slate-200 hover:bg-slate-50">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-1.5"></span> Aktif
+            </button>
+            <button type="button" onclick="setBukuFilterStatus('draft proker')" id="buku-pill-draft" class="buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-200 border bg-white text-slate-700 border-slate-200 hover:bg-slate-50">
+                <span class="w-2 h-2 rounded-full bg-amber-500 inline-block mr-1.5"></span> Draft Proker
+            </button>
+            <button type="button" onclick="setBukuFilterStatus('selesai')" id="buku-pill-selesai" class="buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-200 border bg-white text-slate-700 border-slate-200 hover:bg-slate-50">
+                <span class="w-2 h-2 rounded-full bg-blue-500 inline-block mr-1.5"></span> Selesai
+            </button>
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative w-full sm:w-80">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+            <input type="text" id="searchBukuInput" oninput="filterBukuCards()" placeholder="Cari bulan, tahun, judul LPJ..." class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 bg-white text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs placeholder-slate-400">
+            <button type="button" id="clearSearchBukuBtn" onclick="clearSearchBuku()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs hidden" title="Hapus Pencarian">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </button>
+        </div>
+    </div>
+
     <!-- Grid List Buku Bulanan -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+    <div id="bukuCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
         <?php if (!empty($buku_list)): ?>
             <?php foreach ($buku_list as $buku): ?>
-                <div class="group bg-white rounded-3xl p-6 shadow-md hover:shadow-2xl transition-all duration-300 border border-slate-200/80 hover:-translate-y-1.5 flex flex-col justify-between relative overflow-hidden">
+                <div class="buku-card group bg-white rounded-3xl p-6 shadow-md hover:shadow-2xl transition-all duration-300 border border-slate-200/80 hover:-translate-y-1.5 flex flex-col justify-between relative overflow-hidden"
+                     data-bulan="<?= strtolower(esc($buku['bulan'])) ?>"
+                     data-tahun="<?= esc($buku['tahun']) ?>"
+                     data-judul="<?= strtolower(esc($buku['judul'])) ?>"
+                     data-status="<?= strtolower(esc($buku['status'] ?: 'aktif')) ?>">
                     
                     <!-- Decorative Top Border Gradient -->
                     <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r 
@@ -109,15 +141,32 @@
 
                     <!-- Bottom Action Buttons -->
                     <div class="pt-4 border-t border-slate-100 flex items-center gap-2">
-                        <a href="<?= base_url('buku/detail/' . $buku['id']) ?>" class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs text-center hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 hover:shadow-lg hover:-translate-y-0.5">
-                            <i class="fa-solid fa-folder-open"></i> Kelola & Isi LPJ
+                        <a href="<?= base_url('buku/detail/' . $buku['id']) ?>" class="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs text-center hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 hover:shadow-lg hover:-translate-y-0.5">
+                            <i class="fa-solid fa-folder-open"></i> <span>Kelola & Isi LPJ</span>
                         </a>
-                        <a href="<?= base_url('buku/cetak/' . $buku['id']) ?>" target="_blank" class="py-2.5 px-3.5 rounded-xl bg-emerald-50 text-emerald-700 font-bold text-xs hover:bg-emerald-100 transition border border-emerald-200 flex items-center justify-center" title="Cetak / Export PDF">
+                        <button type="button" onclick="openModalPreviewDoc(<?= $buku['id'] ?>, 'Buku LPJ <?= esc(addslashes($buku['bulan'] . ' ' . $buku['tahun'])) ?>')" class="py-2.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-extrabold text-xs transition-all duration-200 border border-emerald-200/90 flex items-center justify-center gap-1.5 shadow-2xs" title="Preview Hasil Dokumen LPJ Langsung">
+                            <i class="fa-solid fa-eye text-emerald-600"></i>
+                        </button>
+                        <a href="<?= base_url('buku/cetak/' . $buku['id']) ?>" target="_blank" class="py-2.5 px-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 transition border border-slate-200 flex items-center justify-center" title="Buka Halaman Cetak (Tab Baru)">
                             <i class="fa-solid fa-print"></i>
                         </a>
                     </div>
                 </div>
             <?php endforeach; ?>
+
+            <!-- No search results alert -->
+            <div id="noBukuFoundAlert" class="col-span-full py-14 text-center bg-white rounded-3xl border border-slate-200 shadow-sm space-y-3 hidden">
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 mx-auto flex items-center justify-center text-xl shadow-inner">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <div>
+                    <h4 class="font-heading font-extrabold text-slate-800 text-sm">Tidak Ditemukan Buku LPJ</h4>
+                    <p class="text-slate-500 text-xs mt-0.5">Coba gunakan kata kunci pencarian atau filter status yang lain.</p>
+                </div>
+                <button type="button" onclick="resetBukuFilters()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+                    Reset Pencarian
+                </button>
+            </div>
         <?php else: ?>
             <div class="col-span-full py-20 text-center bg-white rounded-3xl border border-slate-200 shadow-sm space-y-4">
                 <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center text-3xl">
@@ -133,6 +182,23 @@
             </div>
         <?php endif; ?>
     </div>
+
+    <!-- Pagination Footer for Buku LPJ Cards -->
+    <?php if (!empty($buku_list)): ?>
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200/80 px-1 mt-6" id="bukuPaginationContainer">
+        <div class="text-xs font-semibold text-slate-500 flex items-center gap-2">
+            <span id="bukuPageInfo">Menampilkan <?= !empty($buku_list) ? ('1 - ' . min(6, count($buku_list)) . ' dari ' . count($buku_list) . ' buku') : '0 buku' ?></span>
+            <select id="bukuPageSize" onchange="changeBukuPageSize(this.value)" class="ml-2 px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs">
+                <option value="6" selected>6 / hal</option>
+                <option value="9">9 / hal</option>
+                <option value="12">12 / hal</option>
+                <option value="24">24 / hal</option>
+                <option value="all">Semua</option>
+            </select>
+        </div>
+        <div class="flex items-center gap-1.5" id="bukuPageButtons"></div>
+    </div>
+    <?php endif; ?>
 </div>
 
 <!-- Modal 1: Buat Buku Baru -->
@@ -241,6 +307,57 @@
     </div>
 </div>
 
+<!-- Modal 3: Quick Preview Dokumen LPJ -->
+<div id="modalPreviewDoc" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md hidden flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden">
+    <div class="bg-white rounded-3xl max-w-5xl w-full h-[92vh] max-h-[900px] shadow-2xl flex flex-col border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200">
+        <!-- Preview Modal Header -->
+        <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 bg-slate-50/80 flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-cyan-600 to-teal-500 text-white flex items-center justify-center shadow-md shadow-cyan-600/20 flex-shrink-0">
+                    <i class="fa-solid fa-file-invoice text-sm"></i>
+                </div>
+                <div>
+                    <h3 id="previewDocTitle" class="font-heading font-extrabold text-sm sm:text-base text-slate-900 leading-tight">
+                        Preview Dokumen LPJ
+                    </h3>
+                    <p class="text-[11px] text-slate-500 font-medium">Tampilan langsung hasil dokumen tanpa meninggalkan halaman</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <a id="previewOpenTabBtn" href="#" target="_blank" class="py-2 px-3 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition border border-slate-200 shadow-2xs" title="Buka di tab baru">
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-slate-500"></i>
+                    <span class="hidden sm:inline">Tab Baru</span>
+                </a>
+                <button type="button" onclick="printPreviewIframe()" class="py-2 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition" title="Cetak Dokumen">
+                    <i class="fa-solid fa-print"></i>
+                    <span class="hidden sm:inline">Cetak</span>
+                </button>
+                <button type="button" onclick="closeModalPreviewDoc()" class="w-8 h-8 rounded-xl bg-slate-200/80 hover:bg-rose-100 hover:text-rose-600 text-slate-500 flex items-center justify-center transition" title="Tutup Preview">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Preview Modal Body (Iframe) -->
+        <div class="flex-1 w-full bg-slate-100 overflow-hidden relative">
+            <!-- Loading Indicator -->
+            <div id="previewIframeLoader" class="absolute inset-0 flex flex-col items-center justify-center bg-white/95 z-10 gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i>
+                </div>
+                <div class="text-center">
+                    <div class="text-xs font-extrabold text-slate-800">Memuat Tampilan Dokumen LPJ...</div>
+                    <div class="text-[11px] text-slate-400 font-medium mt-0.5">Menyiapkan layout lembar laporan</div>
+                </div>
+            </div>
+
+            <!-- Preview Iframe -->
+            <iframe id="previewDocIframe" src="" class="w-full h-full border-0 bg-white" onload="handleIframeLoaded()"></iframe>
+        </div>
+    </div>
+</div>
+
 <script>
     function openModalCreate() {
         const modal = document.getElementById('modalCreate');
@@ -284,6 +401,274 @@
         if (modal) modal.classList.add('hidden');
     }
     window.closeModalEdit = closeModalEdit;
+
+    // Quick Preview Modal Functions
+    function openModalPreviewDoc(id, title) {
+        const modal = document.getElementById('modalPreviewDoc');
+        const iframe = document.getElementById('previewDocIframe');
+        const loader = document.getElementById('previewIframeLoader');
+        const titleEl = document.getElementById('previewDocTitle');
+        const tabBtn = document.getElementById('previewOpenTabBtn');
+        const rawUrl = '<?= base_url('buku/cetak/') ?>' + id;
+        const embedUrl = rawUrl + '?embed=1';
+
+        if (titleEl) titleEl.innerText = 'Preview: ' + title;
+        if (tabBtn) tabBtn.href = rawUrl;
+        if (loader) loader.classList.remove('hidden');
+
+        if (iframe) {
+            iframe.src = embedUrl;
+        }
+
+        if (modal) modal.classList.remove('hidden');
+    }
+    window.openModalPreviewDoc = openModalPreviewDoc;
+
+    function handleIframeLoaded() {
+        const loader = document.getElementById('previewIframeLoader');
+        if (loader) loader.classList.add('hidden');
+    }
+    window.handleIframeLoaded = handleIframeLoaded;
+
+    function closeModalPreviewDoc() {
+        const modal = document.getElementById('modalPreviewDoc');
+        const iframe = document.getElementById('previewDocIframe');
+        if (iframe) iframe.src = '';
+        if (modal) modal.classList.add('hidden');
+    }
+    window.closeModalPreviewDoc = closeModalPreviewDoc;
+
+    function printPreviewIframe() {
+        const iframe = document.getElementById('previewDocIframe');
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+        }
+    }
+    window.printPreviewIframe = printPreviewIframe;
+
+    // Close preview modal on ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModalPreviewDoc();
+            closeModalCreate();
+            closeModalEdit();
+        }
+    });
+
+    // Client-side Search, Status Filter & Pagination Logic for Buku LPJ
+    let currentBukuStatusFilter = 'all';
+    let currentBukuPage = 1;
+    let bukuPageSize = 6;
+
+    function changeBukuPageSize(val) {
+        bukuPageSize = val === 'all' ? 999999 : parseInt(val, 10);
+        currentBukuPage = 1;
+        filterBukuCards();
+    }
+    window.changeBukuPageSize = changeBukuPageSize;
+
+    function setBukuFilterStatus(status) {
+        currentBukuStatusFilter = status;
+        currentBukuPage = 1;
+        document.querySelectorAll('.buku-filter-pill').forEach(pill => {
+            pill.className = 'buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-200 border bg-white text-slate-700 border-slate-200 hover:bg-slate-50';
+        });
+
+        const activePillId = status === 'all' ? 'buku-pill-all' : (status === 'aktif' ? 'buku-pill-aktif' : (status === 'draft proker' ? 'buku-pill-draft' : 'buku-pill-selesai'));
+        const activePill = document.getElementById(activePillId);
+        if (activePill) {
+            activePill.className = 'buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-200 border bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20';
+        }
+        filterBukuCards();
+    }
+    window.setBukuFilterStatus = setBukuFilterStatus;
+
+    function filterBukuCards() {
+        const input = document.getElementById('searchBukuInput');
+        const clearBtn = document.getElementById('clearSearchBukuBtn');
+        const query = (input?.value || '').toLowerCase().trim();
+
+        if (clearBtn) {
+            clearBtn.classList.toggle('hidden', !query);
+        }
+
+        const cards = Array.from(document.querySelectorAll('.buku-card'));
+        const matchedCards = [];
+
+        cards.forEach(card => {
+            const bulan = card.dataset.bulan || '';
+            const tahun = card.dataset.tahun || '';
+            const judul = card.dataset.judul || '';
+            const status = card.dataset.status || '';
+
+            const matchSearch = !query || bulan.includes(query) || tahun.includes(query) || judul.includes(query);
+            const matchStatus = (currentBukuStatusFilter === 'all') || (status.includes(currentBukuStatusFilter));
+
+            if (matchSearch && matchStatus) {
+                matchedCards.push(card);
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        const total = matchedCards.length;
+        const totalPages = Math.ceil(total / bukuPageSize) || 1;
+        if (currentBukuPage > totalPages) currentBukuPage = totalPages;
+        if (currentBukuPage < 1) currentBukuPage = 1;
+
+        const startIdx = (currentBukuPage - 1) * bukuPageSize;
+        const endIdx = startIdx + bukuPageSize;
+
+        matchedCards.forEach((card, idx) => {
+            if (idx >= startIdx && idx < endIdx) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Update Empty State
+        const noFoundAlert = document.getElementById('noBukuFoundAlert');
+        if (noFoundAlert) {
+            noFoundAlert.classList.toggle('hidden', total > 0 || cards.length === 0);
+        }
+
+        // Update Pagination Info & Buttons
+        const paginationContainer = document.getElementById('bukuPaginationContainer');
+        const pageInfo = document.getElementById('bukuPageInfo');
+        const pageButtons = document.getElementById('bukuPageButtons');
+
+        if (paginationContainer) {
+            paginationContainer.classList.toggle('hidden', cards.length === 0 || total === 0);
+        }
+
+        if (pageInfo) {
+            if (total === 0) {
+                pageInfo.textContent = 'Menampilkan 0 buku';
+            } else {
+                const actualEnd = Math.min(endIdx, total);
+                pageInfo.textContent = `Menampilkan ${startIdx + 1} - ${actualEnd} dari ${total} buku`;
+            }
+        }
+
+        if (pageButtons) {
+            pageButtons.innerHTML = '';
+            if (totalPages > 1) {
+                // Prev button
+                const prevBtn = document.createElement('button');
+                prevBtn.type = 'button';
+                prevBtn.className = `px-3 py-1.5 rounded-xl border text-xs font-bold transition flex items-center gap-1 ${
+                    currentBukuPage === 1
+                    ? 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 shadow-2xs'
+                }`;
+                prevBtn.innerHTML = '<i class="fa-solid fa-chevron-left text-[10px]"></i> <span class="hidden sm:inline">Sebelumnya</span>';
+                prevBtn.disabled = currentBukuPage === 1;
+                prevBtn.onclick = () => {
+                    if (currentBukuPage > 1) {
+                        currentBukuPage--;
+                        filterBukuCards();
+                        document.getElementById('bukuCardsGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                };
+                pageButtons.appendChild(prevBtn);
+
+                // Numbered buttons
+                let startPage = Math.max(1, currentBukuPage - 2);
+                let endPage = Math.min(totalPages, startPage + 4);
+                if (endPage - startPage < 4) {
+                    startPage = Math.max(1, endPage - 4);
+                }
+
+                if (startPage > 1) {
+                    addBukuPageBtn(1, pageButtons);
+                    if (startPage > 2) {
+                        const dots = document.createElement('span');
+                        dots.className = 'px-1 text-slate-400 text-xs font-bold';
+                        dots.textContent = '...';
+                        pageButtons.appendChild(dots);
+                    }
+                }
+
+                for (let p = startPage; p <= endPage; p++) {
+                    addBukuPageBtn(p, pageButtons);
+                }
+
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                        const dots = document.createElement('span');
+                        dots.className = 'px-1 text-slate-400 text-xs font-bold';
+                        dots.textContent = '...';
+                        pageButtons.appendChild(dots);
+                    }
+                    addBukuPageBtn(totalPages, pageButtons);
+                }
+
+                // Next button
+                const nextBtn = document.createElement('button');
+                nextBtn.type = 'button';
+                nextBtn.className = `px-3 py-1.5 rounded-xl border text-xs font-bold transition flex items-center gap-1 ${
+                    currentBukuPage === totalPages
+                    ? 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 shadow-2xs'
+                }`;
+                nextBtn.innerHTML = '<span class="hidden sm:inline">Berikutnya</span> <i class="fa-solid fa-chevron-right text-[10px]"></i>';
+                nextBtn.disabled = currentBukuPage === totalPages;
+                nextBtn.onclick = () => {
+                    if (currentBukuPage < totalPages) {
+                        currentBukuPage++;
+                        filterBukuCards();
+                        document.getElementById('bukuCardsGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                };
+                pageButtons.appendChild(nextBtn);
+            }
+        }
+    }
+    window.filterBukuCards = filterBukuCards;
+
+    function addBukuPageBtn(page, container) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `w-8 h-8 rounded-xl text-xs font-extrabold transition flex items-center justify-center ${
+            page === currentBukuPage
+            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20'
+            : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:text-emerald-600 shadow-2xs'
+        }`;
+        btn.textContent = page;
+        btn.onclick = () => {
+            currentBukuPage = page;
+            filterBukuCards();
+            document.getElementById('bukuCardsGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+        container.appendChild(btn);
+    }
+
+    function clearSearchBuku() {
+        const input = document.getElementById('searchBukuInput');
+        if (input) {
+            input.value = '';
+            input.focus();
+        }
+        currentBukuPage = 1;
+        filterBukuCards();
+    }
+    window.clearSearchBuku = clearSearchBuku;
+
+    function resetBukuFilters() {
+        clearSearchBuku();
+        setBukuFilterStatus('all');
+    }
+    window.resetBukuFilters = resetBukuFilters;
+
+    // Initialize pagination immediately and on DOM load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', filterBukuCards);
+    } else {
+        filterBukuCards();
+    }
+    setTimeout(filterBukuCards, 50);
 </script>
 
 <?= $this->endSection() ?>

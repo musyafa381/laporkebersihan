@@ -666,9 +666,44 @@
                 <input type="text" name="penerima_penyerah" placeholder="Misal: Kang Ahmad / Ibu Halimah" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
             </div>
 
-            <div>
-                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Unit / Peruntukan</label>
-                <input type="text" name="unit_tujuan" placeholder="Misal: GEMERLAP Asrama Komplek B / Satgas MA" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+            <!-- Searchable Unit Tujuan Picker for Catat Keluar -->
+            <div class="relative">
+                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>Unit / Peruntukan <span class="text-rose-500">*</span></span>
+                    <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                        <i class="fa-solid fa-magnifying-glass text-[9px]"></i> Bisa dicari
+                    </span>
+                </label>
+                <div class="relative">
+                    <i class="fa-solid fa-building text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2 text-xs pointer-events-none"></i>
+                    <input type="text" id="keluar_unit_tujuan_search" placeholder="Pilih / Cari Unit atau Asrama..." autocomplete="off" required onfocus="openKeluarUnitDropdown()" oninput="filterKeluarUnitOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
+                    <input type="hidden" id="keluar_unit_tujuan" name="unit_tujuan" required value="">
+                    <button type="button" onclick="toggleKeluarUnitDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                        <i id="keluarUnitIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                    </button>
+                </div>
+                <!-- Dropdown List -->
+                <div id="keluarUnitDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-48 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                    <?php if (!empty($unitList)): ?>
+                        <?php foreach ($unitList as $u): ?>
+                            <div class="keluar-unit-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $u['id'] ?>" data-nama="<?= esc($u['nama_unit']) ?>" onclick="selectKeluarUnit(this)">
+                                <div>
+                                    <div class="font-extrabold text-xs text-slate-900"><?= esc($u['nama_unit']) ?></div>
+                                    <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
+                                        <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200/60"><?= esc($u['tipe']) ?></span>
+                                        <?php if (!empty($u['kode_unit'])): ?>
+                                            <span>&bull;</span>
+                                            <span class="font-mono text-slate-400"><?= esc($u['kode_unit']) ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                    <div id="noKeluarUnitFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
+                        Tidak ditemukan unit yang cocok.
+                    </div>
+                </div>
             </div>
 
             <div>
@@ -1162,13 +1197,70 @@
     }
     window.selectMasukAlat = selectMasukAlat;
 
+    function openKeluarUnitDropdown() {
+        const dd = document.getElementById('keluarUnitDropdownList');
+        const icon = document.getElementById('keluarUnitIcon');
+        if (dd) dd.classList.remove('hidden');
+        if (icon) icon.classList.add('rotate-180');
+    }
+    window.openKeluarUnitDropdown = openKeluarUnitDropdown;
+
+    function toggleKeluarUnitDropdown() {
+        const dd = document.getElementById('keluarUnitDropdownList');
+        const icon = document.getElementById('keluarUnitIcon');
+        if (dd) {
+            dd.classList.toggle('hidden');
+            if (icon) icon.classList.toggle('rotate-180', !dd.classList.contains('hidden'));
+        }
+    }
+    window.toggleKeluarUnitDropdown = toggleKeluarUnitDropdown;
+
+    function filterKeluarUnitOptions(query) {
+        openKeluarUnitDropdown();
+        query = (query || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.keluar-unit-item');
+        let found = 0;
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            if (!query || text.includes(query)) {
+                item.style.display = 'flex';
+                found++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        const noFound = document.getElementById('noKeluarUnitFound');
+        if (noFound) noFound.classList.toggle('hidden', found > 0);
+    }
+    window.filterKeluarUnitOptions = filterKeluarUnitOptions;
+
+    function selectKeluarUnit(el) {
+        const nama = el.dataset.nama || '';
+        document.getElementById('keluar_unit_tujuan').value = nama;
+        document.getElementById('keluar_unit_tujuan_search').value = nama;
+        const dd = document.getElementById('keluarUnitDropdownList');
+        const icon = document.getElementById('keluarUnitIcon');
+        if (dd) dd.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+    }
+    window.selectKeluarUnit = selectKeluarUnit;
+
     document.addEventListener('click', function(e) {
-        // Dismiss Keluar Dropdown
+        // Dismiss Keluar Alat Dropdown
         const keluarSearch = document.getElementById('keluar_alat_search');
         const keluarDd = document.getElementById('keluarAlatDropdownList');
         if (keluarDd && keluarSearch && !keluarSearch.contains(e.target) && !keluarDd.contains(e.target)) {
             keluarDd.classList.add('hidden');
             const icon = document.getElementById('keluarAlatIcon');
+            if (icon) icon.classList.remove('rotate-180');
+        }
+
+        // Dismiss Keluar Unit Dropdown
+        const keluarUnitSearch = document.getElementById('keluar_unit_tujuan_search');
+        const keluarUnitDd = document.getElementById('keluarUnitDropdownList');
+        if (keluarUnitDd && keluarUnitSearch && !keluarUnitSearch.contains(e.target) && !keluarUnitDd.contains(e.target)) {
+            keluarUnitDd.classList.add('hidden');
+            const icon = document.getElementById('keluarUnitIcon');
             if (icon) icon.classList.remove('rotate-180');
         }
 

@@ -221,7 +221,7 @@
         <!-- Pagination Bar for Wilayah Master Cards -->
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-200/80 px-1" id="pagination-container-wilayah-cards">
             <div class="text-xs font-semibold text-slate-500 flex items-center gap-2">
-                <span id="page-info-wilayah-cards">Menampilkan 0 wilayah</span>
+                <span id="page-info-wilayah-cards">Menampilkan <?= !empty($wilayahList) ? ('1 - ' . min(8, count($wilayahList)) . ' dari ' . count($wilayahList) . ' wilayah') : '0 wilayah' ?></span>
                 <select id="pageSize-wilayah-cards" onchange="changeWilayahPageSize(this.value)" class="ml-2 px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs">
                     <option value="4">4 / hal</option>
                     <option value="8" selected>8 / hal</option>
@@ -453,11 +453,16 @@
         currentWilayahPage = 1;
         renderWilayahPagination();
     }
-    window.filterWilayahCards = filterWilayahCards;
-
-    document.addEventListener('DOMContentLoaded', function() {
+    function initWilayahCardsPagination() {
         visibleWilayahCards = Array.from(document.querySelectorAll('.wilayah-card'));
         renderWilayahPagination();
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initWilayahCardsPagination);
+    } else {
+        initWilayahCardsPagination();
+    }
+    setTimeout(initWilayahCardsPagination, 50);
 </script>
 <?= $this->endSection() ?>

@@ -71,4 +71,33 @@ class MasterUnitModel extends Model
             $forge->addColumn($this->table, $fieldsToAdd);
         }
     }
+
+    /**
+     * Mengambil daftar data unit aktif saja (bukan unit posko kader dan bukan unit non-aktif)
+     * untuk pilihan formulir lapor CS dan modul terkait lainnya.
+     */
+    public function getActiveUnitsNonKader(): array
+    {
+        return $this->groupStart()
+                ->where('parent_unit_id IS NULL', null, false)
+                ->orWhere('parent_unit_id', 0)
+            ->groupEnd()
+            ->groupStart()
+                ->where('jenis_laporan IS NULL', null, false)
+                ->orWhere('jenis_laporan !=', 'kader')
+            ->groupEnd()
+            ->notLike('tipe', 'Posko')
+            ->notLike('nama_unit', 'GEMERLAP ', 'after')
+            ->notLike('nama_unit', 'Satgas Kebersihan ', 'after')
+            ->notLike('nama_unit', 'Satgas ', 'after')
+            ->groupStart()
+                ->where('status', 'Aktif')
+                ->orWhere('status', 'aktif')
+                ->orWhere('status IS NULL', null, false)
+                ->orWhere('status', '')
+            ->groupEnd()
+            ->orderBy('nama_unit', 'ASC')
+            ->findAll();
+    }
 }
+

@@ -779,10 +779,32 @@
     }
     window.selectAddPj = selectAddPj;
 
+    function openModalAddKader() {
+        const modal = document.getElementById('modalAddKader');
+        if (modal) modal.classList.remove('hidden');
+    }
+    window.openModalAddKader = openModalAddKader;
+
+    function closeModalAddKader() {
+        const modal = document.getElementById('modalAddKader');
+        if (modal) modal.classList.add('hidden');
+    }
+    window.closeModalAddKader = closeModalAddKader;
+
     document.addEventListener('click', function(e) {
         const addPjContainer = document.getElementById('add_pj_user_search')?.closest('.relative');
         if (addPjContainer && !addPjContainer.contains(e.target)) {
             closeAddPjDropdown();
+        }
+
+        const modalAddPj = document.getElementById('modalAddPj');
+        if (e.target === modalAddPj) {
+            closeModalAddPj();
+        }
+
+        const modalAddKader = document.getElementById('modalAddKader');
+        if (e.target === modalAddKader) {
+            closeModalAddKader();
         }
     });
 </script>

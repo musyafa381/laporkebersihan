@@ -46,6 +46,7 @@ class Auth extends BaseController
         $session = session();
         $session->set([
             'userId'       => $user['id'],
+            'user_id'      => $user['id'],
             'username'     => $user['username'],
             'nama_lengkap' => $user['nama_lengkap'],
             'role'         => $user['role'],

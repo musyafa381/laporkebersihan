@@ -114,6 +114,7 @@ $routes->get('/app/lpj', 'AppPortal::lpj');
 $routes->get('/app/pengajuan-alat', 'AppPortal::pengajuanAlat');
 $routes->post('/app/pengajuan-alat/store', 'AppPortal::storePengajuanAlat');
 $routes->get('/app/laporan-kebersihan', 'AppPortal::laporanKebersihan');
+$routes->post('/app/aduan-unit/tanggapi/(:num)', 'AppPortal::tanggapiAduanUnit/$1');
 
 // Menu Struktur Kebersihan (Drag and Drop)
 $routes->get('/struktur', 'Struktur::index');

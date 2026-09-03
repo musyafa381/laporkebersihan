@@ -82,6 +82,10 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             box-shadow: 0 4px 20px rgba(6, 78, 59, 0.35);
         }
+        body.is-embedded .control-bar,
+        .control-bar.hidden-embed {
+            display: none !important;
+        }
         .control-bar .bar-title {
             display: flex;
             align-items: center;
@@ -895,8 +899,11 @@
         }
     </style>
 </head>
-<body>
-
+<body class="<?= ((bool)(request()->getGet('embed') || request()->getGet('preview'))) ? 'is-embedded' : '' ?>">
+    <?php 
+        $isEmbed = (bool)(request()->getGet('embed') || request()->getGet('preview')); 
+    ?>
+    <?php if (!$isEmbed): ?>
     <!-- ══════════════════════════════════════════════
          CONTROL BAR (Web Preview Only)
          ══════════════════════════════════════════════ -->
@@ -917,6 +924,7 @@
             </button>
         </div>
     </div>
+    <?php endif; ?>
 
     <?php
     // ═══════════════════════════════════════════
@@ -1939,5 +1947,13 @@
         </div>
     </div>
 
+    <script>
+        // Automatic detection if loaded inside iframe / preview modal
+        if (window.self !== window.top) {
+            document.body.classList.add('is-embedded');
+            const cBar = document.querySelector('.control-bar');
+            if (cBar) cBar.style.display = 'none';
+        }
+    </script>
 </body>
 </html>

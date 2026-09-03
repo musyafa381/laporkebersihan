@@ -57,7 +57,13 @@ class Cs extends BaseController
 
         // Only fetch inbox list if logged in as Admin or Auditor
         if ($isUserAdminOrAuditor) {
-            $reportsList   = $this->csModel->orderBy('id', 'DESC')->findAll();
+            $reportsList = $this->csModel
+                ->select('cs_reports.*, master_unit.pj_nama, master_unit.pj_kontak, master_unit.kode_unit, tbl_wilayah_kebersihan.nama_wilayah, tbl_wilayah_kebersihan.lokasi_gedung')
+                ->join('master_unit', '(cs_reports.unit_id IS NOT NULL AND cs_reports.unit_id > 0 AND master_unit.id = cs_reports.unit_id) OR ((cs_reports.unit_id IS NULL OR cs_reports.unit_id = 0) AND master_unit.nama_unit = cs_reports.unit_lokasi)', 'left')
+                ->join('tbl_wilayah_kebersihan', 'tbl_wilayah_kebersihan.id = cs_reports.wilayah_id', 'left')
+                ->groupBy('cs_reports.id')
+                ->orderBy('cs_reports.id', 'DESC')
+                ->findAll();
             $pengajuanList = $this->pengajuanModel
                 ->select('pengajuan_alat.*, users.nama_lengkap, users.username, alat_inventaris.nama_alat, alat_inventaris.kode_alat, alat_inventaris.satuan')
                 ->join('users', 'users.id = pengajuan_alat.user_id', 'left')
@@ -72,6 +78,15 @@ class Cs extends BaseController
         $wilayahModel = new \App\Models\WilayahModel();
         $wilayahList  = $wilayahModel->where('status', 'Aktif')->orderBy('nama_wilayah', 'ASC')->findAll();
 
+        $unitModel    = new \App\Models\MasterUnitModel();
+        $unitList     = $unitModel->getActiveUnitsNonKader();
+
+        $penugasanModel = new \App\Models\WilayahPenugasanModel();
+        $penugasanList  = $penugasanModel
+            ->select('tbl_wilayah_penugasan.*, master_unit.nama_unit, master_unit.kode_unit')
+            ->join('master_unit', 'master_unit.id = tbl_wilayah_penugasan.unit_id', 'left')
+            ->findAll();
+
         $data = [
             'title'                => $isUserAdminOrAuditor ? 'Inbox Customer Service Admin K3L' : 'Lapor Kebersihan & Layanan Bantuan (CS)',
             'isUserAdminOrAuditor' => $isUserAdminOrAuditor,
@@ -80,6 +95,8 @@ class Cs extends BaseController
             'reportsList'          => $reportsList,
             'pengajuanList'        => $pengajuanList,
             'wilayahList'          => $wilayahList,
+            'unitList'             => $unitList,
+            'penugasanList'        => $penugasanList,
             'settings'             => $settings,
             'captcha_num1'         => $session->get('captcha_num1'),
             'captcha_num2'         => $session->get('captcha_num2'),
@@ -214,6 +231,37 @@ class Cs extends BaseController
             $wRecord = (new \App\Models\WilayahModel())->find($wilayahId);
             if ($wRecord) {
                 $namaWilayah = $wRecord['nama_wilayah'];
+                if (!empty($wRecord['lokasi_gedung'])) {
+                    $lokasi = $wRecord['lokasi_gedung'];
+                }
+            }
+        }
+
+        $hour = (int)date('H');
+        $autoShift = ($hour >= 5 && $hour < 12) ? 'Pagi' : (($hour >= 12 && $hour < 15) ? 'Siang' : (($hour >= 15 && $hour < 18) ? 'Sore' : 'Malam'));
+        $shift = trim($this->request->getPost('shift') ?: '');
+
+        $unitId = $this->request->getPost('unit_id') ? (int)$this->request->getPost('unit_id') : null;
+
+        // Smart shift routing: assign destination unit_id to specific PJ unit assigned to this shift
+        if ($wilayahId && !empty($shift)) {
+            $penugasanModel = new \App\Models\WilayahPenugasanModel();
+            $assignedPj = $penugasanModel
+                ->select('tbl_wilayah_penugasan.*, master_unit.nama_unit')
+                ->join('master_unit', 'master_unit.id = tbl_wilayah_penugasan.unit_id', 'left')
+                ->where('tbl_wilayah_penugasan.wilayah_id', $wilayahId)
+                ->where('tbl_wilayah_penugasan.shift', $shift)
+                ->first();
+
+            if ($assignedPj && !empty($assignedPj['unit_id'])) {
+                $unitId = (int)$assignedPj['unit_id'];
+            }
+        }
+
+        if (!$unitId && !empty($lokasi)) {
+            $uMatch = (new \App\Models\MasterUnitModel())->where('nama_unit', $lokasi)->first();
+            if ($uMatch) {
+                $unitId = (int)$uMatch['id'];
             }
         }
 
@@ -221,8 +269,10 @@ class Cs extends BaseController
             'nama_pengirim' => $nama,
             'kontak_hp'     => $kontak,
             'unit_lokasi'   => $lokasi ?: ($namaWilayah ?: 'Umum / Pesantren'),
+            'unit_id'       => $unitId,
             'wilayah_id'    => $wilayahId,
             'nama_wilayah'  => $namaWilayah,
+            'shift'         => $shift,
             'kategori'      => $kategori,
             'isi_laporan'   => $laporan,
             'foto_lampiran' => !empty($fotoPaths) ? json_encode($fotoPaths) : null,
@@ -254,6 +304,7 @@ class Cs extends BaseController
                 $namaWilayah = $wRecord['nama_wilayah'];
             }
         }
+        $shift        = $this->request->getPost('shift') !== null ? trim($this->request->getPost('shift')) : ($report['shift'] ?? null);
         $kategori     = trim($this->request->getPost('kategori') ?? $report['kategori']);
         $isiLaporan   = trim($this->request->getPost('isi_laporan') ?? $report['isi_laporan']);
         $status       = $this->request->getPost('status') ?: $report['status'];
@@ -261,40 +312,28 @@ class Cs extends BaseController
 
         // Cek daftar foto yang dipertahankan admin (jika ada yang dihapus via modal)
         $retainedFotos = $this->request->getPost('existing_fotos');
+        $existingFotos = json_decode($report['foto_lampiran'] ?? '[]', true) ?: [];
         if ($retainedFotos !== null) {
-            $existingFotos = is_array($retainedFotos) ? $retainedFotos : [$retainedFotos];
-        } else {
-            $existingFotos = json_decode($report['foto_lampiran'] ?? '[]', true) ?: [];
+            $existingFotos = array_values(array_intersect($existingFotos, is_array($retainedFotos) ? $retainedFotos : []));
         }
 
-        // Hapus file yang tidak dipertahankan dari Cloudinary / Lokal
-        $oldFotos = json_decode($report['foto_lampiran'] ?? '[]', true) ?: [];
-        foreach ($oldFotos as $oldF) {
-            if (!in_array($oldF, $existingFotos)) {
-                if (str_contains($oldF, 'cloudinary.com')) {
-                    $this->cloudinary->delete($oldF);
-                } elseif (file_exists(FCPATH . 'uploads/cs/' . $oldF)) {
-                    @unlink(FCPATH . 'uploads/cs/' . $oldF);
-                }
-            }
-        }
-
-        $uploadedFiles = $this->request->getFiles();
-        $adminFotoNames = $this->request->getPost('foto_names') ?: [];
-
-        if (!empty($uploadedFiles['foto_files'])) {
-            $files = is_array($uploadedFiles['foto_files']) ? $uploadedFiles['foto_files'] : [$uploadedFiles['foto_files']];
+        // Handle upload foto baru oleh admin
+        $adminFiles = $this->request->getFiles();
+        if (!empty($adminFiles['foto_files'])) {
+            $files = is_array($adminFiles['foto_files']) ? $adminFiles['foto_files'] : [$adminFiles['foto_files']];
+            $fotoNames = $this->request->getPost('foto_names') ?: [];
             foreach ($files as $idx => $file) {
                 if ($file->isValid() && !$file->hasMoved()) {
-                    $customName = !empty($adminFotoNames[$idx]) ? trim($adminFotoNames[$idx]) : ('admin_bukti_' . ($idx + 1));
+                    if ($file->getSize() > 3 * 1024 * 1024) {
+                        return $this->respondJsonOrRedirect("File foto '{$file->getClientName()}' melebihi batas 3MB.", false);
+                    }
+                    $customName = !empty($fotoNames[$idx]) ? trim($fotoNames[$idx]) : ('admin_bukti_' . ($idx + 1));
                     $cldRes = $this->cloudinary->upload($file, 'cs_reports', $customName);
                     if ($cldRes['success'] && !empty($cldRes['url'])) {
                         $existingFotos[] = $cldRes['url'];
                     } else {
                         $uploadDir = FCPATH . 'uploads/cs/';
-                        if (!is_dir($uploadDir)) {
-                            mkdir($uploadDir, 0777, true);
-                        }
+                        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
                         $cleanLocalName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $customName) . '_' . substr(uniqid(), -4) . '.' . $file->guessExtension();
                         $file->move($uploadDir, $cleanLocalName);
                         $existingFotos[] = $cleanLocalName;
@@ -303,12 +342,38 @@ class Cs extends BaseController
             }
         }
 
+        $unitId = $this->request->getPost('unit_id') ? (int)$this->request->getPost('unit_id') : ($report['unit_id'] ?? null);
+
+        // Smart shift routing update: assign destination unit_id without overwriting physical location
+        if ($wilayahId && !empty($shift)) {
+            $penugasanModel = new \App\Models\WilayahPenugasanModel();
+            $assignedPj = $penugasanModel
+                ->select('tbl_wilayah_penugasan.*, master_unit.nama_unit')
+                ->join('master_unit', 'master_unit.id = tbl_wilayah_penugasan.unit_id', 'left')
+                ->where('tbl_wilayah_penugasan.wilayah_id', $wilayahId)
+                ->where('tbl_wilayah_penugasan.shift', $shift)
+                ->first();
+
+            if ($assignedPj && !empty($assignedPj['unit_id'])) {
+                $unitId = (int)$assignedPj['unit_id'];
+            }
+        }
+
+        if (!empty($unitLokasi) && !$unitId) {
+            $uMatch = (new \App\Models\MasterUnitModel())->where('nama_unit', $unitLokasi)->first();
+            if ($uMatch) {
+                $unitId = (int)$uMatch['id'];
+            }
+        }
+
         $this->csModel->update($id, [
             'nama_pengirim'   => $namaPengirim,
             'kontak_hp'       => $kontakHp,
             'unit_lokasi'     => $unitLokasi,
+            'unit_id'         => $unitId,
             'wilayah_id'      => $wilayahId,
             'nama_wilayah'    => $namaWilayah,
+            'shift'           => $shift,
             'kategori'        => $kategori,
             'isi_laporan'     => $isiLaporan,
             'foto_lampiran'   => !empty($existingFotos) ? json_encode(array_values($existingFotos)) : null,
@@ -348,9 +413,11 @@ class Cs extends BaseController
             return $this->respondJsonOrRedirect('Laporan tidak ditemukan.', false);
         }
 
-        // Hapus semua foto bukti terkait dari Cloudinary atau disk lokal
+        // Hapus semua foto bukti terkait (foto aduan & foto tindakan unit) dari Cloudinary atau disk lokal
         $fotos = json_decode($report['foto_lampiran'] ?? '[]', true) ?: [];
-        foreach ($fotos as $f) {
+        $unitFotos = json_decode($report['foto_tindakan_unit'] ?? '[]', true) ?: [];
+        $allFotos = array_merge($fotos, $unitFotos);
+        foreach ($allFotos as $f) {
             if (str_contains($f, 'cloudinary.com')) {
                 $this->cloudinary->delete($f);
             } elseif (file_exists(FCPATH . 'uploads/cs/' . $f)) {

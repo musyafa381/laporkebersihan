@@ -81,23 +81,38 @@
             </div>
         </a>
 
-        <!-- Action 3: Lapor Kendala -->
+        <!-- Action 3: Lapor Kendala & Tindak Lanjut Aduan Unit -->
+        <?php 
+            $pendingAduanCount = 0;
+            if (!empty($unitAssignedReports)) {
+                foreach ($unitAssignedReports as $uar) {
+                    if (in_array($uar['status'] ?? '', ['Baru', 'Diproses']) && empty($uar['tanggapan_unit'])) {
+                        $pendingAduanCount++;
+                    }
+                }
+            }
+        ?>
         <a href="<?= base_url('app/laporan-kebersihan') ?>" class="group relative overflow-hidden p-6 rounded-3xl bg-gradient-to-br from-blue-50/90 via-white to-blue-50/40 border border-blue-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between space-y-4">
             <div class="flex items-center justify-between">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center text-xl shadow-md shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300">
+                <div class="relative w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center text-xl shadow-md shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300">
                     <i class="fa-solid fa-headset"></i>
+                    <?php if ($pendingAduanCount > 0): ?>
+                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white rounded-full text-[10px] font-black flex items-center justify-center border-2 border-white animate-pulse">
+                            <?= $pendingAduanCount ?>
+                        </span>
+                    <?php endif; ?>
                 </div>
                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100/80 text-blue-800 text-[11px] font-extrabold border border-blue-200 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                    <span>Buka Form</span>
+                    <span><?= !empty($unitAssignedReports) ? (count($unitAssignedReports) . ' Aduan Unit') : 'Buka Form' ?></span>
                     <i class="fa-solid fa-arrow-right text-[9px] group-hover:translate-x-0.5 transition-transform"></i>
                 </span>
             </div>
             <div class="space-y-1">
                 <h3 class="font-heading font-extrabold text-base text-slate-900 group-hover:text-blue-700 transition-colors">
-                    3. Lapor Kendala Kebersihan
+                    3. Pengaduan & Lapor Kendala
                 </h3>
                 <p class="text-xs text-slate-500 font-medium leading-relaxed">
-                    Kirim pengaduan kendala kebersihan ke Admin CS K3L.
+                    Kirim laporan kendala & tindak lanjuti aduan masuk ke unit Anda.
                 </p>
             </div>
         </a>

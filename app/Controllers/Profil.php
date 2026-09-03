@@ -135,8 +135,9 @@ class Profil extends BaseController
         }
 
         // Prevent deleting own logged in account
-        if (session()->get('userId') == $id) {
-            return $this->respondJsonOrRedirect('Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif.', false, base_url('profil'));
+        $currentLoggedUserId = session()->get('userId') ?? session()->get('user_id');
+        if ($currentLoggedUserId && (int)$currentLoggedUserId === (int)$id) {
+            return $this->respondJsonOrRedirect('Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif digunakan.', false, base_url('profil'));
         }
 
         $this->userModel->delete($id);

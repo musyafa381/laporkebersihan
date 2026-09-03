@@ -331,6 +331,10 @@ class Wilayah extends BaseController
         $jamMulai   = $this->request->getPost('jam_mulai') ?: '06:00';
         $jamSelesai = $this->request->getPost('jam_selesai') ?: '07:30';
         $hariAktif  = $this->request->getPost('hari_aktif') ?: 'Setiap Hari';
+        $customDays = $this->request->getPost('hari_custom');
+        if ($hariAktif === 'Custom' && !empty($customDays) && is_array($customDays)) {
+            $hariAktif = implode(', ', $customDays);
+        }
         $keterangan = $this->request->getPost('keterangan') ?: '';
 
         if (empty($unitId)) {
@@ -364,6 +368,10 @@ class Wilayah extends BaseController
         $jamMulai   = $this->request->getPost('jam_mulai') ?: '06:00';
         $jamSelesai = $this->request->getPost('jam_selesai') ?: '07:30';
         $hariAktif  = $this->request->getPost('hari_aktif') ?: 'Setiap Hari';
+        $customDays = $this->request->getPost('hari_custom');
+        if ($hariAktif === 'Custom' && !empty($customDays) && is_array($customDays)) {
+            $hariAktif = implode(', ', $customDays);
+        }
         $keterangan = $this->request->getPost('keterangan') ?: '';
 
         if (empty($unitId)) {

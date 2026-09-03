@@ -135,10 +135,17 @@
                                         <button type="button" onclick="openModalEditUser(<?= htmlspecialchars(json_encode($u)) ?>)" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200/70 flex items-center justify-center transition hover:scale-105 shadow-2xs" title="Edit Akun">
                                             <i class="fa-solid fa-pen text-xs"></i>
                                         </button>
-                                        <?php if ($u['id'] != session()->get('user_id')): ?>
+                                        <?php 
+                                            $currentLoggedUserId = (int)(session()->get('userId') ?? session()->get('user_id') ?? 0);
+                                        ?>
+                                        <?php if ((int)$u['id'] !== $currentLoggedUserId): ?>
                                             <a href="<?= base_url('profil/delete/' . $u['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus akun pengguna '<?= esc($u['nama_lengkap']) ?>'?" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/70 flex items-center justify-center transition hover:scale-105 shadow-2xs" title="Hapus Akun">
                                                 <i class="fa-solid fa-trash text-xs"></i>
                                             </a>
+                                        <?php else: ?>
+                                            <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200/70 flex items-center justify-center text-xs shadow-2xs cursor-default" title="Akun Anda Sedang Aktif (Tidak dapat menghapus akun sendiri)">
+                                                <i class="fa-solid fa-shield-halved text-xs"></i>
+                                            </span>
                                         <?php endif; ?>
                                     </div>
                                 </td>
