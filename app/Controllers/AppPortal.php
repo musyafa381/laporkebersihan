@@ -40,12 +40,49 @@ class AppPortal extends BaseController
         $this->cloudinary     = new CloudinaryService();
     }
 
+    private function respondJsonOrRedirect($message, $success = true, $redirectUrl = null)
+    {
+        if ($this->request->isAJAX() || $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
+            $jsonData = ['status' => $success ? 'success' : 'error', 'message' => $message];
+            if ($redirectUrl) {
+                $jsonData['redirect'] = $redirectUrl;
+            }
+            return $this->response->setJSON($jsonData);
+        }
+
+        $target = $redirectUrl ?: base_url('app');
+        return redirect()->to($target)->with($success ? 'success' : 'error', $message);
+    }
+
     private function checkAuth()
     {
         $session = session();
         if (!$session->get('isLoggedIn')) {
             return redirect()->to('/login')->with('error', 'Silakan login sebagai Pengurus / Kader terlebih dahulu untuk mengisi LPJ & Pengajuan Alat.')->send();
         }
+    }
+
+    protected function sortByTahunBulan(&$list, $order = 'DESC')
+    {
+        $bulanMap = [
+            'januari' => 1, 'februari' => 2, 'maret' => 3, 'april' => 4,
+            'mei' => 5, 'juni' => 6, 'juli' => 7, 'agustus' => 8,
+            'september' => 9, 'oktober' => 10, 'november' => 11, 'desember' => 12
+        ];
+
+        usort($list, function ($a, $b) use ($bulanMap, $order) {
+            $tahunA = (int)($a['tahun'] ?? 0);
+            $tahunB = (int)($b['tahun'] ?? 0);
+
+            if ($tahunA !== $tahunB) {
+                return ($order === 'ASC') ? ($tahunA <=> $tahunB) : ($tahunB <=> $tahunA);
+            }
+
+            $bulanA = $bulanMap[strtolower(trim($a['bulan'] ?? ''))] ?? 0;
+            $bulanB = $bulanMap[strtolower(trim($b['bulan'] ?? ''))] ?? 0;
+
+            return ($order === 'ASC') ? ($bulanA <=> $bulanB) : ($bulanB <=> $bulanA);
+        });
     }
 
     public function index()
@@ -57,7 +94,13 @@ class AppPortal extends BaseController
         $unitId   = $session->get('unit_id');
 
         $userUnit = $unitId ? $this->unitModel->find($unitId) : null;
-        $bukuAktif = $this->bukuModel->orderBy('id', 'DESC')->first();
+        
+        $bukuAktif = $this->bukuModel->where('status', 'Aktif')->first();
+        if (!$bukuAktif) {
+            $allBuku = $this->bukuModel->findAll();
+            $this->sortByTahunBulan($allBuku, 'DESC');
+            $bukuAktif = $allBuku[0] ?? null;
+        }
 
         $myPengajuan = $this->pengajuanModel
             ->select('pengajuan_alat.*, alat_inventaris.nama_alat, alat_inventaris.kode_alat, alat_inventaris.satuan')
@@ -77,7 +120,7 @@ class AppPortal extends BaseController
             $unitAssignedReports = $this->csModel
                 ->groupStart()
                     ->where('unit_id', $unitId)
-                    ->orWhere('unit_lokasi', $uName)
+                    ->orWhere("(unit_id IS NULL OR unit_id = 0) AND wilayah_id IS NULL AND unit_lokasi = " . $this->csModel->db->escape($uName))
                 ->groupEnd()
                 ->orderBy('id', 'DESC')
                 ->findAll();
@@ -110,7 +153,8 @@ class AppPortal extends BaseController
             }
         }
 
-        $bukuList = $this->bukuModel->orderBy('id', 'DESC')->findAll();
+        $bukuList = $this->bukuModel->findAll();
+        $this->sortByTahunBulan($bukuList, 'DESC');
 
         $data = [
             'title'    => 'Isi Laporan LPJ Unit Kebersihan',
@@ -192,7 +236,7 @@ class AppPortal extends BaseController
                 ->join('tbl_wilayah_kebersihan', 'tbl_wilayah_kebersihan.id = cs_reports.wilayah_id', 'left')
                 ->groupStart()
                     ->where('cs_reports.unit_id', $unitId)
-                    ->orWhere('cs_reports.unit_lokasi', $uName)
+                    ->orWhere("(cs_reports.unit_id IS NULL OR cs_reports.unit_id = 0) AND cs_reports.wilayah_id IS NULL AND cs_reports.unit_lokasi = " . $this->csModel->db->escape($uName))
                 ->groupEnd()
                 ->groupBy('cs_reports.id')
                 ->orderBy('cs_reports.id', 'DESC')
@@ -244,21 +288,26 @@ class AppPortal extends BaseController
         $report = $this->csModel->find($id);
 
         if (!$report) {
-            return redirect()->back()->with('error', 'Laporan pengaduan tidak ditemukan.');
+            return $this->respondJsonOrRedirect('Laporan pengaduan tidak ditemukan.', false, base_url('app/laporan-kebersihan?tab=aduan_unit'));
         }
 
         $uName = $userUnit['nama_unit'] ?? '';
-        $isAuthorized = ($session->get('role') === 'Admin') ||
-                        ($unitId && (int)$report['unit_id'] === (int)$unitId) ||
-                        (!empty($uName) && strtolower($report['unit_lokasi']) === strtolower($uName));
+        $isAuthorized = false;
+        if ($session->get('role') === 'Admin') {
+            $isAuthorized = true;
+        } elseif (!empty($report['unit_id'])) {
+            $isAuthorized = ($unitId && (int)$report['unit_id'] === (int)$unitId);
+        } else {
+            $isAuthorized = (!empty($uName) && strtolower($report['unit_lokasi']) === strtolower($uName));
+        }
 
         if (!$isAuthorized) {
-            return redirect()->back()->with('error', 'Anda tidak memiliki hak akses untuk menindaklanjuti laporan unit ini.');
+            return $this->respondJsonOrRedirect('Anda tidak memiliki hak akses untuk menindaklanjuti laporan ini karena penugasan ditujukan untuk unit lain.', false, base_url('app/laporan-kebersihan?tab=aduan_unit'));
         }
 
         $tanggapanUnit = trim($this->request->getPost('tanggapan_unit') ?? '');
         if (empty($tanggapanUnit)) {
-            return redirect()->back()->with('error', 'Keterangan tindak lanjut / respon unit wajib diisi.');
+            return $this->respondJsonOrRedirect('Keterangan tindak lanjut / respon unit wajib diisi.', false, base_url('app/laporan-kebersihan?tab=aduan_unit'));
         }
 
         $keptExisting = $this->request->getPost('existing_foto_tindakan');
@@ -270,7 +319,7 @@ class AppPortal extends BaseController
             foreach ($files as $idx => $file) {
                 if ($file->isValid() && !$file->hasMoved()) {
                     if ($file->getSize() > 3 * 1024 * 1024) {
-                        return redirect()->back()->with('error', "File foto '{$file->getClientName()}' melebihi batas 3MB.");
+                        return $this->respondJsonOrRedirect("File foto '{$file->getClientName()}' melebihi batas 3MB.", false, base_url('app/laporan-kebersihan?tab=aduan_unit'));
                     }
                     $customName = 'unit_action_' . $id . '_' . ($idx + 1);
                     $cldRes = $this->cloudinary->upload($file, 'cs_reports', $customName);
@@ -371,9 +420,14 @@ class AppPortal extends BaseController
             $p['fotos'] = $this->fotoModel->getByWilayah($p['wilayah_id']);
             $p['primary_foto'] = !empty($p['fotos']) ? $p['fotos'][0]['foto_url'] : null;
 
-            // Fetch active CS reports linked to this wilayah
+            // Fetch active CS reports linked to this wilayah AND matching this specific shift (or general without shift)
             $p['active_cs_reports'] = $this->csModel
                 ->where('wilayah_id', $p['wilayah_id'])
+                ->groupStart()
+                    ->where('shift', $p['shift'])
+                    ->orWhere('shift', '')
+                    ->orWhere('shift IS NULL', null, false)
+                ->groupEnd()
                 ->whereIn('status', ['Baru', 'Diproses'])
                 ->orderBy('id', 'DESC')
                 ->findAll();
@@ -423,10 +477,12 @@ class AppPortal extends BaseController
 
         // Ambil semua master wilayah untuk opsi penambahan shift ke wilayah yang sudah ada
         $allMasterWilayah = $this->wilayahModel->orderBy('nama_wilayah', 'ASC')->findAll();
+        $unitList = $this->unitModel->orderBy('nama_unit', 'ASC')->findAll();
 
         $data = [
             'title'                 => 'Lapor Kebersihan Wilayah Tugas - GEMERLAP K3L',
             'userUnit'              => $userUnit,
+            'unitList'              => $unitList,
             'penugasanList'         => $penugasanList,
             'allMasterWilayah'      => $allMasterWilayah,
             'activeCountToday'      => $activeCountToday,
@@ -454,7 +510,7 @@ class AppPortal extends BaseController
 
         $wilayah = $this->wilayahModel->find($wilayahId);
         if (!$wilayah) {
-            return redirect()->back()->with('error', 'Wilayah kebersihan tidak valid.');
+            return $this->respondJsonOrRedirect('Wilayah kebersihan tidak valid.', false, base_url('app/lapor-wilayah'));
         }
 
         // Upload bukti foto kebersihan harian ke Cloudinary
@@ -484,12 +540,12 @@ class AppPortal extends BaseController
         if ($existing) {
             // Update existing report
             $updateData = [
-                'jam_lapor'         => $jamLapor,
-                'nilai_kebersihan'  => $nilaiKebersihan,
-                'catatan'           => $catatan,
-                'user_id_pelapor'   => $session->get('userId'),
-                'nama_pelapor'      => $session->get('nama_lengkap') ?: 'Pengurus Unit',
-                'status_verifikasi' => $statusVerif
+                'nilai_kebersihan'     => $nilaiKebersihan,
+                'jam_lapor'            => $jamLapor,
+                'catatan'              => $catatan,
+                'user_id_pelapor'      => $session->get('userId'),
+                'nama_pelapor'         => $session->get('nama_lengkap') ?: 'Pengurus Unit',
+                'status_verifikasi'    => $statusVerif
             ];
             if ($fotoBuktiUrl) {
                 $updateData['foto_bukti_url'] = $fotoBuktiUrl;
@@ -515,7 +571,7 @@ class AppPortal extends BaseController
             ]);
         }
 
-        return redirect()->to('/app/lapor-wilayah')->with('success', 'Laporan kebersihan wilayah "' . $wilayah['nama_wilayah'] . '" (Shift ' . $shift . ' pk ' . $jamLapor . ' WIB) berhasil dikirim! Capaian nilai: ' . $nilaiKebersihan . '%.');
+        return $this->respondJsonOrRedirect('Laporan kebersihan wilayah "' . $wilayah['nama_wilayah'] . '" (Shift ' . $shift . ' pk ' . $jamLapor . ' WIB) berhasil dikirim! Capaian nilai: ' . $nilaiKebersihan . '%.', true, base_url('app/lapor-wilayah'));
     }
 
     public function storeWilayahTugas()

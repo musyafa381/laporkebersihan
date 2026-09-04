@@ -13,10 +13,10 @@
                     <i class="fa-solid fa-box-open"></i> Modul Pengajuan Alat Kebersihan Unit
                 </span>
                 <h1 class="text-3xl sm:text-4xl font-heading font-extrabold tracking-tight leading-tight">
-                    Permohonan Peralatan Baru Gudang K3L
+                    Permohonan Peralatan Baru Gudang Kebersihan
                 </h1>
                 <p class="text-emerald-100/90 text-sm sm:text-base leading-relaxed">
-                    Pengurus dan Kader dapat mengusulkan alokasi sapu, kain pel, cairan pembersih, atau mesin baru ke Gudang K3L.
+                    Pengurus dan Kader dapat mengusulkan alokasi sapu, kain pel, cairan pembersih, atau mesin baru ke Gudang Kebersihan.
                 </p>
             </div>
         </div>

@@ -406,7 +406,7 @@
                                             <div class="font-extrabold text-sky-800 text-[10px] uppercase flex items-center justify-between">
                                                 <span><i class="fa-solid fa-check text-sky-600"></i> Oleh: <?= esc($r['nama_penanggap_unit'] ?: 'Pengurus') ?></span>
                                                 <?php if (!empty($r['ditanggapi_unit_at'])): ?>
-                                                    <span class="font-mono text-[9px] lowercase"><?= date('d M H:i', strtotime($r['ditanggapi_unit_at'])) ?></span>
+                                                    <span class="font-mono text-[9px] text-sky-600 font-bold lowercase"><?= date('d M H:i', strtotime($r['ditanggapi_unit_at'])) ?> WIB</span>
                                                 <?php endif; ?>
                                             </div>
                                             <div class="text-slate-700 leading-relaxed"><?= esc($r['tanggapan_unit']) ?></div>

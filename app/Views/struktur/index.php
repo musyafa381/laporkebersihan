@@ -404,6 +404,7 @@
             </div>
         </div>
     </div>
+
 </div>
 
 <!-- Modal Pop Up Detail Personel Node -->
@@ -435,82 +436,6 @@
         </div>
     </div>
 </div>
-
-<!-- Modal Tambah & Edit Form -->
-<?php if (!empty($isLoggedIn) && session()->get('role') === 'Admin'): ?>
-    <div id="modalAddStruktur" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[999999] flex items-center justify-center p-4 hidden">
-        <div class="glass-card rounded-3xl p-6 sm:p-7 max-w-lg w-full bg-white shadow-2xl space-y-5 border border-slate-200 relative animate-in fade-in zoom-in duration-200">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-extrabold">
-                        <i class="fa-solid fa-user-plus"></i>
-                    </div>
-                    <h3 class="font-heading font-extrabold text-base text-slate-900">Tambah Anggota Struktur</h3>
-                </div>
-                <button type="button" onclick="closeAddStrukturModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <form action="<?= base_url('struktur/store') ?>" method="POST" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Penempatan Bagian (Node Bagan)</label>
-                    <select name="node_category" id="addNodeCategory" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                        <option value="koordinator">1. Koordinator Kebersihan</option>
-                        <option value="wakil">2. Wakil / Sekretaris</option>
-                        <option value="gudang">3. Gudang & Logistik</option>
-                        <option value="asrama_pj" selected>4. Asrama ➔ PJ Asrama</option>
-                        <option value="asrama_gemerlap">4. Asrama ➔ Gemerlap</option>
-                        <option value="unit_kos_ungu">5. Unit ➔ Kos Ungu</option>
-                        <option value="unit_kos_iso">5. Unit ➔ Kos ISO</option>
-                        <option value="unit_mess">5. Unit ➔ MESS</option>
-                        <option value="unit_perkantoran">5. Unit ➔ Perkantoran</option>
-                        <option value="unit_bump">5. Unit ➔ BUMP</option>
-                        <option value="sekolah_pj">6. Sekolah ➔ PJ Sekolah</option>
-                        <option value="sekolah_satgas">6. Sekolah ➔ Satgas Kebersihan</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Nama Jabatan / Posisi</label>
-                    <input type="text" name="jabatan" placeholder="Contoh: Koordinator Asrama Putra..." required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Nama Penanggung Jawab</label>
-                    <input type="text" name="nama_penanggung_jawab" placeholder="Ketik nama lengkap beserta gelar..." required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Kategori Role</label>
-                        <select name="role_kategori" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                            <option value="Pimpinan">Pimpinan</option>
-                            <option value="Pengurus Harian" selected>Pengurus Harian</option>
-                            <option value="Divisi Teknis">Divisi Teknis</option>
-                            <option value="Penanggung Jawab Unit">Penanggung Jawab Unit</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">No. WhatsApp / HP</label>
-                        <input type="text" name="kontak_hp" placeholder="08123456789..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Tugas & Wewenang</label>
-                    <textarea name="tugas_wewenang" rows="3" placeholder="Jelaskan rincian tugas pokok..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs"></textarea>
-                </div>
-
-                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                    <button type="button" onclick="closeAddStrukturModal()" class="px-5 py-2.5 rounded-2xl bg-slate-100 text-slate-600 font-extrabold text-xs hover:bg-slate-200 transition">Batal</button>
-                    <button type="submit" class="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs shadow-md shadow-emerald-600/20 hover:from-emerald-700 hover:to-teal-700 transition">Simpan Anggota</button>
-                </div>
-            </form>
-        </div>
-    </div>
-<?php endif; ?>
 
 <script>
     var byNodeData = <?= json_encode($byNode ?? []) ?>;
@@ -575,93 +500,5 @@
         document.getElementById('modalNodeDetail').classList.add('hidden');
     }
     window.closeNodeDetailModal = closeNodeDetailModal;
-
-    function openAddStrukturModal() {
-        document.getElementById('modalAddStruktur').classList.remove('hidden');
-    }
-    window.openAddStrukturModal = openAddStrukturModal;
-
-    function closeAddStrukturModal() {
-        document.getElementById('modalAddStruktur').classList.add('hidden');
-    }
-    window.closeAddStrukturModal = closeAddStrukturModal;
-
-    // Drag and Drop Engine
-    function initStrukturDragAndDrop() {
-        const container = document.getElementById('sortableStrukturList');
-        if (!container) return;
-
-        const cards = container.querySelectorAll('.struktur-card[draggable="true"]');
-        let draggedCard = null;
-
-        cards.forEach(card => {
-            card.addEventListener('dragstart', (e) => {
-                draggedCard = card;
-                e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('text/plain', card.dataset.id);
-                setTimeout(() => {
-                    card.classList.add('opacity-40', 'scale-95', 'border-emerald-500', 'ring-2', 'ring-emerald-400');
-                }, 0);
-            });
-
-            card.addEventListener('dragend', () => {
-                card.classList.remove('opacity-40', 'scale-95', 'border-emerald-500', 'ring-2', 'ring-emerald-400');
-                draggedCard = null;
-                updateOrderNumbers();
-                saveNewStrukturOrder();
-            });
-
-            card.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-                if (!draggedCard || draggedCard === card) return;
-
-                const bounding = card.getBoundingClientRect();
-                const offset = e.clientY - bounding.top - (bounding.height / 2);
-
-                if (offset > 0) {
-                    card.after(draggedCard);
-                } else {
-                    card.before(draggedCard);
-                }
-            });
-        });
-
-        function updateOrderNumbers() {
-            const allCards = container.querySelectorAll('.struktur-card');
-            allCards.forEach((c, idx) => {
-                const badge = c.querySelector('.order-number');
-                if (badge) badge.textContent = idx + 1;
-            });
-        }
-
-        async function saveNewStrukturOrder() {
-            const allCards = container.querySelectorAll('.struktur-card');
-            const orderIds = Array.from(allCards).map(c => c.dataset.id);
-
-            try {
-                const formData = new FormData();
-                orderIds.forEach(id => formData.append('order[]', id));
-
-                const response = await fetch("<?= base_url('struktur/update-order') ?>", {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                });
-
-                const res = await response.json();
-                if (res.status === 'success' && typeof showToast === 'function') {
-                    showToast(res.message, 'success');
-                }
-            } catch (err) {
-                console.error('Failed to save order:', err);
-            }
-        }
-    }
-    window.initStrukturDragAndDrop = initStrukturDragAndDrop;
-
-    document.addEventListener('DOMContentLoaded', initStrukturDragAndDrop);
-    window.rebindPageEvents = initStrukturDragAndDrop;
-    initStrukturDragAndDrop();
 </script>
 <?= $this->endSection() ?>

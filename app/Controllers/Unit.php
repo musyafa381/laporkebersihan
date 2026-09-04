@@ -39,42 +39,47 @@ class Unit extends BaseController
             $usersById[$u['id']] = $u;
         }
 
-        // Multi-PJs for this unit
-        $pjs = $this->unitPjModel->getPjsByUnitId($id);
-        if (empty($pjs) && (!empty($unit['pj_user_id']) || !empty($unit['pj_nama']))) {
-            $pjs = [[
-                'id'        => 0,
-                'unit_id'   => $id,
-                'user_id'   => $unit['pj_user_id'],
-                'nama_pj'   => $unit['pj_nama'] ?: ($usersById[$unit['pj_user_id']]['nama_lengkap'] ?? 'PJ Unit'),
-                'kontak_pj' => $unit['pj_kontak'] ?: '',
-                'peran'     => 'Penanggung Jawab Utama',
-                'user_nama' => $usersById[$unit['pj_user_id']]['nama_lengkap'] ?? null,
-                'username'  => $usersById[$unit['pj_user_id']]['username'] ?? null,
-                'role'      => $usersById[$unit['pj_user_id']]['role'] ?? null,
-            ]];
-        }
-
-        // Tentukan Unit Posko Kader Terkait (Gemerlap / Satgas)
-        $namaUnitClean = preg_replace('/^(GEMERLAP|Satgas\s*Kebersihan|Satgas)\s*/i', '', $unit['nama_unit']);
-        $namaUnitClean = trim($namaUnitClean);
-
+        // Tentukan Unit Posko Kader Terkait (Gemerlap / Satgas) dengan exact clean match
+        $namaUnitClean = trim(preg_replace('/^(GEMERLAP|Satgas\s*Kebersihan|Satgas)\s*/i', '', $unit['nama_unit']));
         $allUnits = $this->unitModel->findAll();
         $linkedUnitIds = [(int)$id];
         $linkedUnitName = null;
 
         foreach ($allUnits as $otherUnit) {
             if ((int)$otherUnit['id'] === (int)$id) continue;
-
-            $otherClean = preg_replace('/^(GEMERLAP|Satgas\s*Kebersihan|Satgas)\s*/i', '', $otherUnit['nama_unit']);
-            $otherClean = trim($otherClean);
-
-            if (strcasecmp($namaUnitClean, $otherClean) === 0 || stripos($otherUnit['nama_unit'], $namaUnitClean) !== false || stripos($unit['nama_unit'], $otherClean) !== false) {
+            $otherClean = trim(preg_replace('/^(GEMERLAP|Satgas\s*Kebersihan|Satgas)\s*/i', '', $otherUnit['nama_unit']));
+            if (strcasecmp($namaUnitClean, $otherClean) === 0) {
+                $linkedUnitIds[] = (int)$otherUnit['id'];
                 if (stripos($otherUnit['nama_unit'], 'GEMERLAP') !== false || stripos($otherUnit['nama_unit'], 'Satgas') !== false) {
-                    $linkedUnitIds[] = (int)$otherUnit['id'];
                     $linkedUnitName = $otherUnit['nama_unit'];
                 }
             }
+        }
+
+        // Multi-PJs for this unit (with fallback to linked unit e.g. Induk -> Posko)
+        $pjs = $this->unitPjModel->getPjsByUnitId($id);
+        if (empty($pjs)) {
+            foreach ($linkedUnitIds as $lId) {
+                if ($lId === (int)$id) continue;
+                $linkedPjs = $this->unitPjModel->getPjsByUnitId($lId);
+                if (!empty($linkedPjs)) {
+                    $pjs = $linkedPjs;
+                    break;
+                }
+            }
+        }
+        if (empty($pjs) && (!empty($unit['pj_user_id']) || !empty($unit['pj_nama']))) {
+            $pjs = [[
+                'id'        => 0,
+                'unit_id'   => $id,
+                'user_id'   => $unit['pj_user_id'],
+                'nama_pj'   => $unit['pj_nama'] ?: ($usersById[$unit['pj_user_id']]['nama_lengkap'] ?? 'PJ Unit'),
+                'kontak_pj' => $unit['pj_kontak'] ?: ($usersById[$unit['pj_user_id']]['no_hp'] ?? ''),
+                'peran'     => 'Penanggung Jawab Utama',
+                'user_nama' => $usersById[$unit['pj_user_id']]['nama_lengkap'] ?? null,
+                'username'  => $usersById[$unit['pj_user_id']]['username'] ?? null,
+                'role'      => $usersById[$unit['pj_user_id']]['role'] ?? null,
+            ]];
         }
 
         // Ambil Daftar Nama Kader dari tbl_unit_kader
@@ -84,6 +89,13 @@ class Unit extends BaseController
             if (!empty($kadData)) {
                 $kaderList = array_merge($kaderList, $kadData);
             }
+        }
+        if (empty($kaderList)) {
+            // Fallback HANYA ke user dengan role 'Kader'
+            $fallbackKaders = array_filter($users, function ($usr) use ($linkedUnitIds) {
+                return in_array((int)($usr['unit_id'] ?? 0), $linkedUnitIds) && ($usr['role'] ?? '') === 'Kader';
+            });
+            $kaderList = array_values($fallbackKaders);
         }
 
         // Akun login terdaftar untuk unit ini (opsional)
@@ -178,7 +190,7 @@ class Unit extends BaseController
             if ($this->request->isAJAX() || $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Unit tidak ditemukan.']);
             }
-            return redirect()->back()->with('msg_error', 'Unit tidak ditemukan.');
+            return redirect()->to(base_url('pengaturan'))->with('msg_error', 'Unit tidak ditemukan.');
         }
 
         $userId   = $this->request->getPost('user_id');
@@ -197,7 +209,7 @@ class Unit extends BaseController
             if ($this->request->isAJAX() || $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Nama Penanggung Jawab wajib diisi.']);
             }
-            return redirect()->back()->with('msg_error', 'Nama Penanggung Jawab wajib diisi.');
+            return redirect()->to(base_url('unit/detail/' . $unitId))->with('msg_error', 'Nama Penanggung Jawab wajib diisi.');
         }
 
         // Prevent duplicate insertion of the same PJ
@@ -241,7 +253,10 @@ class Unit extends BaseController
     {
         $pj = $this->unitPjModel->find($id);
         if (!$pj) {
-            return redirect()->back()->with('msg_error', 'Data PJ tidak ditemukan.');
+            if ($this->request->isAJAX() || $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Data PJ tidak ditemukan.']);
+            }
+            return redirect()->to(base_url('pengaturan'))->with('msg_error', 'Data PJ tidak ditemukan.');
         }
 
         $unitId = $pj['unit_id'];
@@ -262,7 +277,10 @@ class Unit extends BaseController
     {
         $unit = $this->unitModel->find($unitId);
         if (!$unit) {
-            return redirect()->back()->with('msg_error', 'Unit tidak ditemukan.');
+            if ($this->request->isAJAX() || $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Unit tidak ditemukan.']);
+            }
+            return redirect()->to(base_url('pengaturan'))->with('msg_error', 'Unit tidak ditemukan.');
         }
 
         $namaKader    = trim($this->request->getPost('nama_kader') ?? '');
@@ -274,7 +292,7 @@ class Unit extends BaseController
             if ($this->request->isAJAX() || $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Nama Anggota Kader wajib diisi.']);
             }
-            return redirect()->back()->with('msg_error', 'Nama Anggota Kader wajib diisi.');
+            return redirect()->to(base_url('unit/detail/' . $unitId))->with('msg_error', 'Nama Anggota Kader wajib diisi.');
         }
 
         $this->unitKaderModel->insert([
@@ -301,7 +319,10 @@ class Unit extends BaseController
     {
         $kader = $this->unitKaderModel->find($id);
         if (!$kader) {
-            return redirect()->back()->with('msg_error', 'Data Kader tidak ditemukan.');
+            if ($this->request->isAJAX() || $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Data Kader tidak ditemukan.']);
+            }
+            return redirect()->to(base_url('pengaturan'))->with('msg_error', 'Data Kader tidak ditemukan.');
         }
 
         $unitId = $kader['unit_id'];

@@ -71,11 +71,11 @@
                 </div>
                 <button type="button" onclick="openModalTambahShiftExisting()" class="px-3.5 py-1.5 rounded-xl bg-white hover:bg-emerald-50 text-emerald-700 font-heading font-extrabold text-xs border border-emerald-300 transition flex items-center justify-center gap-1.5 shadow-2xs hover:-translate-y-0.5 whitespace-nowrap">
                     <i class="fa-solid fa-clock text-emerald-600"></i>
-                    <span>+ Shift Wilayah Ada</span>
+                    <span>Shift Wilayah Ada</span>
                 </button>
                 <button type="button" onclick="openModalTambahWilayahUnit()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 whitespace-nowrap">
                     <i class="fa-solid fa-plus-circle"></i>
-                    <span>+ Wilayah Baru</span>
+                    <span>Wilayah Baru</span>
                 </button>
                 <span class="text-xs font-extrabold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200/80 whitespace-nowrap">
                     <?= $activeCountToday ?> / <?= count($penugasanList ?? []) ?> Aktif
@@ -246,20 +246,20 @@
                                     </div>
                                 <?php elseif (!empty($p['is_active_today'])): ?>
                                     <!-- Hari ini Wajib Lapor -->
-                                    <div class="p-3 rounded-2xl bg-rose-50/90 border border-rose-200 space-y-2 shadow-2xs">
+                                    <div class="p-3 rounded-2xl bg-rose-50/90 border border-rose-200/90 space-y-2.5 shadow-2xs">
                                         <div class="flex items-center justify-between gap-1">
                                             <div class="inline-flex items-center gap-1.5 text-[11px] font-heading font-extrabold text-rose-900">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
+                                                <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
                                                 <i class="fa-solid fa-clock text-rose-600 text-xs"></i>
-                                                <span>Belum Lapor (Wajib Hari Ini)</span>
+                                                <span>Wajib Lapor Hari Ini</span>
                                             </div>
-                                            <span class="text-[9px] font-bold text-rose-600 bg-rose-100 px-1.5 py-0.5 rounded-md">
+                                            <span class="text-[9px] font-bold text-rose-700 bg-rose-100/90 px-2 py-0.5 rounded-md border border-rose-200">
                                                 Shift <?= esc($p['shift']) ?>
                                             </span>
                                         </div>
 
-                                        <button type="button" onclick="openModalLapor(<?= htmlspecialchars(json_encode($p)) ?>)" class="w-full py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5">
-                                            <i class="fa-solid fa-paper-plane text-[11px]"></i>
+                                        <button type="button" onclick="openModalLapor(<?= htmlspecialchars(json_encode($p)) ?>)" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-heading font-extrabold text-xs shadow-md shadow-emerald-600/25 hover:shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                                            <i class="fa-solid fa-paper-plane text-xs"></i>
                                             <span>Kirim Laporan Hari Ini</span>
                                         </button>
                                     </div>
@@ -269,16 +269,16 @@
                                         <div class="flex items-center justify-between gap-1">
                                             <div class="inline-flex items-center gap-1.5 text-[11px] font-heading font-extrabold text-slate-600">
                                                 <i class="fa-solid fa-calendar-xmark text-slate-400 text-xs"></i>
-                                                <span>Bukan Jadwal Hari Ini</span>
+                                                <span>Di Luar Jadwal</span>
                                             </div>
                                             <span class="text-[9px] font-bold text-slate-600 bg-slate-200/80 px-1.5 py-0.5 rounded-md truncate max-w-[110px]" title="<?= esc($p['hari_aktif'] ?: 'Khusus') ?>">
                                                 <?= esc($p['hari_aktif'] ?: 'Khusus') ?>
                                             </span>
                                         </div>
 
-                                        <button type="button" onclick="openModalLapor(<?= htmlspecialchars(json_encode($p)) ?>)" class="w-full py-1.5 rounded-xl bg-white hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 font-heading font-extrabold text-xs transition border border-slate-200 flex items-center justify-center gap-1.5 shadow-2xs">
+                                        <button type="button" onclick="openModalLapor(<?= htmlspecialchars(json_encode($p)) ?>)" class="w-full py-2 rounded-xl bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 font-heading font-extrabold text-xs transition border border-slate-200 flex items-center justify-center gap-1.5 shadow-2xs active:scale-[0.98]">
                                             <i class="fa-solid fa-paper-plane text-[10px]"></i>
-                                            <span>Lapor Ekstra (Di Luar Jadwal)</span>
+                                            <span>Lapor Ekstra (Sukarela)</span>
                                         </button>
                                     </div>
                                 <?php endif; ?>
@@ -607,114 +607,119 @@
     <?php endif; ?>
 </div>
 
-<!-- Modal Form Laporan Harian Kebersihan (dengan Jam Pengiriman & Interactive Slider 0-100) -->
-<div id="modalLaporWilayah" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-5 border border-slate-100 animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+<!-- Modal Form Laporan Harian Kebersihan (Compact No-Scroll 2-Column Layout) -->
+<div id="modalLaporWilayah" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl max-w-xl sm:max-w-2xl w-full p-4 sm:p-5 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-3">
             <div class="flex items-center gap-2.5">
-                <span class="w-9 h-9 rounded-2xl bg-emerald-100/80 text-emerald-700 flex items-center justify-center text-base shadow-2xs">
+                <span class="w-8 h-8 rounded-xl bg-emerald-100/80 text-emerald-700 flex items-center justify-center text-sm shadow-2xs flex-shrink-0">
                     <i class="fa-solid fa-clipboard-check"></i>
                 </span>
                 <div>
-                    <h3 class="font-heading font-extrabold text-lg text-slate-900">
+                    <h3 class="font-heading font-extrabold text-base text-slate-900 leading-tight">
                         Lapor Kebersihan Wilayah
                     </h3>
-                    <p id="modalLaporSubtitle" class="text-xs text-slate-500 font-medium">Area: Lapangan Utama Putri</p>
+                    <p id="modalLaporSubtitle" class="text-[11px] text-slate-500 font-medium">Area: Lapangan Utama Putri</p>
                 </div>
             </div>
-            <button onclick="closeModalLapor()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition">
-                <i class="fa-solid fa-xmark"></i>
+            <button type="button" onclick="closeModalLapor()" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition flex-shrink-0">
+                <i class="fa-solid fa-xmark text-xs"></i>
             </button>
         </div>
 
-        <form action="<?= base_url('app/lapor-wilayah/store') ?>" method="POST" enctype="multipart/form-data" class="space-y-4">
+        <form action="<?= base_url('app/lapor-wilayah/store') ?>" method="POST" enctype="multipart/form-data" class="space-y-3">
             <input type="hidden" id="lapor_wilayah_id" name="wilayah_id" value="">
             <input type="hidden" id="lapor_penugasan_id" name="penugasan_id" value="">
             <input type="hidden" id="lapor_shift" name="shift" value="Pagi">
 
-            <!-- Active CS Alert Reminder Inside Modal -->
-            <div id="modalCsAlertContainer" class="hidden p-3.5 rounded-2xl bg-rose-50 border border-rose-300 text-rose-900 text-xs space-y-1.5 shadow-2xs">
+            <!-- Active CS Alert Reminder Inside Modal (Compact) -->
+            <div id="modalCsAlertContainer" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs space-y-1 shadow-2xs">
                 <div class="flex items-center justify-between">
-                    <span class="inline-flex items-center gap-1.5 font-extrabold text-rose-800">
+                    <span class="inline-flex items-center gap-1.5 font-extrabold text-rose-800 text-[11px]">
                         <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
                         <span>Perhatian: Ada Keluhan CS Masuk untuk Wilayah Ini!</span>
                     </span>
-                    <span class="px-2 py-0.5 rounded bg-rose-200 text-rose-900 text-[10px] font-extrabold">Wajib Ditindaklanjuti</span>
+                    <span class="px-2 py-0.5 rounded bg-rose-200 text-rose-900 text-[9px] font-extrabold">Wajib Dituntaskan</span>
                 </div>
-                <p id="modalCsAlertText" class="text-rose-800 italic font-semibold bg-white/90 p-2 rounded-xl border border-rose-200/80 shadow-2xs">
-                </p>
-                <p class="text-[10.5px] text-rose-600 font-bold">
-                    Pastikan kendala di atas telah diselesaikan dan dibersihkan tuntas sebelum mengirim laporan ini.
+                <p id="modalCsAlertText" class="text-rose-800 italic font-semibold text-[11px] bg-white/90 px-2 py-1 rounded-lg border border-rose-200/80 shadow-2xs line-clamp-2">
                 </p>
             </div>
 
-            <!-- Tanggal & Jam Pengiriman & Shift Block -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Tanggal Lapor</label>
-                    <input type="date" name="tanggal_lapor" id="lapor_tanggal" value="<?= date('Y-m-d') ?>" required class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                </div>
+            <!-- 2-Column Form Body Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                
+                <!-- Left Column: Tanggal/Jam/Shift + Slider Nilai -->
+                <div class="space-y-2.5">
+                    <!-- Tanggal & Jam & Shift -->
+                    <div class="grid grid-cols-3 gap-1.5 sm:gap-2">
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-slate-700 uppercase tracking-wider mb-1">Tanggal</label>
+                            <input type="date" name="tanggal_lapor" id="lapor_tanggal" value="<?= date('Y-m-d') ?>" required class="w-full px-2 py-1.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                        </div>
 
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                        <span>Jam Lapor</span>
-                        <span class="text-[10px] text-emerald-600 font-bold lowercase">WIB</span>
-                    </label>
-                    <input type="time" name="jam_lapor" id="lapor_jam" value="<?= date('H:i') ?>" required class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
+                                <span>Jam</span>
+                                <span class="text-[9px] text-emerald-600 font-bold lowercase">wib</span>
+                            </label>
+                            <input type="time" name="jam_lapor" id="lapor_jam" value="<?= date('H:i') ?>" required class="w-full px-2 py-1.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                        </div>
 
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Shift Kerja</label>
-                    <input type="text" id="display_shift" readonly class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-100 text-slate-700 cursor-not-allowed">
-                </div>
-            </div>
-
-            <!-- INTERACTIVE SLIDER 0 - 100 DENGAN FLOATING BADGE & DYNAMIC PROGRESS COLOR -->
-            <div class="space-y-2.5 pt-2 pb-1">
-                <div class="flex items-center justify-between">
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-sliders text-emerald-600"></i>
-                        <span>Nilai Capaian Kebersihan</span>
-                    </label>
-                    <span id="sliderScoreLabel" class="text-xs font-bold text-slate-500">Sangat Bersih (Tuntas)</span>
-                </div>
-
-                <!-- Custom Range Slider Container -->
-                <div class="relative pt-6 pb-2 px-1">
-                    <!-- Floating Value Tooltip Bubble -->
-                    <div id="sliderTooltip" class="absolute top-0 -translate-x-1/2 px-2.5 py-0.5 rounded-lg bg-emerald-600 text-white font-heading font-extrabold text-[11px] shadow-md transition-colors duration-150 pointer-events-none" style="left: 85%;">
-                        85%
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-slate-700 uppercase tracking-wider mb-1">Shift</label>
+                            <input type="text" id="display_shift" readonly class="w-full px-2 py-1.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-100 text-slate-700 cursor-not-allowed">
+                        </div>
                     </div>
 
-                    <!-- Range Input -->
-                    <input type="range" id="scoreRangeInput" name="nilai_kebersihan" min="0" max="100" value="85" oninput="updateSliderUI(this.value)" class="w-full h-2.5 rounded-lg appearance-none cursor-pointer focus:outline-none transition-all duration-150" style="background: linear-gradient(to right, #059669 0%, #059669 85%, #e2e8f0 85%, #e2e8f0 100%);">
+                    <!-- Interactive Slider 0 - 100 -->
+                    <div class="p-2.5 rounded-2xl bg-emerald-50/60 border border-emerald-200/70 space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-[10.5px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                                <i class="fa-solid fa-sliders text-emerald-600 text-[10px]"></i>
+                                <span>Nilai Capaian</span>
+                            </label>
+                            <span id="sliderScoreLabel" class="text-[10.5px] font-bold text-slate-500">Sangat Bersih</span>
+                        </div>
 
-                    <!-- Scale 0, 50, and 100 labels -->
-                    <div class="flex justify-between items-center text-[10px] font-extrabold text-slate-400 mt-1.5">
-                        <span class="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200">0%</span>
-                        <span class="text-slate-300 font-semibold">Geser slider untuk memberi nilai kebersihan</span>
-                        <span class="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200">100%</span>
+                        <div class="relative pt-4 pb-1 px-1">
+                            <div id="sliderTooltip" class="absolute top-0 -translate-x-1/2 px-2 py-0.5 rounded-md bg-emerald-600 text-white font-heading font-extrabold text-[10px] shadow-sm pointer-events-none" style="left: 85%;">
+                                85%
+                            </div>
+                            <input type="range" id="scoreRangeInput" name="nilai_kebersihan" min="0" max="100" value="85" oninput="updateSliderUI(this.value)" class="w-full h-2 rounded-lg appearance-none cursor-pointer focus:outline-none transition-all duration-150" style="background: linear-gradient(to right, #059669 0%, #059669 85%, #e2e8f0 85%, #e2e8f0 100%);">
+                            <div class="flex justify-between items-center text-[9px] font-extrabold text-slate-400 mt-1">
+                                <span>0%</span>
+                                <span class="text-slate-400 font-medium">Geser untuk nilai</span>
+                                <span>100%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Foto Bukti & Catatan -->
+                <div class="space-y-2">
+                    <div>
+                        <label class="block text-[10px] font-extrabold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
+                            <span>Foto Bukti Kebersihan</span>
+                            <span class="text-[9px] text-emerald-600 font-bold lowercase bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60">Cloudinary</span>
+                        </label>
+                        <input type="file" name="foto_bukti" accept="image/*" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-[11px] font-bold bg-slate-50 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-extrabold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition shadow-2xs cursor-pointer">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-extrabold text-slate-700 uppercase tracking-wider mb-1">Catatan / Keterangan (Opsional)</label>
+                        <textarea name="catatan" id="lapor_catatan" rows="2" placeholder="Sudah disapu dan dipel bersih..." class="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs resize-none"></textarea>
                     </div>
                 </div>
             </div>
 
-            <div>
-                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                    <span>Unggah Bukti Foto Kebersihan Hari Ini</span>
-                    <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">Cloudinary</span>
-                </label>
-                <input type="file" name="foto_bukti" accept="image/*" class="w-full px-4 py-2 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition shadow-2xs cursor-pointer">
-                <p class="text-[11px] text-slate-400 font-medium mt-1">Unggah foto hasil pembersihan wilayah hari ini sebagai bukti valid.</p>
-            </div>
-
-            <div>
-                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Catatan / Keterangan Pembersihan (Opsional)</label>
-                <textarea name="catatan" id="lapor_catatan" rows="2" placeholder="Contoh: Sudah disapu dan dipel bersih, tempat sampah telah dikosongkan..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs"></textarea>
-            </div>
-
-            <div class="pt-3 flex justify-end gap-2 border-t border-slate-100">
-                <button type="button" onclick="closeModalLapor()" class="px-5 py-2.5 rounded-2xl text-slate-600 text-xs font-bold hover:bg-slate-100 transition">Batal</button>
-                <button type="submit" class="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-extrabold hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-600/20 transition">Kirim Laporan Harian</button>
+            <!-- Modal Footer -->
+            <div class="pt-2.5 flex items-center justify-end gap-2 border-t border-slate-100">
+                <button type="button" onclick="closeModalLapor()" class="px-4 py-2 rounded-xl text-slate-600 text-xs font-bold hover:bg-slate-100 transition">Batal</button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-extrabold hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                    <span>Kirim Laporan Harian</span>
+                </button>
             </div>
         </form>
     </div>
@@ -774,9 +779,43 @@
                                 <option value="Lainnya">Lainnya</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-extrabold text-slate-700 uppercase tracking-wider mb-1">Lokasi Gedung</label>
-                            <input type="text" name="lokasi_gedung" placeholder="Lantai 2 / Gd. B" class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                        <div class="relative">
+                            <label class="block text-[10px] font-extrabold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
+                                <span>Lokasi</span>
+                                <span class="text-[9px] text-emerald-600 font-bold lowercase flex items-center gap-0.5">
+                                    <i class="fa-solid fa-magnifying-glass text-[8px]"></i> cari
+                                </span>
+                            </label>
+                            <input type="hidden" id="portal_wilayah_tambah_lokasi_gedung" name="lokasi_gedung" value="<?= esc($userUnit['nama_unit'] ?? '') ?>">
+                            <div class="relative">
+                                <i class="fa-solid fa-building text-emerald-600 absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] pointer-events-none"></i>
+                                <input type="text" id="portal_wilayah_tambah_lokasi_search" value="<?= esc($userUnit['nama_unit'] ?? '') ?>" placeholder="Pilih unit..." autocomplete="off" onfocus="openPortalTambahWilayahLokasiDropdown()" oninput="filterPortalTambahWilayahLokasiOptions(this.value)" class="w-full pl-7 pr-6 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
+                                <button type="button" onclick="togglePortalTambahWilayahLokasiDropdown()" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                                    <i id="portalTambahWilayahLokasiIcon" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200"></i>
+                                </button>
+                            </div>
+                            <!-- Dropdown List -->
+                            <div id="portalTambahWilayahLokasiDropdownList" class="absolute left-0 right-0 top-full mt-1 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-48 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                                <div class="portal-tambah-wilayah-lokasi-item px-3 py-2 hover:bg-slate-50 transition flex items-center justify-between cursor-pointer text-slate-400 italic text-[11px] font-medium" data-nama="" onclick="selectPortalTambahWilayahLokasi(this)">
+                                    <span>-- Tanpa Gedung Khusus / Umum --</span>
+                                </div>
+                                <?php if (!empty($unitList)): ?>
+                                    <?php foreach ($unitList as $u): ?>
+                                        <div class="portal-tambah-wilayah-lokasi-item px-3 py-2 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-nama="<?= esc($u['nama_unit']) ?>" onclick="selectPortalTambahWilayahLokasi(this)">
+                                            <div>
+                                                <div class="font-extrabold text-xs text-slate-900"><?= esc($u['nama_unit']) ?></div>
+                                                <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1 mt-0.5">
+                                                    <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200/60 text-[9px]"><?= esc($u['tipe']) ?></span>
+                                                </div>
+                                            </div>
+                                            <span class="text-xs text-slate-300 group-hover:text-emerald-600"><i class="fa-solid fa-check text-[10px]"></i></span>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                                <div id="noPortalTambahWilayahLokasiFound" class="px-3 py-2.5 text-center text-slate-400 text-xs italic font-medium hidden">
+                                    Tidak ditemukan.
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -897,19 +936,53 @@
         <form action="<?= base_url('app/wilayah-tugas/store') ?>" method="POST" class="space-y-3.5">
             <input type="hidden" name="is_existing_wilayah" value="1">
 
-            <!-- Pilih Wilayah Master Terdaftar -->
-            <div>
-                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Pilih Wilayah Kebersihan <span class="text-rose-500">*</span></label>
-                <select name="existing_wilayah_id" required class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                    <option value="">-- Pilih Wilayah / Area Spot --</option>
+            <!-- Pilih Wilayah Master Terdaftar (Searchable) -->
+            <div class="relative">
+                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>PILIH WILAYAH KEBERSIHAN <span class="text-rose-500">*</span></span>
+                    <span class="text-[10px] text-emerald-600 font-bold lowercase flex items-center gap-0.5">
+                        <i class="fa-solid fa-magnifying-glass text-[9px]"></i> cari
+                    </span>
+                </label>
+                <input type="hidden" id="portal_shift_existing_wilayah_id" name="existing_wilayah_id" value="" required>
+                <div class="relative">
+                    <i class="fa-solid fa-map-location-dot text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2 text-xs pointer-events-none"></i>
+                    <input type="text" id="portal_shift_existing_wilayah_search" placeholder="Cari nama wilayah / spot area / kode..." autocomplete="off" onfocus="openPortalShiftWilayahDropdown()" oninput="filterPortalShiftWilayahOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
+                    <button type="button" onclick="togglePortalShiftWilayahDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                        <i id="portalShiftWilayahIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                    </button>
+                </div>
+                <!-- Dropdown List -->
+                <div id="portalShiftWilayahDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-52 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                    <div class="portal-shift-wilayah-item px-3.5 py-2.5 hover:bg-slate-50 transition flex items-center justify-between cursor-pointer text-slate-400 italic text-[11px] font-medium" data-id="" data-nama="" onclick="selectPortalShiftWilayah(this)">
+                        <span>-- Pilih Wilayah / Area Spot --</span>
+                    </div>
                     <?php if (!empty($allMasterWilayah)): ?>
                         <?php foreach ($allMasterWilayah as $mw): ?>
-                            <option value="<?= $mw['id'] ?>">
-                                <?= esc($mw['nama_wilayah']) ?> (<?= esc($mw['lokasi_gedung'] ?: $mw['kategori_area']) ?>) &bull; <?= esc($mw['kode_wilayah']) ?>
-                            </option>
+                            <div class="portal-shift-wilayah-item px-3.5 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer group" 
+                                 data-id="<?= $mw['id'] ?>" 
+                                 data-nama="<?= esc($mw['nama_wilayah']) ?>" 
+                                 data-kode="<?= esc($mw['kode_wilayah']) ?>" 
+                                 data-lokasi="<?= esc($mw['lokasi_gedung'] ?: $mw['kategori_area']) ?>"
+                                 onclick="selectPortalShiftWilayah(this)">
+                                <div>
+                                    <div class="font-extrabold text-xs text-slate-900 group-hover:text-emerald-800">
+                                        <?= esc($mw['nama_wilayah']) ?>
+                                    </div>
+                                    <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
+                                        <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200/60 text-[9px]"><?= esc($mw['kode_wilayah'] ?: 'WIL-' . $mw['id']) ?></span>
+                                        <span class="text-slate-300">&bull;</span>
+                                        <span class="text-slate-600"><i class="fa-solid fa-building text-[9px] text-emerald-600 mr-0.5"></i> <?= esc($mw['lokasi_gedung'] ?: $mw['kategori_area']) ?></span>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-slate-300 group-hover:text-emerald-600"><i class="fa-solid fa-check text-[11px]"></i></span>
+                            </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
-                </select>
+                    <div id="noPortalShiftWilayahFound" class="px-3.5 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
+                        Wilayah tidak ditemukan.
+                    </div>
+                </div>
             </div>
 
             <!-- Shift & Jam -->
@@ -1078,6 +1151,25 @@
         if (modal) modal.classList.add('hidden');
     }
     window.closeModalLapor = closeModalLapor;
+
+    function openModalTambahShiftExisting(presetWilayahId) {
+        const modal = document.getElementById('modalTambahShiftExisting');
+        if (modal) modal.classList.remove('hidden');
+        if (presetWilayahId) {
+            const item = document.querySelector(`.portal-shift-wilayah-item[data-id="${presetWilayahId}"]`);
+            if (item) {
+                selectPortalShiftWilayah(item);
+            }
+        }
+    }
+    window.openModalTambahShiftExisting = openModalTambahShiftExisting;
+
+    function closeModalTambahShiftExisting() {
+        const modal = document.getElementById('modalTambahShiftExisting');
+        if (modal) modal.classList.add('hidden');
+        closePortalShiftWilayahDropdown();
+    }
+    window.closeModalTambahShiftExisting = closeModalTambahShiftExisting;
 
     function openModalTambahWilayahUnit() {
         const modal = document.getElementById('modalTambahWilayahUnit');
@@ -1339,6 +1431,170 @@
         renderAssignedCardsPagination();
     }
     window.filterAssignedCards = filterAssignedCards;
+
+    // Searchable Lokasi Wilayah Dropdown in Portal Tambah Master Modal
+    function openPortalTambahWilayahLokasiDropdown() {
+        const dd = document.getElementById('portalTambahWilayahLokasiDropdownList');
+        const icon = document.getElementById('portalTambahWilayahLokasiIcon');
+        if (dd) {
+            dd.classList.remove('hidden');
+            const items = document.querySelectorAll('.portal-tambah-wilayah-lokasi-item');
+            items.forEach(item => item.style.display = 'flex');
+            const noFound = document.getElementById('noPortalTambahWilayahLokasiFound');
+            if (noFound) noFound.classList.add('hidden');
+        }
+        if (icon) icon.classList.add('rotate-180');
+    }
+    window.openPortalTambahWilayahLokasiDropdown = openPortalTambahWilayahLokasiDropdown;
+
+    function closePortalTambahWilayahLokasiDropdown() {
+        const dd = document.getElementById('portalTambahWilayahLokasiDropdownList');
+        const icon = document.getElementById('portalTambahWilayahLokasiIcon');
+        if (dd) dd.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+    }
+    window.closePortalTambahWilayahLokasiDropdown = closePortalTambahWilayahLokasiDropdown;
+
+    function togglePortalTambahWilayahLokasiDropdown() {
+        const dd = document.getElementById('portalTambahWilayahLokasiDropdownList');
+        if (dd && dd.classList.contains('hidden')) {
+            openPortalTambahWilayahLokasiDropdown();
+        } else if (dd) {
+            closePortalTambahWilayahLokasiDropdown();
+        }
+    }
+    window.togglePortalTambahWilayahLokasiDropdown = togglePortalTambahWilayahLokasiDropdown;
+
+    function filterPortalTambahWilayahLokasiOptions(query) {
+        const hiddenInput = document.getElementById('portal_wilayah_tambah_lokasi_gedung');
+        if (hiddenInput) hiddenInput.value = query;
+
+        query = (query || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.portal-tambah-wilayah-lokasi-item');
+        let visibleCount = 0;
+
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            const nama = (item.getAttribute('data-nama') || '').toLowerCase();
+            if (!query || text.includes(query) || nama.includes(query) || item.getAttribute('data-nama') === '') {
+                item.style.display = 'flex';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        const noFound = document.getElementById('noPortalTambahWilayahLokasiFound');
+        if (noFound) {
+            noFound.classList.toggle('hidden', visibleCount > 0);
+        }
+    }
+    window.filterPortalTambahWilayahLokasiOptions = filterPortalTambahWilayahLokasiOptions;
+
+    function selectPortalTambahWilayahLokasi(el) {
+        const nama = el.getAttribute('data-nama') || '';
+        const hiddenInput = document.getElementById('portal_wilayah_tambah_lokasi_gedung');
+        const searchInput = document.getElementById('portal_wilayah_tambah_lokasi_search');
+
+        if (hiddenInput) hiddenInput.value = nama;
+        if (searchInput) searchInput.value = nama;
+
+        closePortalTambahWilayahLokasiDropdown();
+    }
+    window.selectPortalTambahWilayahLokasi = selectPortalTambahWilayahLokasi;
+
+    // Searchable Existing Wilayah Dropdown in Tambah Shift Modal
+    function openPortalShiftWilayahDropdown() {
+        const dd = document.getElementById('portalShiftWilayahDropdownList');
+        const icon = document.getElementById('portalShiftWilayahIcon');
+        if (dd) {
+            dd.classList.remove('hidden');
+            const items = document.querySelectorAll('.portal-shift-wilayah-item');
+            items.forEach(item => item.style.display = 'flex');
+            const noFound = document.getElementById('noPortalShiftWilayahFound');
+            if (noFound) noFound.classList.add('hidden');
+        }
+        if (icon) icon.classList.add('rotate-180');
+    }
+    window.openPortalShiftWilayahDropdown = openPortalShiftWilayahDropdown;
+
+    function closePortalShiftWilayahDropdown() {
+        const dd = document.getElementById('portalShiftWilayahDropdownList');
+        const icon = document.getElementById('portalShiftWilayahIcon');
+        if (dd) dd.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+    }
+    window.closePortalShiftWilayahDropdown = closePortalShiftWilayahDropdown;
+
+    function togglePortalShiftWilayahDropdown() {
+        const dd = document.getElementById('portalShiftWilayahDropdownList');
+        if (dd && dd.classList.contains('hidden')) {
+            openPortalShiftWilayahDropdown();
+        } else if (dd) {
+            closePortalShiftWilayahDropdown();
+        }
+    }
+    window.togglePortalShiftWilayahDropdown = togglePortalShiftWilayahDropdown;
+
+    function filterPortalShiftWilayahOptions(query) {
+        query = (query || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.portal-shift-wilayah-item');
+        let visibleCount = 0;
+
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            const nama = (item.getAttribute('data-nama') || '').toLowerCase();
+            const kode = (item.getAttribute('data-kode') || '').toLowerCase();
+            const lokasi = (item.getAttribute('data-lokasi') || '').toLowerCase();
+            if (!query || text.includes(query) || nama.includes(query) || kode.includes(query) || lokasi.includes(query) || item.getAttribute('data-id') === '') {
+                item.style.display = 'flex';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        const noFound = document.getElementById('noPortalShiftWilayahFound');
+        if (noFound) {
+            noFound.classList.toggle('hidden', visibleCount > 0);
+        }
+    }
+    window.filterPortalShiftWilayahOptions = filterPortalShiftWilayahOptions;
+
+    function selectPortalShiftWilayah(el) {
+        const id = el.getAttribute('data-id') || '';
+        const nama = el.getAttribute('data-nama') || '';
+        const kode = el.getAttribute('data-kode') || '';
+        const hiddenInput = document.getElementById('portal_shift_existing_wilayah_id');
+        const searchInput = document.getElementById('portal_shift_existing_wilayah_search');
+
+        if (hiddenInput) hiddenInput.value = id;
+        if (searchInput) {
+            searchInput.value = id ? (nama + (kode ? ` (${kode})` : '')) : '';
+        }
+
+        closePortalShiftWilayahDropdown();
+    }
+    window.selectPortalShiftWilayah = selectPortalShiftWilayah;
+
+    // Close dropdown on outside click
+    document.addEventListener('click', function(e) {
+        const lokasiDropdown = document.getElementById('portalTambahWilayahLokasiDropdownList');
+        const lokasiSearchInput = document.getElementById('portal_wilayah_tambah_lokasi_search');
+        if (lokasiDropdown && !lokasiDropdown.classList.contains('hidden')) {
+            if (!lokasiDropdown.contains(e.target) && e.target !== lokasiSearchInput && !e.target.closest('#portalTambahWilayahLokasiIcon')) {
+                closePortalTambahWilayahLokasiDropdown();
+            }
+        }
+
+        const shiftWilayahDropdown = document.getElementById('portalShiftWilayahDropdownList');
+        const shiftWilayahSearchInput = document.getElementById('portal_shift_existing_wilayah_search');
+        if (shiftWilayahDropdown && !shiftWilayahDropdown.classList.contains('hidden')) {
+            if (!shiftWilayahDropdown.contains(e.target) && e.target !== shiftWilayahSearchInput && !e.target.closest('#portalShiftWilayahIcon')) {
+                closePortalShiftWilayahDropdown();
+            }
+        }
+    });
 
     document.addEventListener('DOMContentLoaded', function() {
         updateSliderUI(85);

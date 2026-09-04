@@ -52,26 +52,6 @@ class Cs extends BaseController
             ]);
         }
 
-        $reportsList   = [];
-        $pengajuanList = [];
-
-        // Only fetch inbox list if logged in as Admin or Auditor
-        if ($isUserAdminOrAuditor) {
-            $reportsList = $this->csModel
-                ->select('cs_reports.*, master_unit.pj_nama, master_unit.pj_kontak, master_unit.kode_unit, tbl_wilayah_kebersihan.nama_wilayah, tbl_wilayah_kebersihan.lokasi_gedung')
-                ->join('master_unit', '(cs_reports.unit_id IS NOT NULL AND cs_reports.unit_id > 0 AND master_unit.id = cs_reports.unit_id) OR ((cs_reports.unit_id IS NULL OR cs_reports.unit_id = 0) AND master_unit.nama_unit = cs_reports.unit_lokasi)', 'left')
-                ->join('tbl_wilayah_kebersihan', 'tbl_wilayah_kebersihan.id = cs_reports.wilayah_id', 'left')
-                ->groupBy('cs_reports.id')
-                ->orderBy('cs_reports.id', 'DESC')
-                ->findAll();
-            $pengajuanList = $this->pengajuanModel
-                ->select('pengajuan_alat.*, users.nama_lengkap, users.username, alat_inventaris.nama_alat, alat_inventaris.kode_alat, alat_inventaris.satuan')
-                ->join('users', 'users.id = pengajuan_alat.user_id', 'left')
-                ->join('alat_inventaris', 'alat_inventaris.id = pengajuan_alat.alat_id', 'left')
-                ->orderBy('pengajuan_alat.id', 'DESC')
-                ->findAll();
-        }
-
         $pengaturanModel = new \App\Models\PengaturanModel();
         $settings = $pengaturanModel->getAllAsMap();
 
@@ -81,11 +61,115 @@ class Cs extends BaseController
         $unitModel    = new \App\Models\MasterUnitModel();
         $unitList     = $unitModel->getActiveUnitsNonKader();
 
+        // Get fallback PJ data from tbl_unit_pj
+        $unitPjModel = new \App\Models\UnitPjModel();
+        $allPjs = $unitPjModel->findAll();
+        $pjsByUnit = [];
+        foreach ($allPjs as $pj) {
+            if (!empty($pj['unit_id']) && !isset($pjsByUnit[$pj['unit_id']])) {
+                $pjsByUnit[$pj['unit_id']] = $pj;
+            }
+        }
+
+        foreach ($unitList as &$u) {
+            if (empty($u['pj_kontak']) && isset($pjsByUnit[$u['id']])) {
+                $u['pj_kontak'] = $pjsByUnit[$u['id']]['kontak_pj'] ?? '';
+                if (empty($u['pj_nama'])) {
+                    $u['pj_nama'] = $pjsByUnit[$u['id']]['nama_pj'] ?? '';
+                }
+            }
+        }
+        unset($u);
+
         $penugasanModel = new \App\Models\WilayahPenugasanModel();
         $penugasanList  = $penugasanModel
-            ->select('tbl_wilayah_penugasan.*, master_unit.nama_unit, master_unit.kode_unit')
+            ->select('tbl_wilayah_penugasan.*, master_unit.nama_unit, master_unit.kode_unit, master_unit.pj_nama, master_unit.pj_kontak')
             ->join('master_unit', 'master_unit.id = tbl_wilayah_penugasan.unit_id', 'left')
             ->findAll();
+
+        foreach ($penugasanList as &$pen) {
+            if (empty($pen['pj_kontak']) && !empty($pen['unit_id']) && isset($pjsByUnit[$pen['unit_id']])) {
+                $pen['pj_kontak'] = $pjsByUnit[$pen['unit_id']]['kontak_pj'] ?? '';
+                if (empty($pen['pj_nama'])) {
+                    $pen['pj_nama'] = $pjsByUnit[$pen['unit_id']]['nama_pj'] ?? '';
+                }
+            }
+        }
+        unset($pen);
+
+        $reportsList   = [];
+        $pengajuanList = [];
+
+        // Only fetch inbox list if logged in as Admin or Auditor
+        if ($isUserAdminOrAuditor) {
+            $reports = $this->csModel
+                ->select('cs_reports.*, master_unit.pj_nama, master_unit.pj_kontak, master_unit.kode_unit, tbl_wilayah_kebersihan.nama_wilayah, tbl_wilayah_kebersihan.lokasi_gedung')
+                ->join('master_unit', '(cs_reports.unit_id IS NOT NULL AND cs_reports.unit_id > 0 AND master_unit.id = cs_reports.unit_id) OR ((cs_reports.unit_id IS NULL OR cs_reports.unit_id = 0) AND master_unit.nama_unit = cs_reports.unit_lokasi)', 'left')
+                ->join('tbl_wilayah_kebersihan', 'tbl_wilayah_kebersihan.id = cs_reports.wilayah_id', 'left')
+                ->groupBy('cs_reports.id')
+                ->orderBy('cs_reports.id', 'DESC')
+                ->findAll();
+
+            // Build penugasan lookup map by [wilayah_id][shift]
+            $penugasanMap = [];
+            foreach ($penugasanList as $pen) {
+                if (!empty($pen['wilayah_id']) && !empty($pen['shift'])) {
+                    $penugasanMap[$pen['wilayah_id']][$pen['shift']] = $pen;
+                }
+            }
+
+            // Build unit lookup map by [unit_id]
+            $unitsMap = [];
+            foreach ($unitList as $u) {
+                $unitsMap[$u['id']] = $u;
+            }
+
+            foreach ($reports as &$r) {
+                $assignedPj = null;
+                // If report has wilayah_id and shift, resolve PJ of the unit assigned to this shift
+                if (!empty($r['wilayah_id']) && !empty($r['shift']) && isset($penugasanMap[$r['wilayah_id']][$r['shift']])) {
+                    $assignedPj = $penugasanMap[$r['wilayah_id']][$r['shift']];
+                }
+
+                if ($assignedPj) {
+                    $r['pj_unit_id']   = $assignedPj['unit_id'];
+                    $r['pj_unit_nama'] = $assignedPj['nama_unit'] ?? $r['unit_lokasi'];
+                    $r['pj_nama']      = !empty($assignedPj['pj_nama']) ? $assignedPj['pj_nama'] : ($r['pj_nama'] ?? '');
+                    $r['pj_kontak']    = !empty($assignedPj['pj_kontak']) ? $assignedPj['pj_kontak'] : ($r['pj_kontak'] ?? '');
+                } else {
+                    $targetUnitId = $r['unit_id'] ?: null;
+                    if ($targetUnitId && isset($unitsMap[$targetUnitId])) {
+                        $uObj = $unitsMap[$targetUnitId];
+                        $r['pj_unit_id']   = $uObj['id'];
+                        $r['pj_unit_nama'] = $uObj['nama_unit'];
+                        if (empty($r['pj_nama'])) $r['pj_nama'] = $uObj['pj_nama'] ?? '';
+                        if (empty($r['pj_kontak'])) $r['pj_kontak'] = $uObj['pj_kontak'] ?? '';
+                    } else {
+                        $r['pj_unit_id']   = $r['unit_id'] ?? null;
+                        $r['pj_unit_nama'] = $r['unit_lokasi'] ?? '';
+                    }
+                }
+
+                $finalUnitId = $r['pj_unit_id'] ?? $r['unit_id'] ?? null;
+                if ($finalUnitId && isset($pjsByUnit[$finalUnitId])) {
+                    if (empty($r['pj_kontak'])) {
+                        $r['pj_kontak'] = $pjsByUnit[$finalUnitId]['kontak_pj'] ?? '';
+                    }
+                    if (empty($r['pj_nama'])) {
+                        $r['pj_nama'] = $pjsByUnit[$finalUnitId]['nama_pj'] ?? '';
+                    }
+                }
+            }
+            unset($r);
+            $reportsList = $reports;
+
+            $pengajuanList = $this->pengajuanModel
+                ->select('pengajuan_alat.*, users.nama_lengkap, users.username, alat_inventaris.nama_alat, alat_inventaris.kode_alat, alat_inventaris.satuan')
+                ->join('users', 'users.id = pengajuan_alat.user_id', 'left')
+                ->join('alat_inventaris', 'alat_inventaris.id = pengajuan_alat.alat_id', 'left')
+                ->orderBy('pengajuan_alat.id', 'DESC')
+                ->findAll();
+        }
 
         $data = [
             'title'                => $isUserAdminOrAuditor ? 'Inbox Customer Service Admin K3L' : 'Lapor Kebersihan & Layanan Bantuan (CS)',

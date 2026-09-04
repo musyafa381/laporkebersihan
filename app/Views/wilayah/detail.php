@@ -550,7 +550,7 @@
                 <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                     <span>Pilih Unit Penanggung Jawab <span class="text-rose-500">*</span></span>
                     <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
-                        <i class="fa-solid fa-magnifying-glass text-[9px]"></i> Bisa dicari
+                        Bisa dicari
                     </span>
                 </label>
                 <input type="hidden" id="tambah_penugasan_unit_id" name="unit_id" required value="">
@@ -661,13 +661,13 @@
                 <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                     <span>Pilih Unit Penanggung Jawab <span class="text-rose-500">*</span></span>
                     <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
-                        <i class="fa-solid fa-magnifying-glass text-[9px]"></i> Bisa dicari
+                        Bisa dicari
                     </span>
                 </label>
                 <input type="hidden" id="edit_penugasan_unit_id" name="unit_id" required value="">
                 <div class="relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
-                    <input type="text" id="edit_penugasan_unit_search" placeholder="Cari nama unit, tipe asrama/sekolah..." autocomplete="off" onfocus="openEditPenugasanUnitDropdown()" oninput="filterEditPenugasanUnitOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
+                    <input type="text" id="edit_penugasan_unit_search" placeholder="Cari nama unit, tipe asrama/sekolah..." autocomplete="off" onfocus="openEditPenugasanUnitDropdown(); this.select();" oninput="filterEditPenugasanUnitOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
                     <button type="button" onclick="toggleEditPenugasanUnitDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
                         <i id="editPenugasanUnitIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
                     </button>
@@ -755,14 +755,14 @@
 </div>
 
 <!-- Modal Edit Data Wilayah -->
-<div id="modalEditWilayah" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl space-y-5 border border-slate-100 animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
+<div id="modalEditWilayah" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl space-y-5 border border-slate-100 animate-in fade-in zoom-in duration-200 max-h-[92vh] overflow-y-auto">
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h3 class="font-heading font-extrabold text-lg text-slate-900 flex items-center gap-2">
+            <h3 class="font-heading font-extrabold text-lg sm:text-xl text-slate-900 flex items-center gap-2">
                 <i class="fa-solid fa-pen-to-square text-amber-500"></i> Edit Data Wilayah Kebersihan
             </h3>
-            <button onclick="closeModalEditWilayah()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition">
-                <i class="fa-solid fa-xmark"></i>
+            <button onclick="closeModalEditWilayah()" class="w-9 h-9 rounded-2xl bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-base"></i>
             </button>
         </div>
 
@@ -791,9 +791,47 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Lokasi Komplek / Gedung</label>
-                    <input type="text" name="lokasi_gedung" value="<?= esc($wilayah['lokasi_gedung']) ?>" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                <div class="relative">
+                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                        <span>Lokasi Komplek</span>
+                        <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                           Bisa dicari
+                        </span>
+                    </label>
+                    <input type="hidden" id="edit_wilayah_lokasi_gedung" name="lokasi_gedung" value="<?= esc($wilayah['lokasi_gedung'] ?? '') ?>">
+                    <div class="relative">
+                        <i class="fa-solid fa-building text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2 text-xs pointer-events-none"></i>
+                        <input type="text" id="edit_wilayah_lokasi_search" value="<?= esc($wilayah['lokasi_gedung'] ?? '') ?>" placeholder="Cari komplek / unit / gedung..." autocomplete="off" onfocus="openEditWilayahLokasiDropdown(); this.select();" oninput="filterEditWilayahLokasiOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
+                        <button type="button" onclick="toggleEditWilayahLokasiDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                            <i id="editWilayahLokasiIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                        </button>
+                    </div>
+                    <!-- Dropdown List -->
+                    <div id="editWilayahLokasiDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                        <div class="edit-wilayah-lokasi-item px-4 py-2 hover:bg-slate-50 transition flex items-center justify-between cursor-pointer text-slate-400 italic text-xs font-medium" data-nama="" onclick="selectEditWilayahLokasi(this)">
+                            <span>-- Tanpa Gedung Khusus / Umum --</span>
+                        </div>
+                        <?php if (!empty($unitsList)): ?>
+                            <?php foreach ($unitsList as $u): ?>
+                                <div class="edit-wilayah-lokasi-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-nama="<?= esc($u['nama_unit']) ?>" onclick="selectEditWilayahLokasi(this)">
+                                    <div>
+                                        <div class="font-extrabold text-xs text-slate-900"><?= esc($u['nama_unit']) ?></div>
+                                        <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
+                                            <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200/60"><?= esc($u['tipe']) ?></span>
+                                            <?php if (!empty($u['kode_unit'])): ?>
+                                                <span>&bull;</span>
+                                                <span class="font-mono text-slate-400"><?= esc($u['kode_unit']) ?></span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs text-slate-300 group-hover:text-emerald-600"><i class="fa-solid fa-check text-[10px]"></i></span>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                        <div id="noEditWilayahLokasiFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
+                            Tidak ditemukan unit yang sesuai.
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Luas Area</label>
@@ -951,7 +989,7 @@
     // Searchable Penugasan Unit Picker Logic (Edit)
     function openModalEditPenugasan(item) {
         const form = document.getElementById('formEditPenugasan');
-        if (form) form.action = '<?= base_url('wilayah/penugasan/update/') ?>/' + item.id;
+        if (form) form.action = '<?= base_url('wilayah/penugasan/update') ?>/' + item.id;
 
         const hiddenId = document.getElementById('edit_penugasan_unit_id');
         const searchInput = document.getElementById('edit_penugasan_unit_search');
@@ -1008,7 +1046,13 @@
     function openEditPenugasanUnitDropdown() {
         const list = document.getElementById('editPenugasanUnitDropdownList');
         const icon = document.getElementById('editPenugasanUnitIcon');
-        if (list) list.classList.remove('hidden');
+        if (list) {
+            list.classList.remove('hidden');
+            const items = document.querySelectorAll('.edit-penugasan-unit-item');
+            items.forEach(item => item.style.display = 'flex');
+            const noFound = document.getElementById('noEditPenugasanUnitFound');
+            if (noFound) noFound.classList.add('hidden');
+        }
         if (icon) icon.classList.add('rotate-180');
     }
     window.openEditPenugasanUnitDropdown = openEditPenugasanUnitDropdown;
@@ -1071,6 +1115,78 @@
     }
     window.selectEditPenugasanUnit = selectEditPenugasanUnit;
 
+    // Searchable Lokasi Wilayah Dropdown in Edit Modal
+    function openEditWilayahLokasiDropdown() {
+        const dd = document.getElementById('editWilayahLokasiDropdownList');
+        const icon = document.getElementById('editWilayahLokasiIcon');
+        if (dd) {
+            dd.classList.remove('hidden');
+            // Tampilkan SEMUA pilihan secara lengkap saat dibuka
+            const items = document.querySelectorAll('.edit-wilayah-lokasi-item');
+            items.forEach(item => item.style.display = 'flex');
+            const noFound = document.getElementById('noEditWilayahLokasiFound');
+            if (noFound) noFound.classList.add('hidden');
+        }
+        if (icon) icon.classList.add('rotate-180');
+    }
+    window.openEditWilayahLokasiDropdown = openEditWilayahLokasiDropdown;
+
+    function closeEditWilayahLokasiDropdown() {
+        const dd = document.getElementById('editWilayahLokasiDropdownList');
+        const icon = document.getElementById('editWilayahLokasiIcon');
+        if (dd) dd.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+    }
+    window.closeEditWilayahLokasiDropdown = closeEditWilayahLokasiDropdown;
+
+    function toggleEditWilayahLokasiDropdown() {
+        const dd = document.getElementById('editWilayahLokasiDropdownList');
+        if (dd && dd.classList.contains('hidden')) {
+            openEditWilayahLokasiDropdown();
+        } else if (dd) {
+            closeEditWilayahLokasiDropdown();
+        }
+    }
+    window.toggleEditWilayahLokasiDropdown = toggleEditWilayahLokasiDropdown;
+
+    function filterEditWilayahLokasiOptions(query) {
+        const hiddenInput = document.getElementById('edit_wilayah_lokasi_gedung');
+        if (hiddenInput) hiddenInput.value = query;
+
+        query = (query || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.edit-wilayah-lokasi-item');
+        let visibleCount = 0;
+
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            const nama = (item.getAttribute('data-nama') || '').toLowerCase();
+            if (!query || text.includes(query) || nama.includes(query) || item.getAttribute('data-nama') === '') {
+                item.style.display = 'flex';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        const noFound = document.getElementById('noEditWilayahLokasiFound');
+        if (noFound) {
+            noFound.classList.toggle('hidden', visibleCount > 0);
+        }
+    }
+    window.filterEditWilayahLokasiOptions = filterEditWilayahLokasiOptions;
+
+    function selectEditWilayahLokasi(el) {
+        const nama = el.getAttribute('data-nama') || '';
+        const hiddenInput = document.getElementById('edit_wilayah_lokasi_gedung');
+        const searchInput = document.getElementById('edit_wilayah_lokasi_search');
+
+        if (hiddenInput) hiddenInput.value = nama;
+        if (searchInput) searchInput.value = nama;
+
+        closeEditWilayahLokasiDropdown();
+    }
+    window.selectEditWilayahLokasi = selectEditWilayahLokasi;
+
     // Close dropdown on outside click
     document.addEventListener('click', function(e) {
         const dropdown = document.getElementById('penugasanUnitDropdownList');
@@ -1086,6 +1202,14 @@
         if (editDropdown && !editDropdown.classList.contains('hidden')) {
             if (!editDropdown.contains(e.target) && e.target !== editSearchInput && !e.target.closest('#editPenugasanUnitIcon')) {
                 closeEditPenugasanUnitDropdown();
+            }
+        }
+
+        const lokasiDropdown = document.getElementById('editWilayahLokasiDropdownList');
+        const lokasiSearchInput = document.getElementById('edit_wilayah_lokasi_search');
+        if (lokasiDropdown && !lokasiDropdown.classList.contains('hidden')) {
+            if (!lokasiDropdown.contains(e.target) && e.target !== lokasiSearchInput && !e.target.closest('#editWilayahLokasiIcon')) {
+                closeEditWilayahLokasiDropdown();
             }
         }
     });

@@ -40,23 +40,43 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <?php if (!empty($bukuList)): ?>
-                    <?php foreach ($bukuList as $b): ?>
+                    <?php foreach ($bukuList as $b): 
+                        $bStatus = $b['status'] ?: 'Aktif';
+                        $isAktif = (strtolower(trim($bStatus)) === 'aktif' || strtolower(trim($bStatus)) === 'berjalan' || strtolower(trim($bStatus)) === 'active');
+                    ?>
                         <div class="glass-card rounded-2xl p-5 border border-slate-200/80 bg-white space-y-4 shadow-2xs hover:shadow-md transition">
                             <div class="flex items-center justify-between">
-                                <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-extrabold border border-emerald-200">
+                                <span class="px-3 py-1 rounded-full <?= $isAktif ? 'bg-emerald-100 text-emerald-900 border-emerald-200' : 'bg-slate-100 text-slate-700 border-slate-200' ?> text-xs font-extrabold border">
                                     Periode: <?= esc($b['bulan']) ?> <?= esc($b['tahun']) ?>
                                 </span>
-                                <span class="text-xs font-bold text-slate-400">Status: <?= esc($b['status'] ?: 'Aktif') ?></span>
+                                <?php if ($isAktif): ?>
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        Aktif
+                                    </span>
+                                <?php else: ?>
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                        <i class="fa-solid fa-lock text-[10px]"></i>
+                                        <?= esc($bStatus) ?>
+                                    </span>
+                                <?php endif; ?>
                             </div>
                             <div>
                                 <h4 class="font-heading font-extrabold text-lg text-slate-900"><?= esc($b['judul']) ?></h4>
                             </div>
 
                             <?php if (!empty($userUnit)): ?>
-                                <a href="<?= base_url('buku/evaluasi/form/' . $b['id'] . '/' . $userUnit['id']) ?>" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                    <span>Isi / Edit LPJ <?= esc($userUnit['nama_unit']) ?></span>
-                                </a>
+                                <?php if ($isAktif): ?>
+                                    <a href="<?= base_url('buku/evaluasi/form/' . $b['id'] . '/' . $userUnit['id']) ?>" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                        <span>Isi / Edit LPJ <?= esc($userUnit['nama_unit']) ?></span>
+                                    </a>
+                                <?php else: ?>
+                                    <a href="<?= base_url('buku/evaluasi/form/' . $b['id'] . '/' . $userUnit['id']) ?>" class="w-full py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-heading font-extrabold text-xs transition border border-slate-200/80 flex items-center justify-center gap-2 shadow-2xs">
+                                        <i class="fa-solid fa-eye text-slate-500"></i>
+                                        <span>Lihat LPJ <?= esc($userUnit['nama_unit']) ?> (Hanya Lihat)</span>
+                                    </a>
+                                <?php endif; ?>
                             <?php else: ?>
                                 <a href="<?= base_url('buku/detail/' . $b['id']) ?>" class="w-full py-3 rounded-2xl bg-slate-100 text-slate-700 font-heading font-extrabold text-xs text-center block">
                                     Buka Detail LPJ Pusat

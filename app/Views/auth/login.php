@@ -4,11 +4,15 @@
 <div class="max-w-md w-full mx-auto space-y-6">
     <!-- Logo & Title -->
     <div class="text-center space-y-2">
-        <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-3xl mx-auto shadow-xl shadow-emerald-500/25">
-            <i class="fa-solid fa-leaf"></i>
+        <div class="w-16 h-16 rounded-3xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 text-white flex items-center justify-center text-3xl mx-auto shadow-xl shadow-emerald-600/30 ring-4 ring-emerald-500/20">
+            <i class="fa-solid fa-leaf drop-shadow-xs"></i>
         </div>
-        <h1 class="font-heading font-extrabold text-2xl text-slate-900 tracking-tight">WEBSITE LAPOR KEBERSIHAN</h1>
-        <p class="text-xs text-emerald-700 font-bold uppercase tracking-wider">Sistem Informasi Manajemen</p>
+        <div class="space-y-1">
+            <h1 class="font-heading font-black text-2xl tracking-tight text-slate-900">
+                LAPOR <span class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent">KEBERSIHAN</span>
+            </h1>
+            <p class="text-xs text-emerald-700 font-bold uppercase tracking-wider">Web Manajemen Kebersihan</p>
+        </div>
         <p class="text-xs text-slate-500 font-medium">Silakan masuk sesuai role akun yang didaftarkan oleh Admin.</p>
     </div>
 

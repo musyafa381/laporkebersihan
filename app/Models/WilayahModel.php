@@ -19,6 +19,7 @@ class WilayahModel extends Model
         'luas_area',
         'status',
         'urutan',
+        'created_by',
         'created_at',
         'updated_at'
     ];

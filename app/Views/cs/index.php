@@ -479,8 +479,11 @@
 
                                         <?php if (!empty($r['tanggapan_admin'])): ?>
                                             <div class="mt-2 p-2.5 rounded-2xl bg-emerald-50/90 border border-emerald-200/90 text-emerald-900 text-[11px] font-semibold space-y-0.5 shadow-2xs">
-                                                <div class="font-extrabold text-emerald-800 flex items-center gap-1.5 text-[10px] uppercase tracking-wider">
-                                                    <i class="fa-solid fa-circle-check text-emerald-600"></i> Tanggapan Admin:
+                                                <div class="font-extrabold text-emerald-800 flex items-center justify-between text-[10px] uppercase tracking-wider">
+                                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i> Tanggapan Admin:</span>
+                                                    <?php if (!empty($r['updated_at'])): ?>
+                                                        <span class="font-mono text-[9px] text-emerald-700 font-bold lowercase"><?= date('d M H:i', strtotime($r['updated_at'])) ?> WIB</span>
+                                                    <?php endif; ?>
                                                 </div>
                                                 <div class="pl-4 text-slate-700 font-medium"><?= esc($r['tanggapan_admin']) ?></div>
                                             </div>
@@ -512,7 +515,17 @@
                                     <?php if ($isAdmin): ?>
                                         <td class="py-4 px-3 text-center">
                                             <?php 
-                                                // Prepare WhatsApp Messages
+                                                // Prepare WhatsApp Messages & Clean Phone Numbers
+                                                $cleanHp = preg_replace('/[^0-9]/', '', $r['kontak_hp'] ?? '');
+                                                if (substr($cleanHp, 0, 1) === '0') {
+                                                    $cleanHp = '62' . substr($cleanHp, 1);
+                                                }
+
+                                                $cleanHpPj = preg_replace('/[^0-9]/', '', $r['pj_kontak'] ?? '');
+                                                if (substr($cleanHpPj, 0, 1) === '0') {
+                                                    $cleanHpPj = '62' . substr($cleanHpPj, 1);
+                                                }
+
                                                 $pesanPelapor = "Assalamualaikum Wr Wb Kak " . ($r['nama_pengirim'] ?? '') . ", terima kasih telah melapor ke CS Kebersihan Yayasan.\n\n"
                                                     . "📌 *Laporan Anda:*\n"
                                                     . "Lokasi: " . ($r['unit_lokasi'] ?? '-') . (!empty($r['nama_wilayah']) ? ' - ' . $r['nama_wilayah'] : '') . (!empty($r['shift']) ? ' (Shift ' . $r['shift'] . ')' : '') . "\n"
@@ -527,17 +540,17 @@
                                                 $pesanPelapor .= "\nTerima kasih atas kerja samanya dalam menjaga kebersihan pesantren.\n_Admin Kebersihan Assalafiyyah_";
                                                 $waPelaporUrl = !empty($cleanHp) ? "https://api.whatsapp.com/send?phone=" . $cleanHp . "&text=" . urlencode($pesanPelapor) : '';
 
-                                                $cleanHpPj = preg_replace('/[^0-9]/', '', $r['pj_kontak'] ?? '');
-                                                if (substr($cleanHpPj, 0, 1) === '0') {
-                                                    $cleanHpPj = '62' . substr($cleanHpPj, 1);
-                                                }
-                                                $pesanPj = "Assalamu'alaikum Wr. Wb. Pengurus " . ($r['unit_lokasi'] ?? 'Unit') . " (" . ($r['pj_nama'] ?: 'PJ Kebersihan') . "),\n\n"
+                                                $targetUnit = !empty($r['pj_unit_nama']) ? $r['pj_unit_nama'] : ($r['unit_lokasi'] ?? 'Unit');
+                                                $targetPjNama = !empty($r['pj_nama']) ? $r['pj_nama'] : 'PJ Kebersihan';
+
+                                                $pesanPj = "Assalamu'alaikum Wr. Wb. Pengurus " . $targetUnit . " (" . $targetPjNama . "),\n\n"
                                                     . "🚨 *Pemberitahuan Pengaduan Kebersihan Masuk:*\n"
                                                     . "Pelapor: " . ($r['nama_pengirim'] ?? 'Warga/Santri') . " (" . ($r['kontak_hp'] ?? '-') . ")\n"
                                                     . "Lokasi: " . ($r['unit_lokasi'] ?? '-') . (!empty($r['nama_wilayah']) ? ' - ' . $r['nama_wilayah'] : '') . (!empty($r['shift']) ? ' (Shift ' . $r['shift'] . ')' : '') . "\n"
+                                                    . "Unit Bertanggung Jawab (Shift " . ($r['shift'] ?? '-') . "): " . $targetUnit . "\n"
                                                     . "Isi Pengaduan: \"" . ($r['isi_laporan'] ?? '-') . "\"\n"
                                                     . "Tanggal: " . date('d M Y H:i', strtotime($r['created_at'])) . " WIB\n\n"
-                                                    . "Mohon untuk segera dicek, ditindaklanjuti, dan isi respon melalui Portal Kebersihan: " . base_url('app/laporan-kebersihan') . "\n\nTerima kasih.\n_Admin K3L Assalafiyyah_";
+                                                    . "Mohon untuk segera dicek, ditindaklanjuti, dan isi respon melalui Portal Kebersihan: https://laporkebersihan.online/app/lapor-wilayah\n\nTerima kasih.\n_Admin Kebersihan Assalafiyyah_";
                                                 $waPjUrl = !empty($cleanHpPj) ? "https://api.whatsapp.com/send?phone=" . $cleanHpPj . "&text=" . urlencode($pesanPj) : '';
                                             ?>
                                             <div class="flex items-center justify-center gap-1.5 flex-wrap">
@@ -547,13 +560,13 @@
                                                 </button>
 
                                                 <?php if (!empty($waPelaporUrl)): ?>
-                                                    <a href="<?= $waPelaporUrl ?>" target="_blank" class="w-8 h-8 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 flex items-center justify-center transition shadow-2xs" title="Kirim Update WhatsApp ke Pelapor">
+                                                    <a href="<?= $waPelaporUrl ?>" target="_blank" class="w-8 h-8 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 flex items-center justify-center transition shadow-2xs" title="Kirim Update WhatsApp ke Pelapor (<?= esc($r['nama_pengirim']) ?>)">
                                                         <i class="fa-brands fa-whatsapp text-sm"></i>
                                                     </a>
                                                 <?php endif; ?>
 
                                                 <?php if (!empty($waPjUrl)): ?>
-                                                    <a href="<?= $waPjUrl ?>" target="_blank" class="w-8 h-8 rounded-xl bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-200 flex items-center justify-center transition shadow-2xs" title="Teruskan WhatsApp ke PJ Unit (<?= esc($r['pj_nama'] ?: $r['unit_lokasi']) ?>)">
+                                                    <a href="<?= $waPjUrl ?>" target="_blank" class="w-8 h-8 rounded-xl bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-200 flex items-center justify-center transition shadow-2xs" title="Teruskan WhatsApp ke PJ Unit Bertanggung Jawab (<?= esc($targetUnit . ' - ' . $targetPjNama) ?>)">
                                                         <i class="fa-solid fa-share-nodes text-xs"></i>
                                                     </a>
                                                 <?php endif; ?>
@@ -978,6 +991,27 @@
                             <span>Tanggapan & Solusi Admin</span>
                         </label>
                         <textarea id="cs_tanggapan" name="tanggapan_admin" rows="2.5" placeholder="Tuliskan tindak lanjut penanganan atau solusi dari tim admin..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-medium bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs leading-relaxed"></textarea>
+                    </div>
+                </div>
+
+                <!-- WhatsApp Forwarding Quick Actions in Modal -->
+                <div class="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/90 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-extrabold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-brands fa-whatsapp text-emerald-600 text-sm"></i>
+                            <span>Aksi Cepat WhatsApp</span>
+                        </span>
+                        <span class="text-[9.5px] text-emerald-700 font-bold bg-white px-2 py-0.5 rounded-full border border-emerald-200">1-Klik Otomatis</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <a id="modal_btn_wa_pj" href="#" target="_blank" class="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs transition shadow-sm flex items-center justify-center gap-2" title="Teruskan Pengaduan ke PJ Unit">
+                            <i class="fa-solid fa-share-nodes text-xs"></i>
+                            <span>Teruskan ke WA PJ Unit</span>
+                        </a>
+                        <a id="modal_btn_wa_pelapor" href="#" target="_blank" class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition shadow-sm flex items-center justify-center gap-2" title="Kirim Update ke Pelapor">
+                            <i class="fa-brands fa-whatsapp text-sm"></i>
+                            <span>Kirim Update ke Pelapor</span>
+                        </a>
                     </div>
                 </div>
 
@@ -1760,6 +1794,8 @@
     }
     window.selectCsEditWilayah = selectCsEditWilayah;
 
+    var currentModalReport = null;
+
     function populateEditShifts(wilayahId, selectedShift = null, fallbackUnitName = '', fallbackUnitId = '') {
         const select = document.getElementById('cs_edit_shift');
         if (!select) return;
@@ -1774,6 +1810,8 @@
                 opt.value = a.shift;
                 opt.dataset.unitId = a.unit_id || '';
                 opt.dataset.unitName = a.nama_unit || '';
+                opt.dataset.pjNama = a.pj_nama || '';
+                opt.dataset.pjKontak = a.pj_kontak || '';
                 
                 let icon = a.shift === 'Pagi' ? '🌅' : (a.shift === 'Siang' ? '☀️' : (a.shift === 'Sore' ? '🌇' : '🌙'));
                 let jamText = (a.jam_mulai && a.jam_selesai) ? ` (${a.jam_mulai} - ${a.jam_selesai} WIB)` : '';
@@ -1788,6 +1826,7 @@
         } else {
             const curName = fallbackUnitName || document.getElementById('cs_edit_unit_lokasi')?.value || 'Unit Terkait';
             const curId = fallbackUnitId || document.getElementById('cs_edit_unit_id')?.value || '';
+            const uObj = (unitData || []).find(u => String(u.id) === String(curId));
             [
                 { s: 'Pagi', icon: '🌅', jam: '05:00 - 12:00 WIB' },
                 { s: 'Siang', icon: '☀️', jam: '12:00 - 15:00 WIB' },
@@ -1798,12 +1837,18 @@
                 opt.value = item.s;
                 opt.dataset.unitId = curId;
                 opt.dataset.unitName = curName;
+                opt.dataset.pjNama = uObj?.pj_nama || '';
+                opt.dataset.pjKontak = uObj?.pj_kontak || '';
                 opt.textContent = `${item.icon} Shift ${item.s} (${item.jam}) ── PJ: ${curName}`;
                 if (selectedShift ? (item.s === selectedShift) : (item.s === autoDetectedVal)) {
                     opt.selected = true;
                 }
                 select.appendChild(opt);
             });
+        }
+
+        if (currentModalReport) {
+            updateModalWaButtons(currentModalReport, select.value);
         }
     }
     window.populateEditShifts = populateEditShifts;
@@ -1817,11 +1862,110 @@
         if (targetUnitId) {
             document.getElementById('cs_edit_unit_id').value = targetUnitId;
         }
+
+        if (currentModalReport) {
+            updateModalWaButtons(currentModalReport, selectEl.value);
+        }
     }
     window.onEditShiftChange = onEditShiftChange;
 
+    function updateModalWaButtons(report, selectedShift) {
+        if (!report) return;
+
+        const currentWilayahId = document.getElementById('cs_edit_wilayah_id')?.value || report.wilayah_id;
+        const currentUnitLokasi = document.getElementById('cs_edit_unit_lokasi')?.value || report.unit_lokasi || 'Unit Terkait';
+        const currentUnitId = document.getElementById('cs_edit_unit_id')?.value || report.unit_id;
+
+        let targetUnitId = currentUnitId;
+        let targetUnitName = currentUnitLokasi;
+        let targetPjNama = report.pj_nama || 'PJ Kebersihan';
+        let targetPjKontak = report.pj_kontak || '';
+
+        // Check assigned PJ from penugasanData based on currentWilayahId and selectedShift
+        if (currentWilayahId && selectedShift && penugasanData && penugasanData.length > 0) {
+            const assignment = penugasanData.find(p => String(p.wilayah_id) === String(currentWilayahId) && String(p.shift).toLowerCase() === String(selectedShift).toLowerCase());
+            if (assignment && assignment.unit_id) {
+                targetUnitId = assignment.unit_id;
+                targetUnitName = assignment.nama_unit || targetUnitName;
+                if (assignment.pj_nama) targetPjNama = assignment.pj_nama;
+                if (assignment.pj_kontak) targetPjKontak = assignment.pj_kontak;
+            }
+        }
+
+        // Also check in unitData if pj_kontak is still missing or to get fresh unit details
+        if (targetUnitId && unitData && unitData.length > 0) {
+            const u = unitData.find(item => String(item.id) === String(targetUnitId));
+            if (u) {
+                if (!targetUnitName || targetUnitName === 'Unit Terkait') targetUnitName = u.nama_unit;
+                if (u.pj_nama) targetPjNama = u.pj_nama;
+                if (u.pj_kontak) targetPjKontak = u.pj_kontak;
+            }
+        }
+
+        if (targetUnitId) {
+            const editUnitIdInput = document.getElementById('cs_edit_unit_id');
+            if (editUnitIdInput) editUnitIdInput.value = targetUnitId;
+        }
+
+        // 1. Build WA URL for PJ Unit responsible for this shift
+        let pjPhone = (targetPjKontak || '').replace(/[^0-9]/g, '');
+        if (pjPhone.startsWith('0')) pjPhone = '62' + pjPhone.slice(1);
+        const waPjBtn = document.getElementById('modal_btn_wa_pj');
+        if (waPjBtn) {
+            if (pjPhone) {
+                const locText = (report.unit_lokasi || '-') + (report.nama_wilayah ? (' - ' + report.nama_wilayah) : '') + (selectedShift ? (' (Shift ' + selectedShift + ')') : '');
+                let msgPj = "Assalamu'alaikum Wr. Wb. Pengurus " + targetUnitName + " (" + targetPjNama + "),\n\n"
+                    + "🚨 *Pemberitahuan Pengaduan Kebersihan Masuk:*\n"
+                    + "Pelapor: " + (report.nama_pengirim || 'Warga/Santri') + " (" + (report.kontak_hp || '-') + ")\n"
+                    + "Lokasi: " + locText + "\n"
+                    + "Unit Bertanggung Jawab (Shift " + (selectedShift || '-') + "): " + targetUnitName + "\n"
+                    + "Isi Pengaduan: \"" + (report.isi_laporan || '-') + "\"\n"
+                    + "Tanggal: " + (report.created_at || '') + " WIB\n\n"
+                    + "Mohon untuk segera dicek, ditindaklanjuti, dan konfirmasi melalui Portal Kebersihan: https://laporkebersihan.online/app/lapor-wilayah\n\nTerima kasih.\n_Admin Kebersihan Assalafiyyah_";
+                waPjBtn.href = "https://api.whatsapp.com/send?phone=" + pjPhone + "&text=" + encodeURIComponent(msgPj);
+                waPjBtn.classList.remove('opacity-50', 'pointer-events-none');
+                waPjBtn.title = "Teruskan pengaduan ke WhatsApp PJ " + targetUnitName + " (" + targetPjNama + ")";
+                waPjBtn.innerHTML = `<i class="fa-solid fa-share-nodes text-xs"></i><span>Teruskan ke WA PJ (${targetUnitName.length > 18 ? targetUnitName.substring(0, 16) + '...' : targetUnitName})</span>`;
+            } else {
+                waPjBtn.classList.add('opacity-50', 'pointer-events-none');
+                waPjBtn.href = "#";
+                waPjBtn.title = "Nomor WhatsApp PJ Unit (" + targetUnitName + ") belum tersedia";
+                waPjBtn.innerHTML = `<i class="fa-solid fa-share-nodes text-xs"></i><span>WA PJ (${targetUnitName.length > 18 ? targetUnitName.substring(0, 16) + '...' : targetUnitName}) Belum Ada</span>`;
+            }
+        }
+
+        // 2. Build WA URL for Pelapor
+        let pelaporPhone = (report.kontak_hp || '').replace(/[^0-9]/g, '');
+        if (pelaporPhone.startsWith('0')) pelaporPhone = '62' + pelaporPhone.slice(1);
+        const waPelaporBtn = document.getElementById('modal_btn_wa_pelapor');
+        if (waPelaporBtn) {
+            if (pelaporPhone) {
+                const currentStatus = document.getElementById('cs_status')?.value || report.status || 'Diproses';
+                const currentTanggapan = document.getElementById('cs_tanggapan')?.value || report.tanggapan_admin || '';
+                let msgPelapor = "Assalamualaikum Wr Wb Kak " + (report.nama_pengirim || '') + ", terima kasih telah melapor ke CS Kebersihan Yayasan.\n\n"
+                    + "📌 *Laporan Anda:*\n"
+                    + "Lokasi: " + (report.unit_lokasi || '-') + (report.nama_wilayah ? (' - ' + report.nama_wilayah) : '') + (selectedShift ? (' (Shift ' + selectedShift + ')') : '') + "\n"
+                    + "Keluhan: \"" + (report.isi_laporan || '-') + "\"\n\n"
+                    + "📊 *Status Terbaru:* " + currentStatus + "\n";
+                if (currentTanggapan) {
+                    msgPelapor += "💬 *Tanggapan Admin:* " + currentTanggapan + "\n";
+                }
+                msgPelapor += "\nTerima kasih atas kerja samanya dalam menjaga kebersihan pesantren.\n_Admin Kebersihan Assalafiyyah_";
+                waPelaporBtn.href = "https://api.whatsapp.com/send?phone=" + pelaporPhone + "&text=" + encodeURIComponent(msgPelapor);
+                waPelaporBtn.classList.remove('opacity-50', 'pointer-events-none');
+                waPelaporBtn.title = "Kirim WhatsApp ke pelapor (" + (report.nama_pengirim || '') + ")";
+            } else {
+                waPelaporBtn.classList.add('opacity-50', 'pointer-events-none');
+                waPelaporBtn.href = "#";
+                waPelaporBtn.title = "Nomor WhatsApp Pelapor tidak tersedia";
+            }
+        }
+    }
+    window.updateModalWaButtons = updateModalWaButtons;
+
     // Open Modal Tanggapi CS
     function openModalTanggapiCs(report) {
+        currentModalReport = report;
         const form = document.getElementById('formTanggapiCs');
         if (form) {
             form.action = "<?= base_url('cs/report/update/') ?>" + report.id;
@@ -1918,6 +2062,10 @@
 
         renderExistingFotosInModal(fotos);
 
+        // Update WhatsApp action buttons based on shift and assigned PJ unit
+        const currentShiftVal = document.getElementById('cs_edit_shift')?.value || report.shift;
+        updateModalWaButtons(report, currentShiftVal);
+
         const modal = document.getElementById('modalTanggapiCs');
         if (modal) {
             modal.classList.remove('hidden');
@@ -1927,6 +2075,7 @@
     window.openModalTanggapiCs = openModalTanggapiCs;
 
     function closeModalTanggapiCs() {
+        currentModalReport = null;
         const modal = document.getElementById('modalTanggapiCs');
         if (modal) {
             modal.classList.add('hidden');

@@ -172,12 +172,16 @@
 
         <!-- Kartu Daftar Anggota Kader Terdaftar -->
         <?php 
-            $isGemerlapOrSatgasUnit = (stripos($unit['jenis_kader'] ?? '', 'Gemerlap') !== false || stripos($unit['jenis_kader'] ?? '', 'Satgas') !== false || stripos($unit['tipe'] ?? '', 'Asrama') !== false || stripos($unit['tipe'] ?? '', 'Sekolah') !== false || stripos($unit['tipe'] ?? '', 'Madrasah') !== false);
+            $isPoskoUnit = (stripos($unit['tipe'] ?? '', 'Posko') !== false || stripos($unit['nama_unit'], 'GEMERLAP') !== false || stripos($unit['nama_unit'], 'Satgas') !== false);
             $sectionTitle = 'Daftar Anggota Kader';
-            if (!empty($linkedUnitName)) {
-                $teamSubtext = 'Terintegrasi dari posko: <strong class="text-teal-700 font-bold">' . esc($linkedUnitName) . '</strong>';
-            } else {
+            if ($isPoskoUnit) {
                 $teamSubtext = ($unit['ada_kader'] ?? 'Ya') === 'Tidak' ? 'Unit ini berstatus Tanpa Kader.' : 'Tim ' . esc($unit['jenis_kader'] ?: 'Gemerlap / Satgas') . ' yang bertugas.';
+            } else {
+                if (!empty($linkedUnitName)) {
+                    $teamSubtext = 'Terintegrasi dari posko: <strong class="text-teal-700 font-bold">' . esc($linkedUnitName) . '</strong>';
+                } else {
+                    $teamSubtext = ($unit['ada_kader'] ?? 'Ya') === 'Tidak' ? 'Unit ini berstatus Tanpa Kader.' : 'Tim ' . esc($unit['jenis_kader'] ?: 'Gemerlap / Satgas') . ' yang bertugas.';
+                }
             }
         ?>
         <div class="glass-card rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-4 flex flex-col justify-between">

@@ -89,37 +89,17 @@
             transform: translateX(0);
         }
 
-        /* Brand Logo Expanding Animation on Hover (Like Navbar Menu Items) */
+        /* Premium Brand Logo Styling */
         .brand-logo-btn {
             display: inline-flex;
             align-items: center;
-            gap: 0;
-            padding: 0.35rem 0.5rem;
+            gap: 0.75rem;
+            padding: 0.35rem 0.65rem;
             border-radius: 1.25rem;
-            transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
         }
         .brand-logo-btn:hover {
-            gap: 0.65rem;
-            background: rgba(240, 253, 244, 0.85);
-            border: 1px solid rgba(187, 247, 208, 0.8);
-            box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.12);
-        }
-        .brand-text-label {
-            display: inline-flex;
-            flex-direction: column;
-            max-width: 0;
-            opacity: 0;
-            overflow: hidden;
-            white-space: nowrap;
-            transform: translateX(-10px);
-            transition: max-width 450ms cubic-bezier(0.4, 0, 0.2, 1),
-                        opacity 350ms ease-out,
-                        transform 450ms cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .brand-logo-btn:hover .brand-text-label {
-            max-width: 320px;
-            opacity: 1;
-            transform: translateX(0);
+            background: rgba(240, 253, 244, 0.8);
         }
 
         /* Dynamic Badge Visibility: Dot on Icon in Default Mode, Pill on Right when Expanded/Hover/Active */
@@ -439,14 +419,20 @@
     <header class="sticky top-0 z-30 glass-card shadow-sm border-b border-slate-200/80">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 sm:h-20 gap-3">
-                <!-- Logo & Brand with Smooth Expanding Text on Hover -->
+                <!-- Logo & Brand Header -->
                 <a href="<?= base_url('/') ?>" title="LAPOR KEBERSIHAN - Web Manajemen Kebersihan" class="brand-logo-btn group">
-                    <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition flex-shrink-0">
-                        <i class="fa-solid fa-leaf text-base sm:text-xl"></i>
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 flex items-center justify-center text-white shadow-md shadow-emerald-600/25 ring-2 ring-emerald-500/20 group-hover:shadow-lg group-hover:shadow-emerald-600/35 group-hover:scale-105 group-hover:rotate-2 transition-all duration-300 flex-shrink-0">
+                        <i class="fa-solid fa-leaf text-base sm:text-lg drop-shadow-xs"></i>
                     </div>
-                    <div class="brand-text-label">
-                        <h1 class="font-heading font-extrabold text-base sm:text-lg text-slate-900 tracking-tight leading-none group-hover:text-emerald-600 transition whitespace-nowrap">LAPOR KEBERSIHAN</h1>
-                        <p class="text-[10px] sm:text-[11px] text-emerald-600 font-semibold tracking-wide mt-0.5 whitespace-nowrap">Web Manajemen Kebersihan</p>
+                    <div class="flex flex-col justify-center">
+                        <div class="flex items-center gap-1.5 leading-none">
+                            <span class="font-heading font-black text-sm sm:text-base tracking-tight text-slate-900 group-hover:text-emerald-800 transition">LAPOR</span>
+                            <span class="font-heading font-black text-sm sm:text-base tracking-tight bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent">KEBERSIHAN</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 mt-1 leading-none">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <p class="text-[10px] sm:text-[11px] text-slate-500 font-bold tracking-wide group-hover:text-emerald-700 transition whitespace-nowrap">Web Manajemen Kebersihan</p>
+                        </div>
                     </div>
                 </a>
 
@@ -955,7 +941,17 @@
                     showToast(res.message || 'Data berhasil disimpan!', 'success');
                     document.querySelectorAll('.fixed.inset-0:not(.hidden)').forEach(m => m.classList.add('hidden'));
                     
-                    const targetUrl = res.redirect || window.location.href;
+                    let targetUrl = res.redirect || window.location.href;
+                    // Prevent accidental jump to root home page when working on subpages
+                    try {
+                        const currentPath = window.location.pathname.replace(/\/+$/, '');
+                        const targetObj = new URL(targetUrl, window.location.origin);
+                        const targetPath = targetObj.pathname.replace(/\/+$/, '');
+                        if (currentPath !== '' && targetPath === '') {
+                            targetUrl = window.location.href;
+                        }
+                    } catch (e) {}
+
                     await navigateToURL(targetUrl, false);
                 } else {
                     showToast(res.message || 'Terjadi kesalahan.', 'error');

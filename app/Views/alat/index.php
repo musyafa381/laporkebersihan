@@ -115,11 +115,26 @@
     <!-- TAB 1: STOK & GUDANG INVENTARIS UTAMA -->
     <div id="content-stok" class="tab-content space-y-6">
         <div class="glass-card rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-5">
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100 pb-4">
-                <h3 class="font-heading font-extrabold text-lg text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-list-check text-emerald-600"></i> Master Daftar Peralatan Kebersihan
-                </h3>
-                <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full sm:w-auto">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                <!-- 1-Click Quick Filter Pills -->
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button type="button" onclick="setQuickFilterAlat('all')" id="btnFilterAll" class="quick-filter-btn px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-heading font-extrabold text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-boxes-stacked text-xs"></i>
+                        <span>Semua Alat</span>
+                        <span class="px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-extrabold"><?= count($alatList) ?></span>
+                    </button>
+                    <button type="button" onclick="setQuickFilterAlat('kritis')" id="btnFilterKritis" class="quick-filter-btn px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-amber-50 hover:text-amber-800 font-heading font-extrabold text-xs transition border border-slate-200/80 flex items-center gap-1.5">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500 text-xs"></i>
+                        <span>Stok Kritis (≤ 5)</span>
+                        <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold"><?= $stokKritis ?></span>
+                    </button>
+                    <button type="button" onclick="setQuickFilterAlat('rusak')" id="btnFilterRusak" class="quick-filter-btn px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-800 font-heading font-extrabold text-xs transition border border-slate-200/80 flex items-center gap-1.5">
+                        <i class="fa-solid fa-screwdriver-wrench text-rose-500 text-xs"></i>
+                        <span>Alat Rusak / Perlu Diganti</span>
+                    </button>
+                </div>
+
+                <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full md:w-auto">
                     <!-- Filter Kategori Dropdown -->
                     <div class="relative w-full sm:w-48">
                         <select id="filterKategoriAlat" onchange="filterAlatTable()" class="w-full px-3.5 py-2 rounded-2xl border border-slate-200 text-xs font-bold text-slate-700 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
@@ -159,7 +174,9 @@
                     <tbody class="divide-y divide-slate-100 bg-white">
                         <?php if (!empty($alatList)): ?>
                             <?php foreach ($alatList as $idx => $a): ?>
-                                <tr class="alat-row hover:bg-slate-50/90 transition-all">
+                                <tr class="alat-row hover:bg-slate-50/90 transition-all"
+                                    data-stok-sisa="<?= (int)$a['stok_sisa'] ?>"
+                                    data-kondisi="<?= esc(strtolower($a['kondisi'] ?? 'baik')) ?>">
                                     <td class="py-3.5 px-3 text-center font-extrabold text-slate-400"><?= $idx + 1 ?></td>
                                     <td class="py-3.5 px-4">
                                         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 font-mono font-extrabold border border-emerald-200/90 text-[11px] shadow-2xs">
@@ -973,6 +990,34 @@
     }
     window.switchTabAlat = switchTabAlat;
 
+    var currentQuickFilterAlat = 'all';
+
+    function setQuickFilterAlat(mode) {
+        currentQuickFilterAlat = mode;
+        
+        // Update button styles
+        const btnAll = document.getElementById('btnFilterAll');
+        const btnKritis = document.getElementById('btnFilterKritis');
+        const btnRusak = document.getElementById('btnFilterRusak');
+
+        const inactiveCls = "quick-filter-btn px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-heading font-extrabold text-xs transition border border-slate-200/80 flex items-center gap-1.5";
+        
+        if (btnAll) btnAll.className = inactiveCls;
+        if (btnKritis) btnKritis.className = inactiveCls;
+        if (btnRusak) btnRusak.className = inactiveCls;
+
+        if (mode === 'all' && btnAll) {
+            btnAll.className = "quick-filter-btn px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-heading font-extrabold text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5";
+        } else if (mode === 'kritis' && btnKritis) {
+            btnKritis.className = "quick-filter-btn px-3.5 py-1.5 rounded-xl bg-amber-500 text-white font-heading font-extrabold text-xs shadow-md shadow-amber-500/20 transition flex items-center gap-1.5";
+        } else if (mode === 'rusak' && btnRusak) {
+            btnRusak.className = "quick-filter-btn px-3.5 py-1.5 rounded-xl bg-rose-600 text-white font-heading font-extrabold text-xs shadow-md shadow-rose-600/20 transition flex items-center gap-1.5";
+        }
+
+        filterAlatTable();
+    }
+    window.setQuickFilterAlat = setQuickFilterAlat;
+
     function filterAlatTable() {
         const input = document.getElementById('searchAlatInput');
         const filterKat = (document.getElementById('filterKategoriAlat')?.value || '').toLowerCase();
@@ -983,7 +1028,19 @@
             const text = row.innerText.toLowerCase();
             const matchesText = !filter || text.includes(filter);
             const matchesCategory = !filterKat || text.includes(filterKat);
-            row.dataset.searchFiltered = (matchesText && matchesCategory) ? 'true' : 'false';
+            
+            // Check Quick Filter Condition
+            let matchesQuick = true;
+            const stokSisa = parseInt(row.dataset.stokSisa || '0', 10);
+            const kondisi = (row.dataset.kondisi || '').toLowerCase();
+
+            if (currentQuickFilterAlat === 'kritis') {
+                matchesQuick = (stokSisa <= 5) || kondisi.includes('rusak') || kondisi.includes('ganti');
+            } else if (currentQuickFilterAlat === 'rusak') {
+                matchesQuick = kondisi.includes('rusak') || kondisi.includes('ganti') || kondisi.includes('buruk');
+            }
+
+            row.dataset.searchFiltered = (matchesText && matchesCategory && matchesQuick) ? 'true' : 'false';
         });
 
         if (paginatorStok) {

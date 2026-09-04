@@ -141,9 +141,21 @@
 
                     <!-- Bottom Action Buttons -->
                     <div class="pt-4 border-t border-slate-100 flex items-center gap-2">
-                        <a href="<?= base_url('buku/detail/' . $buku['id']) ?>" class="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs text-center hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 hover:shadow-lg hover:-translate-y-0.5">
-                            <i class="fa-solid fa-folder-open"></i> <span>Kelola & Isi LPJ</span>
-                        </a>
+                        <?php 
+                            $userRole = session()->get('role');
+                            $bStatus = $buku['status'] ?? 'Aktif';
+                            $isAktifBuku = in_array(strtolower(trim($bStatus)), ['aktif', 'berjalan']);
+                            $canEditThisBuku = ($userRole === 'Admin') || $isAktifBuku;
+                        ?>
+                        <?php if ($canEditThisBuku): ?>
+                            <a href="<?= base_url('buku/detail/' . $buku['id']) ?>" class="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs text-center hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 hover:shadow-lg hover:-translate-y-0.5">
+                                <i class="fa-solid fa-folder-open"></i> <span>Kelola & Isi LPJ</span>
+                            </a>
+                        <?php else: ?>
+                            <a href="<?= base_url('buku/detail/' . $buku['id']) ?>" class="flex-1 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-heading font-extrabold text-xs text-center transition-all duration-200 flex items-center justify-center gap-1.5 border border-slate-200 shadow-2xs">
+                                <i class="fa-solid fa-eye text-emerald-600"></i> <span>Lihat LPJ (Hanya Lihat)</span>
+                            </a>
+                        <?php endif; ?>
                         <button type="button" onclick="openModalPreviewDoc(<?= $buku['id'] ?>, 'Buku LPJ <?= esc(addslashes($buku['bulan'] . ' ' . $buku['tahun'])) ?>')" class="py-2.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-extrabold text-xs transition-all duration-200 border border-emerald-200/90 flex items-center justify-center gap-1.5 shadow-2xs" title="Preview Hasil Dokumen LPJ Langsung">
                             <i class="fa-solid fa-eye text-emerald-600"></i>
                         </button>

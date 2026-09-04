@@ -64,6 +64,19 @@ class Buku extends BaseController
         return 'Draft Proker';
     }
 
+    protected function isBukuEditable($bukuId)
+    {
+        $role = session()->get('role');
+        if ($role === 'Admin') {
+            return true;
+        }
+        $buku = $this->bukuModel->find($bukuId);
+        if (!$buku) {
+            return false;
+        }
+        return $this->normalizeStatus($buku['status']) === 'Aktif';
+    }
+
     protected function respondJsonOrRedirect($message, $success = true, $redirectUrl = null, $data = [])
     {
         $isAjax = $this->request->isAJAX() 
@@ -113,7 +126,7 @@ class Buku extends BaseController
     public function index()
     {
         $bukuList = $this->bukuModel->findAll();
-        $this->sortByTahunBulan($bukuList, 'ASC');
+        $this->sortByTahunBulan($bukuList, 'DESC');
         
         // Enrich each book with count stats and normalized status
         foreach ($bukuList as &$buku) {
@@ -132,6 +145,10 @@ class Buku extends BaseController
 
     public function store()
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat membuat Buku LPJ.', false);
+        }
+
         $bulan = $this->request->getPost('bulan');
         $tahun = $this->request->getPost('tahun');
 
@@ -153,6 +170,10 @@ class Buku extends BaseController
 
     public function updateBuku($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat mengedit informasi Buku LPJ.', false);
+        }
+
         $judul  = $this->request->getPost('judul');
         $bulan  = $this->request->getPost('bulan');
         $tahun  = $this->request->getPost('tahun');
@@ -178,6 +199,10 @@ class Buku extends BaseController
 
     public function deleteBuku($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus Buku LPJ.', false);
+        }
+
         // Delete related children
         $this->prokerModel->where('buku_id', $id)->delete();
         $this->targetModel->where('buku_id', $id)->delete();
@@ -286,6 +311,10 @@ class Buku extends BaseController
 
     public function updateStatus($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat mengubah status Buku LPJ.', false);
+        }
+
         $status = $this->normalizeStatus($this->request->getPost('status'));
         $this->bukuModel->update($id, ['status' => $status]);
         return $this->respondJsonOrRedirect('Status Buku LPJ berhasil diperbarui.');
@@ -293,6 +322,10 @@ class Buku extends BaseController
 
     public function storeProker($bukuId)
     {
+        if (!$this->isBukuEditable($bukuId)) {
+            return $this->respondJsonOrRedirect("Buku LPJ tidak dalam status 'Aktif' sehingga tidak dapat diubah.", false);
+        }
+
         $tanggal  = $this->request->getPost('tanggal');
         $kegiatan = $this->request->getPost('kegiatan');
         $ket      = $this->request->getPost('keterangan');
@@ -311,6 +344,15 @@ class Buku extends BaseController
 
     public function updateProker($prokerId)
     {
+        $proker = $this->prokerModel->find($prokerId);
+        if (!$proker) {
+            return $this->respondJsonOrRedirect('Agenda Proker tidak ditemukan.', false);
+        }
+
+        if (!$this->isBukuEditable($proker['buku_id'])) {
+            return $this->respondJsonOrRedirect("Buku LPJ tidak dalam status 'Aktif' sehingga tidak dapat diubah.", false);
+        }
+
         $tanggal  = $this->request->getPost('tanggal');
         $kegiatan = $this->request->getPost('kegiatan');
         $ket      = $this->request->getPost('keterangan');
@@ -328,12 +370,25 @@ class Buku extends BaseController
 
     public function deleteProker($prokerId)
     {
+        $proker = $this->prokerModel->find($prokerId);
+        if (!$proker) {
+            return $this->respondJsonOrRedirect('Agenda Proker tidak ditemukan.', false);
+        }
+
+        if (!$this->isBukuEditable($proker['buku_id'])) {
+            return $this->respondJsonOrRedirect("Buku LPJ tidak dalam status 'Aktif' sehingga tidak dapat diubah.", false);
+        }
+
         $this->prokerModel->delete($prokerId);
         return $this->respondJsonOrRedirect('Agenda Proker berhasil dihapus.');
     }
 
     public function storeTarget($bukuId)
     {
+        if (!$this->isBukuEditable($bukuId)) {
+            return $this->respondJsonOrRedirect("Buku LPJ tidak dalam status 'Aktif' sehingga tidak dapat diubah.", false);
+        }
+
         $targetTexts = $this->request->getPost('target_text');
         
         $this->targetModel->where('buku_id', $bukuId)->delete();
@@ -362,12 +417,25 @@ class Buku extends BaseController
 
     public function deleteTarget($targetId)
     {
+        $target = $this->targetModel->find($targetId);
+        if (!$target) {
+            return $this->respondJsonOrRedirect('Target tidak ditemukan.', false);
+        }
+
+        if (!$this->isBukuEditable($target['buku_id'])) {
+            return $this->respondJsonOrRedirect("Buku LPJ tidak dalam status 'Aktif' sehingga tidak dapat diubah.", false);
+        }
+
         $this->targetModel->delete($targetId);
         return $this->respondJsonOrRedirect('Target Bulanan berhasil dihapus.');
     }
 
     public function storeCapaian($bukuId)
     {
+        if (!$this->isBukuEditable($bukuId)) {
+            return $this->respondJsonOrRedirect("Buku LPJ tidak dalam status 'Aktif' sehingga tidak dapat diubah.", false);
+        }
+
         $capaianTexts = $this->request->getPost('capaian_text');
         
         $this->capaianBulananModel->where('buku_id', $bukuId)->delete();
@@ -394,12 +462,25 @@ class Buku extends BaseController
 
     public function deleteCapaian($capaianId)
     {
+        $capaian = $this->capaianBulananModel->find($capaianId);
+        if (!$capaian) {
+            return $this->respondJsonOrRedirect('Capaian tidak ditemukan.', false);
+        }
+
+        if (!$this->isBukuEditable($capaian['buku_id'])) {
+            return $this->respondJsonOrRedirect("Buku LPJ tidak dalam status 'Aktif' sehingga tidak dapat diubah.", false);
+        }
+
         $this->capaianBulananModel->delete($capaianId);
         return $this->respondJsonOrRedirect('Capaian Utama Bulanan berhasil dihapus.');
     }
 
     public function storeEvaluasiBulanan($bukuId)
     {
+        if (!$this->isBukuEditable($bukuId)) {
+            return $this->respondJsonOrRedirect("Buku LPJ tidak dalam status 'Aktif' sehingga tidak dapat diubah.", false);
+        }
+
         $evaluasiTexts = $this->request->getPost('evaluasi_text');
         
         $this->evaluasiBulananModel->where('buku_id', $bukuId)->delete();
@@ -426,12 +507,25 @@ class Buku extends BaseController
 
     public function deleteEvaluasiBulanan($evaluasiId)
     {
+        $evaluasi = $this->evaluasiBulananModel->find($evaluasiId);
+        if (!$evaluasi) {
+            return $this->respondJsonOrRedirect('Evaluasi tidak ditemukan.', false);
+        }
+
+        if (!$this->isBukuEditable($evaluasi['buku_id'])) {
+            return $this->respondJsonOrRedirect("Buku LPJ tidak dalam status 'Aktif' sehingga tidak dapat diubah.", false);
+        }
+
         $this->evaluasiBulananModel->delete($evaluasiId);
         return $this->respondJsonOrRedirect('Evaluasi Utama Bulanan berhasil dihapus.');
     }
 
     public function storeKoordinasi($bukuId)
     {
+        if (!$this->isBukuEditable($bukuId)) {
+            return $this->respondJsonOrRedirect("Buku LPJ tidak dalam status 'Aktif' sehingga tidak dapat diubah.", false);
+        }
+
         $prokerId     = $this->request->getPost('proker_id');
         $kegiatan     = $this->request->getPost('kegiatan');
         $hariTanggal  = $this->request->getPost('hari_tanggal');
@@ -516,7 +610,15 @@ class Buku extends BaseController
     public function deleteKoordinasi($id)
     {
         $koordinasi = $this->koordinasiModel->find($id);
-        if ($koordinasi && !empty($koordinasi['foto'])) {
+        if (!$koordinasi) {
+            return $this->respondJsonOrRedirect('Laporan Koordinasi tidak ditemukan.', false);
+        }
+
+        if (!$this->isBukuEditable($koordinasi['buku_id'])) {
+            return $this->respondJsonOrRedirect("Buku LPJ tidak dalam status 'Aktif' sehingga tidak dapat diubah.", false);
+        }
+
+        if (!empty($koordinasi['foto'])) {
             if (str_contains($koordinasi['foto'], 'cloudinary.com')) {
                 $this->cloudinary->delete($koordinasi['foto']);
             } elseif (file_exists(FCPATH . 'uploads/' . $koordinasi['foto'])) {
@@ -530,23 +632,27 @@ class Buku extends BaseController
     public function deleteFotoKoordinasi($id)
     {
         $koordinasi = $this->koordinasiModel->find($id);
-        if ($koordinasi) {
-            if (!empty($koordinasi['foto'])) {
-                if (str_contains($koordinasi['foto'], 'cloudinary.com')) {
-                    $this->cloudinary->delete($koordinasi['foto']);
-                } elseif (file_exists(FCPATH . 'uploads/' . $koordinasi['foto'])) {
-                    @unlink(FCPATH . 'uploads/' . $koordinasi['foto']);
-                }
-            }
-            $this->koordinasiModel->update($id, [
-                'foto'          => null,
-                'foto_position' => '50% 50%',
-            ]);
-            $bukuId = $koordinasi['buku_id'];
-            return $this->respondJsonOrRedirect('Foto dokumentasi berhasil dihapus!', true, '/buku/detail/' . $bukuId . '?tab=koordinasi');
+        if (!$koordinasi) {
+            return $this->respondJsonOrRedirect('Laporan Koordinasi tidak ditemukan.', false);
         }
 
-        return redirect()->to('/buku');
+        if (!$this->isBukuEditable($koordinasi['buku_id'])) {
+            return $this->respondJsonOrRedirect("Buku LPJ tidak dalam status 'Aktif' sehingga tidak dapat diubah.", false);
+        }
+
+        if (!empty($koordinasi['foto'])) {
+            if (str_contains($koordinasi['foto'], 'cloudinary.com')) {
+                $this->cloudinary->delete($koordinasi['foto']);
+            } elseif (file_exists(FCPATH . 'uploads/' . $koordinasi['foto'])) {
+                @unlink(FCPATH . 'uploads/' . $koordinasi['foto']);
+            }
+        }
+        $this->koordinasiModel->update($id, [
+            'foto'          => null,
+            'foto_position' => '50% 50%',
+        ]);
+        $bukuId = $koordinasi['buku_id'];
+        return $this->respondJsonOrRedirect('Foto dokumentasi berhasil dihapus!', true, '/buku/detail/' . $bukuId . '?tab=koordinasi');
     }
 
     public function formEvaluasi($bukuId, $unitId)
@@ -557,6 +663,8 @@ class Buku extends BaseController
         if (!$buku || !$unit) {
             return redirect()->to('/buku')->with('error', 'Data tidak ditemukan!');
         }
+
+        $buku['status'] = $this->normalizeStatus($buku['status']);
 
         $evaluasi = $this->evaluasiModel->where([
             'buku_id' => $bukuId,
@@ -575,6 +683,18 @@ class Buku extends BaseController
 
     public function storeEvaluasi($bukuId)
     {
+        $buku = $this->bukuModel->find($bukuId);
+        if (!$buku) {
+            return $this->respondJsonOrRedirect('Data Buku LPJ tidak ditemukan!', false);
+        }
+
+        $statusBuku = $this->normalizeStatus($buku['status']);
+        $role = session()->get('role');
+
+        if ($role !== 'Admin' && $statusBuku !== 'Aktif') {
+            return $this->respondJsonOrRedirect("Buku LPJ ini berstatus '{$statusBuku}'. Pengurus dan Kader hanya dapat mengedit buku LPJ yang berstatus 'Aktif'.", false);
+        }
+
         $unitId       = $this->request->getPost('unit_id');
         $capaian      = $this->request->getPost('capaian_text');
         $target       = $this->request->getPost('target_text');
@@ -670,7 +790,6 @@ class Buku extends BaseController
             ]);
         }
 
-        $role = session()->get('role');
         if (in_array($role, ['Pengurus', 'Kader'])) {
             return $this->respondJsonOrRedirect('Laporan LPJ Unit Kebersihan Anda berhasil diperbarui!', true, '/app/lpj');
         }
@@ -680,6 +799,10 @@ class Buku extends BaseController
 
     public function storeUnit()
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menambah unit.', false);
+        }
+
         $nama         = $this->request->getPost('nama_unit');
         $tipe         = $this->request->getPost('tipe') ?? $this->request->getPost('kategori') ?? 'Asrama';
         $jenisLaporan = $this->request->getPost('jenis_laporan') ?? 'unit';
@@ -698,6 +821,10 @@ class Buku extends BaseController
 
     public function deleteUnit($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus unit.', false);
+        }
+
         $this->unitModel->delete($id);
         return $this->respondJsonOrRedirect('Unit Kebersihan Berhasil Dihapus!');
     }

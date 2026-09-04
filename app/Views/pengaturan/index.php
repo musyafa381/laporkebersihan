@@ -588,16 +588,22 @@
                                     </td>
                                     <td class="py-4 px-4">
                                         <?php if (($u['ada_kader'] ?? 'Ya') === 'Tidak'): ?>
-                                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200 inline-block">
-                                                Tidak Ada
-                                            </span>
+                                            <div class="space-y-1">
+                                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200 inline-block">
+                                                    Tanpa Kader
+                                                </span>
+                                                <div class="text-[11px] font-semibold text-slate-400 flex items-center gap-1">
+                                                    <i class="fa-solid fa-user-slash text-[10px]"></i> 0 Kader
+                                                </div>
+                                            </div>
                                         <?php else: ?>
                                             <div class="space-y-1">
                                                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border <?= strpos($u['kader_label'], 'Gemerlap') !== false ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-blue-50 text-blue-800 border-blue-200' ?>">
                                                     <?= esc($u['kader_label']) ?>
                                                 </span>
-                                                <div class="text-[11px] font-semibold text-slate-600">
-                                                    <?= count($u['kaders']) ?> Anggota
+                                                <div class="text-[11px] font-extrabold <?= count($u['kaders']) > 0 ? 'text-emerald-700' : 'text-slate-400 font-semibold' ?> flex items-center gap-1">
+                                                    <i class="fa-solid fa-users text-[10px] <?= count($u['kaders']) > 0 ? 'text-emerald-600' : 'text-slate-400' ?>"></i>
+                                                    <span><?= count($u['kaders']) ?> Kader</span>
                                                 </div>
                                             </div>
                                         <?php endif; ?>
@@ -1219,6 +1225,10 @@
             activeBtn.classList.add('bg-gradient-to-r', 'from-emerald-600', 'to-teal-600', 'text-white', 'shadow-md', 'shadow-emerald-600/20');
         }
 
+        if (tabName === 'units') {
+            initUnitPagination();
+        }
+
         // Save active tab in URL and sessionStorage
         try {
             sessionStorage.setItem('activeTab_pengaturan', tabName);
@@ -1255,10 +1265,7 @@
     var filteredUnitRows = [];
 
     function initUnitPagination() {
-        const rows = Array.from(document.querySelectorAll('#unitTableBody .unit-row'));
-        filteredUnitRows = rows;
-        unitCurrentPage = 1;
-        renderUnitTablePage();
+        filterUnitTable();
     }
     window.initUnitPagination = initUnitPagination;
 
@@ -1268,10 +1275,10 @@
         const rows = Array.from(document.querySelectorAll('#unitTableBody .unit-row'));
 
         filteredUnitRows = rows.filter(row => {
-            const nama = row.getAttribute('data-nama') || '';
-            const kode = row.getAttribute('data-kode') || '';
-            const tipe = row.getAttribute('data-tipe') || '';
-            const pj   = row.getAttribute('data-pj') || '';
+            const nama = (row.getAttribute('data-nama') || '').toLowerCase();
+            const kode = (row.getAttribute('data-kode') || '').toLowerCase();
+            const tipe = (row.getAttribute('data-tipe') || '').toLowerCase();
+            const pj   = (row.getAttribute('data-pj') || '').toLowerCase();
 
             const matchQuery = !query || nama.includes(query) || kode.includes(query) || tipe.includes(query) || pj.includes(query);
             const matchTipe  = !tipeFilter || tipe.includes(tipeFilter);
@@ -1292,6 +1299,7 @@
     window.changeUnitPerPage = changeUnitPerPage;
 
     function renderUnitTablePage() {
+        const tbody = document.getElementById('unitTableBody');
         const allRows = Array.from(document.querySelectorAll('#unitTableBody .unit-row'));
         const total = filteredUnitRows.length;
         const totalPages = Math.max(1, Math.ceil(total / unitPerPage));
@@ -1305,12 +1313,29 @@
         // Hide all rows initially
         allRows.forEach(r => r.classList.add('hidden'));
 
-        // Show only active page's rows & update row number
-        filteredUnitRows.slice(startIndex, endIndex).forEach((row, i) => {
-            row.classList.remove('hidden');
-            const noCell = row.querySelector('.unit-row-no');
-            if (noCell) noCell.innerText = startIndex + i + 1;
-        });
+        let emptyRow = document.getElementById('unitDynamicEmptyRow');
+
+        if (total === 0) {
+            if (!emptyRow && tbody) {
+                emptyRow = document.createElement('tr');
+                emptyRow.id = 'unitDynamicEmptyRow';
+                emptyRow.innerHTML = '<td colspan="6" class="py-8 text-center text-slate-400 text-xs italic font-medium"><i class="fa-solid fa-magnifying-glass mr-1.5 text-slate-300"></i> Tidak ditemukan data unit yang sesuai pencarian / filter.</td>';
+                tbody.appendChild(emptyRow);
+            } else if (emptyRow) {
+                emptyRow.classList.remove('hidden');
+            }
+        } else {
+            if (emptyRow) {
+                emptyRow.classList.add('hidden');
+            }
+
+            // Show only active page's rows & update row number
+            filteredUnitRows.slice(startIndex, endIndex).forEach((row, i) => {
+                row.classList.remove('hidden');
+                const noCell = row.querySelector('.unit-row-no');
+                if (noCell) noCell.innerText = startIndex + i + 1;
+            });
+        }
 
         // Update footer info
         const pageStartEl = document.getElementById('unitPageStart');

@@ -23,9 +23,16 @@
                 </div>
             </div>
 
+            <?php
+                $role = session()->get('role');
+                $statusBuku = $buku['status'] ?: 'Draft Proker';
+                $isStatusAktif = (strtolower(trim($statusBuku)) === 'aktif' || strtolower(trim($statusBuku)) === 'berjalan' || strtolower(trim($statusBuku)) === 'active');
+                $canEditBuku = ($role === 'Admin') || $isStatusAktif;
+            ?>
+
             <!-- Right: Status Control & Action Buttons -->
             <div class="flex items-center gap-3 self-start lg:self-center flex-shrink-0">
-                <?php if (session()->get('role') === 'Admin'): ?>
+                <?php if ($role === 'Admin'): ?>
                     <form action="<?= base_url('buku/update-status/' . $buku['id']) ?>" method="POST" class="flex items-center gap-2">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:inline">Status:</span>
                         <div class="relative">
@@ -45,9 +52,9 @@
                         <span>Import Keuangan</span>
                     </button>
                 <?php else: ?>
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 font-extrabold text-xs border border-slate-200">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        Status: <?= esc($buku['status'] ?: 'Aktif') ?>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl <?= $isStatusAktif ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200' ?> font-extrabold text-xs border shadow-2xs">
+                        <i class="fa-solid <?= $isStatusAktif ? 'fa-circle-check text-emerald-600' : 'fa-lock text-amber-600' ?>"></i>
+                        Status: <?= esc($statusBuku) ?>
                     </span>
                 <?php endif; ?>
 
@@ -63,42 +70,60 @@
             </div>
         </div>
 
-        <!-- Segmented Floating Tab Navbar (Mobile Horizontal Scrollable & Clean Desktop Tabs) -->
-        <div class="mt-6">
-            <div class="bg-white p-1.5 sm:p-2 rounded-2xl border border-slate-200/90 shadow-sm overflow-x-auto">
-                <nav class="flex items-center gap-1.5 min-w-max">
-                    <button onclick="switchTab('proker')" id="tab-proker" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20 whitespace-nowrap">
-                        <i class="fa-solid fa-calendar-days text-sm"></i>
-                        <span>1. Proker & Kalender</span>
-                    </button>
-
-                    <button onclick="switchTab('koordinasi')" id="tab-koordinasi" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
-                        <i class="fa-solid fa-handshake text-sm"></i>
-                        <span>2. Laporan Hasil Koordinasi</span>
-                    </button>
-
-                    <button onclick="switchTab('evaluasi')" id="tab-evaluasi" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
-                        <i class="fa-solid fa-building-user text-sm"></i>
-                        <span>3. Capaian & Evaluasi Unit</span>
-                    </button>
-
-                    <button onclick="switchTab('kader')" id="tab-kader" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
-                        <i class="fa-solid fa-users-gear text-sm"></i>
-                        <span>4. Evaluasi Kader Kebersihan</span>
-                    </button>
-
-                    <button onclick="switchTab('keuangan')" id="tab-keuangan" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
-                        <i class="fa-solid fa-file-invoice-dollar text-sm"></i>
-                        <span>5. Laporan Keuangan</span>
-                        <?php if (!empty($importedKeuangan)): ?>
-                            <span class="tab-badge px-2 py-0.5 rounded-full bg-emerald-100 text-[10px] font-extrabold text-emerald-700 flex-shrink-0"><i class="fa-solid fa-check text-[9px] mr-0.5"></i> Terimport</span>
-                        <?php else: ?>
-                            <span class="tab-badge px-2 py-0.5 rounded-full bg-amber-100 text-[10px] font-extrabold text-amber-700 flex-shrink-0">Belum Import</span>
-                        <?php endif; ?>
-                    </button>
-                </nav>
+        <!-- READ-ONLY LOCK ALERT FOR PENGURUS & KADER ON NON-ACTIVE BOOKS -->
+        <?php if (!$canEditBuku): ?>
+            <div class="mt-5 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border border-amber-200/90 text-amber-950 shadow-sm flex items-start gap-3.5">
+                <div class="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-500/20 mt-0.5">
+                    <i class="fa-solid fa-lock text-base"></i>
+                </div>
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <h3 class="font-heading font-extrabold text-sm text-amber-950">Mode Hanya Lihat (Read-Only)</h3>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-200/90 text-amber-900 border border-amber-300">
+                            Status: <?= esc($statusBuku) ?>
+                        </span>
+                    </div>
+                    <p class="text-xs text-amber-900/90 leading-relaxed font-medium">
+                        Buku LPJ periode ini berstatus <strong><?= esc($statusBuku) ?></strong>. Pengurus dan Kader hanya diperkenankan menginput atau mengedit data laporan pada Buku LPJ yang berstatus <strong>Aktif</strong>. Anda hanya dapat melihat isi dokumen ini.
+                    </p>
+                </div>
             </div>
-        </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Sticky Floating Tab Navbar (Mobile Horizontal Scrollable & Clean Floating Tabs) -->
+    <div class="sticky top-16 sm:top-20 z-20 bg-white/95 backdrop-blur-xl p-1.5 sm:p-2 rounded-2xl border border-slate-200/90 shadow-md shadow-slate-200/40 overflow-x-auto">
+        <nav class="flex items-center gap-1.5 min-w-max">
+            <button onclick="switchTab('proker')" id="tab-proker" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20 whitespace-nowrap">
+                <i class="fa-solid fa-calendar-days text-sm"></i>
+                <span>1. Proker & Kalender</span>
+            </button>
+
+            <button onclick="switchTab('koordinasi')" id="tab-koordinasi" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-handshake text-sm"></i>
+                <span>2. Laporan Hasil Koordinasi</span>
+            </button>
+
+            <button onclick="switchTab('evaluasi')" id="tab-evaluasi" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-building-user text-sm"></i>
+                <span>3. Capaian & Evaluasi Unit</span>
+            </button>
+
+            <button onclick="switchTab('kader')" id="tab-kader" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-users-gear text-sm"></i>
+                <span>4. Evaluasi Kader Kebersihan</span>
+            </button>
+
+            <button onclick="switchTab('keuangan')" id="tab-keuangan" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-file-invoice-dollar text-sm"></i>
+                <span>5. Laporan Keuangan</span>
+                <?php if (!empty($importedKeuangan)): ?>
+                    <span class="tab-badge px-2 py-0.5 rounded-full bg-emerald-100 text-[10px] font-extrabold text-emerald-700 flex-shrink-0"><i class="fa-solid fa-check text-[9px] mr-0.5"></i> Terimport</span>
+                <?php else: ?>
+                    <span class="tab-badge px-2 py-0.5 rounded-full bg-amber-100 text-[10px] font-extrabold text-amber-700 flex-shrink-0">Belum Import</span>
+                <?php endif; ?>
+            </button>
+        </nav>
     </div>
 
     <!-- TAB 1: PROKER & KALENDER BULANAN -->
@@ -262,54 +287,71 @@
         <!-- Section Add Agenda & Table (High Aesthetic Design) -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-7">
             <!-- Form Tambah Agenda (Left Card) -->
-            <div class="glass-card rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white">
-                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
-                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                        <i class="fa-solid fa-plus text-base"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-heading font-extrabold text-lg text-slate-900 tracking-tight">Tambah Agenda Proker</h3>
-                        <p class="text-xs text-slate-500 font-medium">Input agenda kegiatan baru ke dalam kalender.</p>
-                    </div>
-                </div>
-
-                <form action="<?= base_url('buku/proker/store/' . $buku['id']) ?>" method="POST" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Tanggal Kegiatan</label>
-                        <div class="relative">
-                            <input type="date" name="tanggal" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/80 focus:bg-white transition-all shadow-2xs">
+            <?php if ($canEditBuku): ?>
+                <div class="glass-card rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white">
+                    <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                            <i class="fa-solid fa-plus text-base"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-heading font-extrabold text-lg text-slate-900 tracking-tight">Tambah Agenda Proker</h3>
+                            <p class="text-xs text-slate-500 font-medium">Input agenda kegiatan baru ke dalam kalender.</p>
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Kategori Badge Kalender</label>
-                        <select name="kategori_badge" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/80 focus:bg-white transition-all shadow-2xs">
-                            <option value="Koordinasi PJ">🩵 Koordinasi PJ (Cyan)</option>
-                            <option value="Koordinasi Sowan">💚 Koordinasi Sowan (Hijau)</option>
-                            <option value="Koordinasi Kader">🩷 Koordinasi Kader (Merah)</option>
-                            <option value="Lainnya">💙 Lainnya (Biru)</option>
-                        </select>
-                    </div>
+                    <form action="<?= base_url('buku/proker/store/' . $buku['id']) ?>" method="POST" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Tanggal Kegiatan</label>
+                            <div class="relative">
+                                <input type="date" name="tanggal" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/80 focus:bg-white transition-all shadow-2xs">
+                            </div>
+                        </div>
 
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Nama Kegiatan</label>
-                        <input type="text" name="kegiatan" placeholder="Misal: Koordinasi Dengan Pengurus" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/80 focus:bg-white transition-all shadow-2xs">
-                    </div>
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Kategori Badge Kalender</label>
+                            <select name="kategori_badge" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/80 focus:bg-white transition-all shadow-2xs">
+                                <option value="Koordinasi PJ">🩵 Koordinasi PJ (Cyan)</option>
+                                <option value="Koordinasi Sowan">💚 Koordinasi Sowan (Hijau)</option>
+                                <option value="Koordinasi Kader">🩷 Koordinasi Kader (Merah)</option>
+                                <option value="Lainnya">💙 Lainnya (Biru)</option>
+                            </select>
+                        </div>
 
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Keterangan / Detail Agenda</label>
-                        <textarea name="keterangan" rows="3" placeholder="Tuliskan penjelasan singkat kegiatan..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/80 focus:bg-white transition-all shadow-2xs"></textarea>
-                    </div>
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Nama Kegiatan</label>
+                            <input type="text" name="kegiatan" placeholder="Misal: Koordinasi Dengan Pengurus" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/80 focus:bg-white transition-all shadow-2xs">
+                        </div>
 
-                    <button type="submit" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-check text-xs"></i>
-                        <span>Simpan Agenda Proker</span>
-                    </button>
-                </form>
-            </div>
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Keterangan / Detail Agenda</label>
+                            <textarea name="keterangan" rows="3" placeholder="Tuliskan penjelasan singkat kegiatan..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/80 focus:bg-white transition-all shadow-2xs"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-check text-xs"></i>
+                            <span>Simpan Agenda Proker</span>
+                        </button>
+                    </form>
+                </div>
+            <?php else: ?>
+                <div class="glass-card rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-4">
+                    <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
+                        <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shadow-md shadow-amber-500/10">
+                            <i class="fa-solid fa-lock text-base"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-heading font-extrabold text-lg text-slate-900 tracking-tight">Status: <?= esc($statusBuku) ?></h3>
+                            <p class="text-xs text-slate-500 font-medium">Mode Hanya Lihat (Read-Only).</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed font-medium">
+                        Pengisian dan perubahan agenda program kerja pada buku periode ini dikunci karena berstatus <strong><?= esc($statusBuku) ?></strong>.
+                    </p>
+                </div>
+            <?php endif; ?>
 
             <!-- Tabel Agenda Proker (Right Card) -->
-            <div class="lg:col-span-2 glass-card rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-5">
+            <div class="<?= $canEditBuku ? 'lg:col-span-2' : 'lg:col-span-2' ?> glass-card rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-5">
                 <div class="flex items-center justify-between pb-4 border-b border-slate-100">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
@@ -371,14 +413,18 @@
                                         </td>
                                         <td class="p-3.5 text-slate-600 leading-relaxed font-medium"><?= esc($p['keterangan']) ?></td>
                                         <td class="p-3.5 text-center">
-                                            <div class="flex items-center justify-center gap-1.5">
-                                                <button onclick="openModalEditProker(<?= $p['id'] ?>, '<?= esc($p['tanggal']) ?>', '<?= esc(addslashes($p['kategori_badge'])) ?>', '<?= esc(addslashes($p['kegiatan'])) ?>', '<?= esc(addslashes($p['keterangan'])) ?>')" class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white transition-all flex items-center justify-center text-xs shadow-2xs" title="Edit Agenda">
-                                                    <i class="fa-solid fa-pen-to-square"></i>
-                                                </button>
-                                                <a href="<?= base_url('buku/proker/delete/' . $p['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus agenda ini?" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all flex items-center justify-center text-xs shadow-2xs" title="Hapus Agenda">
-                                                    <i class="fa-solid fa-trash-can"></i>
-                                                </a>
-                                            </div>
+                                            <?php if ($canEditBuku): ?>
+                                                <div class="flex items-center justify-center gap-1.5">
+                                                    <button onclick="openModalEditProker(<?= $p['id'] ?>, '<?= esc($p['tanggal']) ?>', '<?= esc(addslashes($p['kategori_badge'])) ?>', '<?= esc(addslashes($p['kegiatan'])) ?>', '<?= esc(addslashes($p['keterangan'])) ?>')" class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white transition-all flex items-center justify-center text-xs shadow-2xs" title="Edit Agenda">
+                                                        <i class="fa-solid fa-pen-to-square"></i>
+                                                    </button>
+                                                    <a href="<?= base_url('buku/proker/delete/' . $p['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus agenda ini?" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all flex items-center justify-center text-xs shadow-2xs" title="Hapus Agenda">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </a>
+                                                </div>
+                                            <?php else: ?>
+                                                <span class="text-[11px] font-bold text-slate-400 italic">Terkunci</span>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -386,7 +432,7 @@
                                 <tr>
                                     <td colspan="5" class="p-10 text-center text-slate-400 font-medium italic">
                                         <i class="fa-solid fa-calendar-xmark text-2xl text-slate-300 mb-2 block"></i>
-                                        Belum ada agenda proker tersimpan. Silakan isi form di sebelah kiri.
+                                        Belum ada agenda proker tersimpan.
                                     </td>
                                 </tr>
                             <?php endif; ?>
@@ -397,7 +443,7 @@
         </div>
 
         <!-- CARD 1: TARGET UTAMA KEBERSIHAN BULAN INI (SINGLE-COLUMN REPEATER) -->
-        <form action="<?= base_url('buku/target/store/' . $buku['id']) ?>" method="POST" class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-6">
+        <form action="<?= base_url('buku/target/store/' . $buku['id']) ?>" method="POST" class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-6" <?= !$canEditBuku ? 'onsubmit="return false;"' : '' ?>>
             <div class="pb-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 flex-shrink-0">
@@ -405,14 +451,18 @@
                     </div>
                     <div>
                         <h3 class="font-heading font-extrabold text-lg text-slate-900 tracking-tight">Target Utama Kebersihan Bulan Ini</h3>
-                        <p class="text-xs text-slate-500 font-medium">Klik "Tambah Target" untuk menambahkan poin-poin target spesifik kebersihan bulan ini.</p>
+                        <p class="text-xs text-slate-500 font-medium">
+                            <?= $canEditBuku ? 'Klik "Tambah Target" untuk menambahkan poin-poin target spesifik kebersihan bulan ini.' : 'Daftar target utama kebersihan pada periode buku ini.' ?>
+                        </p>
                     </div>
                 </div>
 
-                <button type="button" onclick="addTargetRow()" class="py-2.5 px-4 rounded-2xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-heading font-extrabold text-xs transition border border-emerald-200/80 flex items-center gap-2 shadow-2xs flex-shrink-0">
-                    <i class="fa-solid fa-plus-circle text-sm"></i>
-                    <span>Tambah Target</span>
-                </button>
+                <?php if ($canEditBuku): ?>
+                    <button type="button" onclick="addTargetRow()" class="py-2.5 px-4 rounded-2xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-heading font-extrabold text-xs transition border border-emerald-200/80 flex items-center gap-2 shadow-2xs flex-shrink-0">
+                        <i class="fa-solid fa-plus-circle text-sm"></i>
+                        <span>Tambah Target</span>
+                    </button>
+                <?php endif; ?>
             </div>
 
             <div id="targetContainer" class="space-y-3">
@@ -425,24 +475,30 @@
                         <span class="num-badge w-7 h-7 rounded-xl bg-emerald-100 text-emerald-800 font-extrabold text-xs flex items-center justify-center flex-shrink-0">
                             <?= $idx + 1 ?>
                         </span>
-                        <textarea name="target_text[]" rows="2" placeholder="Tuliskan poin target kebersihan bulan ini..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white transition shadow-2xs leading-relaxed"><?= esc($tg['target_text'] ?? '') ?></textarea>
-                        <button type="button" onclick="removeRowElement('<?= $tId ?>', '.target-row', 'targetContainer')" class="w-9 h-9 rounded-2xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition shadow-2xs flex-shrink-0" title="Hapus Poin Ini">
-                            <i class="fa-solid fa-trash text-xs"></i>
-                        </button>
+                        <?php if ($canEditBuku): ?>
+                            <textarea name="target_text[]" rows="2" placeholder="Tuliskan poin target kebersihan bulan ini..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white transition shadow-2xs leading-relaxed"><?= esc($tg['target_text'] ?? '') ?></textarea>
+                            <button type="button" onclick="removeRowElement('<?= $tId ?>', '.target-row', 'targetContainer')" class="w-9 h-9 rounded-2xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition shadow-2xs flex-shrink-0" title="Hapus Poin Ini">
+                                <i class="fa-solid fa-trash text-xs"></i>
+                            </button>
+                        <?php else: ?>
+                            <textarea readonly rows="2" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-100/90 text-slate-700 cursor-default shadow-2xs leading-relaxed select-all focus:outline-none"><?= esc($tg['target_text'] ?? '') ?></textarea>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>
 
-            <div class="pt-2 flex justify-end">
-                <button type="submit" class="py-3 px-7 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-md shadow-emerald-600/20 hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2">
-                    <i class="fa-solid fa-floppy-disk text-sm"></i>
-                    <span>Simpan Target Utama</span>
-                </button>
-            </div>
+            <?php if ($canEditBuku): ?>
+                <div class="pt-2 flex justify-end">
+                    <button type="submit" class="py-3 px-7 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-md shadow-emerald-600/20 hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk text-sm"></i>
+                        <span>Simpan Target Utama</span>
+                    </button>
+                </div>
+            <?php endif; ?>
         </form>
 
         <!-- CARD 2: CAPAIAN UTAMA KEBERSIHAN BULAN INI (SINGLE-COLUMN REPEATER) -->
-        <form action="<?= base_url('buku/capaian/store/' . $buku['id']) ?>" method="POST" class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-6">
+        <form action="<?= base_url('buku/capaian/store/' . $buku['id']) ?>" method="POST" class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-6" <?= !$canEditBuku ? 'onsubmit="return false;"' : '' ?>>
             <div class="pb-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-teal-600 to-emerald-500 text-white flex items-center justify-center shadow-lg shadow-teal-500/20 flex-shrink-0">
@@ -450,14 +506,18 @@
                     </div>
                     <div>
                         <h3 class="font-heading font-extrabold text-xl text-slate-900 tracking-tight">Capaian Utama Kebersihan Bulan Ini</h3>
-                        <p class="text-xs text-slate-500 font-medium">Klik "Tambah Capaian" untuk menambahkan poin-poin realisasi/capaian kebersihan yang telah terlaksana.</p>
+                        <p class="text-xs text-slate-500 font-medium">
+                            <?= $canEditBuku ? 'Klik "Tambah Capaian" untuk menambahkan poin-poin realisasi/capaian kebersihan yang telah terlaksana.' : 'Daftar capaian utama realisasi kebersihan periode ini.' ?>
+                        </p>
                     </div>
                 </div>
 
-                <button type="button" onclick="addCapaianRow()" class="py-2.5 px-4 rounded-2xl bg-teal-50 text-teal-700 hover:bg-teal-100 font-heading font-extrabold text-xs transition border border-teal-200/80 flex items-center gap-2 shadow-2xs flex-shrink-0">
-                    <i class="fa-solid fa-plus-circle text-sm"></i>
-                    <span>Tambah Capaian</span>
-                </button>
+                <?php if ($canEditBuku): ?>
+                    <button type="button" onclick="addCapaianRow()" class="py-2.5 px-4 rounded-2xl bg-teal-50 text-teal-700 hover:bg-teal-100 font-heading font-extrabold text-xs transition border border-teal-200/80 flex items-center gap-2 shadow-2xs flex-shrink-0">
+                        <i class="fa-solid fa-plus-circle text-sm"></i>
+                        <span>Tambah Capaian</span>
+                    </button>
+                <?php endif; ?>
             </div>
 
             <div id="capaianContainer" class="space-y-3">
@@ -470,24 +530,30 @@
                         <span class="num-badge w-7 h-7 rounded-xl bg-teal-100 text-teal-800 font-extrabold text-xs flex items-center justify-center flex-shrink-0">
                             <?= $idx + 1 ?>
                         </span>
-                        <textarea name="capaian_text[]" rows="2" placeholder="Tuliskan poin realisasi/capaian kebersihan bulan ini..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white transition shadow-2xs leading-relaxed"><?= esc($cp['capaian_text'] ?? '') ?></textarea>
-                        <button type="button" onclick="removeRowElement('<?= $cpId ?>', '.capaian-row', 'capaianContainer')" class="w-9 h-9 rounded-2xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition shadow-2xs flex-shrink-0" title="Hapus Poin Ini">
-                            <i class="fa-solid fa-trash text-xs"></i>
-                        </button>
+                        <?php if ($canEditBuku): ?>
+                            <textarea name="capaian_text[]" rows="2" placeholder="Tuliskan poin realisasi/capaian kebersihan bulan ini..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white transition shadow-2xs leading-relaxed"><?= esc($cp['capaian_text'] ?? '') ?></textarea>
+                            <button type="button" onclick="removeRowElement('<?= $cpId ?>', '.capaian-row', 'capaianContainer')" class="w-9 h-9 rounded-2xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition shadow-2xs flex-shrink-0" title="Hapus Poin Ini">
+                                <i class="fa-solid fa-trash text-xs"></i>
+                            </button>
+                        <?php else: ?>
+                            <textarea readonly rows="2" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-100/90 text-slate-700 cursor-default shadow-2xs leading-relaxed select-all focus:outline-none"><?= esc($cp['capaian_text'] ?? '') ?></textarea>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>
 
-            <div class="pt-2 flex justify-end">
-                <button type="submit" class="py-3 px-7 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-heading font-extrabold text-xs hover:from-teal-700 hover:to-emerald-700 transition-all duration-200 shadow-md shadow-teal-600/20 hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2">
-                    <i class="fa-solid fa-floppy-disk text-sm"></i>
-                    <span>Simpan Capaian Utama</span>
-                </button>
-            </div>
+            <?php if ($canEditBuku): ?>
+                <div class="pt-2 flex justify-end">
+                    <button type="submit" class="py-3 px-7 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-heading font-extrabold text-xs hover:from-teal-700 hover:to-emerald-700 transition-all duration-200 shadow-md shadow-teal-600/20 hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk text-sm"></i>
+                        <span>Simpan Capaian Utama</span>
+                    </button>
+                </div>
+            <?php endif; ?>
         </form>
 
         <!-- CARD 3: EVALUASI UTAMA KEBERSIHAN BULAN INI (SINGLE-COLUMN REPEATER) -->
-        <form action="<?= base_url('buku/evaluasi-bulanan/store/' . $buku['id']) ?>" method="POST" class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-6">
+        <form action="<?= base_url('buku/evaluasi-bulanan/store/' . $buku['id']) ?>" method="POST" class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-6" <?= !$canEditBuku ? 'onsubmit="return false;"' : '' ?>>
             <div class="pb-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/20 flex-shrink-0">
@@ -495,14 +561,18 @@
                     </div>
                     <div>
                         <h3 class="font-heading font-extrabold text-xl text-slate-900 tracking-tight">Evaluasi Utama Kebersihan Bulan Ini</h3>
-                        <p class="text-xs text-slate-500 font-medium">Klik "Tambah Evaluasi" untuk menambahkan catatan evaluasi, kendala, atau hal yang perlu dibenahi.</p>
+                        <p class="text-xs text-slate-500 font-medium">
+                            <?= $canEditBuku ? 'Klik "Tambah Evaluasi" untuk menambahkan catatan evaluasi, kendala, atau hal yang perlu dibenahi.' : 'Daftar evaluasi dan catatan kebersihan periode ini.' ?>
+                        </p>
                     </div>
                 </div>
 
-                <button type="button" onclick="addEvaluasiRow()" class="py-2.5 px-4 rounded-2xl bg-amber-50 text-amber-700 hover:bg-amber-100 font-heading font-extrabold text-xs transition border border-amber-200/80 flex items-center gap-2 shadow-2xs flex-shrink-0">
-                    <i class="fa-solid fa-plus-circle text-sm"></i>
-                    <span>Tambah Evaluasi</span>
-                </button>
+                <?php if ($canEditBuku): ?>
+                    <button type="button" onclick="addEvaluasiRow()" class="py-2.5 px-4 rounded-2xl bg-amber-50 text-amber-700 hover:bg-amber-100 font-heading font-extrabold text-xs transition border border-amber-200/80 flex items-center gap-2 shadow-2xs flex-shrink-0">
+                        <i class="fa-solid fa-plus-circle text-sm"></i>
+                        <span>Tambah Evaluasi</span>
+                    </button>
+                <?php endif; ?>
             </div>
 
             <div id="evaluasiContainer" class="space-y-3">
@@ -515,20 +585,26 @@
                         <span class="num-badge w-7 h-7 rounded-xl bg-amber-100 text-amber-800 font-extrabold text-xs flex items-center justify-center flex-shrink-0">
                             <?= $idx + 1 ?>
                         </span>
-                        <textarea name="evaluasi_text[]" rows="2" placeholder="Tuliskan catatan evaluasi kebersihan bulan ini..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white transition shadow-2xs leading-relaxed"><?= esc($evB['evaluasi_text'] ?? '') ?></textarea>
-                        <button type="button" onclick="removeRowElement('<?= $evId ?>', '.evaluasi-row', 'evaluasiContainer')" class="w-9 h-9 rounded-2xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition shadow-2xs flex-shrink-0" title="Hapus Poin Ini">
-                            <i class="fa-solid fa-trash text-xs"></i>
-                        </button>
+                        <?php if ($canEditBuku): ?>
+                            <textarea name="evaluasi_text[]" rows="2" placeholder="Tuliskan catatan evaluasi kebersihan bulan ini..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white transition shadow-2xs leading-relaxed"><?= esc($evB['evaluasi_text'] ?? '') ?></textarea>
+                            <button type="button" onclick="removeRowElement('<?= $evId ?>', '.evaluasi-row', 'evaluasiContainer')" class="w-9 h-9 rounded-2xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition shadow-2xs flex-shrink-0" title="Hapus Poin Ini">
+                                <i class="fa-solid fa-trash text-xs"></i>
+                            </button>
+                        <?php else: ?>
+                            <textarea readonly rows="2" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-100/90 text-slate-700 cursor-default shadow-2xs leading-relaxed select-all focus:outline-none"><?= esc($evB['evaluasi_text'] ?? '') ?></textarea>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>
 
-            <div class="pt-2 flex justify-end">
-                <button type="submit" class="py-3 px-7 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-heading font-extrabold text-xs hover:from-amber-600 hover:to-orange-600 transition-all duration-200 shadow-md shadow-amber-500/20 hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2">
-                    <i class="fa-solid fa-floppy-disk text-sm"></i>
-                    <span>Simpan Evaluasi Utama</span>
-                </button>
-            </div>
+            <?php if ($canEditBuku): ?>
+                <div class="pt-2 flex justify-end">
+                    <button type="submit" class="py-3 px-7 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-heading font-extrabold text-xs hover:from-amber-600 hover:to-orange-600 transition-all duration-200 shadow-md shadow-amber-500/20 hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk text-sm"></i>
+                        <span>Simpan Evaluasi Utama</span>
+                    </button>
+                </div>
+            <?php endif; ?>
         </form>
     </div>
 
@@ -608,7 +684,7 @@
                         </div>
 
                         <!-- Card Form -->
-                        <form action="<?= base_url('buku/koordinasi/store/' . $buku['id']) ?>" method="POST" enctype="multipart/form-data" class="space-y-4">
+                        <form action="<?= base_url('buku/koordinasi/store/' . $buku['id']) ?>" method="POST" enctype="multipart/form-data" class="space-y-4" <?= !$canEditBuku ? 'onsubmit="return false;"' : '' ?>>
                             <input type="hidden" name="proker_id" value="<?= $p['id'] ?>">
                             <input type="hidden" name="kegiatan" value="<?= esc($p['kegiatan']) ?>">
                             <input type="hidden" name="hari_tanggal" value="<?= date('d M Y', strtotime($p['tanggal'])) ?>">
@@ -616,45 +692,49 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Bersama (Pihak Terkait)</label>
-                                    <input type="text" name="bersama" value="<?= esc($kData['bersama'] ?? '') ?>" placeholder="Misal: Get Plastic Jogja / Pengurus Asrama" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/80 focus:bg-white transition-all shadow-2xs">
+                                    <input type="text" name="bersama" value="<?= esc($kData['bersama'] ?? '') ?>" placeholder="<?= $canEditBuku ? 'Misal: Get Plastic Jogja / Pengurus Asrama' : '-' ?>" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 <?= $canEditBuku ? 'bg-slate-50/80 focus:bg-white' : 'bg-slate-100/90 text-slate-700 cursor-default' ?> transition-all shadow-2xs" <?= !$canEditBuku ? 'readonly' : '' ?>>
                                 </div>
 
                                 <div>
                                     <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Tempat / Lokasi</label>
-                                    <input type="text" name="tempat" value="<?= esc($kData['tempat'] ?? '') ?>" placeholder="Misal: Ndalem Pak KH. Chasan" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/80 focus:bg-white transition-all shadow-2xs">
+                                    <input type="text" name="tempat" value="<?= esc($kData['tempat'] ?? '') ?>" placeholder="<?= $canEditBuku ? 'Misal: Ndalem Pak KH. Chasan' : '-' ?>" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 <?= $canEditBuku ? 'bg-slate-50/80 focus:bg-white' : 'bg-slate-100/90 text-slate-700 cursor-default' ?> transition-all shadow-2xs" <?= !$canEditBuku ? 'readonly' : '' ?>>
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-1 gap-4">
                                 <div>
                                     <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Hasil / Materi Koordinasi</label>
-                                    <textarea name="hasil_materi" rows="3" placeholder="Tuliskan poin-poin hasil koordinasi..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/80 focus:bg-white transition-all shadow-2xs leading-relaxed"><?= esc($kData['hasil_materi'] ?? '') ?></textarea>
+                                    <textarea name="hasil_materi" rows="3" placeholder="<?= $canEditBuku ? 'Tuliskan poin-poin hasil koordinasi...' : '-' ?>" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 <?= $canEditBuku ? 'bg-slate-50/80 focus:bg-white' : 'bg-slate-100/90 text-slate-700 cursor-default' ?> transition-all shadow-2xs leading-relaxed" <?= !$canEditBuku ? 'readonly' : '' ?>><?= esc($kData['hasil_materi'] ?? '') ?></textarea>
                                 </div>
 
                                 <div class="space-y-2 pt-2 border-t border-slate-100">
                                     <div class="flex items-center justify-between">
                                         <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider">Dokumentasi Foto Kegiatan</label>
-                                        <span class="text-[10px] text-emerald-600 font-semibold"><i class="fa-solid fa-arrows-up-down-left-right text-emerald-600 mr-1"></i> Klik & Geser foto untuk sesuaikan posisi</span>
+                                        <?php if ($canEditBuku): ?>
+                                            <span class="text-[10px] text-emerald-600 font-semibold"><i class="fa-solid fa-arrows-up-down-left-right text-emerald-600 mr-1"></i> Klik & Geser foto untuk sesuaikan posisi</span>
+                                        <?php endif; ?>
                                     </div>
                                     
                                     <input type="hidden" name="foto_position" id="foto_pos_<?= $p['id'] ?>" value="<?= esc($kData['foto_position'] ?? '50% 50%') ?>">
 
                                     <div class="grid grid-cols-1 sm:grid-cols-5 gap-4 items-center">
                                         <!-- Draggable Image Box (16:9 Aspect Ratio) -->
-                                        <div class="sm:col-span-2">
-                                            <div id="container_preview_<?= $p['id'] ?>" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm group flex items-center justify-center cursor-grab select-none">
+                                        <div class="<?= $canEditBuku ? 'sm:col-span-2' : 'sm:col-span-3' ?>">
+                                            <div id="container_preview_<?= $p['id'] ?>" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm group flex items-center justify-center <?= $canEditBuku ? 'cursor-grab' : '' ?> select-none">
                                                 <?php if (!empty($kData['foto'])): ?>
                                                     <img id="img_preview_<?= $p['id'] ?>" src="<?= image_url($kData['foto'], 'uploads') ?>" alt="Foto Dokumentasi" class="w-full h-full object-cover transition-all duration-75" style="object-position: <?= esc($kData['foto_position'] ?? '50% 50%') ?>;">
                                                     <div class="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-1.5 pointer-events-none">
                                                         <a href="<?= image_url($kData['foto'], 'uploads') ?>" target="_blank" class="pointer-events-auto px-2.5 py-1 bg-white/90 text-slate-900 rounded-xl text-[10px] font-bold shadow-md hover:bg-white transition">
                                                             <i class="fa-solid fa-up-right-from-square"></i> Perbesar
                                                         </a>
-                                                        <button type="button" onclick="resetPhotoPosition('img_preview_<?= $p['id'] ?>', 'foto_pos_<?= $p['id'] ?>')" class="pointer-events-auto px-2.5 py-1 bg-slate-900/80 text-white rounded-xl text-[10px] font-bold shadow-md hover:bg-slate-900 transition">
-                                                            <i class="fa-solid fa-rotate-left"></i> Reset
-                                                        </button>
-                                                        <a href="<?= base_url('buku/koordinasi/delete-foto/' . $kData['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus foto dokumentasi ini?" class="pointer-events-auto px-2.5 py-1 bg-rose-600/90 text-white rounded-xl text-[10px] font-bold shadow-md hover:bg-rose-700 transition" title="Hapus Foto">
-                                                            <i class="fa-solid fa-trash"></i> Hapus
-                                                        </a>
+                                                        <?php if ($canEditBuku): ?>
+                                                            <button type="button" onclick="resetPhotoPosition('img_preview_<?= $p['id'] ?>', 'foto_pos_<?= $p['id'] ?>')" class="pointer-events-auto px-2.5 py-1 bg-slate-900/80 text-white rounded-xl text-[10px] font-bold shadow-md hover:bg-slate-900 transition">
+                                                                <i class="fa-solid fa-rotate-left"></i> Reset
+                                                            </button>
+                                                            <a href="<?= base_url('buku/koordinasi/delete-foto/' . $kData['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus foto dokumentasi ini?" class="pointer-events-auto px-2.5 py-1 bg-rose-600/90 text-white rounded-xl text-[10px] font-bold shadow-md hover:bg-rose-700 transition" title="Hapus Foto">
+                                                                <i class="fa-solid fa-trash"></i> Hapus
+                                                            </a>
+                                                        <?php endif; ?>
                                                     </div>
                                                 <?php else: ?>
                                                     <img id="img_preview_<?= $p['id'] ?>" src="" alt="Pratinjau Foto" class="w-full h-full object-cover hidden transition-all duration-75" style="object-position: 50% 50%;">
@@ -667,28 +747,32 @@
                                         </div>
 
                                         <!-- File Upload Selector -->
-                                        <div class="sm:col-span-3 space-y-2">
-                                            <div class="flex items-center gap-2">
-                                                <input type="file" name="foto" accept="image/*" onchange="previewImageLive(this, 'img_preview_<?= $p['id'] ?>', 'placeholder_<?= $p['id'] ?>', 'container_preview_<?= $p['id'] ?>', 'foto_pos_<?= $p['id'] ?>')" class="w-full text-xs text-slate-500 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition shadow-2xs">
-                                                <?php if (!empty($kData['foto'])): ?>
-                                                    <a href="<?= base_url('buku/koordinasi/delete-foto/' . $kData['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus foto dokumentasi ini?" class="px-3.5 py-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all text-xs font-bold flex items-center gap-1.5 shadow-2xs flex-shrink-0" title="Hapus Foto">
-                                                        <i class="fa-solid fa-trash-can text-xs"></i>
-                                                        <span>Hapus Foto</span>
-                                                    </a>
-                                                <?php endif; ?>
+                                        <?php if ($canEditBuku): ?>
+                                            <div class="sm:col-span-3 space-y-2">
+                                                <div class="flex items-center gap-2">
+                                                    <input type="file" name="foto" accept="image/*" onchange="previewImageLive(this, 'img_preview_<?= $p['id'] ?>', 'placeholder_<?= $p['id'] ?>', 'container_preview_<?= $p['id'] ?>', 'foto_pos_<?= $p['id'] ?>')" class="w-full text-xs text-slate-500 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition shadow-2xs">
+                                                    <?php if (!empty($kData['foto'])): ?>
+                                                        <a href="<?= base_url('buku/koordinasi/delete-foto/' . $kData['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus foto dokumentasi ini?" class="px-3.5 py-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all text-xs font-bold flex items-center gap-1.5 shadow-2xs flex-shrink-0" title="Hapus Foto">
+                                                            <i class="fa-solid fa-trash-can text-xs"></i>
+                                                            <span>Hapus Foto</span>
+                                                        </a>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <p class="text-[11px] text-slate-400 font-medium leading-relaxed">Pilih foto (JPG, PNG, WEBP). Foto akan otomatis disesuaikan dalam rasio **16:9**. Anda dapat **mengklik dan menggeser foto** di kotak pratinjau untuk menata posisi gambar.</p>
                                             </div>
-                                            <p class="text-[11px] text-slate-400 font-medium leading-relaxed">Pilih foto (JPG, PNG, WEBP). Foto akan otomatis disesuaikan dalam rasio **16:9**. Anda dapat **mengklik dan menggeser foto** di kotak pratinjau untuk menata posisi gambar.</p>
-                                        </div>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="pt-2 flex justify-end">
-                                <button type="submit" class="py-2.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-md shadow-emerald-600/20 hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2">
-                                    <i class="fa-solid fa-floppy-disk text-xs"></i>
-                                    <span>Simpan Laporan Koordinasi</span>
-                                </button>
-                            </div>
+                            <?php if ($canEditBuku): ?>
+                                <div class="pt-2 flex justify-end">
+                                    <button type="submit" class="py-2.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-md shadow-emerald-600/20 hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2">
+                                        <i class="fa-solid fa-floppy-disk text-xs"></i>
+                                        <span>Simpan Laporan Koordinasi</span>
+                                    </button>
+                                </div>
+                            <?php endif; ?>
                         </form>
                     </div>
                 <?php endforeach; ?>
@@ -713,7 +797,9 @@
                 </div>
                 <div>
                     <h3 class="font-heading font-extrabold text-xl text-slate-900 tracking-tight">Input Realisasi, Capaian & Permasalahan Unit</h3>
-                    <p class="text-xs text-slate-500 font-medium leading-relaxed">Pilih unit Asrama atau Sekolah di bawah untuk mengisikan lembar capaian dan evaluasi kebersihan.</p>
+                    <p class="text-xs text-slate-500 font-medium leading-relaxed">
+                        <?= $canEditBuku ? 'Pilih unit Asrama atau Sekolah di bawah untuk mengisikan lembar capaian dan evaluasi kebersihan.' : 'Daftar laporan capaian dan evaluasi kebersihan per unit Asrama dan Sekolah (Mode Hanya Lihat).' ?>
+                    </p>
                 </div>
             </div>
         </div>
@@ -743,9 +829,11 @@
                                     </span>
                                 <?php endif; ?>
 
-                                <a href="<?= base_url('buku/unit/delete/' . $unit['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus unit kebersihan ini?" class="w-7 h-7 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center text-xs transition" title="Hapus Unit">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
+                                <?php if ($role === 'Admin'): ?>
+                                    <a href="<?= base_url('buku/unit/delete/' . $unit['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus unit kebersihan ini?" class="w-7 h-7 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center text-xs transition" title="Hapus Unit">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                <?php endif; ?>
                             </div>
                         </div>
 
@@ -755,10 +843,17 @@
 
                     </div>
 
-                    <a href="<?= base_url('buku/evaluasi/form/' . $buku['id'] . '/' . $unit['id']) ?>" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 hover:shadow-lg hover:-translate-y-0.5">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                        <span>Isi / Edit Laporan Unit</span>
-                    </a>
+                    <?php if ($canEditBuku): ?>
+                        <a href="<?= base_url('buku/evaluasi/form/' . $buku['id'] . '/' . $unit['id']) ?>" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 hover:shadow-lg hover:-translate-y-0.5">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <span>Isi / Edit Laporan Unit</span>
+                        </a>
+                    <?php else: ?>
+                        <a href="<?= base_url('buku/evaluasi/form/' . $buku['id'] . '/' . $unit['id']) ?>" class="w-full py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-heading font-extrabold text-xs transition-all duration-200 flex items-center justify-center gap-2 border border-slate-200 shadow-2xs">
+                            <i class="fa-solid fa-eye text-emerald-600"></i>
+                            <span>Lihat Laporan Unit (Hanya Lihat)</span>
+                        </a>
+                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -774,7 +869,9 @@
                 </div>
                 <div>
                     <h3 class="font-heading font-extrabold text-xl text-slate-900 tracking-tight">Evaluasi Kader Kebersihan (GEMERLAP & Satgas)</h3>
-                    <p class="text-xs text-slate-500 font-medium leading-relaxed">Kelola lembar evaluasi kader <b>GEMERLAP</b> (Asrama) dan <b>Satgas Kebersihan</b> (Sekolah).</p>
+                    <p class="text-xs text-slate-500 font-medium leading-relaxed">
+                        <?= $canEditBuku ? 'Kelola lembar evaluasi kader <b>GEMERLAP</b> (Asrama) dan <b>Satgas Kebersihan</b> (Sekolah).' : 'Daftar evaluasi kader <b>GEMERLAP</b> dan <b>Satgas Kebersihan</b> (Mode Hanya Lihat).' ?>
+                    </p>
                 </div>
             </div>
         </div>
@@ -805,9 +902,11 @@
                                     </span>
                                 <?php endif; ?>
 
-                                <a href="<?= base_url('buku/unit/delete/' . $kUnit['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus unit kader ini?" class="w-7 h-7 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center text-xs transition" title="Hapus Unit Kader">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
+                                <?php if ($role === 'Admin'): ?>
+                                    <a href="<?= base_url('buku/unit/delete/' . $kUnit['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus unit kader ini?" class="w-7 h-7 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center text-xs transition" title="Hapus Unit Kader">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                <?php endif; ?>
                             </div>
                         </div>
 
@@ -816,10 +915,17 @@
                         </h4>
                     </div>
 
-                    <a href="<?= base_url('buku/evaluasi/form/' . $buku['id'] . '/' . $kUnit['id']) ?>" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 hover:shadow-lg hover:-translate-y-0.5">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                        <span>Isi / Edit Laporan Kader</span>
-                    </a>
+                    <?php if ($canEditBuku): ?>
+                        <a href="<?= base_url('buku/evaluasi/form/' . $buku['id'] . '/' . $kUnit['id']) ?>" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 hover:shadow-lg hover:-translate-y-0.5">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <span>Isi / Edit Laporan Kader</span>
+                        </a>
+                    <?php else: ?>
+                        <a href="<?= base_url('buku/evaluasi/form/' . $buku['id'] . '/' . $kUnit['id']) ?>" class="w-full py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-heading font-extrabold text-xs transition-all duration-200 flex items-center justify-center gap-2 border border-slate-200 shadow-2xs">
+                            <i class="fa-solid fa-eye text-emerald-600"></i>
+                            <span>Lihat Laporan Kader (Hanya Lihat)</span>
+                        </a>
+                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -867,19 +973,26 @@
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
-                        <a href="<?= base_url('keuangan/detail/' . $importedKeuangan['id']) ?>" target="_blank" class="px-4 py-2.5 rounded-2xl bg-emerald-50 text-emerald-700 font-extrabold text-xs hover:bg-emerald-100 transition border border-emerald-200 shadow-2xs flex items-center gap-2">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                            <span>Edit Keuangan Utama</span>
-                        </a>
+                        <?php if ($canEditBuku): ?>
+                            <a href="<?= base_url('keuangan/detail/' . $importedKeuangan['id']) ?>" target="_blank" class="px-4 py-2.5 rounded-2xl bg-emerald-50 text-emerald-700 font-extrabold text-xs hover:bg-emerald-100 transition border border-emerald-200 shadow-2xs flex items-center gap-2">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                                <span>Edit Keuangan Utama</span>
+                            </a>
 
-                        <button type="button" onclick="openModalImportKeuangan()" class="px-4 py-2.5 rounded-2xl bg-slate-100 text-slate-700 font-extrabold text-xs hover:bg-slate-200 transition border border-slate-200 shadow-2xs flex items-center gap-2">
-                            <i class="fa-solid fa-arrows-rotate"></i>
-                            <span>Ubah Import</span>
-                        </button>
+                            <button type="button" onclick="openModalImportKeuangan()" class="px-4 py-2.5 rounded-2xl bg-slate-100 text-slate-700 font-extrabold text-xs hover:bg-slate-200 transition border border-slate-200 shadow-2xs flex items-center gap-2">
+                                <i class="fa-solid fa-arrows-rotate"></i>
+                                <span>Ubah Import</span>
+                            </button>
 
-                        <a href="<?= base_url('buku/keuangan/unlink/' . $buku['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin memutuskan tautan Laporan Keuangan dari LPJ ini?" class="px-3.5 py-2.5 rounded-2xl bg-rose-50 text-rose-600 font-extrabold text-xs hover:bg-rose-100 transition border border-rose-200 shadow-2xs flex items-center gap-1.5" title="Putuskan Tautan">
-                            <i class="fa-solid fa-link-slash"></i>
-                        </a>
+                            <a href="<?= base_url('buku/keuangan/unlink/' . $buku['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin memutuskan tautan Laporan Keuangan dari LPJ ini?" class="px-3.5 py-2.5 rounded-2xl bg-rose-50 text-rose-600 font-extrabold text-xs hover:bg-rose-100 transition border border-rose-200 shadow-2xs flex items-center gap-1.5" title="Putuskan Tautan">
+                                <i class="fa-solid fa-link-slash"></i>
+                            </a>
+                        <?php else: ?>
+                            <a href="<?= base_url('keuangan/detail/' . $importedKeuangan['id']) ?>" target="_blank" class="px-4 py-2.5 rounded-2xl bg-slate-100 text-slate-700 font-extrabold text-xs hover:bg-slate-200 transition border border-slate-200 shadow-2xs flex items-center gap-2">
+                                <i class="fa-solid fa-eye text-emerald-600"></i>
+                                <span>Lihat Keuangan Utama</span>
+                            </a>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -1021,13 +1134,20 @@
                 <div class="space-y-2">
                     <h3 class="font-heading font-extrabold text-xl text-slate-900">Belum Ada Laporan Keuangan Terimport</h3>
                     <p class="text-xs text-slate-500 leading-relaxed">
-                        Silakan import dan tautkan Laporan Keuangan dari menu utama Keuangan untuk menyelaraskan arus kas pada LPJ ini.
+                        <?= $canEditBuku ? 'Silakan import dan tautkan Laporan Keuangan dari menu utama Keuangan untuk menyelaraskan arus kas pada LPJ ini.' : 'Belum ada Laporan Keuangan yang ditautkan ke buku LPJ periode ini.' ?>
                     </p>
                 </div>
-                <button type="button" onclick="openModalImportKeuangan()" class="px-7 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-lg shadow-emerald-600/20 hover:-translate-y-0.5 flex items-center gap-2 mx-auto">
-                    <i class="fa-solid fa-file-import"></i>
-                    <span>Import Laporan Keuangan Sekarang</span>
-                </button>
+                <?php if ($canEditBuku): ?>
+                    <button type="button" onclick="openModalImportKeuangan()" class="px-7 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-lg shadow-emerald-600/20 hover:-translate-y-0.5 flex items-center gap-2 mx-auto">
+                        <i class="fa-solid fa-file-import"></i>
+                        <span>Import Laporan Keuangan Sekarang</span>
+                    </button>
+                <?php else: ?>
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-500 text-xs font-semibold mx-auto">
+                        <i class="fa-solid fa-lock text-slate-400"></i>
+                        <span>Import Laporan Keuangan dikunci (Mode Hanya Lihat)</span>
+                    </div>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
     </div>
@@ -1289,6 +1409,14 @@
             const url = new URL(window.location.href);
             url.searchParams.set('tab', tabName);
             window.history.replaceState(null, '', url.toString());
+
+            // Gentle scroll to ensure tabs and content top are visible
+            if (window.scrollY > 250) {
+                const navBar = document.querySelector('.sticky');
+                if (navBar) {
+                    navBar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
         } catch (e) {}
     }
     window.switchTab = switchTab;
