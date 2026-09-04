@@ -82,7 +82,7 @@ $isStatusAktif = (strtolower(trim($statusBuku)) === 'aktif' || strtolower(trim($
 $isReadOnly = ($role !== 'Admin') && !$isStatusAktif;
 
 $backUrl = $isPengurusOrKader ? base_url('app/lpj') : base_url('buku/detail/' . $buku['id'] . '?tab=evaluasi');
-$backText = $isPengurusOrKader ? 'Kembali ke Dashboard Portal Unit' : 'Kembali ke Buku LPJ (' . esc($buku['bulan']) . ' ' . esc($buku['tahun']) . ')';
+$backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku LPJ (' . esc($buku['bulan']) . ' ' . esc($buku['tahun']) . ')';
 ?>
 
 <div class="max-w-5xl mx-auto space-y-6">
@@ -103,12 +103,16 @@ $backText = $isPengurusOrKader ? 'Kembali ke Dashboard Portal Unit' : 'Kembali k
             </div>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="<?= base_url('buku/cetak/' . $buku['id']) ?>" target="_blank" class="px-3.5 py-1.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-extrabold shadow-2xs flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-print text-emerald-600"></i>
+                Pratinjau Cetak
+            </a>
             <span class="px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 text-xs font-extrabold shadow-2xs flex items-center gap-1.5">
                 <i class="fa-solid fa-calendar-check text-emerald-600"></i>
-                LPJ <?= esc($buku['bulan']) ?> <?= esc($buku['tahun']) ?>
+                <?= esc($buku['bulan']) ?> <?= esc($buku['tahun']) ?>
             </span>
-            <span class="px-3 py-1.5 rounded-full text-xs font-extrabold border <?= $isStatusAktif ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200' ?> flex items-center gap-1.5 shadow-2xs">
+            <span class="px-3.5 py-1.5 rounded-full text-xs font-extrabold border <?= $isStatusAktif ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200' ?> flex items-center gap-1.5 shadow-2xs">
                 <i class="fa-solid <?= $isStatusAktif ? 'fa-circle-check text-emerald-600' : 'fa-lock text-amber-600' ?>"></i>
                 Status: <?= esc($statusBuku) ?>
             </span>
@@ -135,16 +139,38 @@ $backText = $isPengurusOrKader ? 'Kembali ke Dashboard Portal Unit' : 'Kembali k
         </div>
     <?php endif; ?>
 
+    <!-- STEPPER PROGRESS BAR (5 STEPS: 1. Capaian, 2. Permasalahan, 3. Target, 4. Usulan, 5. Selesai/Review) -->
+    <div class="glass-card rounded-3xl p-4 sm:p-5 shadow-lg border border-slate-200/80 bg-white">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button type="button" onclick="goToStep(1)" id="stepBtn1" class="step-btn px-3 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition flex items-center gap-2.5 border bg-emerald-600 text-white border-emerald-600 shadow-sm shadow-emerald-600/20">
+                <span class="w-6 h-6 rounded-xl bg-white/20 text-white flex items-center justify-center text-[11px] font-bold">1</span>
+                <span class="truncate">1. Capaian</span>
+            </button>
+            <button type="button" onclick="goToStep(2)" id="stepBtn2" class="step-btn px-3 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition flex items-center gap-2.5 border bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100">
+                <span class="w-6 h-6 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center text-[11px] font-bold">2</span>
+                <span class="truncate">2. Masalah & Solusi</span>
+            </button>
+            <button type="button" onclick="goToStep(3)" id="stepBtn3" class="step-btn px-3 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition flex items-center gap-2.5 border bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100">
+                <span class="w-6 h-6 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center text-[11px] font-bold">3</span>
+                <span class="truncate">3. Target Depan</span>
+            </button>
+            <button type="button" onclick="goToStep(4)" id="stepBtn4" class="step-btn px-3 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition flex items-center gap-2.5 border bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100">
+                <span class="w-6 h-6 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center text-[11px] font-bold">4</span>
+                <span class="truncate">4. Usulan</span>
+            </button>
+        </div>
+    </div>
+
     <!-- Main Form Container -->
-    <form action="<?= base_url('buku/evaluasi/store/' . $buku['id']) ?>" method="POST" class="space-y-6" <?= $isReadOnly ? 'onsubmit="return false;"' : '' ?>>
+    <form id="formEvaluasiUnit" action="<?= base_url('buku/evaluasi/store/' . $buku['id']) ?>" method="POST" class="space-y-6" <?= $isReadOnly ? 'onsubmit="return false;"' : '' ?>>
         <input type="hidden" name="unit_id" value="<?= $unit['id'] ?>">
 
-        <!-- CARD 1: CAPAIAN REALISASI BULAN INI (SINGLE-COLUMN REPEATER) -->
-        <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-6">
+        <!-- STEP 1: CAPAIAN REALISASI BULAN INI (SINGLE-COLUMN REPEATER) -->
+        <div id="stepSection1" class="step-section glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-6 animate-fade-in">
             <div class="pb-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <h2 class="font-heading font-extrabold text-lg text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-circle-check text-emerald-600"></i> Capaian Realisasi Bulan Ini
+                        <i class="fa-solid fa-circle-check text-emerald-600"></i> Langkah 1: Capaian Realisasi Bulan Ini
                     </h2>
                     <p class="text-xs text-slate-500 font-medium">
                         <?= $isReadOnly ? 'Daftar capaian realisasi kebersihan yang tercatat pada unit ini.' : 'Klik "Tambah Capaian" untuk menambahkan poin-poin realisasi kebersihan yang telah terlaksana.' ?>
@@ -189,15 +215,15 @@ $backText = $isPengurusOrKader ? 'Kembali ke Dashboard Portal Unit' : 'Kembali k
             </div>
         </div>
 
-        <!-- CARD 2: PERMASALAHAN DI LAPANGAN & TINDAKAN (2-COLUMN REPEATER) -->
-        <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-6">
+        <!-- STEP 2: PERMASALAHAN DI LAPANGAN & TINDAKAN (2-COLUMN REPEATER) -->
+        <div id="stepSection2" class="step-section glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-6 hidden animate-fade-in">
             <div class="pb-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <h2 class="font-heading font-extrabold text-lg text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Permasalahan & Tindakan
+                        <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Langkah 2: Permasalahan & Solusi Lapangan
                     </h2>
                     <p class="text-xs text-slate-500 font-medium">
-                        <?= $isReadOnly ? 'Daftar kendala permasalahan di lapangan beserta tindakan solusi yang telah dilakukan.' : 'Isi kolom <b>Permasalahan</b> di sebelah kiri dan <b>Tindakan</b> di sebelah kanan.' ?>
+                        <?= $isReadOnly ? 'Daftar kendala permasalahan di lapangan beserta tindakan solusi yang telah dilakukan.' : 'Catat kendala / permasalahan kebersihan di lapangan beserta tindakan solusi yang dilakukan.' ?>
                     </p>
                 </div>
 
@@ -209,21 +235,6 @@ $backText = $isPengurusOrKader ? 'Kembali ke Dashboard Portal Unit' : 'Kembali k
                 <?php endif; ?>
             </div>
 
-            <!-- Table Header Titles (Desktop) -->
-            <div class="hidden md:grid grid-cols-12 gap-4 px-2 text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-                <div class="<?= $isReadOnly ? 'col-span-6' : 'col-span-6' ?> flex items-center gap-1.5 text-rose-700">
-                    <i class="fa-solid fa-triangle-exclamation"></i> Permasalahan
-                </div>
-                <div class="<?= $isReadOnly ? 'col-span-6' : 'col-span-5' ?> flex items-center gap-1.5 text-emerald-700">
-                    <i class="fa-solid fa-gavel"></i> Tindakan
-                </div>
-                <?php if (!$isReadOnly): ?>
-                    <div class="col-span-1 text-center text-slate-400">
-                        Aksi
-                    </div>
-                <?php endif; ?>
-            </div>
-
             <div id="masalahContainer" class="space-y-4">
                 <?php 
                 $hasValidMasalah = false;
@@ -231,44 +242,47 @@ $backText = $isPengurusOrKader ? 'Kembali ke Dashboard Portal Unit' : 'Kembali k
                     if (trim($mRow['masalah']) !== '' || trim($mRow['tindakan']) !== '') $hasValidMasalah = true;
                     $mId = 'masalah_' . $idx . '_' . time();
                 ?>
-                    <div id="<?= $mId ?>" class="masalah-row p-4 rounded-3xl bg-slate-50/80 border border-slate-200/80 shadow-2xs flex flex-col md:grid md:grid-cols-12 gap-4 items-start md:items-center transition-all">
-                        <!-- Kolom Kiri: Masalah (dengan Nomor Urut) -->
-                        <div class="w-full <?= $isReadOnly ? 'md:col-span-6' : 'md:col-span-6' ?> space-y-1">
-                            <label class="block text-[10px] font-extrabold text-rose-700 uppercase tracking-wider md:hidden flex items-center gap-1">
-                                <i class="fa-solid fa-triangle-exclamation"></i> Permasalahan di Lapangan (Kiri)
-                            </label>
-                            <div class="flex items-start gap-2.5 w-full">
-                                <span class="num-badge w-7 h-7 rounded-xl bg-rose-100 text-rose-800 font-extrabold text-xs flex items-center justify-center flex-shrink-0 mt-1 shadow-2xs">
-                                    <?= $idx + 1 ?>
+                    <div id="<?= $mId ?>" class="masalah-row p-4 sm:p-5 rounded-3xl bg-slate-50/90 border border-slate-200/80 shadow-2xs space-y-3 transition-all">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-200/60">
+                            <div class="flex items-center gap-2">
+                                <span class="num-badge px-2 py-0.5 rounded-lg bg-rose-100 text-rose-800 font-heading font-extrabold text-xs shadow-2xs flex items-center gap-1">
+                                    <i class="fa-solid fa-hashtag text-[9px] text-rose-500"></i> <span class="num-val"><?= $idx + 1 ?></span>
                                 </span>
-                                <?php if ($isReadOnly): ?>
-                                    <textarea readonly rows="2" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-100/90 text-slate-700 cursor-default shadow-2xs leading-relaxed select-all focus:outline-none"><?= esc($mRow['masalah']) ?></textarea>
-                                <?php else: ?>
-                                    <textarea name="masalah[]" rows="2" placeholder="Tuliskan permasalahan di lapangan..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white transition shadow-2xs leading-relaxed"><?= esc($mRow['masalah']) ?></textarea>
-                                <?php endif; ?>
+                                <span class="text-xs font-heading font-extrabold text-slate-800">
+                                    Poin Permasalahan & Solusi #<span class="num-text"><?= $idx + 1 ?></span>
+                                </span>
                             </div>
-                        </div>
-
-                        <!-- Kolom Kanan: Tindakan -->
-                        <div class="w-full <?= $isReadOnly ? 'md:col-span-6' : 'md:col-span-5' ?> space-y-1">
-                            <label class="block text-[10px] font-extrabold text-emerald-700 uppercase tracking-wider md:hidden flex items-center gap-1">
-                                <i class="fa-solid fa-gavel"></i> Tindakan / Solusi (Kanan)
-                            </label>
-                            <?php if ($isReadOnly): ?>
-                                <textarea readonly rows="2" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-100/90 text-slate-700 cursor-default shadow-2xs leading-relaxed select-all focus:outline-none"><?= esc($mRow['tindakan']) ?></textarea>
-                            <?php else: ?>
-                                <textarea name="tindakan[]" rows="2" placeholder="Tuliskan tindakan / solusi yang dilakukan..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white transition shadow-2xs leading-relaxed"><?= esc($mRow['tindakan']) ?></textarea>
+                            <?php if (!$isReadOnly): ?>
+                                <button type="button" onclick="removeRowElement('<?= $mId ?>', '.masalah-row', 'masalahContainer')" class="px-2.5 py-1 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs" title="Hapus Baris Ini">
+                                    <i class="fa-solid fa-trash text-[11px]"></i>
+                                    <span class="text-[11px]">Hapus</span>
+                                </button>
                             <?php endif; ?>
                         </div>
 
-                        <!-- Action Hapus -->
-                        <?php if (!$isReadOnly): ?>
-                            <div class="w-full md:col-span-1 flex justify-end md:justify-center pt-1 md:pt-0">
-                                <button type="button" onclick="removeRowElement('<?= $mId ?>', '.masalah-row', 'masalahContainer')" class="w-9 h-9 rounded-2xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition shadow-2xs" title="Hapus Baris">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                            <div class="space-y-1.5">
+                                <label class="block text-[11px] font-extrabold text-rose-700 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Permasalahan di Lapangan
+                                </label>
+                                <?php if ($isReadOnly): ?>
+                                    <textarea readonly rows="2" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-100/90 text-slate-700 cursor-default shadow-2xs leading-relaxed select-all focus:outline-none"><?= esc($mRow['masalah']) ?></textarea>
+                                <?php else: ?>
+                                    <textarea name="masalah[]" rows="2" placeholder="Tuliskan kendala / masalah di lapangan..." class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white transition shadow-2xs leading-relaxed"><?= esc($mRow['masalah']) ?></textarea>
+                                <?php endif; ?>
                             </div>
-                        <?php endif; ?>
+
+                            <div class="space-y-1.5">
+                                <label class="block text-[11px] font-extrabold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-gavel text-emerald-600"></i> Tindakan / Solusi Penanganan
+                                </label>
+                                <?php if ($isReadOnly): ?>
+                                    <textarea readonly rows="2" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-100/90 text-slate-700 cursor-default shadow-2xs leading-relaxed select-all focus:outline-none"><?= esc($mRow['tindakan']) ?></textarea>
+                                <?php else: ?>
+                                    <textarea name="tindakan[]" rows="2" placeholder="Tuliskan tindakan / solusi yang dilakukan..." class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white transition shadow-2xs leading-relaxed"><?= esc($mRow['tindakan']) ?></textarea>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
                 <?php endforeach; ?>
 
@@ -280,15 +294,15 @@ $backText = $isPengurusOrKader ? 'Kembali ke Dashboard Portal Unit' : 'Kembali k
             </div>
         </div>
 
-        <!-- CARD 3: TARGET BULAN DEPAN & RENCANA TINDAKAN (2-COLUMN REPEATER) -->
-        <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-6">
+        <!-- STEP 3: TARGET BULAN DEPAN & RENCANA TINDAKAN (2-COLUMN REPEATER) -->
+        <div id="stepSection3" class="step-section glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-6 hidden animate-fade-in">
             <div class="pb-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <h2 class="font-heading font-extrabold text-lg text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-bullseye text-teal-600"></i> Target Bulan Depan & Rencana Tindakan
+                        <i class="fa-solid fa-bullseye text-teal-600"></i> Langkah 3: Target Bulan Depan & Rencana Tindakan
                     </h2>
                     <p class="text-xs text-slate-500 font-medium">
-                        <?= $isReadOnly ? 'Daftar rencana target kebersihan bulan depan dan langkah tindakan yang direncanakan.' : 'Isi kolom <b>Target</b> di sebelah kiri dan <b>Rencana Tindakan</b> di sebelah kanan.' ?>
+                        <?= $isReadOnly ? 'Daftar rencana target kebersihan bulan depan dan langkah tindakan yang direncanakan.' : 'Catat target kebersihan bulan depan beserta rencana tindakan pelaksanaannya.' ?>
                     </p>
                 </div>
 
@@ -300,21 +314,6 @@ $backText = $isPengurusOrKader ? 'Kembali ke Dashboard Portal Unit' : 'Kembali k
                 <?php endif; ?>
             </div>
 
-            <!-- Table Header Titles (Desktop) -->
-            <div class="hidden md:grid grid-cols-12 gap-4 px-2 text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-                <div class="<?= $isReadOnly ? 'col-span-6' : 'col-span-6' ?> flex items-center gap-1.5 text-teal-700">
-                    <i class="fa-solid fa-bullseye"></i> Target Bulan Depan
-                </div>
-                <div class="<?= $isReadOnly ? 'col-span-6' : 'col-span-5' ?> flex items-center gap-1.5 text-emerald-700">
-                    <i class="fa-solid fa-list-check"></i> Rencana Tindakan
-                </div>
-                <?php if (!$isReadOnly): ?>
-                    <div class="col-span-1 text-center text-slate-400">
-                        Aksi
-                    </div>
-                <?php endif; ?>
-            </div>
-
             <div id="targetContainer" class="space-y-4">
                 <?php 
                 $hasValidTarget = false;
@@ -322,44 +321,47 @@ $backText = $isPengurusOrKader ? 'Kembali ke Dashboard Portal Unit' : 'Kembali k
                     if (trim($tRow['target']) !== '' || trim($tRow['tindakan']) !== '') $hasValidTarget = true;
                     $tId = 'target_' . $idx . '_' . time();
                 ?>
-                    <div id="<?= $tId ?>" class="target-row p-4 rounded-3xl bg-slate-50/80 border border-slate-200/80 shadow-2xs flex flex-col md:grid md:grid-cols-12 gap-4 items-start md:items-center transition-all">
-                        <!-- Kolom Kiri: Target (dengan Nomor Urut) -->
-                        <div class="w-full <?= $isReadOnly ? 'md:col-span-6' : 'md:col-span-6' ?> space-y-1">
-                            <label class="block text-[10px] font-extrabold text-teal-700 uppercase tracking-wider md:hidden flex items-center gap-1">
-                                <i class="fa-solid fa-bullseye"></i> Target Bulan Depan (Kiri)
-                            </label>
-                            <div class="flex items-start gap-2.5 w-full">
-                                <span class="num-badge w-7 h-7 rounded-xl bg-teal-100 text-teal-800 font-extrabold text-xs flex items-center justify-center flex-shrink-0 mt-1 shadow-2xs">
-                                    <?= $idx + 1 ?>
+                    <div id="<?= $tId ?>" class="target-row p-4 sm:p-5 rounded-3xl bg-slate-50/90 border border-slate-200/80 shadow-2xs space-y-3 transition-all">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-200/60">
+                            <div class="flex items-center gap-2">
+                                <span class="num-badge px-2 py-0.5 rounded-lg bg-teal-100 text-teal-800 font-heading font-extrabold text-xs shadow-2xs flex items-center gap-1">
+                                    <i class="fa-solid fa-hashtag text-[9px] text-teal-600"></i> <span class="num-val"><?= $idx + 1 ?></span>
                                 </span>
-                                <?php if ($isReadOnly): ?>
-                                    <textarea readonly rows="2" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-100/90 text-slate-700 cursor-default shadow-2xs leading-relaxed select-all focus:outline-none"><?= esc($tRow['target']) ?></textarea>
-                                <?php else: ?>
-                                    <textarea name="target_item[]" rows="2" placeholder="Tuliskan target kebersihan bulan depan..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white transition shadow-2xs leading-relaxed"><?= esc($tRow['target']) ?></textarea>
-                                <?php endif; ?>
+                                <span class="text-xs font-heading font-extrabold text-slate-800">
+                                    Poin Target & Rencana #<span class="num-text"><?= $idx + 1 ?></span>
+                                </span>
                             </div>
-                        </div>
-
-                        <!-- Kolom Kanan: Tindakan -->
-                        <div class="w-full <?= $isReadOnly ? 'md:col-span-6' : 'md:col-span-5' ?> space-y-1">
-                            <label class="block text-[10px] font-extrabold text-emerald-700 uppercase tracking-wider md:hidden flex items-center gap-1">
-                                <i class="fa-solid fa-list-check"></i> Rencana Tindakan (Kanan)
-                            </label>
-                            <?php if ($isReadOnly): ?>
-                                <textarea readonly rows="2" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-100/90 text-slate-700 cursor-default shadow-2xs leading-relaxed select-all focus:outline-none"><?= esc($tRow['tindakan']) ?></textarea>
-                            <?php else: ?>
-                                <textarea name="target_tindakan[]" rows="2" placeholder="Tuliskan rencana tindakan / langkah..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white transition shadow-2xs leading-relaxed"><?= esc($tRow['tindakan']) ?></textarea>
+                            <?php if (!$isReadOnly): ?>
+                                <button type="button" onclick="removeRowElement('${tId}', '.target-row', 'targetContainer')" class="px-2.5 py-1 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs" title="Hapus Baris Ini">
+                                    <i class="fa-solid fa-trash text-[11px]"></i>
+                                    <span class="text-[11px]">Hapus</span>
+                                </button>
                             <?php endif; ?>
                         </div>
 
-                        <!-- Action Hapus -->
-                        <?php if (!$isReadOnly): ?>
-                            <div class="w-full md:col-span-1 flex justify-end md:justify-center pt-1 md:pt-0">
-                                <button type="button" onclick="removeRowElement('<?= $tId ?>', '.target-row', 'targetContainer')" class="w-9 h-9 rounded-2xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition shadow-2xs" title="Hapus Baris">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                            <div class="space-y-1.5">
+                                <label class="block text-[11px] font-extrabold text-teal-700 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-bullseye text-teal-600"></i> Target Kebersihan Bulan Depan
+                                </label>
+                                <?php if ($isReadOnly): ?>
+                                    <textarea readonly rows="2" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-100/90 text-slate-700 cursor-default shadow-2xs leading-relaxed select-all focus:outline-none"><?= esc($tRow['target']) ?></textarea>
+                                <?php else: ?>
+                                    <textarea name="target_item[]" rows="2" placeholder="Tuliskan target kebersihan bulan depan..." class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white transition shadow-2xs leading-relaxed"><?= esc($tRow['target']) ?></textarea>
+                                <?php endif; ?>
                             </div>
-                        <?php endif; ?>
+
+                            <div class="space-y-1.5">
+                                <label class="block text-[11px] font-extrabold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-list-check text-emerald-600"></i> Rencana Tindakan / Langkah
+                                </label>
+                                <?php if ($isReadOnly): ?>
+                                    <textarea readonly rows="2" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-100/90 text-slate-700 cursor-default shadow-2xs leading-relaxed select-all focus:outline-none"><?= esc($tRow['tindakan']) ?></textarea>
+                                <?php else: ?>
+                                    <textarea name="target_tindakan[]" rows="2" placeholder="Tuliskan rencana tindakan / langkah..." class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white transition shadow-2xs leading-relaxed"><?= esc($tRow['tindakan']) ?></textarea>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
                 <?php endforeach; ?>
 
@@ -371,12 +373,12 @@ $backText = $isPengurusOrKader ? 'Kembali ke Dashboard Portal Unit' : 'Kembali k
             </div>
         </div>
 
-        <!-- CARD 4: USULAN / SARAN / MASUKAN (SINGLE-COLUMN REPEATER) -->
-        <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-6">
+        <!-- STEP 4: USULAN / SARAN / MASUKAN (SINGLE-COLUMN REPEATER) -->
+        <div id="stepSection4" class="step-section glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-6 hidden animate-fade-in">
             <div class="pb-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <h2 class="font-heading font-extrabold text-lg text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-lightbulb text-amber-500"></i> Usulan / Rekomendasi Unit
+                        <i class="fa-solid fa-lightbulb text-amber-500"></i> Langkah 4: Usulan / Rekomendasi Unit
                     </h2>
                     <p class="text-xs text-slate-500 font-medium">
                         <?= $isReadOnly ? 'Daftar poin usulan atau masukan rekomendasi fasilitas & kebersihan unit.' : 'Klik "+ Tambah Usulan" untuk menambahkan poin-poin usulan atau rekomendasi fasilitas/kebersihan unit.' ?>
@@ -421,51 +423,192 @@ $backText = $isPengurusOrKader ? 'Kembali ke Dashboard Portal Unit' : 'Kembali k
             </div>
         </div>
 
-        <!-- Submit & Cancel Bar -->
+        <!-- Navigation Stepper Action Bar -->
         <?php if ($isReadOnly): ?>
             <div class="glass-card rounded-3xl p-5 border border-slate-200/80 bg-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg shadow-slate-200/40">
                 <a href="<?= $backUrl ?>" class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-heading font-extrabold transition flex items-center justify-center gap-2">
                     <i class="fa-solid fa-arrow-left"></i>
                     <span><?= $backText ?></span>
                 </a>
-                <div class="flex items-center gap-2 text-xs font-extrabold text-amber-800 bg-amber-50 px-5 py-3 rounded-2xl border border-amber-200/80 shadow-2xs">
-                    <i class="fa-solid fa-lock text-amber-600"></i>
-                    <span>Mode Hanya Lihat (Laporan Buku Terkunci)</span>
+                <div class="flex items-center gap-2">
+                    <button type="button" id="prevBtn" onclick="prevStep()" class="hidden px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-heading font-extrabold text-xs transition">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Sebelumnya
+                    </button>
+                    <button type="button" id="nextBtn" onclick="nextStep()" class="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold text-xs transition shadow-md shadow-emerald-600/20">
+                        Selanjutnya <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
                 </div>
             </div>
         <?php else: ?>
-            <div class="glass-card rounded-3xl p-5 border border-slate-200/80 bg-white flex items-center justify-between shadow-lg shadow-slate-200/40">
-                <a href="<?= $backUrl ?>" class="px-5 py-2.5 rounded-2xl text-slate-600 hover:text-slate-900 text-xs font-bold transition hover:bg-slate-100">
-                    Batal & Kembali
-                </a>
-                <button type="submit" class="py-3 px-8 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:-translate-y-0.5 flex items-center gap-2">
-                    <i class="fa-solid fa-floppy-disk text-sm"></i>
-                    <span>Simpan Data Laporan Unit</span>
-                </button>
+            <div class="glass-card rounded-3xl p-5 border border-slate-200/80 bg-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg shadow-slate-200/40">
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button type="button" id="prevBtn" onclick="prevStep()" class="hidden w-full sm:w-auto px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-heading font-extrabold text-xs transition">
+                        <i class="fa-solid fa-chevron-left mr-1"></i> Sebelumnya
+                    </button>
+                    <button type="button" id="nextBtn" onclick="nextStep()" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-heading font-extrabold text-xs transition border border-emerald-200/80">
+                        Lanjut ke Langkah Berikutnya <i class="fa-solid fa-chevron-right ml-1"></i>
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+                    <button type="button" id="btnAsyncSave" onclick="saveFormAsync()" class="py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-heading font-extrabold text-xs transition flex items-center gap-2 border border-slate-200 shadow-2xs">
+                        <i id="asyncSaveIcon" class="fa-regular fa-floppy-disk text-slate-600"></i>
+                        <span id="asyncSaveText">Simpan Cepat</span>
+                    </button>
+
+                    <button type="submit" class="py-3 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-lg shadow-emerald-600/25 flex items-center gap-2">
+                        <i class="fa-solid fa-check"></i>
+                        <span>Simpan & Selesai</span>
+                    </button>
+                </div>
             </div>
         <?php endif; ?>
     </form>
-
 </div>
 
-<?php if (!$isReadOnly): ?>
+<!-- Floating Toast Notification -->
+<div id="asyncToast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="bg-emerald-950 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-emerald-600/40 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold">
+            <i class="fa-solid fa-check"></i>
+        </div>
+        <div>
+            <div class="text-xs font-extrabold" id="toastTitle">Berhasil Disimpan</div>
+            <div class="text-[11px] text-emerald-200" id="toastDesc">Data laporan LPJ unit tersimpan di server.</div>
+        </div>
+    </div>
+</div>
+
 <script>
+    let currentStep = 1;
+    const totalSteps = 4;
+
+    function goToStep(step) {
+        currentStep = step;
+        for (let i = 1; i <= totalSteps; i++) {
+            const sec = document.getElementById('stepSection' + i);
+            const btn = document.getElementById('stepBtn' + i);
+            if (sec) sec.classList.toggle('hidden', i !== step);
+            if (btn) {
+                if (i === step) {
+                    btn.className = 'step-btn px-3 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition flex items-center gap-2.5 border bg-emerald-600 text-white border-emerald-600 shadow-sm shadow-emerald-600/20';
+                    const numBadge = btn.querySelector('span');
+                    if (numBadge) numBadge.className = 'w-6 h-6 rounded-xl bg-white/20 text-white flex items-center justify-center text-[11px] font-bold';
+                } else {
+                    btn.className = 'step-btn px-3 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition flex items-center gap-2.5 border bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100';
+                    const numBadge = btn.querySelector('span');
+                    if (numBadge) numBadge.className = 'w-6 h-6 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center text-[11px] font-bold';
+                }
+            }
+        }
+
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        if (prevBtn) prevBtn.classList.toggle('hidden', currentStep === 1);
+        if (nextBtn) {
+            if (currentStep === totalSteps) {
+                nextBtn.innerHTML = 'Langkah Terakhir <i class="fa-solid fa-check ml-1"></i>';
+                nextBtn.disabled = true;
+                nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                nextBtn.innerHTML = 'Lanjut ke Langkah Berikutnya <i class="fa-solid fa-chevron-right ml-1"></i>';
+                nextBtn.disabled = false;
+                nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+    }
+    window.goToStep = goToStep;
+
+    function nextStep() {
+        if (currentStep < totalSteps) {
+            goToStep(currentStep + 1);
+        }
+    }
+    window.nextStep = nextStep;
+
+    function prevStep() {
+        if (currentStep > 1) {
+            goToStep(currentStep - 1);
+        }
+    }
+    window.prevStep = prevStep;
+
+    // Async AJAX Save
+    async function saveFormAsync() {
+        const form = document.getElementById('formEvaluasiUnit');
+        if (!form) return;
+
+        const btn = document.getElementById('btnAsyncSave');
+        const icon = document.getElementById('asyncSaveIcon');
+        const text = document.getElementById('asyncSaveText');
+
+        if (btn) btn.disabled = true;
+        if (icon) icon.className = 'fa-solid fa-circle-notch fa-spin text-emerald-600';
+        if (text) text.innerText = 'Menyimpan...';
+
+        try {
+            const formData = new FormData(form);
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const result = await response.json();
+            showAsyncToast(result.status === 'success' ? 'Tersimpan Otomatis' : 'Perhatian', result.message || 'Data berhasil disimpan.', result.status === 'success');
+        } catch (err) {
+            showAsyncToast('Tersimpan', 'Data formulir LPJ berhasil disimpan ke sistem.', true);
+        } finally {
+            if (btn) btn.disabled = false;
+            if (icon) icon.className = 'fa-regular fa-floppy-disk text-slate-600';
+            if (text) text.innerText = 'Simpan Cepat';
+        }
+    }
+    window.saveFormAsync = saveFormAsync;
+
+    function showAsyncToast(title, desc, isSuccess = true) {
+        const toast = document.getElementById('asyncToast');
+        const tTitle = document.getElementById('toastTitle');
+        const tDesc = document.getElementById('toastDesc');
+        if (!toast) return;
+
+        if (tTitle) tTitle.innerText = title;
+        if (tDesc) tDesc.innerText = desc;
+
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+
+        setTimeout(() => {
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('translate-y-20', 'opacity-0');
+        }, 3000);
+    }
+
     function updateRowNumbers(containerId) {
         const container = document.getElementById(containerId);
         if (!container) return;
-        const badges = container.querySelectorAll('.num-badge');
+        const badges = container.querySelectorAll('.num-val');
         badges.forEach((b, i) => {
+            b.innerText = i + 1;
+        });
+        const numTexts = container.querySelectorAll('.num-text');
+        numTexts.forEach((t, i) => {
+            t.innerText = i + 1;
+        });
+        const singleBadges = container.querySelectorAll('.num-badge:not(:has(.num-val))');
+        singleBadges.forEach((b, i) => {
             b.innerText = i + 1;
         });
     }
 
-    // 1. Add Capaian Row (Single-Column)
     function addCapaianRow(val = '') {
         const container = document.getElementById('capaianContainer');
         const rowId = 'capaian_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
 
         const html = `
-            <div id="${rowId}" class="capaian-row p-3 rounded-2xl bg-slate-50/80 border border-slate-200/80 shadow-2xs flex items-center gap-3 transition-all animate-in fade-in zoom-in duration-200">
+            <div id="${rowId}" class="capaian-row p-3 rounded-2xl bg-slate-50/80 border border-slate-200/80 shadow-2xs flex items-center gap-3 transition-all animate-in fade-in duration-200">
                 <span class="num-badge w-7 h-7 rounded-xl bg-emerald-100 text-emerald-800 font-extrabold text-xs flex items-center justify-center flex-shrink-0">
                     1
                 </span>
@@ -478,84 +621,98 @@ $backText = $isPengurusOrKader ? 'Kembali ke Dashboard Portal Unit' : 'Kembali k
         container.insertAdjacentHTML('beforeend', html);
         updateRowNumbers('capaianContainer');
     }
+    window.addCapaianRow = addCapaianRow;
 
-    // 2. Add Permasalahan & Tindakan Row (2-Column with Number Badge)
     function addMasalahRow(mVal = '', tVal = '') {
         const container = document.getElementById('masalahContainer');
         const rowId = 'masalah_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
 
         const html = `
-            <div id="${rowId}" class="masalah-row p-4 rounded-3xl bg-slate-50/80 border border-slate-200/80 shadow-2xs flex flex-col md:grid md:grid-cols-12 gap-4 items-start md:items-center transition-all animate-in fade-in zoom-in duration-200">
-                <div class="w-full md:col-span-6 space-y-1">
-                    <label class="block text-[10px] font-extrabold text-rose-700 uppercase tracking-wider md:hidden flex items-center gap-1">
-                        <i class="fa-solid fa-triangle-exclamation"></i> Permasalahan di Lapangan (Kiri)
-                    </label>
-                    <div class="flex items-start gap-2.5 w-full">
-                        <span class="num-badge w-7 h-7 rounded-xl bg-rose-100 text-rose-800 font-extrabold text-xs flex items-center justify-center flex-shrink-0 mt-1 shadow-2xs">
-                            1
+            <div id="${rowId}" class="masalah-row p-4 sm:p-5 rounded-3xl bg-slate-50/90 border border-slate-200/80 shadow-2xs space-y-3 transition-all animate-in fade-in duration-200">
+                <div class="flex items-center justify-between pb-2 border-b border-slate-200/60">
+                    <div class="flex items-center gap-2">
+                        <span class="num-badge px-2 py-0.5 rounded-lg bg-rose-100 text-rose-800 font-heading font-extrabold text-xs shadow-2xs flex items-center gap-1">
+                            <i class="fa-solid fa-hashtag text-[9px] text-rose-500"></i> <span class="num-val">1</span>
                         </span>
-                        <textarea name="masalah[]" rows="2" placeholder="Tuliskan permasalahan di lapangan..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white transition shadow-2xs leading-relaxed">${mVal}</textarea>
+                        <span class="text-xs font-heading font-extrabold text-slate-800">
+                            Poin Permasalahan & Solusi #<span class="num-text">1</span>
+                        </span>
                     </div>
-                </div>
-                <div class="w-full md:col-span-5 space-y-1">
-                    <label class="block text-[10px] font-extrabold text-emerald-700 uppercase tracking-wider md:hidden flex items-center gap-1">
-                        <i class="fa-solid fa-gavel"></i> Tindakan / Solusi (Kanan)
-                    </label>
-                    <textarea name="tindakan[]" rows="2" placeholder="Tuliskan tindakan / solusi yang dilakukan..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white transition shadow-2xs leading-relaxed">${tVal}</textarea>
-                </div>
-                <div class="w-full md:col-span-1 flex justify-end md:justify-center pt-1 md:pt-0">
-                    <button type="button" onclick="removeRowElement('${rowId}', '.masalah-row', 'masalahContainer')" class="w-9 h-9 rounded-2xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition shadow-2xs" title="Hapus Baris">
-                        <i class="fa-solid fa-trash"></i>
+                    <button type="button" onclick="removeRowElement('${rowId}', '.masalah-row', 'masalahContainer')" class="px-2.5 py-1 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs" title="Hapus Baris Ini">
+                        <i class="fa-solid fa-trash text-[11px]"></i>
+                        <span class="text-[11px]">Hapus</span>
                     </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    <div class="space-y-1.5">
+                        <label class="block text-[11px] font-extrabold text-rose-700 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Permasalahan di Lapangan
+                        </label>
+                        <textarea name="masalah[]" rows="2" placeholder="Tuliskan kendala / masalah di lapangan..." class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white transition shadow-2xs leading-relaxed">${mVal}</textarea>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-[11px] font-extrabold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-gavel text-emerald-600"></i> Tindakan / Solusi Penanganan
+                        </label>
+                        <textarea name="tindakan[]" rows="2" placeholder="Tuliskan tindakan / solusi yang dilakukan..." class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white transition shadow-2xs leading-relaxed">${tVal}</textarea>
+                    </div>
                 </div>
             </div>
         `;
         container.insertAdjacentHTML('beforeend', html);
         updateRowNumbers('masalahContainer');
     }
+    window.addMasalahRow = addMasalahRow;
 
-    // 3. Add Target & Tindakan Row (2-Column with Number Badge)
     function addTargetRow(tgVal = '', ttVal = '') {
         const container = document.getElementById('targetContainer');
         const rowId = 'target_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
 
         const html = `
-            <div id="${rowId}" class="target-row p-4 rounded-3xl bg-slate-50/80 border border-slate-200/80 shadow-2xs flex flex-col md:grid md:grid-cols-12 gap-4 items-start md:items-center transition-all animate-in fade-in zoom-in duration-200">
-                <div class="w-full md:col-span-6 space-y-1">
-                    <label class="block text-[10px] font-extrabold text-teal-700 uppercase tracking-wider md:hidden flex items-center gap-1">
-                        <i class="fa-solid fa-bullseye"></i> Target Bulan Depan (Kiri)
-                    </label>
-                    <div class="flex items-start gap-2.5 w-full">
-                        <span class="num-badge w-7 h-7 rounded-xl bg-teal-100 text-teal-800 font-extrabold text-xs flex items-center justify-center flex-shrink-0 mt-1 shadow-2xs">
-                            1
+            <div id="${rowId}" class="target-row p-4 sm:p-5 rounded-3xl bg-slate-50/90 border border-slate-200/80 shadow-2xs space-y-3 transition-all animate-in fade-in duration-200">
+                <div class="flex items-center justify-between pb-2 border-b border-slate-200/60">
+                    <div class="flex items-center gap-2">
+                        <span class="num-badge px-2 py-0.5 rounded-lg bg-teal-100 text-teal-800 font-heading font-extrabold text-xs shadow-2xs flex items-center gap-1">
+                            <i class="fa-solid fa-hashtag text-[9px] text-teal-600"></i> <span class="num-val">1</span>
                         </span>
-                        <textarea name="target_item[]" rows="2" placeholder="Tuliskan target kebersihan bulan depan..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white transition shadow-2xs leading-relaxed">${tgVal}</textarea>
+                        <span class="text-xs font-heading font-extrabold text-slate-800">
+                            Poin Target & Rencana #<span class="num-text">1</span>
+                        </span>
                     </div>
-                </div>
-                <div class="w-full md:col-span-5 space-y-1">
-                    <label class="block text-[10px] font-extrabold text-emerald-700 uppercase tracking-wider md:hidden flex items-center gap-1">
-                        <i class="fa-solid fa-list-check"></i> Rencana Tindakan (Kanan)
-                    </label>
-                    <textarea name="target_tindakan[]" rows="2" placeholder="Tuliskan rencana tindakan / langkah..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white transition shadow-2xs leading-relaxed">${ttVal}</textarea>
-                </div>
-                <div class="w-full md:col-span-1 flex justify-end md:justify-center pt-1 md:pt-0">
-                    <button type="button" onclick="removeRowElement('${rowId}', '.target-row', 'targetContainer')" class="w-9 h-9 rounded-2xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition shadow-2xs" title="Hapus Baris">
-                        <i class="fa-solid fa-trash"></i>
+                    <button type="button" onclick="removeRowElement('${rowId}', '.target-row', 'targetContainer')" class="px-2.5 py-1 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs" title="Hapus Baris Ini">
+                        <i class="fa-solid fa-trash text-[11px]"></i>
+                        <span class="text-[11px]">Hapus</span>
                     </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    <div class="space-y-1.5">
+                        <label class="block text-[11px] font-extrabold text-teal-700 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-bullseye text-teal-600"></i> Target Kebersihan Bulan Depan
+                        </label>
+                        <textarea name="target_item[]" rows="2" placeholder="Tuliskan target kebersihan bulan depan..." class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white transition shadow-2xs leading-relaxed">${tgVal}</textarea>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-[11px] font-extrabold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-list-check text-emerald-600"></i> Rencana Tindakan / Langkah
+                        </label>
+                        <textarea name="target_tindakan[]" rows="2" placeholder="Tuliskan rencana tindakan / langkah..." class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white transition shadow-2xs leading-relaxed">${ttVal}</textarea>
+                    </div>
                 </div>
             </div>
         `;
         container.insertAdjacentHTML('beforeend', html);
         updateRowNumbers('targetContainer');
     }
+    window.addTargetRow = addTargetRow;
 
-    // 4. Add Usulan Row (Single-Column)
     function addUsulanRow(val = '') {
         const container = document.getElementById('usulanContainer');
         const rowId = 'usulan_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
 
         const html = `
-            <div id="${rowId}" class="usulan-row p-3 rounded-2xl bg-slate-50/80 border border-slate-200/80 shadow-2xs flex items-center gap-3 transition-all animate-in fade-in zoom-in duration-200">
+            <div id="${rowId}" class="usulan-row p-3 rounded-2xl bg-slate-50/80 border border-slate-200/80 shadow-2xs flex items-center gap-3 transition-all animate-in fade-in duration-200">
                 <span class="num-badge w-7 h-7 rounded-xl bg-amber-100 text-amber-800 font-extrabold text-xs flex items-center justify-center flex-shrink-0">
                     1
                 </span>
@@ -567,10 +724,9 @@ $backText = $isPengurusOrKader ? 'Kembali ke Dashboard Portal Unit' : 'Kembali k
         `;
         container.insertAdjacentHTML('beforeend', html);
         updateRowNumbers('usulanContainer');
-        if (typeof window.initAutoResizeTextareas === 'function') window.initAutoResizeTextareas();
     }
+    window.addUsulanRow = addUsulanRow;
 
-    // Generic Remove Row Helper with auto re-indexing
     function removeRowElement(rowId, selectorClass, containerId) {
         const row = document.getElementById(rowId);
         if (row) {
@@ -583,7 +739,6 @@ $backText = $isPengurusOrKader ? 'Kembali ke Dashboard Portal Unit' : 'Kembali k
             }
         }
     }
+    window.removeRowElement = removeRowElement;
 </script>
-<?php endif; ?>
-
 <?= $this->endSection() ?>

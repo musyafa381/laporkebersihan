@@ -33,6 +33,140 @@
         </div>
     </div>
 
+    <?php 
+        $userRole = session()->get('role');
+        $isAdmin = ($userRole === 'Admin');
+        $tabParam = service('request')->getGet('tab') ?? ($_GET['tab'] ?? '');
+        $activeTab = ($isAdmin && $tabParam === 'kelola_users') ? 'kelola_users' : 'profil_saya';
+    ?>
+
+    <!-- Navigation Tabs -->
+    <div class="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
+        <button type="button" onclick="switchProfilTab('tab_profil_saya')" id="btn_tab_profil_saya" class="px-5 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition shadow-2xs flex items-center gap-2 <?= $activeTab === 'profil_saya' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200' ?>">
+            <i class="fa-solid fa-user-gear"></i>
+            <span>Profil & Keamanan Saya</span>
+        </button>
+
+        <?php if ($isAdmin): ?>
+        <button type="button" onclick="switchProfilTab('tab_kelola_users')" id="btn_tab_kelola_users" class="px-5 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition shadow-2xs flex items-center gap-2 <?= $activeTab === 'kelola_users' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200' ?>">
+            <i class="fa-solid fa-users-gear"></i>
+            <span>Manajemen Pengguna Sistem (<?= count($usersList) ?>)</span>
+        </button>
+        <?php endif; ?>
+    </div>
+
+    <!-- TAB 1: PROFIL & KEAMANAN SAYA (Semua Role: Admin, Auditor, Pengurus, Kader) -->
+    <div id="tab_profil_saya" class="<?= $activeTab === 'profil_saya' ? '' : 'hidden' ?> space-y-6 animate-fadeIn">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Card 1: Informasi Profil Akun -->
+            <div class="glass-card rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-5">
+                <div class="flex items-center gap-3.5 border-b border-slate-100 pb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-xl font-heading font-black shadow-lg shadow-emerald-500/20 flex-shrink-0">
+                        <?= esc(substr($currentUser['nama_lengkap'] ?? session()->get('nama_lengkap') ?? 'U', 0, 1)) ?>
+                    </div>
+                    <div>
+                        <h3 class="font-heading font-extrabold text-lg text-slate-900">
+                            Informasi Akun Saya
+                        </h3>
+                        <p class="text-xs text-slate-500 font-medium">Perbarui data nama lengkap atau username akun login Anda.</p>
+                    </div>
+                </div>
+
+                <form action="<?= base_url('profil/update-me') ?>" method="POST" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Nama Lengkap</label>
+                        <input type="text" name="nama_lengkap" value="<?= esc($currentUser['nama_lengkap'] ?? session()->get('nama_lengkap')) ?>" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Username (ID Login)</label>
+                        <input type="text" name="username" value="<?= esc($currentUser['username'] ?? session()->get('username')) ?>" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-mono font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 pt-1">
+                        <div>
+                            <label class="block text-[11px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Role Hak Akses</label>
+                            <div class="px-3.5 py-2.5 rounded-2xl bg-slate-100 border border-slate-200 text-xs font-extrabold text-slate-700 flex items-center gap-1.5">
+                                <i class="fa-solid fa-shield-halved text-emerald-600"></i>
+                                <span><?= esc(session()->get('role')) ?></span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Unit Kerja / Instansi</label>
+                            <div class="px-3.5 py-2.5 rounded-2xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 truncate" title="<?= esc($currentUserUnit['nama_unit'] ?? 'Pengurus Pusat') ?>">
+                                <i class="fa-solid fa-building text-teal-600 mr-1"></i>
+                                <span><?= esc($currentUserUnit['nama_unit'] ?? 'Pengurus Pusat') ?></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="w-full py-3 px-5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>Simpan Perubahan Profil</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Card 2: Form Ganti Password Mandiri -->
+            <div class="glass-card rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-5">
+                <div class="flex items-center gap-3.5 border-b border-slate-100 pb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-rose-500 text-white flex items-center justify-center text-xl shadow-lg shadow-amber-500/20 flex-shrink-0">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-heading font-extrabold text-lg text-slate-900">
+                            Ganti Password Akun
+                        </h3>
+                        <p class="text-xs text-slate-500 font-medium">Ubah kata sandi login akun Anda secara mandiri.</p>
+                    </div>
+                </div>
+
+                <form action="<?= base_url('profil/change-password') ?>" method="POST" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Password Saat Ini (Lama)</label>
+                        <div class="relative">
+                            <input type="password" id="self_old_password" name="old_password" placeholder="Masukkan password lama..." required class="w-full px-4 py-2.5 pr-10 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                            <button type="button" onclick="togglePasswordVisibility('self_old_password', 'icon_self_old_pwd')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                                <i id="icon_self_old_pwd" class="fa-solid fa-eye text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Password Baru (Min. 4 Karakter)</label>
+                        <div class="relative">
+                            <input type="password" id="self_new_password" name="new_password" minlength="4" placeholder="Masukkan password baru..." required class="w-full px-4 py-2.5 pr-10 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                            <button type="button" onclick="togglePasswordVisibility('self_new_password', 'icon_self_new_pwd')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                                <i id="icon_self_new_pwd" class="fa-solid fa-eye text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Konfirmasi Password Baru</label>
+                        <div class="relative">
+                            <input type="password" id="self_confirm_password" name="confirm_password" minlength="4" placeholder="Ulangi password baru..." required class="w-full px-4 py-2.5 pr-10 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                            <button type="button" onclick="togglePasswordVisibility('self_confirm_password', 'icon_self_confirm_pwd')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                                <i id="icon_self_confirm_pwd" class="fa-solid fa-eye text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="w-full py-3 px-5 rounded-2xl bg-gradient-to-r from-amber-600 to-rose-600 text-white font-heading font-extrabold text-xs hover:from-amber-700 hover:to-rose-700 transition shadow-md shadow-amber-600/20 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span>Perbarui Password Sekarang</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: MANAJEMEN PENGGUNA (Admin Only) -->
+    <div id="tab_kelola_users" class="<?= $activeTab === 'kelola_users' ? '' : 'hidden' ?> space-y-6 animate-fadeIn">
     <!-- Table Accounts List -->
     <div class="glass-card rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-5">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100 pb-4">
@@ -357,15 +491,22 @@
 
     function initUserPaginator() {
         if (typeof TablePaginator !== 'undefined' && document.getElementById('tableUserAccounts')) {
-            paginatorUser = new TablePaginator('tableUserAccounts', 'page-info-user', 'page-buttons-user', 'pageSize-user');
+            if (!paginatorUser) {
+                paginatorUser = new TablePaginator('tableUserAccounts', 'page-info-user', 'page-buttons-user', 'pageSize-user');
+            }
             paginatorUser.render();
         }
     }
     window.initUserPaginator = initUserPaginator;
     window.rebindPageEvents = initUserPaginator;
 
-    document.addEventListener('DOMContentLoaded', initUserPaginator);
-    initUserPaginator();
+    document.addEventListener('DOMContentLoaded', function() {
+        initUserPaginator();
+        const initialTab = "<?= $activeTab ?>";
+        if (initialTab === 'kelola_users') {
+            switchProfilTab('tab_kelola_users');
+        }
+    });
 
     function filterUserTable() {
         const input = document.getElementById('searchUserInput');
@@ -483,7 +624,7 @@
 
     function openModalEditUser(user) {
         const form = document.getElementById('formEditUser');
-        if (form) form.action = "<?= base_url('profil/update/') ?>" + user.id;
+        if (form) form.action = "<?= base_url('profil/update') ?>/" + user.id;
         const namaEl = document.getElementById('edit_nama_lengkap');
         if (namaEl) namaEl.value = user.nama_lengkap || '';
         const userEl = document.getElementById('edit_username');
@@ -531,6 +672,44 @@
         closeEditUserUnitDropdown();
     }
     window.closeModalEditUser = closeModalEditUser;
+
+    function switchProfilTab(tabId) {
+        const isUsers = (tabId === 'tab_kelola_users');
+        const tabProfil = document.getElementById('tab_profil_saya');
+        const tabUsers = document.getElementById('tab_kelola_users');
+        
+        if (tabProfil) tabProfil.classList.toggle('hidden', isUsers);
+        if (tabUsers) tabUsers.classList.toggle('hidden', !isUsers);
+        
+        const btnProfil = document.getElementById('btn_tab_profil_saya');
+        const btnUsers = document.getElementById('btn_tab_kelola_users');
+        
+        if (!isUsers) {
+            if (btnProfil) {
+                btnProfil.className = "px-5 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition shadow-2xs flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20";
+            }
+            if (btnUsers) {
+                btnUsers.className = "px-5 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition shadow-2xs flex items-center gap-2 bg-white text-slate-700 hover:bg-slate-50 border border-slate-200";
+            }
+        } else {
+            if (btnProfil) {
+                btnProfil.className = "px-5 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition shadow-2xs flex items-center gap-2 bg-white text-slate-700 hover:bg-slate-50 border border-slate-200";
+            }
+            if (btnUsers) {
+                btnUsers.className = "px-5 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition shadow-2xs flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20";
+            }
+            // Ensure table paginator renders smoothly upon tab activation
+            initUserPaginator();
+        }
+
+        // Update URL query string without page reload
+        try {
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('tab', isUsers ? 'kelola_users' : 'profil_saya');
+            window.history.replaceState(null, '', currentUrl.toString());
+        } catch(e) {}
+    }
+    window.switchProfilTab = switchProfilTab;
 
     // Close dropdowns on outside click
     document.addEventListener('click', function(e) {

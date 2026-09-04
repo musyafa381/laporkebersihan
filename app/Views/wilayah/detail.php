@@ -996,6 +996,9 @@
         if (hiddenId) hiddenId.value = item.unit_id || '';
         if (searchInput) searchInput.value = item.nama_unit ? (item.nama_unit + (item.tipe_unit ? ' (' + item.tipe_unit + ')' : '')) : '';
 
+        const shiftEl = document.getElementById('edit_penugasan_shift');
+        if (shiftEl) shiftEl.value = item.shift || 'Pagi';
+
         const hariEl = document.getElementById('edit_penugasan_hari');
         const customBox = document.getElementById('custom_days_edit_penugasan');
         const standardOptions = ['Setiap Hari', 'Senin - Jumat', 'Sabtu & Ahad', 'Jumat Bersih', 'Ahad Bersih'];

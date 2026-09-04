@@ -257,10 +257,25 @@ class Buku extends BaseController
             if (!empty($k['proker_id'])) {
                 $koordinasiMap[$k['proker_id']] = $k;
             } elseif (!empty($k['kegiatan'])) {
+                // Legacy matching: match by both kegiatan AND date so duplicate names on different dates never clash
+                $matched = false;
                 foreach ($proker as $p) {
-                    if (trim(strtolower($p['kegiatan'])) === trim(strtolower($k['kegiatan']))) {
+                    $pDateFormatted = date('d M Y', strtotime($p['tanggal']));
+                    if (trim(strtolower($p['kegiatan'])) === trim(strtolower($k['kegiatan'])) && 
+                        (!empty($k['hari_tanggal']) && trim(strtolower($k['hari_tanggal'])) === trim(strtolower($pDateFormatted)))) {
                         $koordinasiMap[$p['id']] = $k;
+                        $this->koordinasiModel->update($k['id'], ['proker_id' => $p['id']]);
+                        $matched = true;
                         break;
+                    }
+                }
+                if (!$matched) {
+                    foreach ($proker as $p) {
+                        if (!isset($koordinasiMap[$p['id']]) && trim(strtolower($p['kegiatan'])) === trim(strtolower($k['kegiatan']))) {
+                            $koordinasiMap[$p['id']] = $k;
+                            $this->koordinasiModel->update($k['id'], ['proker_id' => $p['id']]);
+                            break;
+                        }
                     }
                 }
             }
@@ -560,11 +575,26 @@ class Buku extends BaseController
         }
 
         $existing = null;
-        if ($prokerId) {
+        if (!empty($prokerId)) {
             $existing = $this->koordinasiModel->where(['buku_id' => $bukuId, 'proker_id' => $prokerId])->first();
-        }
-        if (!$existing && !empty($kegiatan)) {
-            $existing = $this->koordinasiModel->where(['buku_id' => $bukuId, 'kegiatan' => $kegiatan])->first();
+            if (!$existing && !empty($kegiatan) && !empty($hariTanggal)) {
+                // If legacy row had no proker_id, match by both exact kegiatan AND exact date
+                $existing = $this->koordinasiModel
+                    ->where('buku_id', $bukuId)
+                    ->where('kegiatan', $kegiatan)
+                    ->where('hari_tanggal', $hariTanggal)
+                    ->groupStart()
+                        ->where('proker_id', null)
+                        ->orWhere('proker_id', 0)
+                    ->groupEnd()
+                    ->first();
+            }
+        } elseif (!empty($kegiatan)) {
+            $builder = $this->koordinasiModel->where(['buku_id' => $bukuId, 'kegiatan' => $kegiatan]);
+            if (!empty($hariTanggal)) {
+                $builder->where('hari_tanggal', $hariTanggal);
+            }
+            $existing = $builder->first();
         }
 
         if ($existing) {

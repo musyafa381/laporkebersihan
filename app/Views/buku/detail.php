@@ -4,16 +4,16 @@
 
 <div class="space-y-6">
     <!-- Modern Header & Segmented Navbar -->
-    <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white/90 backdrop-blur-xl">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-100">
+    <div class="glass-card rounded-3xl p-4 sm:p-7 lg:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white/90 backdrop-blur-xl">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6 pb-5 sm:pb-6 border-b border-slate-100">
             <!-- Left: Breadcrumb & Title -->
-            <div class="space-y-2.5">
-                <a href="<?= base_url('buku') ?>" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100/80 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 text-xs font-bold transition-all border border-slate-200/60 shadow-2xs group">
+            <div class="space-y-2 sm:space-y-2.5">
+                <a href="<?= base_url('buku') ?>" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100/80 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 text-xs font-bold transition-all border border-slate-200/60 shadow-2xs group w-fit">
                     <i class="fa-solid fa-arrow-left text-[10px] group-hover:-translate-x-0.5 transition"></i> 
                     <span>Kembali ke Daftar Buku</span>
                 </a>
-                <div class="flex flex-wrap items-center gap-3">
-                    <h1 class="text-2xl sm:text-3xl font-heading font-extrabold text-slate-900 tracking-tight leading-snug">
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-heading font-extrabold text-slate-900 tracking-tight leading-snug">
                         <?= esc($buku['judul']) ?>
                     </h1>
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-extrabold border border-emerald-200/80">
@@ -30,40 +30,39 @@
                 $canEditBuku = ($role === 'Admin') || $isStatusAktif;
             ?>
 
-            <!-- Right: Status Control & Action Buttons -->
-            <div class="flex items-center gap-3 self-start lg:self-center flex-shrink-0">
+            <!-- Right: Status Control & Action Buttons (Mobile-Responsive Grid/Wrap) -->
+            <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto">
                 <?php if ($role === 'Admin'): ?>
-                    <form action="<?= base_url('buku/update-status/' . $buku['id']) ?>" method="POST" class="flex items-center gap-2">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:inline">Status:</span>
-                        <div class="relative">
-                            <select name="status" onchange="this.form.submit()" class="appearance-none pl-3.5 pr-8 py-2.5 rounded-xl border border-slate-200 text-xs font-extrabold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 shadow-2xs cursor-pointer">
+                    <form action="<?= base_url('buku/update-status/' . $buku['id']) ?>" method="POST" class="col-span-1 sm:flex-initial">
+                        <div class="relative w-full">
+                            <select name="status" onchange="this.form.submit()" class="w-full appearance-none pl-3 pr-8 py-2.5 rounded-xl border border-slate-200 text-xs font-extrabold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 hover:bg-white shadow-2xs cursor-pointer transition">
                                 <option value="Aktif" <?= ($buku['status'] === 'Aktif' || $buku['status'] === 'AKTIF' || $buku['status'] === 'Berjalan' || empty($buku['status'])) ? 'selected' : '' ?>>🟢 Aktif</option>
                                 <option value="Draft Proker" <?= ($buku['status'] === 'Draft Proker') ? 'selected' : '' ?>>🟠 Draft Proker</option>
                                 <option value="Selesai" <?= ($buku['status'] === 'Selesai') ? 'selected' : '' ?>>🔵 Selesai</option>
                             </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400">
                                 <i class="fa-solid fa-chevron-down text-[10px]"></i>
                             </div>
                         </div>
                     </form>
 
-                    <button onclick="openModalImportKeuangan()" class="px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-extrabold text-xs transition border border-emerald-200/90 shadow-2xs flex items-center gap-2">
+                    <button onclick="openModalImportKeuangan()" class="col-span-1 sm:flex-initial px-3 sm:px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-extrabold text-xs transition border border-emerald-200/90 shadow-2xs flex items-center justify-center gap-2">
                         <i class="fa-solid fa-file-import text-emerald-600"></i>
                         <span>Import Keuangan</span>
                     </button>
                 <?php else: ?>
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl <?= $isStatusAktif ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200' ?> font-extrabold text-xs border shadow-2xs">
+                    <span class="col-span-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl <?= $isStatusAktif ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200' ?> font-extrabold text-xs border shadow-2xs">
                         <i class="fa-solid <?= $isStatusAktif ? 'fa-circle-check text-emerald-600' : 'fa-lock text-amber-600' ?>"></i>
                         Status: <?= esc($statusBuku) ?>
                     </span>
                 <?php endif; ?>
 
-                <button type="button" onclick="openModalPreviewDoc(<?= $buku['id'] ?>, 'Buku LPJ <?= esc(addslashes($buku['bulan'] . ' ' . $buku['tahun'])) ?>')" class="px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-extrabold text-xs transition border border-emerald-200/90 shadow-2xs flex items-center gap-2" title="Preview Dokumen LPJ Langsung">
+                <button type="button" onclick="openModalPreviewDoc(<?= $buku['id'] ?>, 'Buku LPJ <?= esc(addslashes($buku['bulan'] . ' ' . $buku['tahun'])) ?>')" class="col-span-1 sm:flex-initial px-3 sm:px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-extrabold text-xs transition border border-emerald-200/90 shadow-2xs flex items-center justify-center gap-2" title="Preview Dokumen LPJ Langsung">
                     <i class="fa-solid fa-eye text-emerald-600"></i>
                     <span>Preview Dokumen</span>
                 </button>
 
-                <a href="<?= base_url('buku/cetak/' . $buku['id']) ?>" target="_blank" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-bold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 flex items-center gap-2 shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:-translate-y-0.5" title="Buka Halaman Cetak (Tab Baru)">
+                <a href="<?= base_url('buku/cetak/' . $buku['id']) ?>" target="_blank" class="col-span-1 sm:flex-initial px-3.5 sm:px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-bold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:-translate-y-0.5" title="Buka Halaman Cetak (Tab Baru)">
                     <i class="fa-solid fa-print"></i>
                     <span>Cetak / PDF</span>
                 </a>
@@ -153,50 +152,64 @@
             $daysInMonth       = (int)date('t', $firstDayTimestamp);
             $startDayOfWeek    = (int)date('w', $firstDayTimestamp); // 0 = Minggu, 1 = Senin, ..., 6 = Sabtu
         ?>
-        <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
+        <div class="glass-card rounded-3xl p-3.5 sm:p-7 lg:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6 pb-4 border-b border-slate-100">
                 <div>
                     <div class="flex items-center gap-2.5">
-                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                            <i class="fa-solid fa-calendar-check text-base"></i>
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 flex-shrink-0">
+                            <i class="fa-solid fa-calendar-check text-sm sm:text-base"></i>
                         </div>
                         <div>
-                            <h2 class="font-heading font-extrabold text-xl text-slate-900 tracking-tight">
+                            <h2 class="font-heading font-extrabold text-base sm:text-xl text-slate-900 tracking-tight">
                                 Kalender Kegiatan: <?= esc($buku['bulan']) ?> <?= esc($buku['tahun']) ?>
                             </h2>
-                            <p class="text-xs text-slate-500 font-medium">Tersusun otomatis sesuai jumlah hari & posisi tanggal bulan <?= esc($buku['bulan']) ?>.</p>
+                            <p class="text-[11px] sm:text-xs text-slate-500 font-medium">Tersusun otomatis sesuai jumlah hari & posisi tanggal bulan <?= esc($buku['bulan']) ?>.</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Legend Badges -->
-                <div class="flex flex-wrap items-center gap-2 text-xs font-bold">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200/80 shadow-2xs">
-                        <span class="w-2.5 h-2.5 rounded-full bg-cyan-500 shadow-sm"></span> Koordinasi PJ
+                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-bold">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200/80 shadow-2xs">
+                        <span class="w-2 h-2 rounded-full bg-cyan-500 shadow-sm"></span> Koordinasi PJ
                     </span>
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm"></span> Koordinasi Sowan
+                    <span class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-sm"></span> Koordinasi Sowan
                     </span>
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200/80 shadow-2xs">
-                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm"></span> Koordinasi Kader
+                    <span class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200/80 shadow-2xs">
+                        <span class="w-2 h-2 rounded-full bg-rose-500 shadow-sm"></span> Koordinasi Kader
                     </span>
                 </div>
             </div>
 
-            <!-- Grid Calendar -->
-            <div class="grid grid-cols-7 gap-2.5 text-center">
-                <!-- Day Name Headers -->
-                <div class="py-2.5 rounded-xl bg-slate-100/80 text-rose-600 font-heading font-extrabold text-[11px] uppercase tracking-wider">MINGGU</div>
-                <div class="py-2.5 rounded-xl bg-slate-100/80 text-slate-700 font-heading font-extrabold text-[11px] uppercase tracking-wider">SENIN</div>
-                <div class="py-2.5 rounded-xl bg-slate-100/80 text-slate-700 font-heading font-extrabold text-[11px] uppercase tracking-wider">SELASA</div>
-                <div class="py-2.5 rounded-xl bg-slate-100/80 text-slate-700 font-heading font-extrabold text-[11px] uppercase tracking-wider">RABU</div>
-                <div class="py-2.5 rounded-xl bg-slate-100/80 text-slate-700 font-heading font-extrabold text-[11px] uppercase tracking-wider">KAMIS</div>
-                <div class="py-2.5 rounded-xl bg-slate-100/80 text-slate-700 font-heading font-extrabold text-[11px] uppercase tracking-wider">JUMAT</div>
-                <div class="py-2.5 rounded-xl bg-slate-100/80 text-emerald-700 font-heading font-extrabold text-[11px] uppercase tracking-wider">SABTU</div>
+            <!-- Grid Calendar (Mobile Responsive) -->
+            <div class="grid grid-cols-7 gap-1 sm:gap-2.5 text-center">
+                <!-- Day Name Headers (Shortened on Mobile, Full on Desktop) -->
+                <div class="py-1.5 sm:py-2.5 rounded-xl bg-slate-100/80 text-rose-600 font-heading font-extrabold text-[10px] sm:text-[11px] uppercase tracking-wider">
+                    <span class="sm:hidden">MIN</span><span class="hidden sm:inline">MINGGU</span>
+                </div>
+                <div class="py-1.5 sm:py-2.5 rounded-xl bg-slate-100/80 text-slate-700 font-heading font-extrabold text-[10px] sm:text-[11px] uppercase tracking-wider">
+                    <span class="sm:hidden">SEN</span><span class="hidden sm:inline">SENIN</span>
+                </div>
+                <div class="py-1.5 sm:py-2.5 rounded-xl bg-slate-100/80 text-slate-700 font-heading font-extrabold text-[10px] sm:text-[11px] uppercase tracking-wider">
+                    <span class="sm:hidden">SEL</span><span class="hidden sm:inline">SELASA</span>
+                </div>
+                <div class="py-1.5 sm:py-2.5 rounded-xl bg-slate-100/80 text-slate-700 font-heading font-extrabold text-[10px] sm:text-[11px] uppercase tracking-wider">
+                    <span class="sm:hidden">RAB</span><span class="hidden sm:inline">RABU</span>
+                </div>
+                <div class="py-1.5 sm:py-2.5 rounded-xl bg-slate-100/80 text-slate-700 font-heading font-extrabold text-[10px] sm:text-[11px] uppercase tracking-wider">
+                    <span class="sm:hidden">KAM</span><span class="hidden sm:inline">KAMIS</span>
+                </div>
+                <div class="py-1.5 sm:py-2.5 rounded-xl bg-slate-100/80 text-slate-700 font-heading font-extrabold text-[10px] sm:text-[11px] uppercase tracking-wider">
+                    <span class="sm:hidden">JUM</span><span class="hidden sm:inline">JUMAT</span>
+                </div>
+                <div class="py-1.5 sm:py-2.5 rounded-xl bg-slate-100/80 text-emerald-700 font-heading font-extrabold text-[10px] sm:text-[11px] uppercase tracking-wider">
+                    <span class="sm:hidden">SAB</span><span class="hidden sm:inline">SABTU</span>
+                </div>
 
                 <!-- Empty Cells Before 1st Day -->
                 <?php for ($e = 0; $e < $startDayOfWeek; $e++): ?>
-                    <div class="min-h-[100px] p-2 rounded-2xl bg-slate-50/40 border border-dashed border-slate-200/60 opacity-40"></div>
+                    <div class="min-h-[46px] sm:min-h-[90px] md:min-h-[105px] p-1 sm:p-2 rounded-xl sm:rounded-2xl bg-slate-50/40 border border-dashed border-slate-200/60 opacity-40"></div>
                 <?php endfor; ?>
 
                 <!-- Day Cells -->
@@ -243,20 +256,35 @@
                             }
                         }
                 ?>
-                    <div class="min-h-[100px] p-2 rounded-2xl border transition-all duration-200 flex flex-col justify-between text-left group relative <?= $cellBorderClass ?>">
+                    <div class="min-h-[46px] sm:min-h-[90px] md:min-h-[105px] p-1 sm:p-2 rounded-xl sm:rounded-2xl border transition-all duration-200 flex flex-col justify-between text-left group relative <?= $cellBorderClass ?>">
                         
                         <div class="flex items-center justify-between">
-                            <span class="w-6 h-6 rounded-lg flex items-center justify-center font-heading font-extrabold text-xs <?= $hasAgendas ? 'shadow-xs' : 'text-slate-700 bg-slate-100/80' ?>"
+                            <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg flex items-center justify-center font-heading font-extrabold text-[10px] sm:text-xs <?= $hasAgendas ? 'shadow-xs' : 'text-slate-700 bg-slate-100/80' ?>"
                                   style="<?= $numBoxStyle ?>">
                                 <?= $d ?>
                             </span>
                             <?php if ($hasAgendas): ?>
-                                <span class="w-2 h-2 rounded-full animate-ping" style="<?= $pingDotStyle ?>"></span>
+                                <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full animate-ping" style="<?= $pingDotStyle ?>"></span>
                             <?php endif; ?>
                         </div>
 
-                        <!-- Agenda Items Inside Date Cell -->
-                        <div class="space-y-1 mt-1.5 overflow-hidden">
+                        <!-- Mobile Indicator Dots (Compact for Small Screens) -->
+                        <?php if ($hasAgendas): ?>
+                            <div class="flex sm:hidden items-center justify-center gap-0.5 mt-1 flex-wrap">
+                                <?php foreach ($matchingAgendas as $ag): 
+                                    $badgeText = !empty($ag['kategori_badge']) ? $ag['kategori_badge'] : $ag['kegiatan'];
+                                    $isPJ    = stripos($badgeText, 'PJ') !== false;
+                                    $isSowan = stripos($badgeText, 'Sowan') !== false;
+                                    $isKader = stripos($badgeText, 'Kader') !== false;
+                                    $dotBg = $isPJ ? '#06b6d4' : ($isSowan ? '#10b981' : ($isKader ? '#f43f5e' : '#0284c7'));
+                                ?>
+                                    <span class="w-1.5 h-1.5 rounded-full inline-block" style="background-color: <?= $dotBg ?>;" title="<?= esc($ag['kegiatan']) ?>: <?= esc($ag['keterangan']) ?>"></span>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Desktop Agenda Badges Inside Date Cell -->
+                        <div class="hidden sm:block space-y-1 mt-1.5 overflow-hidden">
                             <?php foreach ($matchingAgendas as $ag): 
                                 $badgeText = !empty($ag['kategori_badge']) ? $ag['kategori_badge'] : $ag['kegiatan'];
                                 $isPJ    = stripos($badgeText, 'PJ') !== false;

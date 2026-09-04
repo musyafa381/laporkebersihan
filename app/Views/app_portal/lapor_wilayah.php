@@ -154,21 +154,10 @@
 
                         <!-- Content Area -->
                         <div class="p-4 flex-1 space-y-3 flex flex-col justify-between">
-                            <div class="space-y-2.5">
-                                <h3 class="font-heading font-extrabold text-sm text-slate-900 leading-snug group-hover:text-emerald-700 transition line-clamp-2 min-h-[2.5rem]">
+                            <div class="space-y-2">
+                                <h3 class="font-heading font-extrabold text-sm text-slate-900 leading-snug group-hover:text-emerald-700 transition">
                                     <?= esc($p['nama_wilayah']) ?>
                                 </h3>
-
-                                <div class="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium flex-wrap">
-                                    <span class="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50/70 px-1.5 py-0.5 rounded-md border border-emerald-200/50">
-                                        <i class="fa-solid fa-tag text-[9px]"></i> <?= esc($p['kategori_area'] ?? 'Area') ?>
-                                    </span>
-                                    <?php if (!empty($p['lokasi_gedung'])): ?>
-                                        <span class="text-slate-300">&bull;</span>
-                                        <span class="truncate max-w-[150px]"><i class="fa-solid fa-location-dot text-rose-500 mr-0.5"></i> <?= esc($p['lokasi_gedung']) ?></span>
-                                    <?php endif; ?>
-                                </div>
-
                                 <!-- Active CS Complaint Alert Box -->
                                 <?php if (!empty($p['active_cs_count']) && !empty($p['active_cs_reports'])): ?>
                                     <div class="p-2.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs space-y-1.5 shadow-2xs">
@@ -198,12 +187,6 @@
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if (!empty($p['keterangan'])): ?>
-                                    <div class="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/80 text-[11px] text-slate-700 leading-relaxed font-medium">
-                                        <strong class="text-amber-900 font-bold block mb-0.5"><i class="fa-solid fa-note-sticky text-amber-500 mr-1"></i> Petunjuk:</strong>
-                                        <p class="line-clamp-2"><?= esc($p['keterangan']) ?></p>
-                                    </div>
-                                <?php endif; ?>
                             </div>
 
                             <!-- Reporting Status Box -->
@@ -611,7 +594,7 @@
 <div id="modalLaporWilayah" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-3xl max-w-xl sm:max-w-2xl w-full p-4 sm:p-5 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
         <!-- Modal Header -->
-        <div class="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-3">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-2.5">
             <div class="flex items-center gap-2.5">
                 <span class="w-8 h-8 rounded-xl bg-emerald-100/80 text-emerald-700 flex items-center justify-center text-sm shadow-2xs flex-shrink-0">
                     <i class="fa-solid fa-clipboard-check"></i>
@@ -620,7 +603,7 @@
                     <h3 class="font-heading font-extrabold text-base text-slate-900 leading-tight">
                         Lapor Kebersihan Wilayah
                     </h3>
-                    <p id="modalLaporSubtitle" class="text-[11px] text-slate-500 font-medium">Area: Lapangan Utama Putri</p>
+                    <p id="modalLaporSubtitle" class="text-[11px] text-slate-500 font-medium">Isi form capaian kebersihan shift hari ini</p>
                 </div>
             </div>
             <button type="button" onclick="closeModalLapor()" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition flex-shrink-0">
@@ -632,6 +615,41 @@
             <input type="hidden" id="lapor_wilayah_id" name="wilayah_id" value="">
             <input type="hidden" id="lapor_penugasan_id" name="penugasan_id" value="">
             <input type="hidden" id="lapor_shift" name="shift" value="Pagi">
+
+            <!-- Area Info & Petunjuk Kerja Box (Compact Banner inside Modal) -->
+            <div class="p-3 rounded-2xl bg-gradient-to-br from-slate-50 to-emerald-50/40 border border-slate-200/80 space-y-2 shadow-2xs">
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <h4 id="modalLaporNamaWilayah" class="font-heading font-extrabold text-sm text-slate-900 leading-tight">
+                            Nama Wilayah
+                        </h4>
+                        <div class="flex items-center gap-1.5 flex-wrap mt-1">
+                            <span id="modalLaporKategoriBadge" class="inline-flex items-center gap-1 text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-200 text-[10px] font-extrabold">
+                                <i class="fa-solid fa-tag text-[9px]"></i> <span id="modalLaporKategoriText">Area</span>
+                            </span>
+                            <span id="modalLaporLuasBadge" class="inline-flex items-center gap-1 text-teal-800 bg-teal-100/80 px-2 py-0.5 rounded-md border border-teal-200 text-[10px] font-extrabold" title="Ukuran / Luas Wilayah">
+                                <i class="fa-solid fa-ruler-combined text-[9px] text-teal-700"></i> <span id="modalLaporLuasText">-</span>
+                            </span>
+                            <span id="modalLaporLokasiBadge" class="inline-flex items-center gap-1 text-slate-700 bg-white px-2 py-0.5 rounded-md border border-slate-200 text-[10px] font-bold">
+                                <i class="fa-solid fa-location-dot text-rose-500 text-[9px]"></i> <span id="modalLaporLokasiText">-</span>
+                            </span>
+                        </div>
+                    </div>
+                    <span id="modalLaporShiftBadge" class="px-2.5 py-1 rounded-xl bg-emerald-600 text-white text-[10.5px] font-extrabold shadow-2xs flex-shrink-0">
+                        Shift Pagi
+                    </span>
+                </div>
+
+                <!-- Petunjuk Kerja Wilayah Box inside Modal -->
+                <div id="modalPetunjukBox" class="p-2 rounded-xl bg-amber-50/90 border border-amber-200/80 text-xs space-y-0.5">
+                    <div class="flex items-center gap-1 text-amber-900 font-extrabold text-[10.5px] uppercase tracking-wider">
+                        <i class="fa-solid fa-note-sticky text-amber-600 text-[10px]"></i>
+                        <span>Petunjuk Kerja / SOP:</span>
+                    </div>
+                    <p id="modalPetunjukText" class="text-slate-700 font-medium text-[11px] leading-relaxed">
+                    </p>
+                </div>
+            </div>
 
             <!-- Active CS Alert Reminder Inside Modal (Compact) -->
             <div id="modalCsAlertContainer" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs space-y-1 shadow-2xs">
@@ -766,10 +784,10 @@
                         <input type="text" name="nama_wilayah" placeholder="Misal: Selasar Kamar 1-6 / Kamar Mandi Barat" required class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2">
+                    <div class="grid grid-cols-3 gap-2">
                         <div>
                             <label class="block text-[10px] font-extrabold text-slate-700 uppercase tracking-wider mb-1">Kategori Area</label>
-                            <select name="kategori_area" class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                            <select name="kategori_area" class="w-full px-2 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
                                 <option value="Asrama & Kamar Mandi">Asrama & KM</option>
                                 <option value="Tempat Ibadah & Selasar">Tempat Ibadah</option>
                                 <option value="Gedung Sekolah & Kelas">Sekolah & Kelas</option>
@@ -778,6 +796,10 @@
                                 <option value="Jalan & Saluran Air">Saluran Air</option>
                                 <option value="Lainnya">Lainnya</option>
                             </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-slate-700 uppercase tracking-wider mb-1">Ukuran / Luas</label>
+                            <input type="text" name="luas_area" placeholder="Misal: 150 m²" class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs placeholder-slate-400">
                         </div>
                         <div class="relative">
                             <label class="block text-[10px] font-extrabold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
@@ -788,10 +810,10 @@
                             </label>
                             <input type="hidden" id="portal_wilayah_tambah_lokasi_gedung" name="lokasi_gedung" value="<?= esc($userUnit['nama_unit'] ?? '') ?>">
                             <div class="relative">
-                                <i class="fa-solid fa-building text-emerald-600 absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] pointer-events-none"></i>
-                                <input type="text" id="portal_wilayah_tambah_lokasi_search" value="<?= esc($userUnit['nama_unit'] ?? '') ?>" placeholder="Pilih unit..." autocomplete="off" onfocus="openPortalTambahWilayahLokasiDropdown()" oninput="filterPortalTambahWilayahLokasiOptions(this.value)" class="w-full pl-7 pr-6 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
-                                <button type="button" onclick="togglePortalTambahWilayahLokasiDropdown()" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
-                                    <i id="portalTambahWilayahLokasiIcon" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200"></i>
+                                <i class="fa-solid fa-building text-emerald-600 absolute left-2 top-1/2 -translate-y-1/2 text-[10px] pointer-events-none"></i>
+                                <input type="text" id="portal_wilayah_tambah_lokasi_search" value="<?= esc($userUnit['nama_unit'] ?? '') ?>" placeholder="Unit..." autocomplete="off" onfocus="openPortalTambahWilayahLokasiDropdown()" oninput="filterPortalTambahWilayahLokasiOptions(this.value)" class="w-full pl-6 pr-5 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
+                                <button type="button" onclick="togglePortalTambahWilayahLokasiDropdown()" class="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                                    <i id="portalTambahWilayahLokasiIcon" class="fa-solid fa-chevron-down text-[8px] transition-transform duration-200"></i>
                                 </button>
                             </div>
                             <!-- Dropdown List -->
@@ -933,7 +955,7 @@
             </button>
         </div>
 
-        <form action="<?= base_url('app/wilayah-tugas/store') ?>" method="POST" class="space-y-3.5">
+        <form action="<?= base_url('app/wilayah-tugas/store') ?>" method="POST" onsubmit="return validatePortalShiftExistingForm()" class="space-y-3.5">
             <input type="hidden" name="is_existing_wilayah" value="1">
 
             <!-- Pilih Wilayah Master Terdaftar (Searchable) -->
@@ -971,6 +993,10 @@
                                     </div>
                                     <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
                                         <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200/60 text-[9px]"><?= esc($mw['kode_wilayah'] ?: 'WIL-' . $mw['id']) ?></span>
+                                        <?php if (!empty($mw['luas_area'])): ?>
+                                            <span class="text-slate-300">&bull;</span>
+                                            <span class="text-teal-700 font-bold"><i class="fa-solid fa-ruler-combined text-[9px] text-teal-600 mr-0.5"></i><?= esc($mw['luas_area']) ?></span>
+                                        <?php endif; ?>
                                         <span class="text-slate-300">&bull;</span>
                                         <span class="text-slate-600"><i class="fa-solid fa-building text-[9px] text-emerald-600 mr-0.5"></i> <?= esc($mw['lokasi_gedung'] ?: $mw['kategori_area']) ?></span>
                                     </div>
@@ -1109,7 +1135,45 @@
         document.getElementById('lapor_penugasan_id').value = item.id || '';
         document.getElementById('lapor_shift').value = item.shift || 'Pagi';
         document.getElementById('display_shift').value = 'Shift ' + (item.shift || 'Pagi');
-        document.getElementById('modalLaporSubtitle').innerText = 'Area: ' + (item.nama_wilayah || '');
+        
+        document.getElementById('modalLaporSubtitle').innerText = 'Laporan kebersihan: ' + (item.nama_wilayah || '');
+        
+        const namaWilEl = document.getElementById('modalLaporNamaWilayah');
+        if (namaWilEl) namaWilEl.innerText = item.nama_wilayah || 'Wilayah Tugas';
+
+        const katEl = document.getElementById('modalLaporKategoriText');
+        if (katEl) katEl.innerText = item.kategori_area || 'Area';
+
+        const luasBadge = document.getElementById('modalLaporLuasBadge');
+        const luasText = document.getElementById('modalLaporLuasText');
+        if (luasBadge && luasText) {
+            if (item.luas_area) {
+                luasText.innerText = item.luas_area;
+                luasBadge.classList.remove('hidden');
+            } else {
+                luasBadge.classList.add('hidden');
+            }
+        }
+
+        const lokasiBadge = document.getElementById('modalLaporLokasiBadge');
+        const lokasiText = document.getElementById('modalLaporLokasiText');
+        if (lokasiBadge && lokasiText) {
+            if (item.lokasi_gedung) {
+                lokasiText.innerText = item.lokasi_gedung;
+                lokasiBadge.classList.remove('hidden');
+            } else {
+                lokasiBadge.classList.add('hidden');
+            }
+        }
+
+        const shiftBadge = document.getElementById('modalLaporShiftBadge');
+        if (shiftBadge) {
+            let shiftStr = 'Shift ' + (item.shift || 'Pagi');
+            if (item.jam_mulai && item.jam_selesai) {
+                shiftStr += ' (' + item.jam_mulai + ' - ' + item.jam_selesai + ')';
+            }
+            shiftBadge.innerText = shiftStr;
+        }
 
         // Pre-fill jam lapor with current time or existing report time
         const now = new Date();
@@ -1141,6 +1205,12 @@
             if (csAlertBox) csAlertBox.classList.add('hidden');
         }
 
+        const petunjukTeks = item.keterangan || item.deskripsi || 'Menjaga kebersihan area secara rutin, menyapu, mengepel, membuang sampah, dan memastikan area tetap rapi & higienis.';
+        const petunjukEl = document.getElementById('modalPetunjukText');
+        if (petunjukEl) {
+            petunjukEl.innerText = petunjukTeks;
+        }
+
         const modal = document.getElementById('modalLaporWilayah');
         if (modal) modal.classList.remove('hidden');
     }
@@ -1163,6 +1233,43 @@
         }
     }
     window.openModalTambahShiftExisting = openModalTambahShiftExisting;
+
+    function validatePortalShiftExistingForm() {
+        const hiddenId = document.getElementById('portal_shift_existing_wilayah_id');
+        const searchInput = document.getElementById('portal_shift_existing_wilayah_search');
+        
+        // If hiddenId is empty, try to auto-match typed query with existing items
+        if (!hiddenId || !hiddenId.value || parseInt(hiddenId.value) <= 0) {
+            const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+            if (query) {
+                const items = document.querySelectorAll('.portal-shift-wilayah-item[data-id]:not([data-id=""])');
+                for (let item of items) {
+                    const nama = (item.getAttribute('data-nama') || '').toLowerCase();
+                    const kode = (item.getAttribute('data-kode') || '').toLowerCase();
+                    if (nama === query || kode === query || nama.includes(query)) {
+                        selectPortalShiftWilayah(item);
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!hiddenId || !hiddenId.value || parseInt(hiddenId.value) <= 0) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pilih Wilayah Terlebih Dahulu',
+                    text: 'Silakan pilih salah satu wilayah kebersihan dari opsi pencarian dropdown.',
+                    confirmButtonColor: '#059669'
+                });
+            } else {
+                alert('Silakan pilih salah satu wilayah kebersihan dari opsi pencarian dropdown.');
+            }
+            return false;
+        }
+        return true;
+    }
+    window.validatePortalShiftExistingForm = validatePortalShiftExistingForm;
 
     function closeModalTambahShiftExisting() {
         const modal = document.getElementById('modalTambahShiftExisting');

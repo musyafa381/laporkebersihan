@@ -85,13 +85,33 @@ class AppPortal extends BaseController
         });
     }
 
+    protected function getResolvedUnitId()
+    {
+        $session = session();
+        $unitId  = $session->get('unit_id');
+
+        if (empty($unitId)) {
+            $userId = $session->get('userId') ?: $session->get('user_id');
+            if ($userId) {
+                $userModel = new \App\Models\UserModel();
+                $uData = $userModel->find($userId);
+                if (!empty($uData['unit_id'])) {
+                    $unitId = (int)$uData['unit_id'];
+                    $session->set('unit_id', $unitId);
+                }
+            }
+        }
+
+        return $unitId ? (int)$unitId : null;
+    }
+
     public function index()
     {
         $this->checkAuth();
 
         $session  = session();
         $userRole = $session->get('role');
-        $unitId   = $session->get('unit_id');
+        $unitId   = $this->getResolvedUnitId();
 
         $userUnit = $unitId ? $this->unitModel->find($unitId) : null;
         
@@ -126,13 +146,41 @@ class AppPortal extends BaseController
                 ->findAll();
         }
 
+        $today = date('Y-m-d');
+        $penugasanList = [];
+        if ($unitId) {
+            $penugasanList = $this->penugasanModel->getPenugasanByUnit($unitId);
+        } else {
+            $penugasanList = $this->penugasanModel->getPenugasanWithUnit();
+        }
+
+        $todayTotalActiveCount = 0;
+        $todayReportedCount = 0;
+        foreach ($penugasanList as $p) {
+            $hariAktif = $p['hari_aktif'] ?? 'Setiap Hari';
+            if ($this->isDayActive($hariAktif, $today)) {
+                $todayTotalActiveCount++;
+                $todayReport = $this->laporanModel
+                    ->where('wilayah_id', $p['wilayah_id'])
+                    ->where('tanggal_lapor', $today)
+                    ->where('shift', $p['shift'])
+                    ->first();
+                if (!empty($todayReport)) {
+                    $todayReportedCount++;
+                }
+            }
+        }
+
         $data = [
-            'title'               => 'Portal Mobile - GEMERLAP K3L',
-            'userUnit'            => $userUnit,
-            'bukuAktif'           => $bukuAktif,
-            'myPengajuan'         => $myPengajuan,
-            'myReports'           => $myReports,
-            'unitAssignedReports' => $unitAssignedReports,
+            'title'                 => 'Portal Mobile - GEMERLAP K3L',
+            'userUnit'              => $userUnit,
+            'bukuAktif'             => $bukuAktif,
+            'myPengajuan'           => $myPengajuan,
+            'myReports'             => $myReports,
+            'unitAssignedReports'   => $unitAssignedReports,
+            'todayTotalActiveCount' => $todayTotalActiveCount,
+            'todayReportedCount'    => $todayReportedCount,
+            'totalWilayahAssigned'  => count($penugasanList),
         ];
 
         return view('app_portal/index', $data);
@@ -143,7 +191,7 @@ class AppPortal extends BaseController
         $this->checkAuth();
 
         $session  = session();
-        $unitId   = $session->get('unit_id');
+        $unitId   = $this->getResolvedUnitId();
         $userUnit = $unitId ? $this->unitModel->find($unitId) : null;
 
         if ($userUnit) {
@@ -156,10 +204,19 @@ class AppPortal extends BaseController
         $bukuList = $this->bukuModel->findAll();
         $this->sortByTahunBulan($bukuList, 'DESC');
 
+        $evaluasiByBuku = [];
+        if ($userUnit) {
+            $evaluasiList = (new \App\Models\CapaianEvaluasiModel())->where('unit_id', $userUnit['id'])->findAll();
+            foreach ($evaluasiList as $ev) {
+                $evaluasiByBuku[$ev['buku_id']] = $ev;
+            }
+        }
+
         $data = [
-            'title'    => 'Isi Laporan LPJ Unit Kebersihan',
-            'userUnit' => $userUnit,
-            'bukuList' => $bukuList,
+            'title'          => 'Isi Laporan LPJ Unit Kebersihan',
+            'userUnit'       => $userUnit,
+            'bukuList'       => $bukuList,
+            'evaluasiByBuku' => $evaluasiByBuku,
         ];
 
         return view('app_portal/lpj', $data);
@@ -193,24 +250,52 @@ class AppPortal extends BaseController
         $this->checkAuth();
 
         $session = session();
-        $alatId = $this->request->getPost('alat_id');
-        $jumlah = (int)$this->request->getPost('jumlah');
-        $alasan = trim($this->request->getPost('alasan_keperluan') ?? '');
+        $userId  = $session->get('userId') ?: $session->get('user_id');
+        $alasan  = trim($this->request->getPost('alasan_keperluan') ?? '');
 
-        if (!$alatId || $jumlah <= 0 || empty($alasan)) {
-            return redirect()->to('/app/pengajuan-alat')->with('error', 'Semua kolom pengajuan alat wajib diisi.')->withInput();
+        if (empty($alasan)) {
+            return redirect()->to('/app/pengajuan-alat')->with('error', 'Alasan keperluan pengajuan alat wajib diisi.')->withInput();
         }
 
-        $data = [
-            'user_id'          => $session->get('userId'),
-            'alat_id'          => $alatId,
-            'jumlah'           => $jumlah,
-            'alasan_keperluan' => $alasan,
-            'status'           => 'Pending',
-        ];
+        $items = $this->request->getPost('items');
+        $insertedCount = 0;
 
-        $this->pengajuanModel->insert($data);
-        return redirect()->to('/app/pengajuan-alat')->with('success', 'Pengajuan alat kebersihan berhasil dikirim ke Admin K3L!');
+        if (is_array($items) && count($items) > 0) {
+            foreach ($items as $item) {
+                $alatId = (int)($item['alat_id'] ?? 0);
+                $jumlah = (int)($item['jumlah'] ?? 0);
+                if ($alatId > 0 && $jumlah > 0) {
+                    $this->pengajuanModel->insert([
+                        'user_id'          => $userId,
+                        'alat_id'          => $alatId,
+                        'jumlah'           => $jumlah,
+                        'alasan_keperluan' => $alasan,
+                        'status'           => 'Pending',
+                    ]);
+                    $insertedCount++;
+                }
+            }
+        } else {
+            // Fallback for single item
+            $alatId = (int)$this->request->getPost('alat_id');
+            $jumlah = (int)$this->request->getPost('jumlah');
+            if ($alatId > 0 && $jumlah > 0) {
+                $this->pengajuanModel->insert([
+                    'user_id'          => $userId,
+                    'alat_id'          => $alatId,
+                    'jumlah'           => $jumlah,
+                    'alasan_keperluan' => $alasan,
+                    'status'           => 'Pending',
+                ]);
+                $insertedCount++;
+            }
+        }
+
+        if ($insertedCount === 0) {
+            return redirect()->to('/app/pengajuan-alat')->with('error', 'Pilih minimal 1 jenis alat dan tentukan jumlah yang valid.')->withInput();
+        }
+
+        return redirect()->to('/app/pengajuan-alat')->with('success', $insertedCount . ' jenis alat kebersihan berhasil diajukan ke Admin K3L!');
     }
 
     public function laporanKebersihan()
@@ -226,13 +311,17 @@ class AppPortal extends BaseController
             $session->set('captcha_answer', $num1 + $num2);
         }
 
-        $unitId = $session->get('unit_id');
+        $unitId = $this->getResolvedUnitId();
         $userUnit = $unitId ? $this->unitModel->find($unitId) : null;
+
+        $defaultNamaPengirim = !empty($userUnit['pj_nama']) ? $userUnit['pj_nama'] : ($session->get('nama_lengkap') ?? '');
+        $defaultKontakHp     = !empty($userUnit['pj_kontak']) ? $userUnit['pj_kontak'] : ($session->get('no_hp') ?? $session->get('kontak') ?? '');
+
         $unitAssignedReports = [];
         if ($unitId || $userUnit) {
             $uName = $userUnit['nama_unit'] ?? '';
             $unitAssignedReports = $this->csModel
-                ->select('cs_reports.*, tbl_wilayah_kebersihan.nama_wilayah, tbl_wilayah_kebersihan.lokasi_gedung')
+                ->select('cs_reports.*, tbl_wilayah_kebersihan.nama_wilayah, tbl_wilayah_kebersihan.lokasi_gedung, tbl_wilayah_kebersihan.luas_area, tbl_wilayah_kebersihan.kategori_area')
                 ->join('tbl_wilayah_kebersihan', 'tbl_wilayah_kebersihan.id = cs_reports.wilayah_id', 'left')
                 ->groupStart()
                     ->where('cs_reports.unit_id', $unitId)
@@ -244,7 +333,7 @@ class AppPortal extends BaseController
         }
 
         $myReports = $this->csModel
-            ->select('cs_reports.*, tbl_wilayah_kebersihan.nama_wilayah, tbl_wilayah_kebersihan.lokasi_gedung')
+            ->select('cs_reports.*, tbl_wilayah_kebersihan.nama_wilayah, tbl_wilayah_kebersihan.lokasi_gedung, tbl_wilayah_kebersihan.luas_area, tbl_wilayah_kebersihan.kategori_area')
             ->join('tbl_wilayah_kebersihan', 'tbl_wilayah_kebersihan.id = cs_reports.wilayah_id', 'left')
             ->where('cs_reports.nama_pengirim', $session->get('nama_lengkap'))
             ->groupBy('cs_reports.id')
@@ -271,6 +360,8 @@ class AppPortal extends BaseController
             'myReports'           => $myReports,
             'unitAssignedReports' => $unitAssignedReports,
             'userUnit'            => $userUnit,
+            'defaultNamaPengirim' => $defaultNamaPengirim,
+            'defaultKontakHp'     => $defaultKontakHp,
             'wilayahList'         => $wilayahList,
             'unitList'            => $unitList,
             'penugasanList'       => $penugasanList,
@@ -283,7 +374,7 @@ class AppPortal extends BaseController
     {
         $this->checkAuth();
         $session = session();
-        $unitId = $session->get('unit_id');
+        $unitId = $this->getResolvedUnitId();
         $userUnit = $unitId ? $this->unitModel->find($unitId) : null;
         $report = $this->csModel->find($id);
 
@@ -399,8 +490,9 @@ class AppPortal extends BaseController
     {
         $this->checkAuth();
 
-        $session  = session();
-        $unitId   = $session->get('unit_id');
+        $session = session();
+        $unitId  = $this->getResolvedUnitId();
+
         $userUnit = $unitId ? $this->unitModel->find($unitId) : null;
         $today    = date('Y-m-d');
 
@@ -499,7 +591,7 @@ class AppPortal extends BaseController
         $this->checkAuth();
 
         $session        = session();
-        $unitId         = $session->get('unit_id') ?: $this->request->getPost('unit_id');
+        $unitId         = $this->getResolvedUnitId() ?: $this->request->getPost('unit_id');
         $wilayahId      = (int)$this->request->getPost('wilayah_id');
         $penugasanId    = (int)($this->request->getPost('penugasan_id') ?: 0);
         $shift          = $this->request->getPost('shift') ?: 'Pagi';
@@ -579,14 +671,14 @@ class AppPortal extends BaseController
         $this->checkAuth();
 
         $session = session();
-        $unitId  = $session->get('unit_id');
+        $unitId  = $this->getResolvedUnitId();
 
         if (!$unitId && in_array($session->get('role'), ['Admin', 'Superadmin', 'Auditor'])) {
             $unitId = (int)$this->request->getPost('unit_id') ?: ($this->unitModel->first()['id'] ?? null);
         }
 
         if (!$unitId) {
-            return redirect()->to('/app/lapor-wilayah')->with('error', 'Akun Anda belum terhubung ke unit manapun.');
+            return redirect()->to('/app/lapor-wilayah')->with('error', 'Akun Anda belum terhubung ke unit manapun. Hubungi Admin untuk mengatur unit akun Anda.');
         }
 
         $isExistingMode = (int)($this->request->getPost('is_existing_wilayah') ?? 0);
@@ -603,10 +695,25 @@ class AppPortal extends BaseController
         $keterangan   = trim($this->request->getPost('keterangan') ?? '');
 
         // JIKA MENAMBAHKAN SHIFT PADA WILAYAH YANG SUDAH ADA
-        if ($isExistingMode && $existingWilayahId > 0) {
+        if ($isExistingMode) {
+            if ($existingWilayahId <= 0) {
+                return redirect()->to('/app/lapor-wilayah')->with('error', 'Silakan pilih salah satu wilayah kebersihan dari daftar yang tersedia.');
+            }
+
             $existingW = $this->wilayahModel->find($existingWilayahId);
             if (!$existingW) {
                 return redirect()->to('/app/lapor-wilayah')->with('error', 'Wilayah yang dipilih tidak ditemukan.');
+            }
+
+            // Check if already assigned same shift & same unit
+            $alreadyAssigned = $this->penugasanModel
+                ->where('wilayah_id', $existingWilayahId)
+                ->where('unit_id', $unitId)
+                ->where('shift', $shift)
+                ->first();
+
+            if ($alreadyAssigned) {
+                return redirect()->to('/app/lapor-wilayah')->with('error', 'Shift ' . $shift . ' untuk wilayah "' . $existingW['nama_wilayah'] . '" sudah terdaftar pada unit Anda.');
             }
 
             $this->penugasanModel->insert([
@@ -648,71 +755,89 @@ class AppPortal extends BaseController
             $kodeWilayah  = $prefix . str_pad($totalWilayah, 2, '0', STR_PAD_LEFT);
         }
 
-        // 1. Insert into Master Wilayah
-        $wilayahId = $this->wilayahModel->insert([
-            'nama_wilayah'  => $namaWilayah,
-            'kode_wilayah'  => $kodeWilayah,
-            'kategori_area' => $kategoriArea,
-            'lokasi_gedung' => $lokasiGedung,
-            'luas_area'     => $luasArea,
-            'deskripsi'     => $deskripsi,
-            'created_by'    => $session->get('id_user')
-        ]);
+        $db = \Config\Database::connect();
+        $db->transBegin();
 
-        if (!$wilayahId) {
-            return redirect()->to('/app/lapor-wilayah')->with('error', 'Gagal menyimpan data wilayah kebersihan.');
-        }
+        try {
+            $currentUserId = $session->get('userId') ?: $session->get('user_id');
 
-        // 2. Insert into Penugasan Unit (Langsung aktif untuk unit bersangkutan)
-        $this->penugasanModel->insert([
-            'wilayah_id'  => $wilayahId,
-            'unit_id'     => $unitId,
-            'shift'       => $shift,
-            'jam_mulai'   => $jamMulai,
-            'jam_selesai' => $jamSelesai,
-            'hari_aktif'  => $hariAktif,
-            'keterangan'  => $keterangan
-        ]);
+            // 1. Insert into Master Wilayah
+            $wilayahId = $this->wilayahModel->insert([
+                'nama_wilayah'  => $namaWilayah,
+                'kode_wilayah'  => $kodeWilayah,
+                'kategori_area' => $kategoriArea,
+                'lokasi_gedung' => $lokasiGedung,
+                'luas_area'     => $luasArea,
+                'deskripsi'     => $deskripsi,
+                'status'        => 'Aktif',
+                'created_by'    => $currentUserId
+            ]);
 
-        // 3. Upload Foto Master Wilayah (if any)
-        $files = $this->request->getFiles();
-        if (!empty($files['foto_wilayah'])) {
-            $fotoFiles = is_array($files['foto_wilayah']) ? $files['foto_wilayah'] : [$files['foto_wilayah']];
-            $isFirst = true;
+            if (!$wilayahId) {
+                $db->transRollback();
+                return redirect()->to('/app/lapor-wilayah')->with('error', 'Gagal menyimpan data wilayah kebersihan.');
+            }
 
-            foreach ($fotoFiles as $file) {
-                if ($file->isValid() && !$file->hasMoved()) {
-                    $customName = 'master_' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', $kodeWilayah) . '_' . uniqid();
-                    $uploadRes  = $this->cloudinary->upload($file, 'wilayah_kebersihan', $customName);
+            // 2. Insert into Penugasan Unit (Langsung aktif untuk unit bersangkutan)
+            $this->penugasanModel->insert([
+                'wilayah_id'  => $wilayahId,
+                'unit_id'     => $unitId,
+                'shift'       => $shift,
+                'jam_mulai'   => $jamMulai,
+                'jam_selesai' => $jamSelesai,
+                'hari_aktif'  => $hariAktif,
+                'keterangan'  => $keterangan
+            ]);
 
-                    if ($uploadRes['success'] && !empty($uploadRes['url'])) {
-                        $this->fotoModel->insert([
-                            'wilayah_id' => $wilayahId,
-                            'foto_url'   => $uploadRes['url'],
-                            'public_id'  => $uploadRes['public_id'] ?? null,
-                            'is_primary' => $isFirst ? 1 : 0
-                        ]);
-                        $isFirst = false;
-                    } else {
-                        $uploadDir = FCPATH . 'uploads/wilayah/';
-                        if (!is_dir($uploadDir)) {
-                            mkdir($uploadDir, 0777, true);
+            // 3. Upload Foto Master Wilayah (if any)
+            $files = $this->request->getFiles();
+            if (!empty($files['foto_wilayah'])) {
+                $fotoFiles = is_array($files['foto_wilayah']) ? $files['foto_wilayah'] : [$files['foto_wilayah']];
+                $isFirst = true;
+
+                foreach ($fotoFiles as $file) {
+                    if ($file->isValid() && !$file->hasMoved()) {
+                        $customName = 'master_' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', $kodeWilayah) . '_' . uniqid();
+                        $uploadRes  = null;
+                        try {
+                            $uploadRes = $this->cloudinary->upload($file, 'wilayah_kebersihan', $customName);
+                        } catch (\Throwable $e) {
+                            $uploadRes = ['success' => false];
                         }
-                        $cleanLocalName = $customName . '.' . $file->guessExtension();
-                        $file->move($uploadDir, $cleanLocalName);
-                        $this->fotoModel->insert([
-                            'wilayah_id' => $wilayahId,
-                            'foto_url'   => base_url('uploads/wilayah/' . $cleanLocalName),
-                            'public_id'  => null,
-                            'is_primary' => $isFirst ? 1 : 0
-                        ]);
-                        $isFirst = false;
+
+                        if ($uploadRes && !empty($uploadRes['success']) && !empty($uploadRes['url'])) {
+                            $this->fotoModel->insert([
+                                'wilayah_id' => $wilayahId,
+                                'foto_url'   => $uploadRes['url'],
+                                'public_id'  => $uploadRes['public_id'] ?? null,
+                                'is_primary' => $isFirst ? 1 : 0
+                            ]);
+                            $isFirst = false;
+                        } else {
+                            $uploadDir = FCPATH . 'uploads/wilayah/';
+                            if (!is_dir($uploadDir)) {
+                                mkdir($uploadDir, 0777, true);
+                            }
+                            $cleanLocalName = $customName . '.' . ($file->guessExtension() ?: 'jpg');
+                            $file->move($uploadDir, $cleanLocalName);
+                            $this->fotoModel->insert([
+                                'wilayah_id' => $wilayahId,
+                                'foto_url'   => base_url('uploads/wilayah/' . $cleanLocalName),
+                                'public_id'  => null,
+                                'is_primary' => $isFirst ? 1 : 0
+                            ]);
+                            $isFirst = false;
+                        }
                     }
                 }
             }
-        }
 
-        return redirect()->to('/app/lapor-wilayah')->with('success', 'Wilayah tugas baru "' . $namaWilayah . '" (Shift ' . $shift . ' - ' . $hariAktif . ') berhasil ditambahkan dan langsung aktif di daftar tugas unit Anda!');
+            $db->transCommit();
+            return redirect()->to('/app/lapor-wilayah')->with('success', 'Wilayah tugas baru "' . $namaWilayah . '" (Shift ' . $shift . ' - ' . $hariAktif . ') berhasil ditambahkan dan langsung aktif di daftar tugas unit Anda!');
+        } catch (\Throwable $e) {
+            $db->transRollback();
+            return redirect()->to('/app/lapor-wilayah')->with('error', 'Terjadi kesalahan saat menyimpan wilayah tugas: ' . $e->getMessage());
+        }
     }
 
     public function deleteWilayahTugas($penugasanId)
@@ -720,7 +845,7 @@ class AppPortal extends BaseController
         $this->checkAuth();
 
         $session = session();
-        $unitId  = $session->get('unit_id');
+        $unitId  = $this->getResolvedUnitId();
 
         $penugasan = $this->penugasanModel->find($penugasanId);
         if (!$penugasan) {

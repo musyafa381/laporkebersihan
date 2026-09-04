@@ -96,9 +96,21 @@ $routes->post('/unit/kader/add/(:num)', 'Unit::addKader/$1');
 $routes->get('/unit/kader/delete/(:num)', 'Unit::deleteKader/$1');
 $routes->get('/pengaturan/backup', 'Pengaturan::backupDatabase');
 $routes->get('/profil', 'Profil::index');
+$routes->post('/profil/update-me', 'Profil::updateMyProfile');
+$routes->post('/profil/change-password', 'Profil::changeMyPassword');
 $routes->post('/profil/store', 'Profil::storeUser');
 $routes->post('/profil/update/(:num)', 'Profil::updateUser/$1');
 $routes->get('/profil/delete/(:num)', 'Profil::deleteUser/$1');
+
+// Pusat Bantuan, FAQ & Panduan Alur Sistem (Multi-Role & Public)
+$routes->get('/faq', 'Faq::index');
+$routes->get('/bantuan', 'Faq::index');
+$routes->post('/faq/store', 'Faq::storeFaq');
+$routes->post('/faq/update/(:num)', 'Faq::updateFaq/$1');
+$routes->get('/faq/delete/(:num)', 'Faq::deleteFaq/$1');
+$routes->post('/faq/alur/store', 'Faq::storeAlur');
+$routes->post('/faq/alur/update/(:num)', 'Faq::updateAlur/$1');
+$routes->get('/faq/alur/delete/(:num)', 'Faq::deleteAlur/$1');
 
 // Public & Admin Customer Service
 $routes->get('/cs', 'Cs::index');

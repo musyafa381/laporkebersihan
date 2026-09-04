@@ -39,6 +39,15 @@
         }
     </script>
     <style>
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+            position: relative;
+        }
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: #94a3b8 #f1f5f9;
+        }
         body {
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -50,43 +59,62 @@
             border: 1px solid rgba(226, 232, 240, 0.8);
         }
 
-        /* Ultra Smooth Navbar Expansion Animation */
-        .nav-item-btn {
+        /* Modern Clean Navbar Styling */
+        .top-nav-btn {
             display: inline-flex;
             align-items: center;
-            gap: 0;
-            padding: 0.6rem 0.85rem;
-            border-radius: 1rem;
-            font-size: 0.75rem;
+            gap: 0.45rem;
+            padding: 0.5rem 0.85rem;
+            border-radius: 0.875rem;
+            font-size: 0.8125rem;
             font-weight: 700;
             white-space: nowrap;
-            transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
         }
-        .nav-item-btn.active {
-            gap: 0.5rem;
-            padding: 0.6rem 1rem;
+        .top-nav-btn.active {
+            background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
+            border: 1px solid rgba(16, 185, 129, 0.3);
         }
-        .nav-item-btn:hover {
-            gap: 0.5rem;
-            padding-left: 0.95rem;
-            padding-right: 0.95rem;
+        .top-nav-btn:not(.active) {
+            background: rgba(248, 250, 252, 0.9);
+            color: #334155;
+            border: 1px solid rgba(226, 232, 240, 0.9);
         }
-        .nav-item-label {
-            display: inline-block;
-            max-width: 0;
+        .top-nav-btn:not(.active):hover {
+            background: #f0fdf4;
+            color: #047857;
+            border-color: #a7f3d0;
+            transform: translateY(-1px);
+        }
+
+        /* Top Nav Dropdown Panel with Hover Bridge */
+        .nav-dropdown-wrapper {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            padding-top: 0.45rem;
             opacity: 0;
-            overflow: hidden;
-            white-space: nowrap;
-            transform: translateX(-8px);
-            transition: max-width 400ms cubic-bezier(0.4, 0, 0.2, 1),
-                        opacity 300ms ease-out,
-                        transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(6px) scale(0.97);
+            transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1),
+                        transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
+                        visibility 200ms;
+            z-index: 70;
         }
-        .nav-item-btn:hover .nav-item-label,
-        .nav-item-btn.active .nav-item-label {
-            max-width: 280px;
+        .group:hover .nav-dropdown-wrapper,
+        .group:focus-within .nav-dropdown-wrapper {
             opacity: 1;
-            transform: translateX(0);
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
+        .nav-dropdown-wrapper.align-right {
+            left: auto;
+            right: 0;
         }
 
         /* Premium Brand Logo Styling */
@@ -102,44 +130,10 @@
             background: rgba(240, 253, 244, 0.8);
         }
 
-        /* Dynamic Badge Visibility: Dot on Icon in Default Mode, Pill on Right when Expanded/Hover/Active */
-        .nav-icon-badge {
-            transition: opacity 250ms ease, transform 250ms ease;
-        }
-        .nav-text-badge {
-            display: inline-flex;
-            max-width: 0;
-            opacity: 0;
-            overflow: hidden;
-            margin-left: 0;
-            padding: 0;
-            transform: scale(0.6);
-            transition: max-width 400ms cubic-bezier(0.4, 0, 0.2, 1),
-                        opacity 300ms ease,
-                        margin-left 300ms ease,
-                        padding 300ms ease,
-                        transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .nav-item-btn:hover .nav-icon-badge,
-        .nav-item-btn.active .nav-icon-badge {
-            opacity: 0;
-            transform: scale(0.4);
-            pointer-events: none;
-        }
-        .nav-item-btn:hover .nav-text-badge,
-        .nav-item-btn.active .nav-text-badge {
-            max-width: 100px;
-            opacity: 1;
-            margin-left: 0.375rem;
-            padding-left: 0.375rem;
-            padding-right: 0.375rem;
-            transform: scale(1);
-        }
-
         /* Modern Custom Scrollbar for Smooth Touch & Desktop */
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 7px;
+            height: 7px;
         }
         ::-webkit-scrollbar-track {
             background: #f1f5f9;
@@ -147,6 +141,7 @@
         ::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 9999px;
+            border: 2px solid #f1f5f9;
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
@@ -185,15 +180,15 @@
         body.overflow-hidden {
             overflow: hidden !important;
         }
-        /* Ensure modal overlay covers 100% of viewport over all headers */
+        /* Ensure modal overlay covers 100% of viewport over all headers without causing 100vw horizontal overflow */
         .fixed.inset-0:not(.hidden):not(#mobileDrawerContainer) {
             position: fixed !important;
             top: 0 !important;
             left: 0 !important;
             right: 0 !important;
             bottom: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
+            width: 100% !important;
+            height: 100% !important;
             margin: 0 !important;
             padding: 1rem !important;
             z-index: 999999 !important;
@@ -222,7 +217,8 @@
         $isWilayahActive    = (strpos($uriStr, 'wilayah') !== false);
         $isPengaturanActive = (strpos($uriStr, 'pengaturan') !== false);
         $isProfilActive     = (strpos($uriStr, 'profil') !== false || strpos($uriStr, 'akun') !== false);
-        $isCsActive         = (strpos($uriStr, 'cs') !== false || strpos($uriStr, 'bantuan') !== false);
+        $isCsActive         = (strpos($uriStr, 'cs') !== false);
+        $isFaqActive        = (strpos($uriStr, 'faq') !== false || strpos($uriStr, 'bantuan') !== false);
         $isStrukturActive   = (strpos($uriStr, 'struktur') !== false);
         $isSopActive        = (strpos($uriStr, 'sop') !== false);
         $isProkerActive     = (strpos($uriStr, 'program-kerja') !== false);
@@ -251,172 +247,254 @@
         }
 
         if ($isUserAdminOrAuditor) {
-            // Mode 1: Admin & Auditor Full Dashboard Menu
-            $navItems = [
+            // Mode 1: Admin & Auditor Grouped Navigation
+            $navGroups = [
                 [
+                    'type'   => 'link',
                     'url'    => base_url('/'),
                     'icon'   => 'fa-solid fa-house',
                     'label'  => 'Beranda',
                     'active' => $isHomeActive,
                 ],
                 [
-                    'url'    => base_url('buku'),
-                    'icon'   => 'fa-solid fa-book-bookmark',
-                    'label'  => 'Daftar Buku LPJ',
-                    'active' => $isBukuActive,
+                    'type'     => 'dropdown',
+                    'label'    => 'Operasional',
+                    'icon'     => 'fa-solid fa-broom-ball',
+                    'badge'    => $notifAlatCount,
+                    'active'   => ($isWilayahActive || $isAlatActive || $isProkerActive),
+                    'children' => [
+                        [
+                            'url'    => base_url('wilayah'),
+                            'icon'   => 'fa-solid fa-map-location-dot',
+                            'label'  => 'Pemetaan Wilayah',
+                            'desc'   => 'Zona & pemetaan titik wilayah kebersihan',
+                            'active' => $isWilayahActive,
+                        ],
+                        [
+                            'url'    => base_url('alat'),
+                            'icon'   => 'fa-solid fa-broom-ball',
+                            'label'  => 'Alat Kebersihan',
+                            'desc'   => 'Inventaris & persetujuan logistik',
+                            'badge'  => $notifAlatCount,
+                            'active' => $isAlatActive,
+                        ],
+                        [
+                            'url'    => base_url('program-kerja'),
+                            'icon'   => 'fa-solid fa-list-check',
+                            'label'  => 'Program Kerja',
+                            'desc'   => 'Agenda & target kerja tahunan',
+                            'active' => $isProkerActive,
+                        ],
+                    ]
                 ],
                 [
-                    'url'    => base_url('keuangan'),
-                    'icon'   => 'fa-solid fa-calculator',
-                    'label'  => 'Laporan Keuangan',
-                    'active' => $isKeuanganActive,
+                    'type'     => 'dropdown',
+                    'label'    => 'Laporan & Keuangan',
+                    'icon'     => 'fa-solid fa-chart-pie',
+                    'active'   => ($isBukuActive || $isKeuanganActive),
+                    'children' => [
+                        [
+                            'url'    => base_url('buku'),
+                            'icon'   => 'fa-solid fa-book-bookmark',
+                            'label'  => 'Daftar Buku LPJ',
+                            'desc'   => 'Laporan pertanggungjawaban bulanan',
+                            'active' => $isBukuActive,
+                        ],
+                        [
+                            'url'    => base_url('keuangan'),
+                            'icon'   => 'fa-solid fa-calculator',
+                            'label'  => 'Laporan Keuangan',
+                            'desc'   => 'Pembukuan pemasukan & belanja',
+                            'active' => $isKeuanganActive,
+                        ],
+                    ]
                 ],
                 [
-                    'url'    => base_url('alat'),
-                    'icon'   => 'fa-solid fa-broom-ball',
-                    'label'  => 'Alat Kebersihan',
-                    'badge'  => $notifAlatCount,
-                    'active' => $isAlatActive,
-                ],
-                [
-                    'url'    => base_url('wilayah'),
-                    'icon'   => 'fa-solid fa-map-location-dot',
-                    'label'  => 'Pemetaan Wilayah',
-                    'active' => $isWilayahActive,
-                ],
-                [
-                    'url'    => base_url('program-kerja'),
-                    'icon'   => 'fa-solid fa-list-check',
-                    'label'  => 'Program Kerja',
-                    'active' => $isProkerActive,
-                ],
-                [
-                    'url'    => base_url('struktur'),
-                    'icon'   => 'fa-solid fa-sitemap',
-                    'label'  => 'Struktur Kebersihan',
-                    'active' => $isStrukturActive,
-                ],
-                [
-                    'url'    => base_url('sop'),
-                    'icon'   => 'fa-solid fa-file-shield',
-                    'label'  => 'SOP & Kebijakan',
-                    'active' => $isSopActive,
-                ],
-                [
-                    'url'    => base_url('pengaturan'),
-                    'icon'   => 'fa-solid fa-sliders',
-                    'label'  => 'Pengaturan',
-                    'active' => $isPengaturanActive,
-                ],
-                [
-                    'url'    => base_url('profil'),
-                    'icon'   => 'fa-solid fa-user-gear',
-                    'label'  => 'Akun & Profil',
-                    'active' => $isProfilActive,
-                ],
-                [
-                    'url'    => base_url('cs'),
-                    'icon'   => 'fa-solid fa-headset',
-                    'label'  => 'Customer Service',
-                    'badge'  => $notifCsCount,
-                    'active' => $isCsActive,
-                ],
+                    'type'     => 'dropdown',
+                    'label'    => 'Pusat Informasi',
+                    'icon'     => 'fa-solid fa-circle-info',
+                    'badge'    => $notifCsCount,
+                    'active'   => ($isStrukturActive || $isSopActive || $isFaqActive || $isCsActive),
+                    'children' => [
+                        [
+                            'url'    => base_url('struktur'),
+                            'icon'   => 'fa-solid fa-sitemap',
+                            'label'  => 'Struktur Kebersihan',
+                            'desc'   => 'Struktur organisasi tim kebersihan',
+                            'active' => $isStrukturActive,
+                        ],
+                        [
+                            'url'    => base_url('sop'),
+                            'icon'   => 'fa-solid fa-file-shield',
+                            'label'  => 'SOP & Kebijakan',
+                            'desc'   => 'Standar operasional prosedur K3L',
+                            'active' => $isSopActive,
+                        ],
+                        [
+                            'url'    => base_url('faq'),
+                            'icon'   => 'fa-solid fa-circle-question',
+                            'label'  => 'FAQ & Panduan Alur',
+                            'desc'   => 'Panduan alur modul & tanya jawab',
+                            'active' => $isFaqActive,
+                        ],
+                        [
+                            'url'    => base_url('cs'),
+                            'icon'   => 'fa-solid fa-headset',
+                            'label'  => 'Customer Service',
+                            'desc'   => 'Aduan & keluhan kebersihan unit',
+                            'badge'  => $notifCsCount,
+                            'active' => $isCsActive,
+                        ],
+                    ]
+                ]
             ];
         } elseif ($isUserPengurusOrKader) {
-            // Mode 2: Pengurus & Kader Dashboard Menu
-            $navItems = [
+            // Mode 2: Pengurus & Kader Grouped Navigation
+            $navGroups = [
                 [
+                    'type'   => 'link',
                     'url'    => base_url('/'),
                     'icon'   => 'fa-solid fa-house',
                     'label'  => 'Beranda',
                     'active' => $isHomeActive,
                 ],
                 [
-                    'url'    => base_url('app'),
-                    'icon'   => 'fa-solid fa-gauge-high',
-                    'label'  => 'Dashboard Unit',
-                    'active' => $isAppActive,
+                    'type'     => 'dropdown',
+                    'label'    => 'Portal Unit',
+                    'icon'     => 'fa-solid fa-gauge-high',
+                    'active'   => ($isAppActive || $isAppLpjActive || $isAppWilayahActive || $isAppAlatActive || $isAppLaporActive),
+                    'children' => [
+                        [
+                            'url'    => base_url('app'),
+                            'icon'   => 'fa-solid fa-gauge-high',
+                            'label'  => 'Dashboard Unit',
+                            'desc'   => 'Ringkasan & status kebersihan unit',
+                            'active' => $isAppActive,
+                        ],
+                        [
+                            'url'    => base_url('app/lpj'),
+                            'icon'   => 'fa-solid fa-pen-to-square',
+                            'label'  => 'Isi LPJ Unit',
+                            'desc'   => 'Pengisian laporan bulanan unit',
+                            'active' => $isAppLpjActive,
+                        ],
+                        [
+                            'url'    => base_url('app/lapor-wilayah'),
+                            'icon'   => 'fa-solid fa-map-location-dot',
+                            'label'  => 'Lapor Wilayah',
+                            'desc'   => 'Laporan kondisi titik/zona wilayah',
+                            'active' => $isAppWilayahActive,
+                        ],
+                        [
+                            'url'    => base_url('app/pengajuan-alat'),
+                            'icon'   => 'fa-solid fa-box-open',
+                            'label'  => 'Pengajuan Alat',
+                            'desc'   => 'Permohonan kebutuhan alat kebersihan',
+                            'active' => $isAppAlatActive,
+                        ],
+                        [
+                            'url'    => base_url('app/laporan-kebersihan'),
+                            'icon'   => 'fa-solid fa-headset',
+                            'label'  => 'Lapor CS / Keluhan',
+                            'desc'   => 'Kirim aduan/keluhan ke Admin',
+                            'active' => $isAppLaporActive,
+                        ],
+                    ]
                 ],
                 [
-                    'url'    => base_url('app/lpj'),
-                    'icon'   => 'fa-solid fa-pen-to-square',
-                    'label'  => 'Isi LPJ Unit',
-                    'active' => $isAppLpjActive,
-                ],
-                [
-                    'url'    => base_url('app/lapor-wilayah'),
-                    'icon'   => 'fa-solid fa-map-location-dot',
-                    'label'  => 'Lapor Wilayah',
-                    'active' => $isAppWilayahActive,
-                ],
-                [
-                    'url'    => base_url('program-kerja'),
-                    'icon'   => 'fa-solid fa-list-check',
-                    'label'  => 'Program Kerja',
-                    'active' => $isProkerActive,
-                ],
-                [
-                    'url'    => base_url('app/pengajuan-alat'),
-                    'icon'   => 'fa-solid fa-box-open',
-                    'label'  => 'Pengajuan Alat',
-                    'active' => $isAppAlatActive,
-                ],
-                [
-                    'url'    => base_url('app/laporan-kebersihan'),
-                    'icon'   => 'fa-solid fa-headset',
-                    'label'  => 'Lapor CS',
-                    'active' => $isAppLaporActive,
-                ],
-                [
-                    'url'    => base_url('struktur'),
-                    'icon'   => 'fa-solid fa-sitemap',
-                    'label'  => 'Struktur Kebersihan',
-                    'active' => $isStrukturActive,
-                ],
-                [
-                    'url'    => base_url('sop'),
-                    'icon'   => 'fa-solid fa-file-shield',
-                    'label'  => 'SOP Kebersihan',
-                    'active' => $isSopActive,
-                ],
+                    'type'     => 'dropdown',
+                    'label'    => 'Pusat Informasi',
+                    'icon'     => 'fa-solid fa-circle-info',
+                    'active'   => ($isProkerActive || $isStrukturActive || $isSopActive || $isFaqActive),
+                    'children' => [
+                        [
+                            'url'    => base_url('program-kerja'),
+                            'icon'   => 'fa-solid fa-list-check',
+                            'label'  => 'Program Kerja',
+                            'desc'   => 'Agenda & target kerja K3L',
+                            'active' => $isProkerActive,
+                        ],
+                        [
+                            'url'    => base_url('struktur'),
+                            'icon'   => 'fa-solid fa-sitemap',
+                            'label'  => 'Struktur Kebersihan',
+                            'desc'   => 'Struktur organisasi tim kebersihan',
+                            'active' => $isStrukturActive,
+                        ],
+                        [
+                            'url'    => base_url('sop'),
+                            'icon'   => 'fa-solid fa-file-shield',
+                            'label'  => 'SOP Kebersihan',
+                            'desc'   => 'Standar operasional prosedur K3L',
+                            'active' => $isSopActive,
+                        ],
+                        [
+                            'url'    => base_url('faq'),
+                            'icon'   => 'fa-solid fa-circle-question',
+                            'label'  => 'FAQ & Panduan Alur',
+                            'desc'   => 'Panduan alur sistem & tanya jawab',
+                            'active' => $isFaqActive,
+                        ],
+                    ]
+                ]
             ];
         } else {
             // Mode 3: Public General Visitors Menu
-            $navItems = [
+            $navGroups = [
                 [
+                    'type'   => 'link',
                     'url'    => base_url('/'),
                     'icon'   => 'fa-solid fa-house',
                     'label'  => 'Beranda',
                     'active' => $isHomeActive,
                 ],
                 [
-                    'url'    => base_url('program-kerja'),
-                    'icon'   => 'fa-solid fa-list-check',
-                    'label'  => 'Program Kerja',
-                    'active' => $isProkerActive,
+                    'type'     => 'dropdown',
+                    'label'    => 'Informasi & Regulasi',
+                    'icon'     => 'fa-solid fa-circle-info',
+                    'active'   => ($isProkerActive || $isStrukturActive || $isSopActive || $isFaqActive),
+                    'children' => [
+                        [
+                            'url'    => base_url('program-kerja'),
+                            'icon'   => 'fa-solid fa-list-check',
+                            'label'  => 'Program Kerja',
+                            'desc'   => 'Agenda & program kerja kebersihan',
+                            'active' => $isProkerActive,
+                        ],
+                        [
+                            'url'    => base_url('sop'),
+                            'icon'   => 'fa-solid fa-file-shield',
+                            'label'  => 'SOP Kebersihan',
+                            'desc'   => 'Standar operasional prosedur',
+                            'active' => $isSopActive,
+                        ],
+                        [
+                            'url'    => base_url('struktur'),
+                            'icon'   => 'fa-solid fa-sitemap',
+                            'label'  => 'Struktur Kebersihan',
+                            'desc'   => 'Bagan organisasi tim kebersihan',
+                            'active' => $isStrukturActive,
+                        ],
+                        [
+                            'url'    => base_url('faq'),
+                            'icon'   => 'fa-solid fa-circle-question',
+                            'label'  => 'FAQ & Panduan Alur',
+                            'desc'   => 'Tanya jawab & alur pemakaian',
+                            'active' => $isFaqActive,
+                        ],
+                    ]
                 ],
                 [
-                    'url'    => base_url('sop'),
-                    'icon'   => 'fa-solid fa-file-shield',
-                    'label'  => 'SOP Kebersihan',
-                    'active' => $isSopActive,
-                ],
-                [
-                    'url'    => base_url('struktur'),
-                    'icon'   => 'fa-solid fa-sitemap',
-                    'label'  => 'Struktur Kebersihan',
-                    'active' => $isStrukturActive,
-                ],
-                [
+                    'type'   => 'link',
                     'url'    => base_url('cs'),
                     'icon'   => 'fa-solid fa-headset',
-                    'label'  => 'Lapor Kebersihan (CS)',
+                    'label'  => 'Lapor CS',
                     'active' => $isCsActive,
                 ],
             ];
         }
     ?>
-    <header class="sticky top-0 z-30 glass-card shadow-sm border-b border-slate-200/80">
+    <header class="fixed top-0 left-0 right-0 z-40 w-full glass-card shadow-sm border-b border-slate-200/80">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 sm:h-20 gap-3">
                 <!-- Logo & Brand Header -->
@@ -437,76 +515,135 @@
                 </a>
 
                 <!-- Desktop / Tablet Horizontal Navigation -->
-                <div class="hidden lg:flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
-                    <?php foreach ($navItems as $item): 
-                        $hasBadge = !empty($item['badge']) && (int)$item['badge'] > 0;
+                <div class="hidden lg:flex items-center gap-2">
+                    <?php foreach ($navGroups as $group): 
+                        $groupHasBadge = !empty($group['badge']) && (int)$group['badge'] > 0;
                     ?>
-                        <?php if ($item['active']): ?>
-                            <a href="<?= $item['url'] ?>" class="nav-item-btn active bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading shadow-md shadow-emerald-600/25 border border-emerald-500/30 relative">
-                                <span class="relative inline-flex items-center">
-                                    <i class="<?= $item['icon'] ?> text-sm flex-shrink-0"></i>
-                                    <?php if ($hasBadge): ?>
-                                        <span class="nav-icon-badge absolute -top-2 -right-2 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center border border-white shadow-xs animate-pulse">
-                                            <?= $item['badge'] > 99 ? '99+' : $item['badge'] ?>
-                                        </span>
-                                    <?php endif; ?>
-                                </span>
-                                <span class="nav-item-label"><?= $item['label'] ?></span>
-                                <?php if ($hasBadge): ?>
-                                    <span class="nav-text-badge py-0.5 rounded-full bg-white text-rose-600 text-[10px] font-black shadow-xs">
-                                        <?= $item['badge'] ?>
+                        <?php if ($group['type'] === 'link'): ?>
+                            <!-- Single Direct Link -->
+                            <a href="<?= $group['url'] ?>" class="top-nav-btn <?= $group['active'] ? 'active font-heading' : '' ?>">
+                                <i class="<?= $group['icon'] ?> text-sm flex-shrink-0 <?= $group['active'] ? 'text-white' : 'text-slate-500' ?>"></i>
+                                <span><?= $group['label'] ?></span>
+                                <?php if ($groupHasBadge): ?>
+                                    <span class="ml-1 px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-black animate-pulse">
+                                        <?= $group['badge'] > 99 ? '99+' : $group['badge'] ?>
                                     </span>
                                 <?php endif; ?>
                             </a>
-                        <?php else: ?>
-                            <a href="<?= $item['url'] ?>" title="<?= $item['label'] . ($hasBadge ? ' (' . $item['badge'] . ' Menunggu Tindakan)' : '') ?>" class="nav-item-btn bg-slate-100/90 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 border border-slate-200/80 shadow-2xs relative">
-                                <span class="relative inline-flex items-center">
-                                    <i class="<?= $item['icon'] ?> text-sm flex-shrink-0 text-slate-600 hover:text-emerald-600"></i>
-                                    <?php if ($hasBadge): ?>
-                                        <span class="nav-icon-badge absolute -top-2 -right-2 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center border border-white shadow-xs animate-pulse">
-                                            <?= $item['badge'] > 99 ? '99+' : $item['badge'] ?>
+
+                        <?php elseif ($group['type'] === 'dropdown'): ?>
+                            <!-- Dropdown Group Button -->
+                            <div class="relative group">
+                                <button type="button" class="top-nav-btn <?= $group['active'] ? 'active font-heading' : '' ?>">
+                                    <i class="<?= $group['icon'] ?> text-sm flex-shrink-0 <?= $group['active'] ? 'text-white' : 'text-slate-500' ?>"></i>
+                                    <span><?= $group['label'] ?></span>
+                                    <?php if ($groupHasBadge): ?>
+                                        <span class="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black animate-pulse">
+                                            <?= $group['badge'] > 99 ? '99+' : $group['badge'] ?>
                                         </span>
                                     <?php endif; ?>
-                                </span>
-                                <span class="nav-item-label"><?= $item['label'] ?></span>
-                                <?php if ($hasBadge): ?>
-                                    <span class="nav-text-badge py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-black">
-                                        <?= $item['badge'] ?>
-                                    </span>
-                                <?php endif; ?>
-                            </a>
+                                    <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200 group-hover:rotate-180 <?= $group['active'] ? 'text-white/80' : 'text-slate-400' ?>"></i>
+                                </button>
+
+                                <!-- Dropdown Menu Floating Card -->
+                                <div class="nav-dropdown-wrapper">
+                                    <div class="min-w-[280px] bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/10 border border-slate-200/90 p-2 space-y-1">
+                                        <?php foreach ($group['children'] as $child): 
+                                            $childHasBadge = !empty($child['badge']) && (int)$child['badge'] > 0;
+                                        ?>
+                                            <a href="<?= $child['url'] ?>" class="flex items-center gap-3 p-2.5 rounded-xl transition duration-150 <?= $child['active'] ? 'bg-emerald-50 text-emerald-800 font-extrabold border border-emerald-200/60 shadow-xs' : 'text-slate-700 hover:bg-slate-100/80 hover:text-emerald-700' ?>">
+                                                <div class="w-8 h-8 rounded-xl <?= $child['active'] ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 group-hover:bg-emerald-100 group-hover:text-emerald-700' ?> flex items-center justify-center text-xs flex-shrink-0">
+                                                    <i class="<?= $child['icon'] ?>"></i>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex items-center justify-between gap-1">
+                                                        <span class="text-xs font-heading <?= $child['active'] ? 'font-extrabold text-emerald-900' : 'font-bold text-slate-800' ?> truncate"><?= $child['label'] ?></span>
+                                                        <?php if ($childHasBadge): ?>
+                                                            <span class="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black animate-pulse">
+                                                                <?= $child['badge'] > 99 ? '99+' : $child['badge'] ?>
+                                                            </span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <?php if (!empty($child['desc'])): ?>
+                                                        <p class="text-[10.5px] text-slate-400 font-medium truncate"><?= $child['desc'] ?></p>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </a>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
                         <?php endif; ?>
                     <?php endforeach; ?>
 
+                    <!-- User Profile Dropdown / Login Action -->
                     <?php if (session()->get('isLoggedIn')): ?>
-                        <div class="nav-item-btn bg-slate-100/90 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 border border-slate-200/80 shadow-2xs cursor-default ml-1" title="<?= esc(session()->get('nama_lengkap')) ?> (<?= esc(session()->get('role')) ?>)">
-                            <i class="fa-solid fa-user-circle text-sm flex-shrink-0 <?= session()->get('role') === 'Admin' ? 'text-emerald-600' : (session()->get('role') === 'Auditor' ? 'text-blue-600' : 'text-purple-600') ?>"></i>
-                            <div class="nav-item-label inline-flex items-center gap-1.5">
-                                <span class="font-extrabold text-xs text-slate-800 whitespace-nowrap"><?= esc(session()->get('nama_lengkap')) ?></span>
-                                <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider <?= session()->get('role') === 'Admin' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : (session()->get('role') === 'Auditor' ? 'bg-blue-100 text-blue-800 border border-blue-200' : 'bg-purple-100 text-purple-800 border border-purple-200') ?>">
-                                    <?= esc(session()->get('role')) ?>
-                                </span>
+                        <div class="relative group ml-1">
+                            <button type="button" class="flex items-center gap-2.5 px-3 py-1.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:border-emerald-300 hover:bg-emerald-50/50 transition duration-200 cursor-pointer">
+                                <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center font-heading font-black text-xs shadow-2xs">
+                                    <?= strtoupper(substr(session()->get('nama_lengkap') ?? 'U', 0, 1)) ?>
+                                </div>
+                                <div class="text-left hidden xl:block leading-tight">
+                                    <div class="font-heading font-extrabold text-xs text-slate-800 truncate max-w-[130px]"><?= esc(session()->get('nama_lengkap')) ?></div>
+                                    <span class="text-[10px] font-bold <?= session()->get('role') === 'Admin' ? 'text-emerald-700' : (session()->get('role') === 'Auditor' ? 'text-blue-700' : 'text-purple-700') ?>">
+                                        <?= esc(session()->get('role')) ?>
+                                    </span>
+                                </div>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 group-hover:text-slate-600 transition-transform duration-200 group-hover:rotate-180"></i>
+                            </button>
+
+                            <!-- User Profile Dropdown Card -->
+                            <div class="nav-dropdown-wrapper align-right">
+                                <div class="w-60 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl shadow-xl shadow-slate-900/10 p-2 space-y-1">
+                                    <div class="px-3 py-2.5 bg-slate-50/90 rounded-xl border border-slate-100 mb-1">
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Login Sebagai</p>
+                                        <p class="font-heading font-extrabold text-xs text-slate-900 truncate mt-0.5"><?= esc(session()->get('nama_lengkap')) ?></p>
+                                        <div class="flex items-center gap-1.5 mt-1">
+                                            <span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider <?= session()->get('role') === 'Admin' ? 'bg-emerald-100 text-emerald-800' : (session()->get('role') === 'Auditor' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800') ?>">
+                                                <?= esc(session()->get('role')) ?>
+                                            </span>
+                                            <?php if (session()->get('nama_unit')): ?>
+                                                <span class="text-[9px] px-2 py-0.5 rounded-full font-semibold bg-slate-200 text-slate-700 truncate max-w-[100px]">
+                                                    <?= esc(session()->get('nama_unit')) ?>
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+
+                                    <?php if ($isUserAdminOrAuditor): ?>
+                                        <a href="<?= base_url('pengaturan') ?>" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition <?= $isPengaturanActive ? 'bg-emerald-50 text-emerald-700 font-extrabold' : '' ?>">
+                                            <i class="fa-solid fa-sliders text-sm text-slate-400 w-4 text-center"></i>
+                                            <span>Master Pengaturan</span>
+                                        </a>
+                                        <a href="<?= base_url('profil') ?>" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition <?= $isProfilActive ? 'bg-emerald-50 text-emerald-700 font-extrabold' : '' ?>">
+                                            <i class="fa-solid fa-user-gear text-sm text-slate-400 w-4 text-center"></i>
+                                            <span>Kelola Akun & Profil</span>
+                                        </a>
+                                    <?php else: ?>
+                                        <a href="<?= base_url('app') ?>" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition <?= $isAppActive ? 'bg-emerald-50 text-emerald-700 font-extrabold' : '' ?>">
+                                            <i class="fa-solid fa-gauge-high text-sm text-slate-400 w-4 text-center"></i>
+                                            <span>Dashboard Unit</span>
+                                        </a>
+                                    <?php endif; ?>
+
+                                    <div class="border-t border-slate-100 my-1"></div>
+                                    <a href="<?= base_url('logout') ?>" data-confirm-msg="Apakah Anda yakin ingin keluar/logout?" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition">
+                                        <i class="fa-solid fa-right-from-bracket text-sm text-rose-500 w-4 text-center"></i>
+                                        <span>Keluar / Logout</span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                        <a href="<?= base_url('logout') ?>" data-confirm-msg="Apakah Anda yakin ingin keluar/logout?" title="Logout" class="nav-item-btn bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200/80 shadow-2xs ml-1">
-                            <i class="fa-solid fa-right-from-bracket text-sm flex-shrink-0 text-rose-600"></i>
-                            <span class="nav-item-label">Logout</span>
-                        </a>
                     <?php else: ?>
-                        <a href="<?= base_url('login') ?>" title="Login Sistem" class="nav-item-btn bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/80 shadow-2xs ml-1">
+                        <a href="<?= base_url('login') ?>" title="Login Petugas / Pengurus" class="top-nav-btn bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/80 shadow-2xs ml-1">
                             <i class="fa-solid fa-right-to-bracket text-sm flex-shrink-0 text-emerald-600"></i>
-                            <span class="nav-item-label">Login</span>
+                            <span>Masuk / Login</span>
                         </a>
                     <?php endif; ?>
                 </div>
 
                 <!-- Mobile Hamburger Toggle Button -->
                 <div class="flex items-center gap-2 lg:hidden">
-                    <?php if (session()->get('isLoggedIn')): ?>
-                        <span class="text-[11px] font-bold px-2 py-1 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 max-w-[120px] truncate">
-                            <?= esc(session()->get('nama_lengkap')) ?>
-                        </span>
-                    <?php endif; ?>
                     <button type="button" onclick="toggleMobileDrawer(true)" class="w-10 h-10 rounded-2xl bg-white border border-slate-200 text-slate-700 hover:text-emerald-700 hover:bg-emerald-50 shadow-2xs flex items-center justify-center transition" aria-label="Buka Menu Navigasi">
                         <i class="fa-solid fa-bars text-base"></i>
                     </button>
@@ -515,6 +652,9 @@
         </div>
     </header>
 
+    <!-- Fixed Header Layout Spacer (Prevents Content Underflow) -->
+    <div class="h-16 sm:h-20 w-full flex-shrink-0" aria-hidden="true"></div>
+
     <!-- Mobile Off-Canvas Drawer Navigation -->
     <div id="mobileDrawerContainer" class="fixed inset-0 pointer-events-none transition-all hidden" style="z-index: 99999999 !important;">
         <!-- Backdrop -->
@@ -522,7 +662,7 @@
 
         <!-- Drawer Content Body -->
         <div id="mobileDrawer" class="absolute top-0 right-0 w-[85vw] max-w-xs h-full bg-white shadow-2xl flex flex-col justify-between transform translate-x-full transition-transform duration-300 ease-out pointer-events-auto overflow-y-auto">
-            <div class="p-5 sm:p-6 space-y-5">
+            <div class="p-5 space-y-4">
                 <!-- Drawer Header -->
                 <div class="flex items-center justify-between border-b border-slate-100 pb-4">
                     <div class="flex items-center gap-2.5">
@@ -542,35 +682,82 @@
                 <!-- User Profile Card in Drawer if Logged In -->
                 <?php if (session()->get('isLoggedIn')): ?>
                     <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-base flex-shrink-0">
-                            <i class="fa-solid fa-user-circle"></i>
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center font-heading font-black text-sm flex-shrink-0 shadow-2xs">
+                            <?= strtoupper(substr(session()->get('nama_lengkap') ?? 'U', 0, 1)) ?>
                         </div>
                         <div class="min-w-0 flex-1">
                             <div class="font-heading font-extrabold text-xs text-slate-900 truncate"><?= esc(session()->get('nama_lengkap')) ?></div>
-                            <span class="inline-block text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider mt-0.5 <?= session()->get('role') === 'Admin' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800' ?>">
+                            <span class="inline-block text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider mt-0.5 <?= session()->get('role') === 'Admin' ? 'bg-emerald-100 text-emerald-800' : (session()->get('role') === 'Auditor' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800') ?>">
                                 <?= esc(session()->get('role')) ?>
                             </span>
                         </div>
                     </div>
                 <?php endif; ?>
 
-                <!-- Drawer Links List -->
-                <div class="space-y-1">
-                    <?php foreach ($navItems as $item): 
-                        $hasBadge = !empty($item['badge']) && (int)$item['badge'] > 0;
-                    ?>
-                        <a href="<?= $item['url'] ?>" onclick="toggleMobileDrawer(false)" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-heading font-bold transition <?= $item['active'] ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-700' ?>">
-                            <div class="flex items-center gap-2.5">
-                                <i class="<?= $item['icon'] ?> text-sm w-5 text-center <?= $item['active'] ? 'text-white' : 'text-slate-400' ?>"></i>
-                                <span><?= $item['label'] ?></span>
+                <!-- Drawer Categorized Links List -->
+                <div class="space-y-4">
+                    <?php foreach ($navGroups as $group): ?>
+                        <?php if ($group['type'] === 'link'): ?>
+                            <a href="<?= $group['url'] ?>" onclick="toggleMobileDrawer(false)" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-heading font-bold transition <?= $group['active'] ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-700' ?>">
+                                <div class="flex items-center gap-2.5">
+                                    <i class="<?= $group['icon'] ?> text-sm w-5 text-center <?= $group['active'] ? 'text-white' : 'text-slate-400' ?>"></i>
+                                    <span><?= $group['label'] ?></span>
+                                </div>
+                                <?php if (!empty($group['badge']) && $group['badge'] > 0): ?>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black <?= $group['active'] ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' ?>">
+                                        <?= $group['badge'] ?>
+                                    </span>
+                                <?php endif; ?>
+                            </a>
+                        <?php elseif ($group['type'] === 'dropdown'): ?>
+                            <div class="space-y-1">
+                                <div class="px-3 pt-1 pb-1 flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100">
+                                    <span class="flex items-center gap-1.5">
+                                        <i class="<?= $group['icon'] ?> text-[10px] text-emerald-600"></i>
+                                        <?= $group['label'] ?>
+                                    </span>
+                                    <?php if (!empty($group['badge']) && $group['badge'] > 0): ?>
+                                        <span class="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black">
+                                            <?= $group['badge'] ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                                <?php foreach ($group['children'] as $child): 
+                                    $childHasBadge = !empty($child['badge']) && (int)$child['badge'] > 0;
+                                ?>
+                                    <a href="<?= $child['url'] ?>" onclick="toggleMobileDrawer(false)" class="flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-heading font-bold transition <?= $child['active'] ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-700' ?>">
+                                        <div class="flex items-center gap-2.5">
+                                            <i class="<?= $child['icon'] ?> text-sm w-5 text-center <?= $child['active'] ? 'text-white' : 'text-slate-400' ?>"></i>
+                                            <span><?= $child['label'] ?></span>
+                                        </div>
+                                        <?php if ($childHasBadge): ?>
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black <?= $child['active'] ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' ?>">
+                                                <?= $child['badge'] ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    </a>
+                                <?php endforeach; ?>
                             </div>
-                            <?php if ($hasBadge): ?>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-black <?= $item['active'] ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' ?>">
-                                    <?= $item['badge'] ?>
-                                </span>
-                            <?php endif; ?>
-                        </a>
+                        <?php endif; ?>
                     <?php endforeach; ?>
+
+                    <?php if ($isUserAdminOrAuditor): ?>
+                        <!-- Admin Account Settings in Drawer -->
+                        <div class="space-y-1 pt-1">
+                            <div class="px-3 pt-1 pb-1 flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100">
+                                <i class="fa-solid fa-user-gear text-[10px] text-emerald-600"></i>
+                                Pengaturan & Akun
+                            </div>
+                            <a href="<?= base_url('pengaturan') ?>" onclick="toggleMobileDrawer(false)" class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-heading font-bold transition <?= $isPengaturanActive ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-700' ?>">
+                                <i class="fa-solid fa-sliders text-sm w-5 text-center <?= $isPengaturanActive ? 'text-white' : 'text-slate-400' ?>"></i>
+                                <span>Master Pengaturan</span>
+                            </a>
+                            <a href="<?= base_url('profil') ?>" onclick="toggleMobileDrawer(false)" class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-heading font-bold transition <?= $isProfilActive ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-700' ?>">
+                                <i class="fa-solid fa-user-gear text-sm w-5 text-center <?= $isProfilActive ? 'text-white' : 'text-slate-400' ?>"></i>
+                                <span>Kelola Akun & Profil</span>
+                            </a>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -716,7 +903,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-slate-200 bg-white py-6 mt-auto">
+    <footer class="w-full border-t border-slate-200 bg-white py-6 mt-auto">
         <div class="max-w-7xl mx-auto px-4 text-center text-sm text-slate-500">
             <p>&copy; <?= date('Y') ?> <b>Kebersihan Yayasan Assalafiyyah Mlangi</b>. System Manajemen.</p>
         </div>

@@ -143,22 +143,44 @@
                                 </h3>
                             </div>
 
-                            <?php if (!empty($w['lokasi_gedung'])): ?>
-                                <p class="text-xs text-slate-500 font-medium flex items-center gap-1.5">
-                                    <i class="fa-solid fa-location-dot text-rose-500 text-[11px]"></i>
-                                    <span><?= esc($w['lokasi_gedung']) ?></span>
-                                    <?php if (!empty($w['luas_area'])): ?>
-                                        <span>&bull;</span>
+                            <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium flex-wrap">
+                                <?php if (!empty($w['lokasi_gedung'])): ?>
+                                    <span class="inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-location-dot text-rose-500 text-[11px]"></i>
+                                        <span><?= esc($w['lokasi_gedung']) ?></span>
+                                    </span>
+                                <?php endif; ?>
+                                <?php if (!empty($w['lokasi_gedung']) && !empty($w['luas_area'])): ?>
+                                    <span class="text-slate-300">&bull;</span>
+                                <?php endif; ?>
+                                <?php if (!empty($w['luas_area'])): ?>
+                                    <span class="inline-flex items-center gap-1 text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200/60 text-[11px] font-bold" title="Ukuran / Luas Area">
+                                        <i class="fa-solid fa-ruler-combined text-[10px] text-teal-600"></i>
                                         <span><?= esc($w['luas_area']) ?></span>
-                                    <?php endif; ?>
-                                </p>
-                            <?php endif; ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
 
-                            <?php if (!empty($w['deskripsi'])): ?>
-                                <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                                    <?= esc($w['deskripsi']) ?>
-                                </p>
-                            <?php endif; ?>
+                            <?php 
+                                $shiftKeterangan = '';
+                                if (!empty($w['penugasan'])) {
+                                    foreach ($w['penugasan'] as $pItem) {
+                                        if (!empty($pItem['keterangan'])) {
+                                            $shiftKeterangan = $pItem['keterangan'];
+                                            break;
+                                        }
+                                    }
+                                }
+                                $adminPetunjuk = !empty($shiftKeterangan) 
+                                    ? $shiftKeterangan 
+                                    : (!empty($w['deskripsi']) 
+                                        ? $w['deskripsi'] 
+                                        : 'Menjaga kebersihan area secara rutin, menyapu, mengepel, membuang sampah, dan memastikan area tetap rapi & higienis.');
+                            ?>
+                            <div class="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/80 text-[11px] text-slate-700 leading-relaxed font-medium">
+                                <strong class="text-amber-900 font-bold block mb-0.5"><i class="fa-solid fa-note-sticky text-amber-500 mr-1"></i> Petunjuk:</strong>
+                                <p class="line-clamp-2"><?= esc($adminPetunjuk) ?></p>
+                            </div>
                         </div>
 
                         <!-- Assigned Shifts & Units -->

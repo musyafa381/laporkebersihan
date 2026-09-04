@@ -96,7 +96,7 @@ class WilayahPenugasanModel extends Model
 
     public function getPenugasanWithUnit(int $wilayahId = null)
     {
-        $builder = $this->select('tbl_wilayah_penugasan.*, master_unit.nama_unit, master_unit.tipe as tipe_unit, master_unit.pj_nama, master_unit.pj_kontak, tbl_wilayah_kebersihan.nama_wilayah, tbl_wilayah_kebersihan.kode_wilayah')
+        $builder = $this->select('tbl_wilayah_penugasan.*, master_unit.nama_unit, master_unit.tipe as tipe_unit, master_unit.pj_nama, master_unit.pj_kontak, tbl_wilayah_kebersihan.nama_wilayah, tbl_wilayah_kebersihan.kode_wilayah, tbl_wilayah_kebersihan.kategori_area, tbl_wilayah_kebersihan.lokasi_gedung, tbl_wilayah_kebersihan.deskripsi, tbl_wilayah_kebersihan.luas_area, tbl_wilayah_kebersihan.status as status_wilayah')
             ->join('master_unit', 'master_unit.id = tbl_wilayah_penugasan.unit_id', 'left')
             ->join('tbl_wilayah_kebersihan', 'tbl_wilayah_kebersihan.id = tbl_wilayah_penugasan.wilayah_id', 'left');
 

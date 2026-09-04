@@ -81,6 +81,11 @@ class WilayahModel extends Model
                     'constraint' => 11,
                     'default'    => 0
                 ],
+                'created_by' => [
+                    'type'       => 'INT',
+                    'constraint' => 11,
+                    'null'       => true
+                ],
                 'created_at' => [
                     'type' => 'DATETIME',
                     'null' => true
@@ -90,9 +95,6 @@ class WilayahModel extends Model
                     'null' => true
                 ]
             ]);
-            $forge->addKey('id', true);
-            $forge->createTable($this->table, true);
-
             // Default initial seeds
             $now = date('Y-m-d H:i:s');
             $defaultZones = [
@@ -134,6 +136,19 @@ class WilayahModel extends Model
                 ]
             ];
             $db->table($this->table)->insertBatch($defaultZones);
+        } else {
+            $fields = $db->getFieldNames($this->table);
+            if (!in_array('created_by', $fields)) {
+                $forge = \Config\Database::forge();
+                $forge->addColumn($this->table, [
+                    'created_by' => [
+                        'type'       => 'INT',
+                        'constraint' => 11,
+                        'null'       => true,
+                        'after'      => 'urutan'
+                    ]
+                ]);
+            }
         }
     }
 }

@@ -26,7 +26,11 @@
                 </p>
             </div>
 
-            <div class="flex-shrink-0">
+            <div class="flex-shrink-0 flex flex-wrap items-center gap-2.5">
+                <a href="<?= base_url('faq') ?>" class="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-emerald-600/60 hover:bg-emerald-600 text-white font-heading font-extrabold text-sm border border-emerald-400/40 backdrop-blur-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-circle-question text-xs"></i>
+                    <span>Panduan Alur & FAQ</span>
+                </a>
                 <a href="<?= base_url('app/lpj') ?>" class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-white text-emerald-900 font-heading font-bold text-sm hover:bg-emerald-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 group">
                     <div class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition">
                         <i class="fa-solid fa-pen-to-square text-xs"></i>
@@ -37,51 +41,112 @@
         </div>
     </div>
 
-    <!-- 3 Quick Action Dashboard Cards (Premium & Clean) -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <!-- Action 1: LPJ -->
-        <a href="<?= base_url('app/lpj') ?>" class="group relative overflow-hidden p-6 rounded-3xl bg-gradient-to-br from-emerald-50/90 via-white to-emerald-50/40 border border-emerald-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between space-y-4">
-            <div class="flex items-center justify-between">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-xl shadow-md shadow-emerald-500/20 group-hover:scale-110 transition-transform duration-300">
-                    <i class="fa-solid fa-file-pen"></i>
+    <!-- Daily Wilayah Tasks Progress Bar Widget (New Smart Feature) -->
+    <?php
+        $totalActive = $todayTotalActiveCount ?? 0;
+        $reported = $todayReportedCount ?? 0;
+        $percentComplete = $totalActive > 0 ? round(($reported / $totalActive) * 100) : 100;
+        $isAllDone = ($totalActive > 0 && $reported >= $totalActive) || ($totalActive === 0);
+    ?>
+    <div class="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/80 shadow-xl shadow-slate-200/40 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl <?= $isAllDone ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' ?> flex items-center justify-center text-lg flex-shrink-0">
+                    <i class="fa-solid <?= $isAllDone ? 'fa-circle-check' : 'fa-list-check' ?>"></i>
                 </div>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100/80 text-emerald-800 text-[11px] font-extrabold border border-emerald-200 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                    <span>Buka Form</span>
-                    <i class="fa-solid fa-arrow-right text-[9px] group-hover:translate-x-0.5 transition-transform"></i>
+                <div>
+                    <h3 class="font-heading font-extrabold text-sm sm:text-base text-slate-900">
+                        Progres Tugas Kebersihan Hari Ini (<?= date('d M Y') ?>)
+                    </h3>
+                    <p class="text-xs text-slate-500 font-medium">
+                        <?= $totalActive > 0 ? "{$reported} dari {$totalActive} shift spot wilayah aktif telah dilaporkan." : "Tidak ada jadwal tugas kebersihan aktif hari ini." ?>
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 self-start sm:self-center">
+                <span class="px-3 py-1 rounded-full text-xs font-extrabold <?= $isAllDone ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200' ?>">
+                    <?= $percentComplete ?>% Selesai
+                </span>
+                <a href="<?= base_url('app/lapor-wilayah') ?>" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-emerald-700 text-white text-xs font-extrabold transition shadow-2xs flex items-center gap-1.5">
+                    <span><?= $isAllDone ? 'Lihat Wilayah' : 'Lapor Sekarang' ?></span>
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden">
+            <div class="h-full rounded-full transition-all duration-500 <?= $isAllDone ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-gradient-to-r from-amber-500 to-emerald-500' ?>" style="width: <?= $percentComplete ?>%;"></div>
+        </div>
+    </div>
+
+    <!-- 4 Quick Action Dashboard Cards (Symmetric & Premium Grid) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <!-- Action 1: Lapor Wilayah Harian (Utama) -->
+        <a href="<?= base_url('app/lapor-wilayah') ?>" class="group relative overflow-hidden p-5 rounded-3xl bg-gradient-to-br from-emerald-50/90 via-white to-emerald-50/40 border border-emerald-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between space-y-4">
+            <div class="flex items-center justify-between">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-lg shadow-md shadow-emerald-500/20 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                </div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full <?= $isAllDone ? 'bg-emerald-100/90 text-emerald-800 border border-emerald-200' : 'bg-rose-100/90 text-rose-800 border border-rose-200' ?> text-[10.5px] font-extrabold">
+                    <i class="fa-solid <?= $isAllDone ? 'fa-check' : 'fa-bell' ?> text-[9px]"></i>
+                    <span><?= $totalActive > 0 ? "{$reported}/{$totalActive} Lapor" : 'Siap' ?></span>
                 </span>
             </div>
             <div class="space-y-1">
-                <h3 class="font-heading font-extrabold text-base text-slate-900 group-hover:text-emerald-700 transition-colors">
-                    1. Isi LPJ Unit Kebersihan
+                <h3 class="font-heading font-extrabold text-sm sm:text-base text-slate-900 group-hover:text-emerald-700 transition-colors">
+                    1. Lapor Wilayah Harian
                 </h3>
-                <p class="text-xs text-slate-500 font-medium leading-relaxed">
-                    Input capaian target & evaluasi kebersihan bulanan unit Anda.
+                <p class="text-[11px] text-slate-500 font-medium leading-relaxed">
+                    Kirim capaian skor & foto bukti kebersihan harian per shift.
                 </p>
             </div>
         </a>
 
-        <!-- Action 2: Pengajuan Alat -->
-        <a href="<?= base_url('app/pengajuan-alat') ?>" class="group relative overflow-hidden p-6 rounded-3xl bg-gradient-to-br from-teal-50/90 via-white to-teal-50/40 border border-teal-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between space-y-4">
+        <!-- Action 2: LPJ -->
+        <a href="<?= base_url('app/lpj') ?>" class="group relative overflow-hidden p-5 rounded-3xl bg-gradient-to-br from-amber-50/90 via-white to-amber-50/40 border border-amber-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between space-y-4">
             <div class="flex items-center justify-between">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-teal-600 to-cyan-500 text-white flex items-center justify-center text-xl shadow-md shadow-teal-500/20 group-hover:scale-110 transition-transform duration-300">
-                    <i class="fa-solid fa-box-open"></i>
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center text-lg shadow-md shadow-amber-500/20 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fa-solid fa-file-pen"></i>
                 </div>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-100/80 text-teal-800 text-[11px] font-extrabold border border-teal-200 group-hover:bg-teal-600 group-hover:text-white transition-colors">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100/90 text-amber-800 text-[10.5px] font-extrabold border border-amber-200 group-hover:bg-amber-600 group-hover:text-white transition-colors">
                     <span>Buka Form</span>
-                    <i class="fa-solid fa-arrow-right text-[9px] group-hover:translate-x-0.5 transition-transform"></i>
+                    <i class="fa-solid fa-arrow-right text-[8px] group-hover:translate-x-0.5 transition-transform"></i>
                 </span>
             </div>
             <div class="space-y-1">
-                <h3 class="font-heading font-extrabold text-base text-slate-900 group-hover:text-teal-700 transition-colors">
-                    2. Pengajuan Alat Kebersihan
+                <h3 class="font-heading font-extrabold text-sm sm:text-base text-slate-900 group-hover:text-amber-700 transition-colors">
+                    2. Isi LPJ Unit Kebersihan
                 </h3>
-                <p class="text-xs text-slate-500 font-medium leading-relaxed">
+                <p class="text-[11px] text-slate-500 font-medium leading-relaxed">
+                    Input capaian target, koordinasi, & evaluasi bulanan unit.
+                </p>
+            </div>
+        </a>
+
+        <!-- Action 3: Pengajuan Alat -->
+        <a href="<?= base_url('app/pengajuan-alat') ?>" class="group relative overflow-hidden p-5 rounded-3xl bg-gradient-to-br from-teal-50/90 via-white to-teal-50/40 border border-teal-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between space-y-4">
+            <div class="flex items-center justify-between">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-teal-600 to-cyan-500 text-white flex items-center justify-center text-lg shadow-md shadow-teal-500/20 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-teal-100/90 text-teal-800 text-[10.5px] font-extrabold border border-teal-200 group-hover:bg-teal-600 group-hover:text-white transition-colors">
+                    <span><?= !empty($myPengajuan) ? (count($myPengajuan) . ' Riwayat') : 'Buka Form' ?></span>
+                    <i class="fa-solid fa-arrow-right text-[8px] group-hover:translate-x-0.5 transition-transform"></i>
+                </span>
+            </div>
+            <div class="space-y-1">
+                <h3 class="font-heading font-extrabold text-sm sm:text-base text-slate-900 group-hover:text-teal-700 transition-colors">
+                    3. Pengajuan Alat Kebersihan
+                </h3>
+                <p class="text-[11px] text-slate-500 font-medium leading-relaxed">
                     Permohonan alokasi sapu, pel, atau alat baru dari Gudang K3L.
                 </p>
             </div>
         </a>
 
-        <!-- Action 3: Lapor Kendala & Tindak Lanjut Aduan Unit -->
+        <!-- Action 4: Lapor Kendala & Tindak Lanjut Aduan Unit -->
         <?php 
             $pendingAduanCount = 0;
             if (!empty($unitAssignedReports)) {
@@ -92,27 +157,27 @@
                 }
             }
         ?>
-        <a href="<?= base_url('app/laporan-kebersihan') ?>" class="group relative overflow-hidden p-6 rounded-3xl bg-gradient-to-br from-blue-50/90 via-white to-blue-50/40 border border-blue-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between space-y-4">
+        <a href="<?= base_url('app/laporan-kebersihan') ?>" class="group relative overflow-hidden p-5 rounded-3xl bg-gradient-to-br from-blue-50/90 via-white to-blue-50/40 border border-blue-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between space-y-4">
             <div class="flex items-center justify-between">
-                <div class="relative w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center text-xl shadow-md shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300">
+                <div class="relative w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center text-lg shadow-md shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300">
                     <i class="fa-solid fa-headset"></i>
                     <?php if ($pendingAduanCount > 0): ?>
-                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white rounded-full text-[10px] font-black flex items-center justify-center border-2 border-white animate-pulse">
+                        <span class="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[9px] font-black flex items-center justify-center border-2 border-white animate-pulse">
                             <?= $pendingAduanCount ?>
                         </span>
                     <?php endif; ?>
                 </div>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100/80 text-blue-800 text-[11px] font-extrabold border border-blue-200 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                    <span><?= !empty($unitAssignedReports) ? (count($unitAssignedReports) . ' Aduan Unit') : 'Buka Form' ?></span>
-                    <i class="fa-solid fa-arrow-right text-[9px] group-hover:translate-x-0.5 transition-transform"></i>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-100/90 text-blue-800 text-[10.5px] font-extrabold border border-blue-200 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <span><?= $pendingAduanCount > 0 ? "{$pendingAduanCount} Aduan Baru" : 'Buka Form' ?></span>
+                    <i class="fa-solid fa-arrow-right text-[8px] group-hover:translate-x-0.5 transition-transform"></i>
                 </span>
             </div>
             <div class="space-y-1">
-                <h3 class="font-heading font-extrabold text-base text-slate-900 group-hover:text-blue-700 transition-colors">
-                    3. Pengaduan & Lapor Kendala
+                <h3 class="font-heading font-extrabold text-sm sm:text-base text-slate-900 group-hover:text-blue-700 transition-colors">
+                    4. Pengaduan & Lapor Kendala
                 </h3>
-                <p class="text-xs text-slate-500 font-medium leading-relaxed">
-                    Kirim laporan kendala & tindak lanjuti aduan masuk ke unit Anda.
+                <p class="text-[11px] text-slate-500 font-medium leading-relaxed">
+                    Kirim laporan kendala & tindak lanjuti aduan masuk unit Anda.
                 </p>
             </div>
         </a>

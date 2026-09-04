@@ -31,19 +31,29 @@
                     <i class="fa-solid fa-paper-plane text-emerald-600"></i> Form Lapor Kendala Kebersihan
                 </h3>
                 <span class="text-[10px] font-extrabold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                    <i class="fa-solid fa-shield-halved mr-1"></i> Terverifikasi Anti-SPAM
+                    <i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> Akun Terverifikasi
                 </span>
             </div>
 
             <form action="<?= base_url('cs/public/store') ?>" method="POST" enctype="multipart/form-data" class="space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Nama Lengkap Pengirim</label>
-                        <input type="text" name="nama_pengirim" value="<?= esc(session()->get('nama_lengkap') ?? '') ?>" placeholder="Misal: Santri / Pengurus / Warga" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                            <span>Nama Lengkap Pengirim</span>
+                            <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                                <i class="fa-solid fa-lock text-[9px]"></i> Otomatis (PJ Unit)
+                            </span>
+                        </label>
+                        <input type="text" name="nama_pengirim" value="<?= esc($defaultNamaPengirim ?? $userUnit['pj_nama'] ?? session()->get('nama_lengkap') ?? '') ?>" readonly required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-100/90 text-slate-800 cursor-not-allowed shadow-2xs">
                     </div>
                     <div>
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Nomor WhatsApp / HP</label>
-                        <input type="text" name="kontak_hp" placeholder="081234567890" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                            <span>Nomor WhatsApp / HP</span>
+                            <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                                <i class="fa-solid fa-lock text-[9px]"></i> Otomatis (PJ Unit)
+                            </span>
+                        </label>
+                        <input type="text" name="kontak_hp" value="<?= esc($defaultKontakHp ?? $userUnit['pj_kontak'] ?? '') ?>" readonly required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-100/90 text-slate-800 cursor-not-allowed shadow-2xs">
                     </div>
                 </div>
 
@@ -134,10 +144,16 @@
                                     <div class="portal-wilayah-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $w['id'] ?>" data-name="<?= esc($w['nama_wilayah']) ?>" data-lokasi-gedung="<?= esc(strtolower($w['lokasi_gedung'] ?? '')) ?>" onclick="selectPortalWilayah(this)">
                                         <div>
                                             <div class="font-extrabold text-xs text-slate-900"><?= esc($w['nama_wilayah']) ?></div>
-                                            <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
+                                            <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5 flex-wrap">
                                                 <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/60"><?= esc($w['kategori_area']) ?></span>
+                                                <?php if (!empty($w['luas_area'])): ?>
+                                                    <span class="text-slate-300">&bull;</span>
+                                                    <span class="inline-flex items-center gap-0.5 text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200/60 font-bold" title="Ukuran / Luas Area">
+                                                        <i class="fa-solid fa-ruler-combined text-[9px] text-teal-600"></i> <?= esc($w['luas_area']) ?>
+                                                    </span>
+                                                <?php endif; ?>
                                                 <?php if (!empty($w['lokasi_gedung'])): ?>
-                                                    <span>&bull;</span>
+                                                    <span class="text-slate-300">&bull;</span>
                                                     <span><i class="fa-solid fa-location-dot text-rose-500 mr-0.5"></i><?= esc($w['lokasi_gedung']) ?></span>
                                                 <?php endif; ?>
                                             </div>
@@ -223,20 +239,6 @@
 
                     <!-- Live Thumbnail Preview Container with Delete Button -->
                     <div id="portalFotoPreviewContainer" class="flex flex-wrap gap-3 pt-2 hidden border-t border-slate-200/70"></div>
-                </div>
-
-                <!-- Anti-SPAM Security Verification Code -->
-                <div class="p-4 rounded-2xl bg-slate-100/90 border border-slate-200 space-y-2">
-                    <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider">
-                        <i class="fa-solid fa-robot text-emerald-600 mr-1"></i> Verifikasi Keamanan Anti-SPAM
-                    </label>
-                    <div class="flex items-center gap-3">
-                        <div class="px-4 py-2 rounded-xl bg-white border border-slate-300 font-mono font-extrabold text-sm text-emerald-800 shadow-inner">
-                            Berapa <?= esc($captcha_num1 ?? 5) ?> + <?= esc($captcha_num2 ?? 3) ?> = ?
-                        </div>
-                        <input type="number" name="captcha_user" placeholder="Jawaban..." required class="w-32 px-4 py-2 rounded-xl border border-slate-300 text-xs font-bold text-center bg-white focus:ring-2 focus:ring-emerald-500 shadow-2xs">
-                    </div>
-                    <p class="text-[10px] text-slate-500 font-medium">Jawab pertanyaan penjumlahan matematika sederhana di atas untuk membuktikan Anda bukan bot spam.</p>
                 </div>
 
                 <button type="submit" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
@@ -371,12 +373,20 @@
                                             <i class="fa-solid fa-map-location-dot text-teal-600 text-[10px]"></i>
                                             <span><?= esc($gabunganLokasi) ?></span>
                                         </div>
-                                        <?php if (!empty($r['shift'])): ?>
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200/80 text-[10px] font-extrabold shadow-2xs w-fit">
-                                                <i class="fa-regular fa-clock text-amber-600 text-[9px]"></i>
-                                                <span>Shift <?= esc($r['shift']) ?></span>
-                                            </span>
-                                        <?php endif; ?>
+                                        <div class="flex items-center gap-1 flex-wrap">
+                                            <?php if (!empty($r['luas_area'])): ?>
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 border border-teal-200/80 text-[10px] font-extrabold shadow-2xs" title="Ukuran / Luas Area">
+                                                    <i class="fa-solid fa-ruler-combined text-teal-600 text-[9px]"></i>
+                                                    <span><?= esc($r['luas_area']) ?></span>
+                                                </span>
+                                            <?php endif; ?>
+                                            <?php if (!empty($r['shift'])): ?>
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200/80 text-[10px] font-extrabold shadow-2xs w-fit">
+                                                    <i class="fa-regular fa-clock text-amber-600 text-[9px]"></i>
+                                                    <span>Shift <?= esc($r['shift']) ?></span>
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="py-4 px-4">
@@ -525,6 +535,12 @@
                                             <i class="fa-solid fa-tag text-[9px]"></i>
                                             <?= esc($r['kategori']) ?>
                                         </span>
+                                        <?php if (!empty($r['luas_area'])): ?>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 border border-teal-200/80 text-[10px] font-extrabold shadow-2xs" title="Ukuran / Luas Area">
+                                                <i class="fa-solid fa-ruler-combined text-teal-600 text-[9px]"></i>
+                                                <span><?= esc($r['luas_area']) ?></span>
+                                            </span>
+                                        <?php endif; ?>
                                         <?php if (!empty($r['shift'])): ?>
                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200/80 text-[10px] font-extrabold shadow-2xs">
                                                 <i class="fa-regular fa-clock text-amber-600 text-[9px]"></i>

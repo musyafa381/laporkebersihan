@@ -103,7 +103,7 @@ class Cs extends BaseController
         // Only fetch inbox list if logged in as Admin or Auditor
         if ($isUserAdminOrAuditor) {
             $reports = $this->csModel
-                ->select('cs_reports.*, master_unit.pj_nama, master_unit.pj_kontak, master_unit.kode_unit, tbl_wilayah_kebersihan.nama_wilayah, tbl_wilayah_kebersihan.lokasi_gedung')
+                ->select('cs_reports.*, master_unit.pj_nama, master_unit.pj_kontak, master_unit.kode_unit, tbl_wilayah_kebersihan.nama_wilayah, tbl_wilayah_kebersihan.lokasi_gedung, tbl_wilayah_kebersihan.luas_area, tbl_wilayah_kebersihan.kategori_area')
                 ->join('master_unit', '(cs_reports.unit_id IS NOT NULL AND cs_reports.unit_id > 0 AND master_unit.id = cs_reports.unit_id) OR ((cs_reports.unit_id IS NULL OR cs_reports.unit_id = 0) AND master_unit.nama_unit = cs_reports.unit_lokasi)', 'left')
                 ->join('tbl_wilayah_kebersihan', 'tbl_wilayah_kebersihan.id = cs_reports.wilayah_id', 'left')
                 ->groupBy('cs_reports.id')
@@ -171,6 +171,20 @@ class Cs extends BaseController
                 ->findAll();
         }
 
+        $userUnit = null;
+        if ($session->get('isLoggedIn')) {
+            $unitId = $session->get('unit_id');
+            if (!$unitId && $session->get('userId')) {
+                $uObj = (new \App\Models\UserModel())->find($session->get('userId'));
+                $unitId = $uObj['unit_id'] ?? null;
+            }
+            if ($unitId) {
+                $userUnit = $this->unitModel->find($unitId);
+            }
+        }
+        $defaultNamaPengirim = !empty($userUnit['pj_nama']) ? $userUnit['pj_nama'] : ($session->get('nama_lengkap') ?? '');
+        $defaultKontakHp     = !empty($userUnit['pj_kontak']) ? $userUnit['pj_kontak'] : ($session->get('no_hp') ?? $session->get('kontak') ?? '');
+
         $data = [
             'title'                => $isUserAdminOrAuditor ? 'Inbox Customer Service Admin K3L' : 'Lapor Kebersihan & Layanan Bantuan (CS)',
             'isUserAdminOrAuditor' => $isUserAdminOrAuditor,
@@ -182,6 +196,9 @@ class Cs extends BaseController
             'unitList'             => $unitList,
             'penugasanList'        => $penugasanList,
             'settings'             => $settings,
+            'userUnit'             => $userUnit,
+            'defaultNamaPengirim'  => $defaultNamaPengirim,
+            'defaultKontakHp'      => $defaultKontakHp,
             'captcha_num1'         => $session->get('captcha_num1'),
             'captcha_num2'         => $session->get('captcha_num2'),
         ];
@@ -192,32 +209,37 @@ class Cs extends BaseController
     public function storePublicReport()
     {
         $session = session();
-        $userAnswer   = (int)$this->request->getPost('captcha_user');
-        $actualAnswer = (int)$session->get('captcha_answer');
+        $isLoggedIn = (bool)$session->get('isLoggedIn');
 
-        if ($actualAnswer === 0 || $userAnswer !== $actualAnswer) {
-            // Generate pertanyaan baru jika salah
-            $num1 = rand(3, 9);
-            $num2 = rand(2, 8);
-            $session->set([
-                'captcha_num1'   => $num1,
-                'captcha_num2'   => $num2,
-                'captcha_answer' => $num1 + $num2
-            ]);
+        // Only enforce captcha check for guest / public non-logged in users
+        if (!$isLoggedIn) {
+            $userAnswer   = (int)$this->request->getPost('captcha_user');
+            $actualAnswer = (int)$session->get('captcha_answer');
 
-            if ($this->request->isAJAX()) {
-                return $this->response->setJSON([
-                    'status'       => 'error',
-                    'message'      => 'Verifikasi Keamanan (Anti-SPAM) salah. Silakan coba lagi.',
-                    'new_captcha'  => [
-                        'num1'   => $num1,
-                        'num2'   => $num2,
-                        'prompt' => "Berapa {$num1} + {$num2} = ?"
-                    ]
+            if ($actualAnswer === 0 || $userAnswer !== $actualAnswer) {
+                // Generate pertanyaan baru jika salah
+                $num1 = rand(3, 9);
+                $num2 = rand(2, 8);
+                $session->set([
+                    'captcha_num1'   => $num1,
+                    'captcha_num2'   => $num2,
+                    'captcha_answer' => $num1 + $num2
                 ]);
-            }
 
-            return $this->respondJsonOrRedirect('Verifikasi Keamanan (Anti-SPAM) salah. Silakan coba lagi.', false);
+                if ($this->request->isAJAX()) {
+                    return $this->response->setJSON([
+                        'status'       => 'error',
+                        'message'      => 'Verifikasi Keamanan (Anti-SPAM) salah. Silakan coba lagi.',
+                        'new_captcha'  => [
+                            'num1'   => $num1,
+                            'num2'   => $num2,
+                            'prompt' => "Berapa {$num1} + {$num2} = ?"
+                        ]
+                    ]);
+                }
+
+                return $this->respondJsonOrRedirect('Verifikasi Keamanan (Anti-SPAM) salah. Silakan coba lagi.', false);
+            }
         }
 
         // Generate CAPTCHA baru untuk laporan berikutnya
