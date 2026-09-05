@@ -49,14 +49,62 @@
             scrollbar-color: #94a3b8 #f1f5f9;
         }
         body {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            background-color: #f8fafc;
             font-family: 'Plus Jakarta Sans', sans-serif;
             min-height: 100vh;
         }
+        /* Ambient Glassmorphism Mesh Gradients Background */
+        .ambient-mesh {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .ambient-mesh .orb {
+            position: absolute;
+            border-radius: 9999px;
+            filter: blur(80px);
+            opacity: 0.6;
+            will-change: transform;
+        }
+        .ambient-mesh .orb-1 {
+            top: -10%;
+            right: 5%;
+            width: 480px;
+            height: 480px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.28) 0%, rgba(20, 184, 166, 0.08) 70%, transparent 100%);
+        }
+        .ambient-mesh .orb-2 {
+            top: 35%;
+            left: -8%;
+            width: 520px;
+            height: 520px;
+            background: radial-gradient(circle, rgba(14, 165, 233, 0.2) 0%, rgba(56, 189, 248, 0.06) 70%, transparent 100%);
+        }
+        .ambient-mesh .orb-3 {
+            bottom: -5%;
+            right: 12%;
+            width: 550px;
+            height: 550px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.24) 0%, rgba(99, 102, 241, 0.08) 70%, transparent 100%);
+        }
+
         .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(226, 232, 240, 0.8);
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 10px 32px -4px rgba(0, 0, 0, 0.05), 0 2px 10px -2px rgba(0, 0, 0, 0.02);
+        }
+        .glass-card-hover {
+            transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-card-hover:hover {
+            background: rgba(255, 255, 255, 0.94);
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px -8px rgba(16, 185, 129, 0.14), 0 6px 16px -4px rgba(0, 0, 0, 0.04);
+            border-color: rgba(167, 243, 208, 0.95);
         }
 
         /* Modern Compact Unified Navbar Styling */
@@ -239,10 +287,11 @@
             touch-action: pan-y;
             overscroll-behavior: contain;
             -webkit-overflow-scrolling: touch;
-            max-height: 100vh;
-            max-height: 100dvh;
-            height: 100vh;
-            height: 100dvh;
+            top: 0.75rem;
+            right: 0.75rem;
+            bottom: 5.5rem;
+            max-height: calc(100dvh - 6.25rem);
+            height: auto;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
         }
     </style>
@@ -279,7 +328,13 @@
         }
     </style>
 </head>
-<body class="text-slate-800 flex flex-col min-h-screen">
+<body class="text-slate-800 flex flex-col min-h-screen relative selection:bg-emerald-100 selection:text-emerald-900">
+    <!-- Ambient Glassmorphism Mesh Glow Background -->
+    <div class="ambient-mesh" aria-hidden="true">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
 
     <!-- Header Navigation -->
     <?php
@@ -304,14 +359,22 @@
         $isSopActive        = (strpos($uriStr, 'sop') !== false);
         $isProkerActive     = (strpos($uriStr, 'program-kerja') !== false || strpos($uriStr, 'proker') !== false);
 
-        $isDrawerActive     = ($isPengaturanActive || $isProfilActive || $isStrukturActive || $isFaqActive || $isSopActive || $isCsActive || $isProkerActive || $isAppAlatActive || $isAppLaporActive);
-
         $isLoggedIn          = session()->get('isLoggedIn');
         $userRole            = session()->get('role');
         $isAuditor           = ($userRole === 'Auditor');
         $isAdmin             = ($userRole === 'Admin');
         $isUserAdminOrAuditor = $isLoggedIn && in_array($userRole, ['Admin', 'Auditor']);
         $isUserPengurusOrKader = $isLoggedIn && in_array($userRole, ['Pengurus', 'Kader']);
+
+        // Set isDrawerActive only for subpages that live inside the drawer and not in the 4 bottom tabs
+        if ($isUserAdminOrAuditor) {
+            $isDrawerActive = ($isPengaturanActive || $isProfilActive || $isStrukturActive || $isFaqActive || $isSopActive || $isCsActive || $isProkerActive);
+        } elseif ($isUserPengurusOrKader) {
+            $isDrawerActive = ($isAppAlatActive || $isAppLaporActive || $isStrukturActive || $isFaqActive || $isSopActive || $isProkerActive);
+        } else {
+            // Public: only active on items inside drawer (Struktur, FAQ, Login)
+            $isDrawerActive = ($isStrukturActive || $isFaqActive || $isLoginActive);
+        }
 
         // Query status notifikasi baru untuk CS dan Pengajuan Alat serta Nomor WA Hotline CS
         $db = \Config\Database::connect();
@@ -594,7 +657,7 @@
             ];
         }
     ?>
-    <header class="fixed top-0 left-0 right-0 z-40 w-full glass-card shadow-xs border-b border-slate-200/80">
+    <header class="fixed top-0 left-0 right-0 z-40 w-full glass-card shadow-xs border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-14 gap-2.5">
                 <!-- Logo & Brand Header -->
@@ -761,12 +824,8 @@
                     <?php endif; ?>
                 </div>
 
-                <!-- Mobile Hamburger Toggle Button -->
-                <div class="flex items-center gap-2 lg:hidden">
-                    <button type="button" onclick="toggleMobileDrawer(true)" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-emerald-700 hover:bg-emerald-50 shadow-2xs flex items-center justify-center transition" aria-label="Buka Menu Navigasi">
-                        <i class="fa-solid fa-bars text-sm"></i>
-                    </button>
-                </div>
+                <!-- Mobile Screen Header: Clean view with only Logo & Title as requested -->
+                <div class="hidden"></div>
             </div>
         </div>
     </header>
@@ -774,65 +833,105 @@
     <!-- Fixed Header Layout Spacer (Prevents Content Underflow) -->
     <div class="h-14 w-full flex-shrink-0" aria-hidden="true"></div>
 
-    <!-- Mobile Off-Canvas Drawer Navigation -->
+    <!-- Mobile Floating Glassmorphism Drawer Navigation -->
     <div id="mobileDrawerContainer" class="fixed inset-0 pointer-events-none transition-all hidden" style="z-index: 99999999 !important;">
-        <!-- Backdrop -->
-        <div id="mobileDrawerBackdrop" onclick="toggleMobileDrawer(false)" class="absolute inset-0 bg-slate-950/50 backdrop-blur-xs opacity-0 transition-opacity duration-300"></div>
+        <!-- Backdrop Blur Overlay -->
+        <div id="mobileDrawerBackdrop" onclick="toggleMobileDrawer(false)" class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
 
-        <!-- Drawer Content Body -->
-        <div id="mobileDrawer" class="absolute top-0 right-0 w-[85vw] max-w-xs h-full bg-white shadow-2xl flex flex-col justify-between transform translate-x-full transition-transform duration-300 ease-out pointer-events-auto overflow-y-auto">
-            <div class="p-5 space-y-4">
-                <!-- Drawer Header -->
-                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <!-- Floating Glassmorphic Drawer Modal Card (Floating in the air with margins, not touching screen edges) -->
+        <div id="mobileDrawer" class="absolute top-3 right-3 bottom-24 max-h-[calc(100dvh-104px)] w-[calc(100vw-24px)] max-w-xs sm:max-w-sm bg-white/95 backdrop-blur-2xl rounded-[28px] border border-white/90 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.35)] ring-1 ring-slate-900/10 flex flex-col transform translate-x-[110%] scale-95 transition-all duration-300 ease-out pointer-events-auto overflow-hidden">
+            
+            <!-- Top Header Banner (Vibrant Emerald with Glass Accent) -->
+            <div class="relative bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white p-4 flex-shrink-0">
+                <!-- Background ambient decorative circles -->
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+                
+                <div class="flex items-center justify-between relative z-10">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
-                            <i class="fa-solid fa-leaf text-sm"></i>
+                        <div class="w-9 h-9 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-xs">
+                            <i class="fa-solid fa-leaf text-sm drop-shadow-xs"></i>
                         </div>
                         <div>
-                            <span class="font-heading font-extrabold text-sm text-slate-900 block leading-tight">Menu Navigasi</span>
-                            <span class="text-[10px] text-emerald-600 font-semibold">Sistem K3L Kebersihan</span>
+                            <div class="font-heading font-black text-xs sm:text-sm tracking-tight text-white leading-tight">LAPOR KEBERSIHAN</div>
+                            <div class="text-[9.5px] text-emerald-100 font-semibold leading-tight mt-0.5">Sistem Manajemen K3L</div>
                         </div>
                     </div>
-                    <button type="button" onclick="toggleMobileDrawer(false)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition text-xs">
+                    <!-- Modern Glass Close Button -->
+                    <button type="button" onclick="toggleMobileDrawer(false)" class="w-8 h-8 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white flex items-center justify-center transition active:scale-90 text-xs shadow-2xs" aria-label="Tutup Menu">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
+            </div>
 
-                <!-- User Profile Card in Drawer if Logged In -->
+            <!-- Scrollable Content Body -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-3.5 pb-12">
+                <!-- User Profile Banner (Only for Logged-In Users) -->
                 <?php if (session()->get('isLoggedIn')): ?>
-                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center font-heading font-black text-sm flex-shrink-0 shadow-2xs">
+                    <div class="p-3 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/80 border border-slate-200/80 shadow-2xs flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center font-heading font-black text-sm flex-shrink-0 shadow-xs">
                             <?= strtoupper(substr(session()->get('nama_lengkap') ?? 'U', 0, 1)) ?>
                         </div>
                         <div class="min-w-0 flex-1">
                             <div class="font-heading font-extrabold text-xs text-slate-900 truncate"><?= esc(session()->get('nama_lengkap')) ?></div>
-                            <span class="inline-block text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider mt-0.5 <?= session()->get('role') === 'Admin' ? 'bg-emerald-100 text-emerald-800' : (session()->get('role') === 'Auditor' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800') ?>">
-                                <?= esc(session()->get('role')) ?>
-                            </span>
+                            <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                <span class="inline-block text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider <?= session()->get('role') === 'Admin' ? 'bg-emerald-100 text-emerald-800' : (session()->get('role') === 'Auditor' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800') ?>">
+                                    <?= esc(session()->get('role')) ?>
+                                </span>
+                                <?php if (session()->get('nama_unit')): ?>
+                                    <span class="text-[9px] text-slate-500 font-semibold truncate max-w-[110px]">
+                                        <?= esc(session()->get('nama_unit')) ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 <?php endif; ?>
 
-                <!-- Drawer Categorized Links List -->
-                <div class="space-y-4">
+                <!-- Navigation Categorized Links -->
+                <div class="space-y-3.5">
+                    <?php 
+                    // Helper to get squircle icon styling for each link
+                    $getIconStyle = function($icon, $label) {
+                        if (strpos($icon, 'house') !== false) return 'bg-sky-50 text-sky-600 border-sky-200/60';
+                        if (strpos($icon, 'location') !== false || strpos($icon, 'map') !== false) return 'bg-emerald-50 text-emerald-600 border-emerald-200/60';
+                        if (strpos($icon, 'broom') !== false || strpos($icon, 'box') !== false) return 'bg-amber-50 text-amber-600 border-amber-200/60';
+                        if (strpos($icon, 'list') !== false) return 'bg-indigo-50 text-indigo-600 border-indigo-200/60';
+                        if (strpos($icon, 'book') !== false) return 'bg-teal-50 text-teal-600 border-teal-200/60';
+                        if (strpos($icon, 'calc') !== false) return 'bg-cyan-50 text-cyan-600 border-cyan-200/60';
+                        if (strpos($icon, 'gauge') !== false) return 'bg-purple-50 text-purple-600 border-purple-200/60';
+                        if (strpos($icon, 'pen') !== false) return 'bg-emerald-50 text-emerald-600 border-emerald-200/60';
+                        if (strpos($icon, 'shield') !== false || strpos($icon, 'file') !== false) return 'bg-orange-50 text-orange-600 border-orange-200/60';
+                        if (strpos($icon, 'sitemap') !== false) return 'bg-violet-50 text-violet-600 border-violet-200/60';
+                        if (strpos($icon, 'question') !== false) return 'bg-fuchsia-50 text-fuchsia-600 border-fuchsia-200/60';
+                        if (strpos($icon, 'headset') !== false) return 'bg-rose-50 text-rose-600 border-rose-200/60';
+                        if (strpos($icon, 'sliders') !== false) return 'bg-slate-100 text-slate-700 border-slate-200/60';
+                        if (strpos($icon, 'user') !== false) return 'bg-blue-50 text-blue-600 border-blue-200/60';
+                        return 'bg-emerald-50 text-emerald-600 border-emerald-200/60';
+                    };
+                    ?>
+
                     <?php foreach ($navGroups as $group): ?>
                         <?php if ($group['type'] === 'link'): ?>
-                            <a href="<?= $group['url'] ?>" onclick="toggleMobileDrawer(false)" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-heading font-bold transition <?= $group['active'] ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-700' ?>">
-                                <div class="flex items-center gap-2.5">
-                                    <i class="<?= $group['icon'] ?> text-sm w-5 text-center <?= $group['active'] ? 'text-white' : 'text-slate-400' ?>"></i>
-                                    <span><?= $group['label'] ?></span>
+                            <a href="<?= $group['url'] ?>" onclick="toggleMobileDrawer(false)" class="flex items-center justify-between p-2 rounded-2xl transition-all duration-200 group <?= $group['active'] ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/25' : 'hover:bg-slate-100/80 text-slate-700' ?>">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs border transition-transform group-hover:scale-105 <?= $group['active'] ? 'bg-white text-emerald-700 border-white shadow-2xs' : $getIconStyle($group['icon'], $group['label']) ?>">
+                                        <i class="<?= $group['icon'] ?>"></i>
+                                    </div>
+                                    <span class="text-xs font-heading <?= $group['active'] ? 'font-black text-white' : 'font-extrabold text-slate-800 group-hover:text-emerald-800' ?>"><?= $group['label'] ?></span>
                                 </div>
                                 <?php if (!empty($group['badge']) && $group['badge'] > 0): ?>
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black <?= $group['active'] ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' ?>">
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-black <?= $group['active'] ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' ?>">
                                         <?= $group['badge'] ?>
                                     </span>
+                                <?php else: ?>
+                                    <i class="fa-solid fa-chevron-right text-[9px] transition-transform group-hover:translate-x-0.5 <?= $group['active'] ? 'text-white/80' : 'text-slate-300 group-hover:text-emerald-600' ?>"></i>
                                 <?php endif; ?>
                             </a>
                         <?php elseif ($group['type'] === 'dropdown'): ?>
                             <div class="space-y-1">
-                                <div class="px-3 pt-1 pb-1 flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100">
+                                <div class="px-2 pt-1 pb-0.5 flex items-center justify-between text-[9.5px] font-extrabold uppercase tracking-wider text-slate-400">
                                     <span class="flex items-center gap-1.5">
-                                        <i class="<?= $group['icon'] ?> text-[10px] text-emerald-600"></i>
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                         <?= $group['label'] ?>
                                     </span>
                                     <?php if (!empty($group['badge']) && $group['badge'] > 0): ?>
@@ -841,21 +940,32 @@
                                         </span>
                                     <?php endif; ?>
                                 </div>
-                                <?php foreach ($group['children'] as $child): 
-                                    $childHasBadge = !empty($child['badge']) && (int)$child['badge'] > 0;
-                                ?>
-                                    <a href="<?= $child['url'] ?>" onclick="toggleMobileDrawer(false)" class="flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-heading font-bold transition <?= $child['active'] ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-700' ?>">
-                                        <div class="flex items-center gap-2.5">
-                                            <i class="<?= $child['icon'] ?> text-sm w-5 text-center <?= $child['active'] ? 'text-white' : 'text-slate-400' ?>"></i>
-                                            <span><?= $child['label'] ?></span>
-                                        </div>
-                                        <?php if ($childHasBadge): ?>
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black <?= $child['active'] ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' ?>">
-                                                <?= $child['badge'] ?>
-                                            </span>
-                                        <?php endif; ?>
-                                    </a>
-                                <?php endforeach; ?>
+                                <div class="space-y-0.5">
+                                    <?php foreach ($group['children'] as $child): 
+                                        $childHasBadge = !empty($child['badge']) && (int)$child['badge'] > 0;
+                                    ?>
+                                        <a href="<?= $child['url'] ?>" onclick="toggleMobileDrawer(false)" class="flex items-center justify-between p-2 rounded-2xl transition-all duration-200 group <?= $child['active'] ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/25' : 'hover:bg-slate-100/80 text-slate-700' ?>">
+                                            <div class="flex items-center gap-3 min-w-0">
+                                                <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs border transition-transform group-hover:scale-105 flex-shrink-0 <?= $child['active'] ? 'bg-white text-emerald-700 border-white shadow-2xs' : $getIconStyle($child['icon'], $child['label']) ?>">
+                                                    <i class="<?= $child['icon'] ?>"></i>
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <span class="text-xs font-heading block truncate <?= $child['active'] ? 'font-black text-white' : 'font-extrabold text-slate-800 group-hover:text-emerald-800' ?>"><?= $child['label'] ?></span>
+                                                    <?php if (!empty($child['desc'])): ?>
+                                                        <span class="text-[9.5px] block truncate <?= $child['active'] ? 'text-emerald-100' : 'text-slate-400' ?>"><?= $child['desc'] ?></span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                            <?php if ($childHasBadge): ?>
+                                                <span class="px-2 py-0.5 rounded-full text-[9px] font-black <?= $child['active'] ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' ?>">
+                                                    <?= $child['badge'] ?>
+                                                </span>
+                                            <?php else: ?>
+                                                <i class="fa-solid fa-chevron-right text-[9px] transition-transform group-hover:translate-x-0.5 <?= $child['active'] ? 'text-white/80' : 'text-slate-300 group-hover:text-emerald-600' ?>"></i>
+                                            <?php endif; ?>
+                                        </a>
+                                    <?php endforeach; ?>
+                                </div>
                             </div>
                         <?php endif; ?>
                     <?php endforeach; ?>
@@ -863,36 +973,66 @@
                     <?php if ($isUserAdminOrAuditor): ?>
                         <!-- Admin Account Settings in Drawer -->
                         <div class="space-y-1 pt-1">
-                            <div class="px-3 pt-1 pb-1 flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100">
-                                <i class="fa-solid fa-user-gear text-[10px] text-emerald-600"></i>
+                            <div class="px-2 pt-1 pb-0.5 flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-wider text-slate-400">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
                                 Pengaturan & Akun
                             </div>
-                            <a href="<?= base_url('pengaturan') ?>" onclick="toggleMobileDrawer(false)" class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-heading font-bold transition <?= $isPengaturanActive ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-700' ?>">
-                                <i class="fa-solid fa-sliders text-sm w-5 text-center <?= $isPengaturanActive ? 'text-white' : 'text-slate-400' ?>"></i>
-                                <span>Master Pengaturan</span>
-                            </a>
-                            <a href="<?= base_url('profil') ?>" onclick="toggleMobileDrawer(false)" class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-heading font-bold transition <?= $isProfilActive ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-700' ?>">
-                                <i class="fa-solid fa-user-gear text-sm w-5 text-center <?= $isProfilActive ? 'text-white' : 'text-slate-400' ?>"></i>
-                                <span>Kelola Akun & Profil</span>
-                            </a>
+                            <div class="space-y-0.5">
+                                <a href="<?= base_url('pengaturan') ?>" onclick="toggleMobileDrawer(false)" class="flex items-center justify-between p-2 rounded-2xl transition-all duration-200 group <?= $isPengaturanActive ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/25' : 'hover:bg-slate-100/80 text-slate-700' ?>">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs border transition-transform group-hover:scale-105 <?= $isPengaturanActive ? 'bg-white text-emerald-700 border-white shadow-2xs' : 'bg-slate-100 text-slate-700 border-slate-200/60' ?>">
+                                            <i class="fa-solid fa-sliders"></i>
+                                        </div>
+                                        <span class="text-xs font-heading <?= $isPengaturanActive ? 'font-black text-white' : 'font-extrabold text-slate-800 group-hover:text-emerald-800' ?>">Master Pengaturan</span>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-[9px] transition-transform group-hover:translate-x-0.5 <?= $isPengaturanActive ? 'text-white/80' : 'text-slate-300 group-hover:text-emerald-600' ?>"></i>
+                                </a>
+                                <a href="<?= base_url('profil') ?>" onclick="toggleMobileDrawer(false)" class="flex items-center justify-between p-2 rounded-2xl transition-all duration-200 group <?= $isProfilActive ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/25' : 'hover:bg-slate-100/80 text-slate-700' ?>">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs border transition-transform group-hover:scale-105 <?= $isProfilActive ? 'bg-white text-emerald-700 border-white shadow-2xs' : 'bg-blue-50 text-blue-600 border-blue-200/60' ?>">
+                                            <i class="fa-solid fa-user-gear"></i>
+                                        </div>
+                                        <span class="text-xs font-heading <?= $isProfilActive ? 'font-black text-white' : 'font-extrabold text-slate-800 group-hover:text-emerald-800' ?>">Kelola Akun & Profil</span>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-[9px] transition-transform group-hover:translate-x-0.5 <?= $isProfilActive ? 'text-white/80' : 'text-slate-300 group-hover:text-emerald-600' ?>"></i>
+                                </a>
+                            </div>
                         </div>
                     <?php endif; ?>
-                </div>
-            </div>
 
-            <!-- Drawer Footer Auth Action -->
-            <div class="p-5 border-t border-slate-100 bg-slate-50/50">
-                <?php if (session()->get('isLoggedIn')): ?>
-                    <a href="<?= base_url('logout') ?>" onclick="toggleMobileDrawer(false)" data-confirm-msg="Apakah Anda yakin ingin keluar/logout?" class="w-full py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-heading font-extrabold text-xs border border-rose-200 transition shadow-2xs flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <span>Keluar / Logout</span>
-                    </a>
-                <?php else: ?>
-                    <a href="<?= base_url('login') ?>" onclick="toggleMobileDrawer(false)" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-heading font-extrabold text-xs transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-right-to-bracket"></i>
-                        <span>Masuk / Login Sistem</span>
-                    </a>
-                <?php endif; ?>
+                    <!-- Quick Contact Hotline Card -->
+                    <div class="pt-1">
+                        <div class="px-2 pt-1 pb-1 flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-wider text-slate-400">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            Bantuan & Kontak CS
+                        </div>
+                        <a href="<?= $waCsUrl ?>" target="_blank" rel="noopener noreferrer" data-no-spa="true" class="flex items-center gap-3 p-2.5 rounded-2xl bg-emerald-50/70 hover:bg-emerald-100/80 border border-emerald-200/70 transition group">
+                            <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs shadow-2xs group-hover:scale-105 transition-transform flex-shrink-0">
+                                <i class="fa-brands fa-whatsapp text-sm"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <span class="text-xs font-heading font-extrabold text-emerald-900 block truncate">Hotline CS WhatsApp</span>
+                                <span class="text-[10px] text-emerald-700 font-bold block truncate"><?= esc($hotlineWa) ?></span>
+                            </div>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-emerald-600 mr-1"></i>
+                        </a>
+                    </div>
+
+                    <!-- Auth Action Button (Logout / Login) inside Scroll Body with extra bottom clearance -->
+                    <div class="pt-2 pb-6">
+                        <?php if (session()->get('isLoggedIn')): ?>
+                            <a href="<?= base_url('logout') ?>" onclick="toggleMobileDrawer(false)" data-confirm-msg="Apakah Anda yakin ingin keluar/logout?" class="w-full py-2.5 px-4 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-heading font-extrabold text-xs border border-rose-200/80 transition shadow-2xs flex items-center justify-center gap-2 active:scale-98">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                                <span>Keluar / Logout</span>
+                            </a>
+                        <?php else: ?>
+                            <a href="<?= base_url('login') ?>" onclick="toggleMobileDrawer(false)" class="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-heading font-extrabold text-xs transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 active:scale-98">
+                                <i class="fa-solid fa-right-to-bracket"></i>
+                                <span>Masuk / Login Sistem</span>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -932,14 +1072,14 @@
 
                     requestAnimationFrame(function() {
                         backdrop.style.opacity = '1';
-                        drawer.style.transform = 'translateX(0)';
+                        drawer.style.transform = 'translateX(0) scale(1)';
                     });
                 } else {
                     if (!isDrawerOpen && container.classList.contains('hidden')) return;
                     isDrawerOpen = false;
 
                     backdrop.style.opacity = '0';
-                    drawer.style.transform = 'translateX(100%)';
+                    drawer.style.transform = 'translateX(110%) scale(0.95)';
                     container.style.pointerEvents = 'none';
 
                     // Unlock body scroll and restore previous scroll position accurately
@@ -990,7 +1130,7 @@
     </script>
 
     <!-- Main Content Area -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-24 md:py-8">
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-28 md:py-8">
         <?php if ($isAuditor): ?>
             <!-- Auditor Read-Only Notification Banner -->
             <div class="mb-6 p-4 rounded-2xl bg-blue-50/90 border border-blue-200 text-blue-900 flex items-center justify-between shadow-sm">
@@ -1263,127 +1403,142 @@
         </div>
     </footer>
 
-    <!-- Mobile Bottom App Bar Navigation (Hidden on Desktop, Visible on Mobile) -->
-    <nav id="mobileBottomNav" class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] py-1.5 px-2">
-        <div class="flex items-center justify-around max-w-md mx-auto">
+    <!-- Mobile Bottom App Bar Navigation (Floating Glassmorphism Card Style) -->
+    <nav id="mobileBottomNav" class="md:hidden fixed bottom-3 left-3 right-3 sm:left-6 sm:right-6 max-w-md mx-auto z-40 bg-white/95 backdrop-blur-2xl border border-slate-100 shadow-[0_12px_40px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.04)] ring-1 ring-slate-900/5 rounded-[32px] px-2 py-1.5">
+        <div class="grid grid-cols-5 items-end justify-items-center relative">
             <?php if ($isUserAdminOrAuditor): ?>
                 <!-- Admin / Auditor Mobile Bottom Tabs -->
-                <a href="<?= base_url('/') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isHomeActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
-                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isHomeActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
-                        <i class="fa-solid fa-house"></i>
-                    </div>
-                    <span class="text-[10px] leading-tight tracking-tight <?= $isHomeActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Beranda</span>
-                </a>
-
-                <a href="<?= base_url('wilayah') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isWilayahActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
-                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isWilayahActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                <!-- 1. Wilayah -->
+                <a href="<?= base_url('wilayah') ?>" class="flex flex-col items-center justify-between w-full h-[54px] py-1 text-center transition group relative">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm transition-all duration-200 <?= $isWilayahActive ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300/50 shadow-2xs' : 'text-slate-400 group-hover:text-emerald-700' ?>">
                         <i class="fa-solid fa-map-location-dot"></i>
                     </div>
-                    <span class="text-[10px] leading-tight tracking-tight <?= $isWilayahActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Wilayah</span>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isWilayahActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Wilayah</span>
                 </a>
 
-                <a href="<?= base_url('alat') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group relative <?= $isAlatActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
-                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs relative transition-all <?= $isAlatActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                <!-- 2. Alat -->
+                <a href="<?= base_url('alat') ?>" class="flex flex-col items-center justify-between w-full h-[54px] py-1 text-center transition group relative">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm relative transition-all duration-200 <?= $isAlatActive ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300/50 shadow-2xs' : 'text-slate-400 group-hover:text-emerald-700' ?>">
                         <i class="fa-solid fa-broom-ball"></i>
                         <?php if ($notifAlatCount > 0): ?>
-                            <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center animate-pulse shadow-2xs">
+                            <span class="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center ring-2 ring-white shadow-2xs animate-pulse">
                                 <?= $notifAlatCount > 9 ? '9+' : $notifAlatCount ?>
                             </span>
                         <?php endif; ?>
                     </div>
-                    <span class="text-[10px] leading-tight tracking-tight <?= $isAlatActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Alat</span>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isAlatActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Alat</span>
                 </a>
 
-                <a href="<?= base_url('buku') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= ($isBukuActive || $isKeuanganActive) ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
-                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= ($isBukuActive || $isKeuanganActive) ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                <!-- 3. Center Raised FAB: Beranda (Home) -->
+                <a href="<?= base_url('/') ?>" class="flex flex-col items-center justify-end w-full h-[54px] pb-1 text-center transition group relative">
+                    <div class="absolute -top-4.5 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full flex items-center justify-center text-base transition-all duration-300 <?= $isHomeActive ? 'bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-600 text-white shadow-xl shadow-emerald-600/40 ring-4 ring-emerald-200/90 scale-105' : 'bg-white text-slate-400 border border-slate-200/90 shadow-md shadow-slate-300/40 ring-4 ring-slate-100/90 group-hover:scale-105 group-hover:text-emerald-600 group-hover:border-emerald-300 group-hover:shadow-emerald-500/15 active:scale-95' ?>">
+                        <i class="fa-solid fa-house <?= $isHomeActive ? 'drop-shadow-xs' : '' ?>"></i>
+                    </div>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isHomeActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-emerald-700' ?>">Beranda</span>
+                </a>
+
+                <!-- 4. LPJ -->
+                <a href="<?= base_url('buku') ?>" class="flex flex-col items-center justify-between w-full h-[54px] py-1 text-center transition group relative">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm transition-all duration-200 <?= ($isBukuActive || $isKeuanganActive) ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300/50 shadow-2xs' : 'text-slate-400 group-hover:text-emerald-700' ?>">
                         <i class="fa-solid fa-book-bookmark"></i>
                     </div>
-                    <span class="text-[10px] leading-tight tracking-tight <?= ($isBukuActive || $isKeuanganActive) ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">LPJ</span>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= ($isBukuActive || $isKeuanganActive) ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">LPJ</span>
                 </a>
 
-                <button type="button" onclick="toggleMobileDrawer(true)" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group relative <?= $isDrawerActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
-                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs relative transition-all <?= $isDrawerActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                <!-- 5. Menu Drawer Trigger -->
+                <button type="button" onclick="toggleMobileDrawer(true)" class="flex flex-col items-center justify-between w-full h-[54px] py-1 text-center transition group relative">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm relative transition-all duration-200 <?= $isDrawerActive ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300/50 shadow-2xs' : 'text-slate-400 group-hover:text-emerald-700' ?>">
                         <i class="fa-solid fa-bars"></i>
                         <?php if ($notifCsCount > 0): ?>
-                            <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white animate-pulse"></span>
+                            <span class="absolute top-0.5 right-1 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white animate-pulse"></span>
                         <?php endif; ?>
                     </div>
-                    <span class="text-[10px] leading-tight tracking-tight <?= $isDrawerActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Menu</span>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isDrawerActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Menu</span>
                 </button>
 
             <?php elseif ($isUserPengurusOrKader): ?>
                 <!-- Pengurus / Kader Mobile Bottom Tabs -->
-                <a href="<?= base_url('/') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isHomeActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
-                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isHomeActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
-                        <i class="fa-solid fa-house"></i>
-                    </div>
-                    <span class="text-[10px] leading-tight tracking-tight <?= $isHomeActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Beranda</span>
-                </a>
-
-                <a href="<?= base_url('app') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isAppActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
-                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isAppActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                <!-- 1. Dashboard -->
+                <a href="<?= base_url('app') ?>" class="flex flex-col items-center justify-between w-full h-[54px] py-1 text-center transition group relative">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm transition-all duration-200 <?= $isAppActive ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300/50 shadow-2xs' : 'text-slate-400 group-hover:text-emerald-700' ?>">
                         <i class="fa-solid fa-gauge-high"></i>
                     </div>
-                    <span class="text-[10px] leading-tight tracking-tight <?= $isAppActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Dashboard</span>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isAppActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Dashboard</span>
                 </a>
 
-                <a href="<?= base_url('app/lpj') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isAppLpjActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
-                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isAppLpjActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </div>
-                    <span class="text-[10px] leading-tight tracking-tight <?= $isAppLpjActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Isi LPJ</span>
-                </a>
-
-                <a href="<?= base_url('app/lapor-wilayah') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isAppWilayahActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
-                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isAppWilayahActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                <!-- 2. Lapor Area -->
+                <a href="<?= base_url('app/lapor-wilayah') ?>" class="flex flex-col items-center justify-between w-full h-[54px] py-1 text-center transition group relative">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm transition-all duration-200 <?= $isAppWilayahActive ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300/50 shadow-2xs' : 'text-slate-400 group-hover:text-emerald-700' ?>">
                         <i class="fa-solid fa-map-location-dot"></i>
                     </div>
-                    <span class="text-[10px] leading-tight tracking-tight <?= $isAppWilayahActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Lapor Area</span>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isAppWilayahActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Lapor Area</span>
                 </a>
 
-                <button type="button" onclick="toggleMobileDrawer(true)" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isDrawerActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
-                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isDrawerActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                <!-- 3. Center Raised FAB: Beranda (Home) -->
+                <a href="<?= base_url('/') ?>" class="flex flex-col items-center justify-end w-full h-[54px] pb-1 text-center transition group relative">
+                    <div class="absolute -top-4.5 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full flex items-center justify-center text-base transition-all duration-300 <?= $isHomeActive ? 'bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-600 text-white shadow-xl shadow-emerald-600/40 ring-4 ring-emerald-200/90 scale-105' : 'bg-white text-slate-400 border border-slate-200/90 shadow-md shadow-slate-300/40 ring-4 ring-slate-100/90 group-hover:scale-105 group-hover:text-emerald-600 group-hover:border-emerald-300 group-hover:shadow-emerald-500/15 active:scale-95' ?>">
+                        <i class="fa-solid fa-house <?= $isHomeActive ? 'drop-shadow-xs' : '' ?>"></i>
+                    </div>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isHomeActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-emerald-700' ?>">Beranda</span>
+                </a>
+
+                <!-- 4. Isi LPJ -->
+                <a href="<?= base_url('app/lpj') ?>" class="flex flex-col items-center justify-between w-full h-[54px] py-1 text-center transition group relative">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm transition-all duration-200 <?= $isAppLpjActive ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300/50 shadow-2xs' : 'text-slate-400 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </div>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isAppLpjActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Isi LPJ</span>
+                </a>
+
+                <!-- 5. Menu Drawer Trigger -->
+                <button type="button" onclick="toggleMobileDrawer(true)" class="flex flex-col items-center justify-between w-full h-[54px] py-1 text-center transition group relative">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm relative transition-all duration-200 <?= $isDrawerActive ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300/50 shadow-2xs' : 'text-slate-400 group-hover:text-emerald-700' ?>">
                         <i class="fa-solid fa-bars"></i>
                     </div>
-                    <span class="text-[10px] leading-tight tracking-tight <?= $isDrawerActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Menu</span>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isDrawerActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Menu</span>
                 </button>
 
             <?php else: ?>
                 <!-- Public / Guest Mobile Bottom Tabs -->
-                <a href="<?= base_url('/') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isHomeActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
-                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isHomeActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
-                        <i class="fa-solid fa-house"></i>
-                    </div>
-                    <span class="text-[10px] leading-tight tracking-tight <?= $isHomeActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Beranda</span>
-                </a>
-
-                <a href="<?= base_url('program-kerja') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isProkerActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
-                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isProkerActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                <!-- 1. Program -->
+                <a href="<?= base_url('program-kerja') ?>" class="flex flex-col items-center justify-between w-full h-[54px] py-1 text-center transition group relative">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm transition-all duration-200 <?= $isProkerActive ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300/50 shadow-2xs' : 'text-slate-400 group-hover:text-emerald-700' ?>">
                         <i class="fa-solid fa-list-check"></i>
                     </div>
-                    <span class="text-[10px] leading-tight tracking-tight <?= $isProkerActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Program</span>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isProkerActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Program</span>
                 </a>
 
-                <a href="<?= base_url('sop') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isSopActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
-                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isSopActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                <!-- 2. SOP -->
+                <a href="<?= base_url('sop') ?>" class="flex flex-col items-center justify-between w-full h-[54px] py-1 text-center transition group relative">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm transition-all duration-200 <?= $isSopActive ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300/50 shadow-2xs' : 'text-slate-400 group-hover:text-emerald-700' ?>">
                         <i class="fa-solid fa-file-shield"></i>
                     </div>
-                    <span class="text-[10px] leading-tight tracking-tight <?= $isSopActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">SOP</span>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isSopActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">SOP</span>
                 </a>
 
-                <a href="<?= base_url('cs') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isCsActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
-                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isCsActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                <!-- 3. Center Raised FAB: Beranda (Home) -->
+                <a href="<?= base_url('/') ?>" class="flex flex-col items-center justify-end w-full h-[54px] pb-1 text-center transition group relative">
+                    <div class="absolute -top-4.5 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full flex items-center justify-center text-base transition-all duration-300 <?= $isHomeActive ? 'bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-600 text-white shadow-xl shadow-emerald-600/40 ring-4 ring-emerald-200/90 scale-105' : 'bg-white text-slate-400 border border-slate-200/90 shadow-md shadow-slate-300/40 ring-4 ring-slate-100/90 group-hover:scale-105 group-hover:text-emerald-600 group-hover:border-emerald-300 group-hover:shadow-emerald-500/15 active:scale-95' ?>">
+                        <i class="fa-solid fa-house <?= $isHomeActive ? 'drop-shadow-xs' : '' ?>"></i>
+                    </div>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isHomeActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-emerald-700' ?>">Beranda</span>
+                </a>
+
+                <!-- 4. Lapor CS -->
+                <a href="<?= base_url('cs') ?>" class="flex flex-col items-center justify-between w-full h-[54px] py-1 text-center transition group relative">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm transition-all duration-200 <?= $isCsActive ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300/50 shadow-2xs' : 'text-slate-400 group-hover:text-emerald-700' ?>">
                         <i class="fa-solid fa-headset"></i>
                     </div>
-                    <span class="text-[10px] leading-tight tracking-tight <?= $isCsActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Lapor CS</span>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isCsActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Lapor CS</span>
                 </a>
 
-                <a href="<?= base_url('login') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isLoginActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
-                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isLoginActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
-                        <i class="fa-solid fa-right-to-bracket"></i>
+                <!-- 5. Menu Drawer Trigger -->
+                <button type="button" onclick="toggleMobileDrawer(true)" class="flex flex-col items-center justify-between w-full h-[54px] py-1 text-center transition group relative">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm relative transition-all duration-200 <?= $isDrawerActive ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300/50 shadow-2xs' : 'text-slate-400 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-bars"></i>
                     </div>
-                    <span class="text-[10px] leading-tight tracking-tight <?= $isLoginActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Login</span>
-                </a>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isDrawerActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Menu</span>
+                </button>
             <?php endif; ?>
         </div>
     </nav>
@@ -1391,7 +1546,7 @@
     <!-- Floating Fixed WhatsApp Customer Service (CS) Button (Non-Admin / Non-Auditor Only) -->
     <div id="floatingCsContainer">
         <?php if (!$isUserAdminOrAuditor): ?>
-            <aside aria-label="Hotline WhatsApp CS Admin Kebersihan" class="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-40 group flex items-center">
+            <aside aria-label="Hotline WhatsApp CS Admin Kebersihan" class="fixed bottom-24 right-4 md:bottom-6 md:right-6 z-40 group flex items-center">
                 <!-- Floating Tooltip Card (Desktop Only) -->
                 <a href="<?= $waCsUrl ?>" target="_blank" rel="noopener noreferrer" data-no-spa="true" class="hidden md:flex items-center gap-2.5 mr-3 px-3.5 py-2 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-xl shadow-slate-900/10 opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100 animate-pulse flex-shrink-0"></span>

@@ -3,20 +3,21 @@
 <?= $this->section('content') ?>
 <div class="space-y-8">
 
-    <!-- Hero Header Banner (Gradient Emerald Standard) -->
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-700 to-emerald-900 text-white p-8 sm:p-10 shadow-2xl shadow-emerald-900/20 border border-emerald-600/30">
-        <div class="absolute -right-10 -bottom-10 opacity-10 text-white pointer-events-none">
-            <i class="fa-solid fa-leaf text-[240px]"></i>
-        </div>
+    <!-- Hero Header Banner (Frosted Glass Emerald Theme) -->
+    <div class="relative overflow-hidden rounded-[32px] p-6 sm:p-10 shadow-[0_20px_50px_rgba(6,78,59,0.22)] border border-white/25 bg-gradient-to-br from-emerald-950/90 via-teal-900/85 to-slate-950/90 backdrop-blur-2xl text-white">
+        <!-- Ambient Background Glowing Circles -->
+        <div class="absolute -right-12 -top-12 w-64 h-64 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-12 -bottom-12 w-64 h-64 bg-teal-400/20 rounded-full blur-3xl pointer-events-none"></div>
+
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div class="space-y-2 max-w-3xl">
-                <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/20 backdrop-blur-md text-emerald-200 text-xs font-bold uppercase tracking-wider border border-emerald-400/30">
-                    <i class="fa-solid fa-book-open"></i> Yayasan Assalafiyyah Mlangi
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-emerald-200 text-xs font-extrabold uppercase tracking-wider border border-white/20">
+                    <i class="fa-solid fa-leaf text-emerald-400"></i> Yayasan Assalafiyyah Mlangi
                 </span>
-                <h1 class="text-3xl sm:text-4xl font-heading font-extrabold tracking-tight leading-tight">
+                <h1 class="text-2xl sm:text-4xl font-heading font-black tracking-tight leading-tight text-white drop-shadow-md">
                     Program Kerja Asrama & Unit
                 </h1>
-                <p class="text-emerald-100/90 text-sm sm:text-base leading-relaxed">
+                <p class="text-slate-200 text-xs sm:text-base leading-relaxed font-medium">
                     Daftar program kebersihan yang berjalan di seluruh asrama, Gemerlap, Satgas Kebersihan, dan unit lembaga. Seluruh unit dapat memantau program secara transparan.
                 </p>
                 <?php if ($isLoggedIn && !$isAdminOrAuditor && $currentUserUnit): ?>
@@ -29,8 +30,8 @@
 
             <?php if ($isLoggedIn && session()->get('role') !== 'Auditor'): ?>
                 <div class="flex-shrink-0">
-                    <a href="<?= base_url('program-kerja/create') ?>" class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-white text-emerald-900 font-heading font-bold text-sm hover:bg-emerald-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 group">
-                        <div class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition">
+                    <a href="<?= base_url('program-kerja/create') ?>" class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-white text-emerald-900 font-heading font-extrabold text-xs sm:text-sm hover:bg-emerald-50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 shadow-lg flex items-center justify-center gap-2 group active:scale-95">
+                        <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition">
                             <i class="fa-solid fa-plus text-xs"></i>
                         </div>
                         <span>Tambah Program Baru</span>
@@ -40,9 +41,9 @@
         </div>
     </div>
 
-    <!-- Quick Stats Cards (4 Cards) -->
+    <!-- Quick Stats Cards (4 Frosted Glass Cards) -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-200/80 bg-white shadow-md flex items-center gap-3.5">
+        <div class="glass-card glass-card-hover rounded-2xl p-4 sm:p-5 border border-white/80 bg-white/75 backdrop-blur-2xl shadow-sm flex items-center gap-3.5">
             <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">
                 <i class="fa-solid fa-layer-group"></i>
             </div>
@@ -52,7 +53,7 @@
             </div>
         </div>
 
-        <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-200/80 bg-white shadow-md flex items-center gap-3.5">
+        <div class="glass-card glass-card-hover rounded-2xl p-4 sm:p-5 border border-white/80 bg-white/75 backdrop-blur-2xl shadow-sm flex items-center gap-3.5">
             <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
                 <i class="fa-solid fa-circle-check"></i>
             </div>
@@ -62,7 +63,7 @@
             </div>
         </div>
 
-        <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-200/80 bg-white shadow-md flex items-center gap-3.5">
+        <div class="glass-card glass-card-hover rounded-2xl p-4 sm:p-5 border border-white/80 bg-white/75 backdrop-blur-2xl shadow-sm flex items-center gap-3.5">
             <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
                 <i class="fa-solid fa-spinner"></i>
             </div>
@@ -72,7 +73,7 @@
             </div>
         </div>
 
-        <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-200/80 bg-white shadow-md flex items-center gap-3.5">
+        <div class="glass-card glass-card-hover rounded-2xl p-4 sm:p-5 border border-white/80 bg-white/75 backdrop-blur-2xl shadow-sm flex items-center gap-3.5">
             <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
                 <i class="fa-solid fa-calendar-check"></i>
             </div>

@@ -2,35 +2,35 @@
 
 <?= $this->section('content') ?>
 <div class="space-y-6">
-    <!-- Hero Banner / Page Header (Standard Emerald Theme) -->
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-700 to-emerald-900 text-white p-6 sm:p-10 shadow-2xl shadow-emerald-900/20 border border-emerald-600/30">
-        <div class="absolute -right-10 -bottom-10 opacity-10 text-white pointer-events-none">
-            <i class="fa-solid fa-circle-question text-[160px] sm:text-[240px]"></i>
-        </div>
+    <!-- Hero Banner / Page Header (Frosted Glass Theme) -->
+    <div class="relative overflow-hidden rounded-[32px] p-6 sm:p-10 shadow-[0_20px_50px_rgba(6,78,59,0.22)] border border-white/25 bg-gradient-to-br from-emerald-950/90 via-teal-900/85 to-slate-950/90 backdrop-blur-2xl text-white">
+        <!-- Ambient Glowing Circles -->
+        <div class="absolute -right-12 -top-12 w-64 h-64 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-12 -bottom-12 w-64 h-64 bg-teal-400/20 rounded-full blur-3xl pointer-events-none"></div>
+
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div class="space-y-2 max-w-2xl">
-                <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/20 backdrop-blur-md text-emerald-200 text-xs font-bold uppercase tracking-wider border border-emerald-400/30">
-                    <i class="fa-solid fa-book-open-reader"></i> Pusat Bantuan & Panduan Sistem
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-emerald-200 text-xs font-extrabold uppercase tracking-wider border border-white/20">
+                    <i class="fa-solid fa-book-open-reader text-emerald-400"></i> Pusat Bantuan & Panduan Sistem
                 </span>
-                <h1 class="text-3xl sm:text-4xl font-heading font-extrabold tracking-tight leading-tight">
+                <h1 class="text-2xl sm:text-4xl font-heading font-black tracking-tight leading-tight text-white drop-shadow-md">
                     Pusat Bantuan & FAQ
                 </h1>
-                <p class="text-emerald-100/90 text-sm sm:text-base leading-relaxed">
+                <p class="text-slate-200 text-xs sm:text-sm leading-relaxed font-medium">
                     Panduan alur kerja operasional menu untuk pengurus & kader, prosedur kebersihan, dan jawaban atas pertanyaan umum.
                 </p>
             </div>
 
             <?php if ($isAdmin): ?>
             <div class="flex-shrink-0 flex flex-wrap items-center gap-2.5">
-                <button type="button" onclick="openModalTambahFaq()" class="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-white text-emerald-900 font-heading font-bold text-xs sm:text-sm hover:bg-emerald-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 group">
-                    <div class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition">
+                <button type="button" onclick="openModalTambahFaq()" class="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-white text-emerald-900 font-heading font-extrabold text-xs sm:text-sm hover:bg-emerald-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 group active:scale-95">
+                    <div class="w-6 h-6 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition">
                         <i class="fa-solid fa-plus text-xs"></i>
                     </div>
                     <span>Tambah FAQ</span>
                 </button>
-                <button type="button" onclick="openModalTambahAlur()" class="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-white text-emerald-900 font-heading font-bold text-xs sm:text-sm hover:bg-emerald-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 group
-                ">
-                    <div class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition">
+                <button type="button" onclick="openModalTambahAlur()" class="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-white text-emerald-900 font-heading font-extrabold text-xs sm:text-sm hover:bg-emerald-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 group active:scale-95">
+                    <div class="w-6 h-6 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition">
                         <i class="fa-solid fa-diagram-project text-xs"></i>
                     </div>
                     <span>Tambah Alur</span>
@@ -45,24 +45,24 @@
         $activeTab = ($isAdmin && in_array($tabParam, ['faq_kelola', 'alur_kelola'])) ? $tabParam : 'panduan_alur';
     ?>
 
-    <!-- Navigation Tabs & Search Row (Standardized Layout) -->
-    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-slate-200 pb-2">
+    <!-- Navigation Tabs & Search Row (Glassmorphic Bar) -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-3">
         <!-- Navigation Tabs -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-            <button type="button" onclick="switchFaqTab('tab_panduan_alur')" id="btn_tab_panduan_alur" class="px-4 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition-all duration-200 shadow-2xs flex items-center gap-2 <?= $activeTab === 'panduan_alur' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200/90' ?>">
+            <button type="button" onclick="switchFaqTab('tab_panduan_alur')" id="btn_tab_panduan_alur" class="px-4 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition-all duration-200 shadow-2xs flex items-center gap-2 <?= $activeTab === 'panduan_alur' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'glass-card text-slate-700 hover:bg-white border border-white/80' ?>">
                 <i class="fa-solid fa-route <?= $activeTab === 'panduan_alur' ? 'text-white' : 'text-emerald-600' ?>"></i>
                 <span>Panduan Alur Menu</span>
                 <span class="tab-badge px-2 py-0.5 rounded-full text-[10px] font-extrabold <?= $activeTab === 'panduan_alur' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600' ?>"><?= count($alurList) ?></span>
             </button>
 
-            <button type="button" onclick="switchFaqTab('tab_faq_list')" id="btn_tab_faq_list" class="px-4 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition-all duration-200 shadow-2xs flex items-center gap-2 <?= $activeTab === 'faq_list' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200/90' ?>">
+            <button type="button" onclick="switchFaqTab('tab_faq_list')" id="btn_tab_faq_list" class="px-4 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition-all duration-200 shadow-2xs flex items-center gap-2 <?= $activeTab === 'faq_list' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'glass-card text-slate-700 hover:bg-white border border-white/80' ?>">
                 <i class="fa-solid fa-circle-question <?= $activeTab === 'faq_list' ? 'text-white' : 'text-emerald-600' ?>"></i>
                 <span>Tanya Jawab FAQ</span>
                 <span class="tab-badge px-2 py-0.5 rounded-full text-[10px] font-extrabold <?= $activeTab === 'faq_list' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600' ?>"><?= count($faqList) ?></span>
             </button>
 
             <?php if ($isAdmin): ?>
-            <button type="button" onclick="switchFaqTab('tab_admin_kelola')" id="btn_tab_admin_kelola" class="px-4 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition-all duration-200 shadow-2xs flex items-center gap-2 <?= ($activeTab === 'faq_kelola' || $activeTab === 'alur_kelola') ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200/90' ?>">
+            <button type="button" onclick="switchFaqTab('tab_admin_kelola')" id="btn_tab_admin_kelola" class="px-4 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition-all duration-200 shadow-2xs flex items-center gap-2 <?= ($activeTab === 'faq_kelola' || $activeTab === 'alur_kelola') ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'glass-card text-slate-700 hover:bg-white border border-white/80' ?>">
                 <i class="fa-solid fa-sliders <?= ($activeTab === 'faq_kelola' || $activeTab === 'alur_kelola') ? 'text-white' : 'text-emerald-600' ?>"></i>
                 <span>Kelola Konten</span>
             </button>
@@ -72,7 +72,7 @@
         <!-- Search Input -->
         <div class="relative w-full sm:w-72">
             <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-            <input type="text" id="faqGlobalSearch" onkeyup="filterFaqAndAlur()" placeholder="Cari alur / pertanyaan FAQ..." class="w-full pl-9 pr-4 py-2 rounded-2xl border border-slate-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 focus:bg-white transition shadow-2xs">
+            <input type="text" id="faqGlobalSearch" onkeyup="filterFaqAndAlur()" placeholder="Cari alur / pertanyaan FAQ..." class="w-full pl-9 pr-4 py-2.5 rounded-2xl border border-white/80 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white/80 backdrop-blur-md focus:bg-white transition shadow-2xs">
         </div>
     </div>
 

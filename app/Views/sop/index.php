@@ -3,27 +3,28 @@
 <?= $this->section('content') ?>
 <div class="space-y-6 sm:space-y-8">
 
-    <!-- Hero Header Banner (Gradient Emerald) -->
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-700 to-emerald-900 text-white p-6 sm:p-10 shadow-2xl shadow-emerald-900/20 border border-emerald-600/30">
-        <div class="absolute -right-10 -bottom-10 opacity-10 text-white pointer-events-none">
-            <i class="fa-solid fa-book-bookmark text-[160px] sm:text-[240px]"></i>
-        </div>
+    <!-- Hero Header Banner (Frosted Glass Emerald Theme) -->
+    <div class="relative overflow-hidden rounded-[32px] p-6 sm:p-10 shadow-[0_20px_50px_rgba(6,78,59,0.22)] border border-white/25 bg-gradient-to-br from-emerald-950/90 via-teal-900/85 to-slate-950/90 backdrop-blur-2xl text-white">
+        <!-- Ambient Glowing Background Circles -->
+        <div class="absolute -right-12 -top-12 w-64 h-64 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-12 -bottom-12 w-64 h-64 bg-teal-400/20 rounded-full blur-3xl pointer-events-none"></div>
+
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
             <div class="space-y-2 max-w-3xl">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 backdrop-blur-md text-emerald-200 text-[11px] sm:text-xs font-bold uppercase tracking-wider border border-emerald-400/30">
-                    <i class="fa-solid fa-shield-halved"></i> Panduan & Regulasi Resmi
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-emerald-200 text-[11px] sm:text-xs font-extrabold uppercase tracking-wider border border-white/20">
+                    <i class="fa-solid fa-shield-halved text-emerald-400"></i> Panduan & Regulasi Resmi
                 </span>
-                <h1 class="text-2xl sm:text-4xl font-heading font-extrabold tracking-tight leading-tight">
+                <h1 class="text-2xl sm:text-4xl font-heading font-black tracking-tight leading-tight text-white drop-shadow-md">
                     SOP & Kebijakan Kebersihan
                 </h1>
-                <p class="text-emerald-100/90 text-xs sm:text-base leading-relaxed">
+                <p class="text-slate-200 text-xs sm:text-base leading-relaxed font-medium">
                     Kumpulan standar operasional prosedur, peraturan ketertiban lingkungan, kebijakan resmi, serta program-program utama kebersihan Yayasan Assalafiyyah Mlangi.
                 </p>
             </div>
 
             <?php if (session()->get('role') === 'Admin'): ?>
                 <div class="flex-shrink-0 flex items-center gap-3">
-                    <a href="<?= base_url('sop/create') ?>" class="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-white text-emerald-900 font-heading font-bold text-xs sm:text-sm hover:bg-emerald-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 group">
+                    <a href="<?= base_url('sop/create') ?>" class="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-white text-emerald-900 font-heading font-extrabold text-xs sm:text-sm hover:bg-emerald-50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 shadow-lg flex items-center justify-center gap-2 group active:scale-95">
                         <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition">
                             <i class="fa-solid fa-plus text-xs"></i>
                         </div>
@@ -40,7 +41,7 @@
         <div class="flex flex-wrap items-center gap-2">
             <!-- Semua -->
             <?php $isAll = empty($currentKategori); ?>
-            <a href="<?= base_url('sop') ?>" class="px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center gap-2 border <?= $isAll ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 border-slate-200/90 hover:bg-slate-50 hover:border-slate-300 shadow-2xs' ?>">
+            <a href="<?= base_url('sop') ?>" class="px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center gap-2 border <?= $isAll ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20' : 'glass-card text-slate-700 border-white/80 hover:bg-white shadow-2xs' ?>">
                 <i class="fa-solid fa-layer-group text-xs <?= $isAll ? 'text-white' : 'text-emerald-600' ?>"></i>
                 <span>Semua</span>
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold <?= $isAll ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600' ?>"><?= $stats['total'] ?></span>
@@ -48,7 +49,7 @@
 
             <!-- Peraturan -->
             <?php $isPeraturan = ($currentKategori === 'Peraturan'); ?>
-            <a href="<?= base_url('sop?kategori=Peraturan') ?>" class="px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center gap-2 border <?= $isPeraturan ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 border-slate-200/90 hover:bg-rose-50/50 hover:border-rose-200 shadow-2xs' ?>">
+            <a href="<?= base_url('sop?kategori=Peraturan') ?>" class="px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center gap-2 border <?= $isPeraturan ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20' : 'glass-card text-slate-700 border-white/80 hover:bg-rose-50/50 shadow-2xs' ?>">
                 <i class="fa-solid fa-scale-balanced text-xs <?= $isPeraturan ? 'text-white' : 'text-rose-500' ?>"></i>
                 <span>Peraturan</span>
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold <?= $isPeraturan ? 'bg-white/20 text-white' : 'bg-rose-50 text-rose-700 border border-rose-100/80' ?>"><?= $stats['peraturan'] ?></span>
@@ -56,7 +57,7 @@
 
             <!-- Kebijakan -->
             <?php $isKebijakan = ($currentKategori === 'Kebijakan'); ?>
-            <a href="<?= base_url('sop?kategori=Kebijakan') ?>" class="px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center gap-2 border <?= $isKebijakan ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 border-slate-200/90 hover:bg-teal-50/50 hover:border-teal-200 shadow-2xs' ?>">
+            <a href="<?= base_url('sop?kategori=Kebijakan') ?>" class="px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center gap-2 border <?= $isKebijakan ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20' : 'glass-card text-slate-700 border-white/80 hover:bg-teal-50/50 shadow-2xs' ?>">
                 <i class="fa-solid fa-building-shield text-xs <?= $isKebijakan ? 'text-white' : 'text-teal-600' ?>"></i>
                 <span>Kebijakan</span>
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold <?= $isKebijakan ? 'bg-white/20 text-white' : 'bg-teal-50 text-teal-700 border border-teal-100/80' ?>"><?= $stats['kebijakan'] ?></span>
@@ -64,8 +65,8 @@
 
             <!-- Program Utama -->
             <?php $isProgram = ($currentKategori === 'Program Utama'); ?>
-            <a href="<?= base_url('sop?kategori=' . urlencode('Program Utama')) ?>" class="px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center gap-2 border <?= $isProgram ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 border-slate-200/90 hover:bg-amber-50/50 hover:border-amber-200 shadow-2xs' ?>">
-                <i class="fa-solid fa-sparkles text-xs <?= $isProgram ? 'text-white' : 'text-amber-500' ?>"></i>
+            <a href="<?= base_url('sop?kategori=' . urlencode('Program Utama')) ?>" class="px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center gap-2 border <?= $isProgram ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20' : 'glass-card text-slate-700 border-white/80 hover:bg-amber-50/50 shadow-2xs' ?>">
+                <i class="fa-solid fa-star text-xs <?= $isProgram ? 'text-white' : 'text-amber-500' ?>"></i>
                 <span>Program Utama</span>
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold <?= $isProgram ? 'bg-white/20 text-white' : 'bg-amber-50 text-amber-800 border border-amber-100/80' ?>"><?= $stats['program'] ?></span>
             </a>
@@ -77,7 +78,7 @@
                 <input type="hidden" name="kategori" value="<?= esc($currentKategori) ?>">
             <?php endif; ?>
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-            <input type="text" name="q" value="<?= esc($searchKeyword ?? '') ?>" placeholder="Cari SOP, aturan, atau program..." class="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs placeholder-slate-400">
+            <input type="text" name="q" value="<?= esc($searchKeyword ?? '') ?>" placeholder="Cari SOP, aturan, atau program..." class="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-white/80 bg-white/80 backdrop-blur-md text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:bg-white transition shadow-2xs placeholder-slate-400">
         </form>
     </div>
 

@@ -13,20 +13,21 @@
     <!-- ========================================== -->
     <!-- 🌐 TAMPILAN FORM CS (PUBLIK & AUDITOR)     -->
     <!-- ========================================== -->
-    <!-- Hero Banner / Page Header -->
-    <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-700 to-emerald-900 text-white p-4 sm:p-7 shadow-lg sm:shadow-xl shadow-emerald-900/20 border border-emerald-600/30">
-        <div class="absolute -right-6 -bottom-6 opacity-10 text-white pointer-events-none">
-            <i class="fa-solid fa-headset text-[120px] sm:text-[200px]"></i>
-        </div>
-        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-5">
-            <div class="space-y-1 sm:space-y-1.5 max-w-3xl">
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full bg-emerald-500/20 backdrop-blur-md text-emerald-200 text-[10px] sm:text-xs font-bold uppercase tracking-wider border border-emerald-400/30">
-                    <i class="fa-solid fa-headset text-[10px]"></i> Layanan Pengaduan 24/7
+    <!-- Hero Banner / Page Header (Frosted Glass Theme) -->
+    <div class="relative overflow-hidden rounded-[32px] p-6 sm:p-9 shadow-[0_20px_50px_rgba(6,78,59,0.22)] border border-white/25 bg-gradient-to-br from-emerald-950/90 via-teal-900/85 to-slate-950/90 backdrop-blur-2xl text-white">
+        <!-- Ambient Background Glows -->
+        <div class="absolute -right-12 -top-12 w-64 h-64 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-12 -bottom-12 w-64 h-64 bg-teal-400/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
+            <div class="space-y-2 max-w-3xl">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-emerald-200 text-[11px] sm:text-xs font-extrabold uppercase tracking-wider border border-white/20">
+                    <i class="fa-solid fa-headset text-emerald-400"></i> Layanan Pengaduan 24/7
                 </div>
-                <h1 class="text-lg sm:text-2xl md:text-3xl font-heading font-extrabold tracking-tight leading-tight">
+                <h1 class="text-xl sm:text-3xl md:text-4xl font-heading font-black tracking-tight leading-tight text-white drop-shadow-md">
                     Customer Service & Lapor Kendala
                 </h1>
-                <p class="text-emerald-100/90 text-xs sm:text-sm leading-relaxed max-w-2xl">
+                <p class="text-slate-200 text-xs sm:text-sm leading-relaxed max-w-2xl font-medium">
                     Sampaikan kendala kebersihan atau pertanyaan seputar kebersihan pesantren. Tim siap menindaklanjuti.
                 </p>
             </div>
@@ -34,9 +35,9 @@
     </div>
 
     <!-- Public Contact Grid & Form -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 items-start relative">
         <!-- Form Pengaduan Publik (Anti-SPAM CAPTCHA) -->
-        <div class="lg:col-span-2 glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-7 shadow-lg sm:shadow-xl border border-slate-200/80 bg-white space-y-4 sm:space-y-5">
+        <div class="lg:col-span-2 glass-card rounded-[32px] p-5 sm:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.06)] border border-white/80 bg-white/80 backdrop-blur-2xl space-y-5 relative z-30">
             <div class="border-b border-slate-100 pb-3 flex items-center justify-between gap-2">
                 <h2 class="font-heading font-extrabold text-sm sm:text-base text-slate-900 flex items-center gap-2">
                     <i class="fa-solid fa-paper-plane text-emerald-600 text-xs sm:text-sm"></i> 
@@ -124,7 +125,7 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <!-- Searchable Unit Picker in CS Form -->
-                        <div class="relative">
+                        <div class="relative z-40">
                             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between flex-wrap gap-1">
                                 <span>1. Lokasi / Unit <span class="text-rose-500">*</span></span>
                                 <span class="text-[9px] sm:text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 flex items-center gap-0.5">
@@ -141,7 +142,7 @@
                                 </button>
                             </div>
                             <!-- Dropdown List -->
-                            <div id="csUnitDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                            <div id="csUnitDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200/90 ring-1 ring-slate-900/10 max-h-56 overflow-y-auto z-[100] hidden divide-y divide-slate-100">
                                 <?php if (!empty($unitList)): ?>
                                     <?php foreach ($unitList as $u): ?>
                                         <div class="cs-unit-item px-3.5 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $u['id'] ?>" data-nama="<?= esc($u['nama_unit']) ?>" onclick="selectCsUnit(this)">
@@ -170,7 +171,7 @@
                         </div>
 
                         <!-- Searchable Wilayah Picker in CS Form -->
-                        <div class="relative">
+                        <div class="relative z-30">
                             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between flex-wrap gap-1">
                                 <span>2. Wilayah / Spot Area</span>
                                 <span class="text-[9px] sm:text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 flex items-center gap-0.5">
@@ -186,7 +187,7 @@
                                 </button>
                             </div>
                             <!-- Dropdown List -->
-                            <div id="csWilayahDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                            <div id="csWilayahDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200/90 ring-1 ring-slate-900/10 max-h-56 overflow-y-auto z-[100] hidden divide-y divide-slate-100">
                                 <div class="cs-wilayah-item px-3.5 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="" data-name="" data-lokasi-gedung="" onclick="selectCsWilayah(this)">
                                     <div>
                                         <div class="font-extrabold text-xs text-slate-600 italic">-- Bukan Wilayah Khusus / Umum --</div>
@@ -409,43 +410,71 @@
             </form>
         </div>
 
-        <!-- Quick Contacts Column -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 lg:self-start">
-            <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-lg border border-slate-200/80 bg-white space-y-3 h-fit">
+        <!-- Sidebar Info & Hotline WhatsApp (Glassmorphism Cards) -->
+        <div class="lg:col-span-1 space-y-4">
+            <!-- Hotline WhatsApp Card -->
+            <?php 
+                $csWaNum = !empty($hotlineWa) ? $hotlineWa : '081234567890';
+                $cleanWa = preg_replace('/[^0-9]/', '', $csWaNum);
+                if (substr($cleanWa, 0, 1) === '0') $cleanWa = '62' . substr($cleanWa, 1);
+                elseif (substr($cleanWa, 0, 2) !== '62') $cleanWa = '62' . $cleanWa;
+                $directWaUrl = "https://api.whatsapp.com/send?phone=" . $cleanWa . "&text=" . urlencode("Halo Admin Kebersihan, saya ingin berkonsultasi / membutuhkan bantuan terkait kebersihan.");
+            ?>
+            <div class="glass-card rounded-[28px] p-5 sm:p-6 shadow-[0_10px_30px_rgba(0,0,0,0.05)] border border-white/80 bg-white/75 backdrop-blur-2xl space-y-4 relative overflow-hidden">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-lg shadow-md shadow-emerald-500/20 flex-shrink-0">
-                        <i class="fa-brands fa-whatsapp"></i>
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-lg shadow-md shadow-emerald-600/25 ring-2 ring-emerald-100 flex-shrink-0">
+                        <i class="fa-brands fa-whatsapp text-xl"></i>
                     </div>
-                    <div class="min-w-0">
-                        <h3 class="font-heading font-extrabold text-sm text-slate-900 leading-tight">WhatsApp Live CS</h3>
-                        <p class="text-[11px] text-slate-500 font-normal">Respon cepat via WA Admin Kebersihan.</p>
+                    <div>
+                        <h3 class="font-heading font-extrabold text-sm text-slate-900 leading-tight">Hotline WhatsApp CS</h3>
+                        <p class="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">Kontak langsung via chat</p>
                     </div>
                 </div>
-                <?php
-                    $rawWa = $settings['hotline_wa'] ?? '081802787499';
-                    $cleanWa = preg_replace('/[^0-9]/', '', $rawWa);
-                    if (str_starts_with($cleanWa, '0')) {
-                        $cleanWa = '62' . substr($cleanWa, 1);
-                    }
-                ?>
-                <a href="https://wa.me/<?= $cleanWa ?>?text=Halo%20Admin%20Kebersihan,%20saya%20butuh%20bantuan" target="_blank" class="w-full py-2.5 rounded-xl bg-emerald-600 text-white font-heading font-bold text-xs hover:bg-emerald-700 transition flex items-center justify-center gap-2 shadow-sm shadow-emerald-600/20 active:scale-[0.98]">
+
+                <div class="p-3 rounded-2xl bg-emerald-50/70 border border-emerald-100/90 text-xs text-emerald-950 font-semibold space-y-1">
+                    <div class="flex items-center justify-between text-[11px]">
+                        <span class="text-slate-500 font-normal">Nomor Resmi:</span>
+                        <span class="font-bold text-emerald-800 font-mono"><?= esc($csWaNum) ?></span>
+                    </div>
+                    <div class="flex items-center justify-between text-[11px]">
+                        <span class="text-slate-500 font-normal">Waktu Respon:</span>
+                        <span class="font-bold text-emerald-800">07:00 - 21:00 WIB</span>
+                    </div>
+                </div>
+
+                <a href="<?= $directWaUrl ?>" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-heading font-extrabold text-xs transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 active:scale-95">
                     <i class="fa-brands fa-whatsapp text-sm"></i>
-                    <span>Chat WhatsApp CS</span>
+                    <span>Chat WhatsApp Admin</span>
                 </a>
             </div>
 
-            <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-lg border border-slate-200/80 bg-white space-y-3 h-fit">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center text-lg shadow-md shadow-teal-500/20 flex-shrink-0">
-                        <i class="fa-solid fa-building-flag"></i>
+            <!-- Alur Penanganan Cepat Card -->
+            <div class="glass-card rounded-[28px] p-5 sm:p-6 shadow-[0_10px_30px_rgba(0,0,0,0.05)] border border-white/80 bg-white/75 backdrop-blur-2xl space-y-3.5">
+                <h4 class="font-heading font-extrabold text-xs text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-route text-emerald-600"></i>
+                    <span>Alur Penanganan Laporan</span>
+                </h4>
+
+                <div class="space-y-2.5 text-xs">
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-extrabold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+                        <p class="text-slate-600 text-[11px] leading-relaxed"><strong class="text-slate-800">Kirim Form:</strong> Isi data dan foto kondisi kebersihan.</p>
                     </div>
-                    <div class="min-w-0">
-                        <h3 class="font-heading font-extrabold text-sm text-slate-900 leading-tight">Kantor Sekretariat</h3>
-                        <p class="text-[11px] text-slate-500 font-normal">Kantor K3L Yayasan Assalafiyyah Mlangi.</p>
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-5 h-5 rounded-full bg-teal-100 text-teal-700 font-extrabold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+                        <p class="text-slate-600 text-[11px] leading-relaxed"><strong class="text-slate-800">Verifikasi Tim:</strong> Admin menerima dan menugaskan petugas.</p>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-5 h-5 rounded-full bg-sky-100 text-sky-700 font-extrabold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
+                        <p class="text-slate-600 text-[11px] leading-relaxed"><strong class="text-slate-800">Tindak Lanjut:</strong> Area dibersihkan & status diperbarui.</p>
                     </div>
                 </div>
-                <div class="w-full py-2 px-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-[11px] text-center border border-slate-200/80">
-                    Jam Operasional: <?= esc($settings['jam_cs_buka'] ?? '06:00') ?> – <?= esc($settings['jam_cs_tutup'] ?? '21:00') ?> WIB
+
+                <div class="pt-2 border-t border-slate-100">
+                    <a href="<?= base_url('faq') ?>" class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 transition">
+                        <i class="fa-solid fa-circle-question text-[11px]"></i>
+                        <span>Lihat Panduan & FAQ Lengkap &rarr;</span>
+                    </a>
                 </div>
             </div>
         </div>
