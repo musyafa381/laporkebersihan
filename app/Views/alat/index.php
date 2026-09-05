@@ -121,12 +121,12 @@
                     <button type="button" onclick="setQuickFilterAlat('all')" id="btnFilterAll" class="quick-filter-btn px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-heading font-extrabold text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5">
                         <i class="fa-solid fa-boxes-stacked text-xs"></i>
                         <span>Semua Alat</span>
-                        <span class="px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-extrabold"><?= count($alatList) ?></span>
+                        <span class="filter-badge px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-extrabold"><?= count($alatList) ?></span>
                     </button>
                     <button type="button" onclick="setQuickFilterAlat('kritis')" id="btnFilterKritis" class="quick-filter-btn px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-amber-50 hover:text-amber-800 font-heading font-extrabold text-xs transition border border-slate-200/80 flex items-center gap-1.5">
                         <i class="fa-solid fa-triangle-exclamation text-amber-500 text-xs"></i>
-                        <span>Stok Kritis (≤ 5)</span>
-                        <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold"><?= $stokKritis ?></span>
+                        <span>Stok Kritis</span>
+                        <span class="filter-badge px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold"><?= $stokKritis ?></span>
                     </button>
                     <button type="button" onclick="setQuickFilterAlat('rusak')" id="btnFilterRusak" class="quick-filter-btn px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-800 font-heading font-extrabold text-xs transition border border-slate-200/80 flex items-center gap-1.5">
                         <i class="fa-solid fa-screwdriver-wrench text-rose-500 text-xs"></i>
@@ -1002,16 +1002,42 @@
 
         const inactiveCls = "quick-filter-btn px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-heading font-extrabold text-xs transition border border-slate-200/80 flex items-center gap-1.5";
         
-        if (btnAll) btnAll.className = inactiveCls;
-        if (btnKritis) btnKritis.className = inactiveCls;
-        if (btnRusak) btnRusak.className = inactiveCls;
+        if (btnAll) {
+            btnAll.className = inactiveCls;
+            const b = btnAll.querySelector('.filter-badge');
+            if (b) b.className = "filter-badge px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-extrabold";
+            const icon = btnAll.querySelector('i');
+            if (icon) icon.className = "fa-solid fa-boxes-stacked text-emerald-600 text-xs";
+        }
+        if (btnKritis) {
+            btnKritis.className = inactiveCls;
+            const b = btnKritis.querySelector('.filter-badge');
+            if (b) b.className = "filter-badge px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold";
+            const icon = btnKritis.querySelector('i');
+            if (icon) icon.className = "fa-solid fa-triangle-exclamation text-amber-500 text-xs";
+        }
+        if (btnRusak) {
+            btnRusak.className = inactiveCls;
+            const icon = btnRusak.querySelector('i');
+            if (icon) icon.className = "fa-solid fa-screwdriver-wrench text-rose-500 text-xs";
+        }
 
         if (mode === 'all' && btnAll) {
             btnAll.className = "quick-filter-btn px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-heading font-extrabold text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5";
+            const b = btnAll.querySelector('.filter-badge');
+            if (b) b.className = "filter-badge px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-extrabold";
+            const icon = btnAll.querySelector('i');
+            if (icon) icon.className = "fa-solid fa-boxes-stacked text-white text-xs";
         } else if (mode === 'kritis' && btnKritis) {
             btnKritis.className = "quick-filter-btn px-3.5 py-1.5 rounded-xl bg-amber-500 text-white font-heading font-extrabold text-xs shadow-md shadow-amber-500/20 transition flex items-center gap-1.5";
+            const b = btnKritis.querySelector('.filter-badge');
+            if (b) b.className = "filter-badge px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-extrabold";
+            const icon = btnKritis.querySelector('i');
+            if (icon) icon.className = "fa-solid fa-triangle-exclamation text-white text-xs";
         } else if (mode === 'rusak' && btnRusak) {
             btnRusak.className = "quick-filter-btn px-3.5 py-1.5 rounded-xl bg-rose-600 text-white font-heading font-extrabold text-xs shadow-md shadow-rose-600/20 transition flex items-center gap-1.5";
+            const icon = btnRusak.querySelector('i');
+            if (icon) icon.className = "fa-solid fa-screwdriver-wrench text-white text-xs";
         }
 
         filterAlatTable();
