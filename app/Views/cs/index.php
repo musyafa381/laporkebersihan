@@ -512,7 +512,7 @@
 
             <div class="overflow-x-auto rounded-2xl border border-slate-200/80">
                 <table id="tableCsReports" class="w-full min-w-[720px] text-left text-[11px]">
-                    <thead class="bg-slate-800 text-white text-[10px] font-bold uppercase tracking-wider">
+                    <thead class="bg-slate-100/90 text-slate-700 font-heading font-extrabold uppercase text-[10px] tracking-wider border-b border-slate-200">
                         <tr>
                             <th width="3%" class="py-2.5 px-2.5 text-center">#</th>
                             <th width="10%" class="py-2.5 px-3">Tanggal</th>
@@ -783,18 +783,18 @@
                 </div>
             </div>
 
-            <div class="overflow-x-auto rounded-2xl border border-emerald-800/20 shadow-2xs">
+            <div class="overflow-x-auto rounded-2xl border border-slate-200/80 shadow-2xs">
                 <table id="tablePengajuanAlat" class="w-full min-w-[760px] text-left text-xs font-semibold">
-                    <thead class="bg-gradient-to-r from-emerald-800 to-teal-800 text-white font-heading font-extrabold uppercase text-[10px] tracking-wider">
+                    <thead class="bg-slate-100/90 text-slate-700 font-heading font-extrabold uppercase text-[10px] tracking-wider border-b border-slate-200">
                         <tr>
-                            <th width="4%" class="py-3.5 px-3 text-center">NO</th>
-                            <th width="13%" class="py-3.5 px-4">TANGGAL</th>
-                            <th width="18%" class="py-3.5 px-4">PEMOHON (USER)</th>
-                            <th width="20%" class="py-3.5 px-4">PERALATAN PERMOHONAN</th>
-                            <th width="<?= $isAdmin ? '24%' : '34%' ?>" class="py-3.5 px-4">ALASAN KEPERLUAN & CATATAN</th>
-                            <th width="11%" class="py-3.5 px-4 text-center">STATUS</th>
+                            <th width="4%" class="py-3 px-3 text-center">NO</th>
+                            <th width="13%" class="py-3 px-4">TANGGAL</th>
+                            <th width="18%" class="py-3 px-4">PEMOHON</th>
+                            <th width="20%" class="py-3 px-4">PERALATAN</th>
+                            <th width="<?= $isAdmin ? '24%' : '34%' ?>" class="py-3 px-4">ALASAN & CATATAN</th>
+                            <th width="11%" class="py-3 px-4 text-center">STATUS</th>
                             <?php if ($isAdmin): ?>
-                                <th width="10%" class="py-3.5 px-3 text-center">PROSES</th>
+                                <th width="10%" class="py-3 px-3 text-center">PROSES</th>
                             <?php endif; ?>
                         </tr>
                     </thead>
