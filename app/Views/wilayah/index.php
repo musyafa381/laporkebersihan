@@ -160,27 +160,6 @@
                                     </span>
                                 <?php endif; ?>
                             </div>
-
-                            <?php 
-                                $shiftKeterangan = '';
-                                if (!empty($w['penugasan'])) {
-                                    foreach ($w['penugasan'] as $pItem) {
-                                        if (!empty($pItem['keterangan'])) {
-                                            $shiftKeterangan = $pItem['keterangan'];
-                                            break;
-                                        }
-                                    }
-                                }
-                                $adminPetunjuk = !empty($shiftKeterangan) 
-                                    ? $shiftKeterangan 
-                                    : (!empty($w['deskripsi']) 
-                                        ? $w['deskripsi'] 
-                                        : 'Menjaga kebersihan area secara rutin, menyapu, mengepel, membuang sampah, dan memastikan area tetap rapi & higienis.');
-                            ?>
-                            <div class="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/80 text-[11px] text-slate-700 leading-relaxed font-medium">
-                                <strong class="text-amber-900 font-bold block mb-0.5"><i class="fa-solid fa-note-sticky text-amber-500 mr-1"></i> Petunjuk:</strong>
-                                <p class="line-clamp-2"><?= esc($adminPetunjuk) ?></p>
-                            </div>
                         </div>
 
                         <!-- Assigned Shifts & Units -->
