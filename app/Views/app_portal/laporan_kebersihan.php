@@ -91,19 +91,19 @@
                             <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                                 <span>Nama Lengkap Pengirim <span class="text-rose-500">*</span></span>
                                 <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
-                                    <i class="fa-solid fa-lock text-[9px]"></i> Otomatis (PJ Unit)
+                                    <i class="fa-solid fa-lock text-[9px]"></i> Akun Login
                                 </span>
                             </label>
-                            <input type="text" id="portal_nama_pengirim" name="nama_pengirim" value="<?= esc($defaultNamaPengirim ?? $userUnit['pj_nama'] ?? session()->get('nama_lengkap') ?? '') ?>" readonly required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-100/90 text-slate-800 cursor-not-allowed shadow-2xs">
+                            <input type="text" id="portal_nama_pengirim" name="nama_pengirim" value="<?= esc($defaultNamaPengirim ?? session()->get('nama_lengkap') ?? $userUnit['pj_nama'] ?? '') ?>" readonly required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-100/90 text-slate-800 cursor-not-allowed shadow-2xs">
                         </div>
                         <div>
                             <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                                 <span>Nomor WhatsApp / HP <span class="text-rose-500">*</span></span>
-                                <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
-                                    <i class="fa-solid fa-lock text-[9px]"></i> Otomatis (PJ Unit)
+                                <span class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                                    <i class="fa-brands fa-whatsapp text-[9px]"></i> Nomor Aktif
                                 </span>
                             </label>
-                            <input type="text" id="portal_kontak_hp" name="kontak_hp" value="<?= esc($defaultKontakHp ?? $userUnit['pj_kontak'] ?? '') ?>" readonly required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-100/90 text-slate-800 cursor-not-allowed shadow-2xs">
+                            <input type="text" id="portal_kontak_hp" name="kontak_hp" value="<?= esc($defaultKontakHp ?? $userUnit['pj_kontak'] ?? '') ?>" placeholder="081234567890" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
                         </div>
                     </div>
 

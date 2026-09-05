@@ -105,22 +105,20 @@
                                 <span>Nama Pengirim <span class="text-rose-500">*</span></span>
                                 <?php if ($isLoggedIn): ?>
                                     <span class="text-[9px] sm:text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 flex items-center gap-0.5">
-                                        <i class="fa-solid fa-lock text-[8px]"></i> Otomatis
+                                        <i class="fa-solid fa-lock text-[8px]"></i> Akun Login
                                     </span>
                                 <?php endif; ?>
                             </label>
-                            <input type="text" id="cs_nama_pengirim" name="nama_pengirim" value="<?= esc($defaultNamaPengirim ?? $userUnit['pj_nama'] ?? session()->get('nama_lengkap') ?? '') ?>" <?= $isLoggedIn ? 'readonly' : '' ?> placeholder="Misal: Santri / Warga / Kader" required class="w-full px-3.5 py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 text-xs font-bold <?= $isLoggedIn ? 'bg-slate-100/90 text-slate-800 cursor-not-allowed' : 'bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500' ?> transition shadow-2xs">
+                            <input type="text" id="cs_nama_pengirim" name="nama_pengirim" value="<?= esc($defaultNamaPengirim ?? session()->get('nama_lengkap') ?? $userUnit['pj_nama'] ?? '') ?>" <?= $isLoggedIn ? 'readonly' : '' ?> placeholder="Misal: Santri / Warga / Kader" required class="w-full px-3.5 py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 text-xs font-bold <?= $isLoggedIn ? 'bg-slate-100/90 text-slate-800 cursor-not-allowed' : 'bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500' ?> transition shadow-2xs">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between flex-wrap gap-1">
                                 <span>WhatsApp / HP <span class="text-rose-500">*</span></span>
-                                <?php if ($isLoggedIn): ?>
-                                    <span class="text-[9px] sm:text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 flex items-center gap-0.5">
-                                        <i class="fa-solid fa-lock text-[8px]"></i> Otomatis
-                                    </span>
-                                <?php endif; ?>
+                                <span class="text-[9px] sm:text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 flex items-center gap-0.5">
+                                    <i class="fa-brands fa-whatsapp text-[8px]"></i> Nomor Aktif
+                                </span>
                             </label>
-                            <input type="text" id="cs_kontak_hp" name="kontak_hp" value="<?= esc($defaultKontakHp ?? $userUnit['pj_kontak'] ?? '') ?>" <?= $isLoggedIn ? 'readonly' : '' ?> placeholder="081234567890" required class="w-full px-3.5 py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 text-xs font-bold <?= $isLoggedIn ? 'bg-slate-100/90 text-slate-800 cursor-not-allowed' : 'bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500' ?> transition shadow-2xs">
+                            <input type="text" id="cs_kontak_hp" name="kontak_hp" value="<?= esc($defaultKontakHp ?? $userUnit['pj_kontak'] ?? '') ?>" placeholder="081234567890" required class="w-full px-3.5 py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
                         </div>
                     </div>
 

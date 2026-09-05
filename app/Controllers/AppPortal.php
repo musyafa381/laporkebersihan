@@ -314,8 +314,13 @@ class AppPortal extends BaseController
         $unitId = $this->getResolvedUnitId();
         $userUnit = $unitId ? $this->unitModel->find($unitId) : null;
 
-        $defaultNamaPengirim = !empty($userUnit['pj_nama']) ? $userUnit['pj_nama'] : ($session->get('nama_lengkap') ?? '');
-        $defaultKontakHp     = !empty($userUnit['pj_kontak']) ? $userUnit['pj_kontak'] : ($session->get('no_hp') ?? $session->get('kontak') ?? '');
+        if ($session->get('isLoggedIn')) {
+            $defaultNamaPengirim = $session->get('nama_lengkap') ?: ($userUnit['pj_nama'] ?? '');
+            $defaultKontakHp     = $session->get('no_hp') ?: ($session->get('kontak') ?: ($userUnit['pj_kontak'] ?? ''));
+        } else {
+            $defaultNamaPengirim = '';
+            $defaultKontakHp     = '';
+        }
 
         $unitAssignedReports = [];
         if ($unitId || $userUnit) {
