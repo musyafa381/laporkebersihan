@@ -13,7 +13,6 @@
             </h1>
             <p class="text-xs text-emerald-700 font-bold uppercase tracking-wider">Web Manajemen Kebersihan</p>
         </div>
-        <p class="text-xs text-slate-500 font-medium">Silakan masuk sesuai role akun yang didaftarkan oleh Admin.</p>
     </div>
 
     <!-- Login Card Form -->
@@ -66,7 +65,7 @@
                 <i class="fa-solid fa-headset"></i>
                 <span>Buka Layanan Customer Service Publik</span>
             </a>
-            <p class="text-[11px] text-slate-400">&copy; 2026 Musapang. All rights reserved.</p>
+            <p class="text-[11px] text-slate-400">&copy; 2026 Musapang Company. All rights reserved.</p>
         </div>
     </div>
 </div>

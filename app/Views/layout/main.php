@@ -283,25 +283,28 @@
 
     <!-- Header Navigation -->
     <?php
-        $uriStr = uri_string();
-        $isHomeActive       = ($uriStr === '' || $uriStr === '/' || $uriStr === 'home');
-        $isAppActive        = (strpos($uriStr, 'app') !== false && strpos($uriStr, 'app/') === false);
+        $uriStr = trim(uri_string(), '/');
+        $isLoginActive      = (strpos($uriStr, 'login') !== false || strpos($uriStr, 'auth') !== false);
+        $isHomeActive       = ($uriStr === '' || $uriStr === 'home' || $uriStr === 'index.php') && !$isLoginActive;
+        $isAppActive        = ($uriStr === 'app' || $uriStr === 'app/index' || $uriStr === 'app/dashboard');
         $isAppLpjActive     = (strpos($uriStr, 'app/lpj') !== false);
-        $isAppWilayahActive = (strpos($uriStr, 'app/lapor-wilayah') !== false);
+        $isAppWilayahActive = (strpos($uriStr, 'app/lapor-wilayah') !== false || strpos($uriStr, 'app/wilayah-tugas') !== false);
         $isAppAlatActive    = (strpos($uriStr, 'app/pengajuan-alat') !== false);
         $isAppLaporActive   = (strpos($uriStr, 'app/laporan-kebersihan') !== false);
 
         $isBukuActive       = (strpos($uriStr, 'buku') !== false);
         $isKeuanganActive   = (strpos($uriStr, 'keuangan') !== false);
-        $isAlatActive       = (strpos($uriStr, 'alat') !== false);
-        $isWilayahActive    = (strpos($uriStr, 'wilayah') !== false);
+        $isAlatActive       = (strpos($uriStr, 'alat') !== false && strpos($uriStr, 'app/pengajuan-alat') === false);
+        $isWilayahActive    = (strpos($uriStr, 'wilayah') !== false && strpos($uriStr, 'app/lapor-wilayah') === false && strpos($uriStr, 'app/wilayah-tugas') === false);
         $isPengaturanActive = (strpos($uriStr, 'pengaturan') !== false);
         $isProfilActive     = (strpos($uriStr, 'profil') !== false || strpos($uriStr, 'akun') !== false);
-        $isCsActive         = (strpos($uriStr, 'cs') !== false);
+        $isCsActive         = (strpos($uriStr, 'cs') !== false && strpos($uriStr, 'app/laporan-kebersihan') === false);
         $isFaqActive        = (strpos($uriStr, 'faq') !== false || strpos($uriStr, 'bantuan') !== false);
         $isStrukturActive   = (strpos($uriStr, 'struktur') !== false);
         $isSopActive        = (strpos($uriStr, 'sop') !== false);
-        $isProkerActive     = (strpos($uriStr, 'program-kerja') !== false);
+        $isProkerActive     = (strpos($uriStr, 'program-kerja') !== false || strpos($uriStr, 'proker') !== false);
+
+        $isDrawerActive     = ($isPengaturanActive || $isProfilActive || $isStrukturActive || $isFaqActive || $isSopActive || $isCsActive || $isProkerActive || $isAppAlatActive || $isAppLaporActive);
 
         $isLoggedIn          = session()->get('isLoggedIn');
         $userRole            = session()->get('role');
@@ -310,10 +313,11 @@
         $isUserAdminOrAuditor = $isLoggedIn && in_array($userRole, ['Admin', 'Auditor']);
         $isUserPengurusOrKader = $isLoggedIn && in_array($userRole, ['Pengurus', 'Kader']);
 
-        // Query status notifikasi baru untuk CS dan Pengajuan Alat
+        // Query status notifikasi baru untuk CS dan Pengajuan Alat serta Nomor WA Hotline CS
         $db = \Config\Database::connect();
         $notifCsCount = 0;
         $notifAlatCount = 0;
+        $hotlineWa = '081234567890';
 
         try {
             if ($db->tableExists('cs_reports')) {
@@ -322,9 +326,25 @@
             if ($db->tableExists('alat_pengajuan')) {
                 $notifAlatCount = $db->table('alat_pengajuan')->where('status', 'Pending')->countAllResults();
             }
+            if ($db->tableExists('tbl_pengaturan')) {
+                $settingRow = $db->table('tbl_pengaturan')->where('setting_key', 'hotline_wa')->get()->getRowArray();
+                if (!empty($settingRow['setting_value'])) {
+                    $hotlineWa = trim($settingRow['setting_value']);
+                }
+            }
         } catch (\Throwable $e) {
             // Silently fallback if table issue
         }
+
+        // Generate WhatsApp Hotline Direct Link
+        $cleanWaNumber = preg_replace('/[^0-9]/', '', $hotlineWa);
+        if (substr($cleanWaNumber, 0, 1) === '0') {
+            $cleanWaNumber = '62' . substr($cleanWaNumber, 1);
+        } elseif (substr($cleanWaNumber, 0, 2) !== '62') {
+            $cleanWaNumber = '62' . $cleanWaNumber;
+        }
+        $waCsMessage = "Halo Admin Kebersihan K3L, saya ingin berkonsultasi / membutuhkan bantuan terkait kebersihan.";
+        $waCsUrl = "https://api.whatsapp.com/send?phone=" . $cleanWaNumber . "&text=" . urlencode($waCsMessage);
 
         if ($isUserAdminOrAuditor) {
             // Mode 1: Admin & Auditor Grouped Navigation
@@ -970,7 +990,7 @@
     </script>
 
     <!-- Main Content Area -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-24 md:py-8">
         <?php if ($isAuditor): ?>
             <!-- Auditor Read-Only Notification Banner -->
             <div class="mb-6 p-4 rounded-2xl bg-blue-50/90 border border-blue-200 text-blue-900 flex items-center justify-between shadow-sm">
@@ -1049,14 +1069,364 @@
     </main>
 
     <!-- Footer -->
-    <footer class="w-full border-t border-slate-200 bg-white py-6 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 text-center text-sm text-slate-500">
-            <p>&copy; <?= date('Y') ?> <b>Kebersihan Yayasan Assalafiyyah Mlangi</b>. System Manajemen.</p>
+    <?php
+        // Generate role-specific footer menu links
+        $footerCol1 = [];
+        $footerCol2 = [];
+        $footerCol1Title = 'Navigasi Menu';
+        $footerCol1Icon = 'fa-solid fa-compass';
+        $footerCol2Title = 'Informasi & Layanan';
+        $footerCol2Icon = 'fa-solid fa-layer-group';
+        $footerCsUrl = base_url('cs');
+        $footerCsLabel = 'Buka Layanan CS';
+        $footerCsDesc = 'Butuh bantuan operasional atau ingin menyampaikan kendala kebersihan?';
+
+        if ($isUserAdminOrAuditor) {
+            $footerCol1Title = 'Operasional & Wilayah';
+            $footerCol1Icon = 'fa-solid fa-broom-ball';
+            $footerCol1 = [
+                ['url' => base_url('/'), 'icon' => 'fa-solid fa-house', 'label' => 'Beranda Utama'],
+                ['url' => base_url('wilayah'), 'icon' => 'fa-solid fa-map-location-dot', 'label' => 'Pemetaan Wilayah'],
+                ['url' => base_url('alat'), 'icon' => 'fa-solid fa-broom-ball', 'label' => 'Alat Kebersihan'],
+                ['url' => base_url('program-kerja'), 'icon' => 'fa-solid fa-list-check', 'label' => 'Program Kerja'],
+            ];
+
+            $footerCol2Title = 'Laporan & Regulasi';
+            $footerCol2Icon = 'fa-solid fa-chart-pie';
+            $footerCol2 = [
+                ['url' => base_url('buku'), 'icon' => 'fa-solid fa-book-bookmark', 'label' => 'Daftar Buku LPJ'],
+                ['url' => base_url('keuangan'), 'icon' => 'fa-solid fa-calculator', 'label' => 'Laporan Keuangan'],
+                ['url' => base_url('sop'), 'icon' => 'fa-solid fa-file-shield', 'label' => 'SOP & Kebijakan'],
+                ['url' => base_url('struktur'), 'icon' => 'fa-solid fa-sitemap', 'label' => 'Struktur Kebersihan'],
+                ['url' => base_url('faq'), 'icon' => 'fa-solid fa-circle-question', 'label' => 'FAQ & Panduan Alur'],
+                ['url' => base_url('cs'), 'icon' => 'fa-solid fa-headset', 'label' => 'Customer Service'],
+            ];
+            $footerCsUrl = base_url('cs');
+            $footerCsLabel = 'Kelola Layanan CS';
+            $footerCsDesc = 'Pantau dan tindak lanjuti laporan kendala serta pengajuan logistik unit.';
+        } elseif ($isUserPengurusOrKader) {
+            $footerCol1Title = 'Portal Unit & Lapor';
+            $footerCol1Icon = 'fa-solid fa-gauge-high';
+            $footerCol1 = [
+                ['url' => base_url('/'), 'icon' => 'fa-solid fa-house', 'label' => 'Beranda Utama'],
+                ['url' => base_url('app'), 'icon' => 'fa-solid fa-gauge-high', 'label' => 'Dashboard Unit'],
+                ['url' => base_url('app/lpj'), 'icon' => 'fa-solid fa-pen-to-square', 'label' => 'Isi LPJ Unit'],
+                ['url' => base_url('app/lapor-wilayah'), 'icon' => 'fa-solid fa-map-location-dot', 'label' => 'Lapor Wilayah'],
+                ['url' => base_url('app/pengajuan-alat'), 'icon' => 'fa-solid fa-box-open', 'label' => 'Pengajuan Alat'],
+                ['url' => base_url('app/laporan-kebersihan'), 'icon' => 'fa-solid fa-headset', 'label' => 'Lapor Kendala CS'],
+            ];
+
+            $footerCol2Title = 'Informasi & Panduan';
+            $footerCol2Icon = 'fa-solid fa-circle-info';
+            $footerCol2 = [
+                ['url' => base_url('program-kerja'), 'icon' => 'fa-solid fa-list-check', 'label' => 'Program Kerja'],
+                ['url' => base_url('sop'), 'icon' => 'fa-solid fa-file-shield', 'label' => 'SOP Kebersihan'],
+                ['url' => base_url('struktur'), 'icon' => 'fa-solid fa-sitemap', 'label' => 'Struktur Kebersihan'],
+                ['url' => base_url('faq'), 'icon' => 'fa-solid fa-circle-question', 'label' => 'FAQ & Panduan Alur'],
+            ];
+            $footerCsUrl = base_url('app/laporan-kebersihan');
+            $footerCsLabel = 'Kirim Laporan CS';
+            $footerCsDesc = 'Ada kendala kebersihan atau sarpras di unit Anda? Laporkan ke tim pengelola.';
+        } else {
+            // Mode Umum / Public Guest
+            $footerCol1Title = 'Navigasi Publik';
+            $footerCol1Icon = 'fa-solid fa-compass';
+            $footerCol1 = [
+                ['url' => base_url('/'), 'icon' => 'fa-solid fa-house', 'label' => 'Beranda Utama'],
+                ['url' => base_url('cs'), 'icon' => 'fa-solid fa-headset', 'label' => 'Layanan CS Publik'],
+                ['url' => base_url('login'), 'icon' => 'fa-solid fa-right-to-bracket', 'label' => 'Login Petugas'],
+            ];
+
+            $footerCol2Title = 'Informasi & Regulasi';
+            $footerCol2Icon = 'fa-solid fa-circle-info';
+            $footerCol2 = [
+                ['url' => base_url('program-kerja'), 'icon' => 'fa-solid fa-list-check', 'label' => 'Program Kerja'],
+                ['url' => base_url('sop'), 'icon' => 'fa-solid fa-file-shield', 'label' => 'SOP Kebersihan'],
+                ['url' => base_url('struktur'), 'icon' => 'fa-solid fa-sitemap', 'label' => 'Struktur Kebersihan'],
+                ['url' => base_url('faq'), 'icon' => 'fa-solid fa-circle-question', 'label' => 'FAQ & Panduan Alur'],
+            ];
+            $footerCsUrl = base_url('cs');
+            $footerCsLabel = 'Buka Layanan CS';
+            $footerCsDesc = 'Sampaikan aduan atau aspirasi terkait fasilitas dan kebersihan lingkungan yayasan.';
+        }
+    ?>
+    <footer class="hidden md:block w-full border-t border-slate-200/80 bg-white/95 backdrop-blur-md pt-12 pb-8 mt-auto text-slate-600 relative overflow-hidden">
+        <!-- Subtle Top Glow Line -->
+        <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+            <!-- Top Section: Multi-Column Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10">
+                
+                <!-- Col 1: Brand & Bio (5 cols on lg) -->
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-lg shadow-md shadow-emerald-600/25 ring-2 ring-emerald-500/20">
+                            <i class="fa-solid fa-leaf"></i>
+                        </div>
+                        <div>
+                            <span class="font-heading font-black text-base text-slate-900 tracking-tight block">
+                                LAPOR <span class="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">KEBERSIHAN</span>
+                            </span>
+                            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Yayasan Assalafiyyah Mlangi</span>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-slate-500 leading-relaxed max-w-sm">
+                        Platform terpadu digitalisasi pemantauan mutu kebersihan, inspeksi wilayah, pengelolaan inventaris alat, serta pelaporan kinerja unit & kader secara transparan.
+                    </p>
+
+                    <div class="flex items-center gap-2 pt-1 flex-wrap">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-[11px] font-bold shadow-2xs">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span>Sistem Aktif & Terintegrasi</span>
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200/80 text-[11px] font-bold">
+                            <i class="fa-solid fa-shield-halved text-emerald-600"></i>
+                            <span><?= esc($userRole ? 'Akses: ' . $userRole : 'Akses Publik / Umum') ?></span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Col 2: Dynamic Role Navigasi Column 1 (2 cols on lg) -->
+                <div class="lg:col-span-2 space-y-3">
+                    <p class="text-xs font-heading font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                        <i class="<?= esc($footerCol1Icon) ?> text-emerald-600 text-[11px]"></i>
+                        <span><?= esc($footerCol1Title) ?></span>
+                    </p>
+                    <ul class="space-y-2 text-xs font-medium text-slate-500">
+                        <?php foreach ($footerCol1 as $item): ?>
+                            <li>
+                                <a href="<?= $item['url'] ?>" class="hover:text-emerald-700 hover:translate-x-1 transition-all duration-150 inline-flex items-center gap-1.5">
+                                    <i class="fa-solid fa-chevron-right text-[9px] text-slate-300"></i>
+                                    <span><?= esc($item['label']) ?></span>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Dynamic Role Navigasi Column 2 (2 cols on lg) -->
+                <div class="lg:col-span-2 space-y-3">
+                    <p class="text-xs font-heading font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                        <i class="<?= esc($footerCol2Icon) ?> text-emerald-600 text-[11px]"></i>
+                        <span><?= esc($footerCol2Title) ?></span>
+                    </p>
+                    <ul class="space-y-2 text-xs font-medium text-slate-500">
+                        <?php foreach ($footerCol2 as $item): ?>
+                            <li>
+                                <a href="<?= $item['url'] ?>" class="hover:text-emerald-700 hover:translate-x-1 transition-all duration-150 inline-flex items-center gap-1.5">
+                                    <i class="fa-solid fa-chevron-right text-[9px] text-slate-300"></i>
+                                    <span><?= esc($item['label']) ?></span>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Customer Service & Contact Card (3 cols on lg) -->
+                <div class="lg:col-span-3 space-y-3">
+                    <p class="text-xs font-heading font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-headset text-emerald-600 text-[11px]"></i>
+                        <span>Bantuan & CS</span>
+                    </p>
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5 shadow-2xs">
+                        <p class="text-[11px] text-slate-500 font-medium leading-relaxed">
+                            <?= esc($footerCsDesc) ?>
+                        </p>
+                        <a href="<?= $footerCsUrl ?>" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs shadow-md shadow-emerald-600/20 hover:from-emerald-700 hover:to-teal-700 transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-headset text-xs"></i>
+                            <span><?= esc($footerCsLabel) ?></span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom Sub-Footer Bar -->
+            <div class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+                <div class="flex items-center gap-2 text-center sm:text-left flex-wrap justify-center sm:justify-start">
+                    <p>&copy; <?= date('Y') ?> <strong class="text-slate-800 font-bold">Yayasan Assalafiyyah Mlangi</strong>. Seluruh Hak Cipta Dilindungi.</p>
+                </div>
+
+                <div class="flex items-center gap-3 text-[11px]">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200/80 text-slate-600 font-bold">
+                        <i class="fa-solid fa-code text-[10px] text-emerald-600"></i>
+                        <span>Developed by <strong class="text-slate-800 font-extrabold">Musapang Company</strong></span>
+                    </span>
+
+                    <button type="button" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-500 hover:text-emerald-700 border border-slate-200/80 flex items-center justify-center transition shadow-2xs group" title="Kembali ke Atas">
+                        <i class="fa-solid fa-arrow-up text-xs group-hover:-translate-y-0.5 transition-transform"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </footer>
 
+    <!-- Mobile Bottom App Bar Navigation (Hidden on Desktop, Visible on Mobile) -->
+    <nav id="mobileBottomNav" class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] py-1.5 px-2">
+        <div class="flex items-center justify-around max-w-md mx-auto">
+            <?php if ($isUserAdminOrAuditor): ?>
+                <!-- Admin / Auditor Mobile Bottom Tabs -->
+                <a href="<?= base_url('/') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isHomeActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
+                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isHomeActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-house"></i>
+                    </div>
+                    <span class="text-[10px] leading-tight tracking-tight <?= $isHomeActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Beranda</span>
+                </a>
+
+                <a href="<?= base_url('wilayah') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isWilayahActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
+                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isWilayahActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                    <span class="text-[10px] leading-tight tracking-tight <?= $isWilayahActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Wilayah</span>
+                </a>
+
+                <a href="<?= base_url('alat') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group relative <?= $isAlatActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
+                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs relative transition-all <?= $isAlatActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-broom-ball"></i>
+                        <?php if ($notifAlatCount > 0): ?>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center animate-pulse shadow-2xs">
+                                <?= $notifAlatCount > 9 ? '9+' : $notifAlatCount ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                    <span class="text-[10px] leading-tight tracking-tight <?= $isAlatActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Alat</span>
+                </a>
+
+                <a href="<?= base_url('buku') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= ($isBukuActive || $isKeuanganActive) ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
+                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= ($isBukuActive || $isKeuanganActive) ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-book-bookmark"></i>
+                    </div>
+                    <span class="text-[10px] leading-tight tracking-tight <?= ($isBukuActive || $isKeuanganActive) ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">LPJ</span>
+                </a>
+
+                <button type="button" onclick="toggleMobileDrawer(true)" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group relative <?= $isDrawerActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
+                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs relative transition-all <?= $isDrawerActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-bars"></i>
+                        <?php if ($notifCsCount > 0): ?>
+                            <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white animate-pulse"></span>
+                        <?php endif; ?>
+                    </div>
+                    <span class="text-[10px] leading-tight tracking-tight <?= $isDrawerActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Menu</span>
+                </button>
+
+            <?php elseif ($isUserPengurusOrKader): ?>
+                <!-- Pengurus / Kader Mobile Bottom Tabs -->
+                <a href="<?= base_url('/') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isHomeActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
+                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isHomeActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-house"></i>
+                    </div>
+                    <span class="text-[10px] leading-tight tracking-tight <?= $isHomeActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Beranda</span>
+                </a>
+
+                <a href="<?= base_url('app') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isAppActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
+                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isAppActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-gauge-high"></i>
+                    </div>
+                    <span class="text-[10px] leading-tight tracking-tight <?= $isAppActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Dashboard</span>
+                </a>
+
+                <a href="<?= base_url('app/lpj') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isAppLpjActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
+                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isAppLpjActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </div>
+                    <span class="text-[10px] leading-tight tracking-tight <?= $isAppLpjActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Isi LPJ</span>
+                </a>
+
+                <a href="<?= base_url('app/lapor-wilayah') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isAppWilayahActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
+                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isAppWilayahActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                    <span class="text-[10px] leading-tight tracking-tight <?= $isAppWilayahActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Lapor Area</span>
+                </a>
+
+                <button type="button" onclick="toggleMobileDrawer(true)" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isDrawerActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
+                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isDrawerActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-bars"></i>
+                    </div>
+                    <span class="text-[10px] leading-tight tracking-tight <?= $isDrawerActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Menu</span>
+                </button>
+
+            <?php else: ?>
+                <!-- Public / Guest Mobile Bottom Tabs -->
+                <a href="<?= base_url('/') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isHomeActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
+                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isHomeActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-house"></i>
+                    </div>
+                    <span class="text-[10px] leading-tight tracking-tight <?= $isHomeActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Beranda</span>
+                </a>
+
+                <a href="<?= base_url('program-kerja') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isProkerActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
+                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isProkerActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                    <span class="text-[10px] leading-tight tracking-tight <?= $isProkerActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Program</span>
+                </a>
+
+                <a href="<?= base_url('sop') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isSopActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
+                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isSopActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-file-shield"></i>
+                    </div>
+                    <span class="text-[10px] leading-tight tracking-tight <?= $isSopActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">SOP</span>
+                </a>
+
+                <a href="<?= base_url('cs') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isCsActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
+                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isCsActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-headset"></i>
+                    </div>
+                    <span class="text-[10px] leading-tight tracking-tight <?= $isCsActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Lapor CS</span>
+                </a>
+
+                <a href="<?= base_url('login') ?>" class="flex flex-col items-center justify-center flex-1 py-0.5 gap-0.5 text-center transition group <?= $isLoginActive ? 'text-emerald-800' : 'text-slate-400 hover:text-emerald-700' ?>">
+                    <div class="w-10 h-7 rounded-full flex items-center justify-center text-xs transition-all <?= $isLoginActive ? 'bg-emerald-100 text-emerald-800 font-black shadow-2xs -translate-y-0.5' : 'text-slate-400 group-hover:bg-slate-100 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                    </div>
+                    <span class="text-[10px] leading-tight tracking-tight <?= $isLoginActive ? 'font-heading font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Login</span>
+                </a>
+            <?php endif; ?>
+        </div>
+    </nav>
+
+    <!-- Floating Fixed WhatsApp Customer Service (CS) Button (Non-Admin / Non-Auditor Only) -->
+    <div id="floatingCsContainer">
+        <?php if (!$isUserAdminOrAuditor): ?>
+            <aside aria-label="Hotline WhatsApp CS Admin Kebersihan" class="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-40 group flex items-center">
+                <!-- Floating Tooltip Card (Desktop Only) -->
+                <a href="<?= $waCsUrl ?>" target="_blank" rel="noopener noreferrer" data-no-spa="true" class="hidden md:flex items-center gap-2.5 mr-3 px-3.5 py-2 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-xl shadow-slate-900/10 opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100 animate-pulse flex-shrink-0"></span>
+                    <div class="text-left leading-tight">
+                        <span class="font-heading font-black text-xs text-slate-900 block">Chat CS Kebersihan</span>
+                        <span class="text-[10px] text-emerald-700 font-extrabold flex items-center gap-1 mt-0.5">
+                            <i class="fa-brands fa-whatsapp text-emerald-600 text-xs"></i>
+                            <span>WhatsApp Admin Online</span>
+                        </span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400 ml-1"></i>
+                </a>
+
+                <!-- Main CS Person & WhatsApp Floating Avatar Button -->
+                <a href="<?= $waCsUrl ?>" target="_blank" rel="noopener noreferrer" data-no-spa="true" title="Hubungi CS Admin Kebersihan via WhatsApp (<?= esc($hotlineWa) ?>)" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-emerald-600 via-teal-600 to-emerald-500 text-white shadow-xl shadow-emerald-600/35 hover:shadow-2xl hover:shadow-emerald-600/50 flex items-center justify-center transition-all duration-300 transform group-hover:scale-105 active:scale-95 ring-4 ring-emerald-500/20 hover:ring-emerald-500/40">
+                    <!-- Online Pulse Halo -->
+                    <span class="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-400 ring-2 ring-white"></span>
+                    </span>
+
+                    <!-- CS Person Agent Icon -->
+                    <i class="fa-solid fa-headset text-xl sm:text-2xl drop-shadow-xs group-hover:rotate-6 transition-transform"></i>
+
+                    <!-- WhatsApp Badge Corner Pill -->
+                    <span class="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#25D366] text-white flex items-center justify-center text-xs sm:text-sm shadow-md ring-2 ring-white">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </span>
+                </a>
+            </aside>
+        <?php endif; ?>
+    </div>
+
     <!-- Universal SPA Toast Container -->
-    <div id="spaToastContainer" class="fixed bottom-6 right-6 z-[100] space-y-2 pointer-events-none"></div>
+    <div id="spaToastContainer" class="fixed bottom-24 right-6 md:bottom-24 md:right-6 z-[100] space-y-2 pointer-events-none"></div>
 
     <script>
         // Desktop / Header Dropdown Navigation Manager
@@ -1238,6 +1608,20 @@
                 const newDrawer = newDoc.querySelector('#mobileDrawer');
                 if (currentDrawer && newDrawer) {
                     currentDrawer.innerHTML = newDrawer.innerHTML;
+                }
+
+                // Update Mobile Bottom Navigation Bar Synchronously
+                const currentBottomNav = document.getElementById('mobileBottomNav');
+                const newBottomNav = newDoc.querySelector('#mobileBottomNav');
+                if (currentBottomNav && newBottomNav) {
+                    currentBottomNav.innerHTML = newBottomNav.innerHTML;
+                }
+
+                // Update Floating CS Widget Container Synchronously
+                const currentCsContainer = document.getElementById('floatingCsContainer');
+                const newCsContainer = newDoc.querySelector('#floatingCsContainer');
+                if (currentCsContainer && newCsContainer) {
+                    currentCsContainer.innerHTML = newCsContainer.innerHTML;
                 }
 
                 // Automatically close mobile sidebar on navigation
