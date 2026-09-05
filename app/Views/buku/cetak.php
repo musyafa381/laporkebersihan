@@ -879,6 +879,133 @@
             }
         }
 
+        /* ═══════════════════════════════════════════
+           ZOOM & PREVIEW CONTROLS
+           ═══════════════════════════════════════════ */
+        .doc-pages-container {
+            transform-origin: top center;
+            transition: zoom 0.15s ease-out;
+            width: 100%;
+        }
+
+        .floating-zoom-bar {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.15);
+            user-select: none;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .floating-zoom-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .floating-zoom-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.08);
+        }
+        .floating-zoom-label {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 0 6px;
+            min-width: 48px;
+            text-align: center;
+            color: #e2e8f0;
+            cursor: pointer;
+        }
+        .floating-zoom-label:hover {
+            color: #34d399;
+        }
+
+        .top-zoom-group {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 3px 6px;
+            gap: 4px;
+        }
+        .btn-top-zoom {
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-top-zoom:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        .top-zoom-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 0 6px;
+            min-width: 44px;
+            text-align: center;
+            cursor: pointer;
+            color: #e2e8f0;
+        }
+        .top-zoom-badge:hover {
+            color: #34d399;
+        }
+        .btn-top-zoom-fit {
+            padding: 4px 8px;
+            border-radius: 8px;
+            background: rgba(16, 185, 129, 0.3);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .btn-top-zoom-fit:hover {
+            background: rgba(16, 185, 129, 0.5);
+        }
+
+        @media print {
+            .no-print,
+            .floating-zoom-bar,
+            .control-bar {
+                display: none !important;
+            }
+            .doc-pages-container {
+                zoom: 1 !important;
+                transform: none !important;
+            }
+        }
+
         /* Web preview styling */
         @media screen {
             .page {
@@ -916,6 +1043,20 @@
             </div>
         </div>
         <div class="bar-actions">
+            <!-- Top Zoom Controller -->
+            <div class="top-zoom-group">
+                <button type="button" onclick="zoomDoc(-0.1)" class="btn-top-zoom" title="Perkecil / Zoom Out (Ctrl -)">
+                    <i class="fa-solid fa-minus"></i>
+                </button>
+                <span id="zoomLevelTextTop" onclick="resetDocZoom()" class="top-zoom-badge" title="Klik untuk reset 100%">100%</span>
+                <button type="button" onclick="zoomDoc(0.1)" class="btn-top-zoom" title="Perbesar / Zoom In (Ctrl +)">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+                <button type="button" onclick="fitDocWidth()" class="btn-top-zoom-fit" title="Sesuaikan Lebar Layar (Fit Width)">
+                    <i class="fa-solid fa-arrows-left-right"></i> Fit
+                </button>
+            </div>
+
             <a href="<?= base_url('buku/detail/' . $buku['id']) ?>" class="btn-back">
                 <i class="fa-solid fa-arrow-left"></i> Kembali
             </a>
@@ -925,6 +1066,21 @@
         </div>
     </div>
     <?php endif; ?>
+
+    <!-- Floating Zoom Widget (Available on both direct & preview modes) -->
+    <div id="floatingZoomBar" class="floating-zoom-bar no-print">
+        <button type="button" onclick="zoomDoc(-0.1)" class="floating-zoom-btn" title="Perkecil / Zoom Out (Ctrl -)">
+            <i class="fa-solid fa-minus"></i>
+        </button>
+        <span id="floatingZoomLabel" onclick="resetDocZoom()" class="floating-zoom-label" title="Klik untuk reset 100%">100%</span>
+        <button type="button" onclick="zoomDoc(0.1)" class="floating-zoom-btn" title="Perbesar / Zoom In (Ctrl +)">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+        <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.2); margin: 0 2px;"></div>
+        <button type="button" onclick="fitDocWidth()" class="floating-zoom-btn" style="width: auto; padding: 0 10px; border-radius: 9999px; font-size: 11px; font-weight: 700;" title="Sesuaikan Lebar Layar (Fit Width)">
+            <i class="fa-solid fa-arrows-left-right" style="margin-right: 4px; font-size: 10px;"></i> Fit
+        </button>
+    </div>
 
     <?php
     // ═══════════════════════════════════════════
@@ -944,6 +1100,11 @@
     // Page counter variable (starts from 1 after cover)
     $pageNumber = 1;
     ?>
+
+    <!-- ══════════════════════════════════════════════
+         DOC PAGES CONTAINER (ZOOMABLE WRAPPER)
+         ══════════════════════════════════════════════ -->
+    <div id="docPagesContainer" class="doc-pages-container">
 
     <!-- ══════════════════════════════════════════════
          1. SAMPUL RESMI (COVER PAGE)
@@ -1947,12 +2108,110 @@
         </div>
     </div>
 
+    </div><!-- End #docPagesContainer -->
+
     <script>
+        // Zoom Controller Logic
+        let currentZoom = 1.0;
+
+        function setDocZoom(zoomLevel) {
+            currentZoom = Math.min(Math.max(0.3, parseFloat(Number(zoomLevel).toFixed(2))), 2.5);
+            const container = document.getElementById('docPagesContainer');
+            if (container) {
+                container.style.zoom = currentZoom;
+            }
+            updateZoomDisplay();
+
+            // Notify parent modal if inside iframe
+            if (window.self !== window.top && window.parent) {
+                window.parent.postMessage({ action: 'zoomChanged', zoom: currentZoom }, '*');
+            }
+        }
+        window.setDocZoom = setDocZoom;
+
+        function zoomDoc(delta) {
+            setDocZoom(currentZoom + delta);
+        }
+        window.zoomDoc = zoomDoc;
+
+        function resetDocZoom() {
+            setDocZoom(1.0);
+        }
+        window.resetDocZoom = resetDocZoom;
+
+        function fitDocWidth() {
+            const firstPage = document.querySelector('.page');
+            const container = document.getElementById('docPagesContainer');
+            if (!firstPage) return;
+
+            const padding = (window.self !== window.top) ? 24 : 48;
+            const availableWidth = window.innerWidth - padding;
+            const pageWidth = 794; // approx 210mm in px at 96dpi
+            const fitRatio = availableWidth / pageWidth;
+            
+            setDocZoom(Math.min(fitRatio, 1.2));
+        }
+        window.fitDocWidth = fitDocWidth;
+
+        function updateZoomDisplay() {
+            const percent = Math.round(currentZoom * 100) + '%';
+            const floatingLabel = document.getElementById('floatingZoomLabel');
+            if (floatingLabel) floatingLabel.textContent = percent;
+            const topLabel = document.getElementById('zoomLevelTextTop');
+            if (topLabel) topLabel.textContent = percent;
+        }
+
+        // Listen to commands from parent modal
+        window.addEventListener('message', function(e) {
+            if (!e.data) return;
+            if (e.data.action === 'setZoom') {
+                setDocZoom(e.data.zoom);
+            } else if (e.data.action === 'zoomDelta') {
+                zoomDoc(e.data.delta);
+            } else if (e.data.action === 'fitWidth') {
+                fitDocWidth();
+            } else if (e.data.action === 'resetZoom') {
+                resetDocZoom();
+            }
+        });
+
+        // Keyboard shortcuts for zooming (Ctrl + / Ctrl - / Ctrl 0)
+        window.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === '=' || e.key === '+') {
+                    e.preventDefault();
+                    zoomDoc(0.1);
+                } else if (e.key === '-' || e.key === '_') {
+                    e.preventDefault();
+                    zoomDoc(-0.1);
+                } else if (e.key === '0') {
+                    e.preventDefault();
+                    resetDocZoom();
+                }
+            }
+        });
+
+        // Ctrl + Mouse Wheel for Smooth Zooming
+        window.addEventListener('wheel', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                const delta = e.deltaY < 0 ? 0.05 : -0.05;
+                zoomDoc(delta);
+            }
+        }, { passive: false });
+
         // Automatic detection if loaded inside iframe / preview modal
         if (window.self !== window.top) {
             document.body.classList.add('is-embedded');
             const cBar = document.querySelector('.control-bar');
             if (cBar) cBar.style.display = 'none';
+
+            // Auto fit width inside modal iframe on small screens
+            window.addEventListener('DOMContentLoaded', function() {
+                if (window.innerWidth < 880) {
+                    setTimeout(fitDocWidth, 100);
+                }
+            });
         }
     </script>
 </body>

@@ -14,268 +14,414 @@
     <!-- 🌐 TAMPILAN FORM CS (PUBLIK & AUDITOR)     -->
     <!-- ========================================== -->
     <!-- Hero Banner / Page Header -->
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-700 to-emerald-900 text-white p-6 sm:p-10 shadow-2xl shadow-emerald-900/20 border border-emerald-600/30">
-        <div class="absolute -right-10 -bottom-10 opacity-10 text-white pointer-events-none">
-            <i class="fa-solid fa-headset text-[160px] sm:text-[240px]"></i>
+    <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-700 to-emerald-900 text-white p-4 sm:p-7 shadow-lg sm:shadow-xl shadow-emerald-900/20 border border-emerald-600/30">
+        <div class="absolute -right-6 -bottom-6 opacity-10 text-white pointer-events-none">
+            <i class="fa-solid fa-headset text-[120px] sm:text-[200px]"></i>
         </div>
-        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
-            <div class="space-y-2 max-w-3xl">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 backdrop-blur-md text-emerald-200 text-[11px] sm:text-xs font-bold uppercase tracking-wider border border-emerald-400/30">
-                    <i class="fa-solid fa-headset"></i> Layanan Pengaduan Kebersihan 24/7
-                </span>
-                <h1 class="text-2xl sm:text-4xl font-heading font-extrabold tracking-tight leading-tight">
-                    Customer Service & Lapor Kebersihan
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-5">
+            <div class="space-y-1 sm:space-y-1.5 max-w-3xl">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full bg-emerald-500/20 backdrop-blur-md text-emerald-200 text-[10px] sm:text-xs font-bold uppercase tracking-wider border border-emerald-400/30">
+                    <i class="fa-solid fa-headset text-[10px]"></i> Layanan Pengaduan 24/7
+                </div>
+                <h1 class="text-lg sm:text-2xl md:text-3xl font-heading font-extrabold tracking-tight leading-tight">
+                    Customer Service & Lapor Kendala
                 </h1>
-                <p class="text-emerald-100/90 text-xs sm:text-base leading-relaxed">
-                    Silakan sampaikan kendala kebersihan atau pertanyaan seputar kebersihan pesantren. Tim Kebersihan siap membantu.
+                <p class="text-emerald-100/90 text-xs sm:text-sm leading-relaxed max-w-2xl">
+                    Sampaikan kendala kebersihan atau pertanyaan seputar kebersihan pesantren. Tim siap menindaklanjuti.
                 </p>
             </div>
         </div>
     </div>
 
     <!-- Public Contact Grid & Form -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 items-start">
         <!-- Form Pengaduan Publik (Anti-SPAM CAPTCHA) -->
-        <div class="lg:col-span-2 glass-card rounded-3xl p-6 sm:p-7 shadow-xl border border-slate-200/80 bg-white space-y-5">
-            <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
-                <h3 class="font-heading font-extrabold text-lg text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-paper-plane text-emerald-600"></i> Form Lapor Kendala Kebersihan
-                </h3>
-                <span class="text-[10px] font-extrabold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                    <i class="fa-solid fa-shield-halved mr-1"></i> Terverifikasi Anti-SPAM
+        <div class="lg:col-span-2 glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-7 shadow-lg sm:shadow-xl border border-slate-200/80 bg-white space-y-4 sm:space-y-5">
+            <div class="border-b border-slate-100 pb-3 flex items-center justify-between gap-2">
+                <h2 class="font-heading font-extrabold text-sm sm:text-base text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-paper-plane text-emerald-600 text-xs sm:text-sm"></i> 
+                    <span>Form Lapor Kendala</span>
+                </h2>
+                <span class="text-[9px] sm:text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-emerald-200 flex items-center gap-1 flex-shrink-0">
+                    <i class="fa-solid fa-shield-halved text-[9px]"></i> 
+                    <span>Anti-SPAM</span>
                 </span>
             </div>
 
-            <form action="<?= base_url('cs/public/store') ?>" method="POST" enctype="multipart/form-data" class="space-y-4 allow-auditor" id="formLaporCsPublic">
+            <!-- Multi-Step Progress Stepper -->
+            <div class="mb-3 sm:mb-5 px-1 sm:px-2">
+                <div class="flex items-start justify-between w-full">
+                    <!-- Step 1 Trigger -->
+                    <button type="button" onclick="goToCsStep(1)" id="stepTab1" class="flex flex-col items-center group cursor-pointer focus:outline-none flex-1 max-w-[100px] z-10">
+                        <div id="stepCircle1" class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center font-extrabold text-xs sm:text-sm bg-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-2 sm:ring-4 ring-emerald-100 transition-all duration-300 scale-105">
+                            <i class="fa-solid fa-user text-xs sm:text-sm"></i>
+                        </div>
+                        <span id="stepLabel1" class="mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] font-extrabold text-emerald-900 tracking-tight transition-colors text-center leading-tight">1. Identitas</span>
+                    </button>
+
+                    <!-- Connector 1-2 -->
+                    <div class="flex-1 h-1 bg-slate-200 mx-1 sm:mx-2 mt-4 sm:mt-[18px] rounded-full overflow-hidden self-start">
+                        <div id="csProgressLine1" class="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300" style="width: 0%;"></div>
+                    </div>
+
+                    <!-- Step 2 Trigger -->
+                    <button type="button" onclick="goToCsStep(2)" id="stepTab2" class="flex flex-col items-center group cursor-pointer focus:outline-none flex-1 max-w-[100px] z-10">
+                        <div id="stepCircle2" class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center font-bold text-xs sm:text-sm bg-slate-100 text-slate-400 border border-slate-200 ring-2 sm:ring-4 ring-white transition-all duration-300">
+                            <i class="fa-solid fa-camera text-xs sm:text-sm"></i>
+                        </div>
+                        <span id="stepLabel2" class="mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] font-medium text-slate-400 tracking-tight transition-colors text-center leading-tight">2. Detail Foto</span>
+                    </button>
+
+                    <!-- Connector 2-3 -->
+                    <div class="flex-1 h-1 bg-slate-200 mx-1 sm:mx-2 mt-4 sm:mt-[18px] rounded-full overflow-hidden self-start">
+                        <div id="csProgressLine2" class="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300" style="width: 0%;"></div>
+                    </div>
+
+                    <!-- Step 3 Trigger -->
+                    <button type="button" onclick="goToCsStep(3)" id="stepTab3" class="flex flex-col items-center group cursor-pointer focus:outline-none flex-1 max-w-[100px] z-10">
+                        <div id="stepCircle3" class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center font-bold text-xs sm:text-sm bg-slate-100 text-slate-400 border border-slate-200 ring-2 sm:ring-4 ring-white transition-all duration-300">
+                            <i class="fa-solid fa-paper-plane text-xs sm:text-sm"></i>
+                        </div>
+                        <span id="stepLabel3" class="mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] font-medium text-slate-400 tracking-tight transition-colors text-center leading-tight">3. Kirim</span>
+                    </button>
+                </div>
+            </div>
+
+            <form action="<?= base_url('cs/public/store') ?>" method="POST" enctype="multipart/form-data" class="space-y-4 allow-auditor" id="formLaporCsPublic" onsubmit="return validateCsFinalSubmit(event)">
                 <?php $isLoggedIn = (bool)session()->get('isLoggedIn'); ?>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                            <span>Nama Lengkap Pengirim</span>
-                            <?php if ($isLoggedIn): ?>
-                                <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
-                                    <i class="fa-solid fa-lock text-[9px]"></i> Otomatis (PJ Unit)
-                                </span>
-                            <?php endif; ?>
-                        </label>
-                        <input type="text" name="nama_pengirim" value="<?= esc($defaultNamaPengirim ?? $userUnit['pj_nama'] ?? session()->get('nama_lengkap') ?? '') ?>" <?= $isLoggedIn ? 'readonly' : '' ?> placeholder="Misal: Santri / Pengurus / Warga" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold <?= $isLoggedIn ? 'bg-slate-100/90 text-slate-800 cursor-not-allowed' : 'bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500' ?> transition shadow-2xs">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                            <span>Nomor WhatsApp / HP</span>
-                            <?php if ($isLoggedIn): ?>
-                                <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
-                                    <i class="fa-solid fa-lock text-[9px]"></i> Otomatis (PJ Unit)
-                                </span>
-                            <?php endif; ?>
-                        </label>
-                        <input type="text" name="kontak_hp" value="<?= esc($defaultKontakHp ?? $userUnit['pj_kontak'] ?? '') ?>" <?= $isLoggedIn ? 'readonly' : '' ?> placeholder="081234567890" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold <?= $isLoggedIn ? 'bg-slate-100/90 text-slate-800 cursor-not-allowed' : 'bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500' ?> transition shadow-2xs">
-                    </div>
-                </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Searchable Unit Picker in CS Form -->
-                    <div class="relative">
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                            <span>1. Lokasi / Unit Terkait</span>
-                            <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
-                                <i class="fa-solid fa-magnifying-glass text-[9px]"></i> Bisa dicari
-                            </span>
-                        </label>
-                        <input type="hidden" id="cs_unit_id" name="unit_id" value="">
-                        <input type="hidden" id="cs_unit_lokasi" name="unit_lokasi" required value="">
-                        <div class="relative">
-                            <i class="fa-solid fa-building text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2 text-xs pointer-events-none"></i>
-                            <input type="text" id="cs_unit_search" placeholder="Pilih unit / asrama terkait..." autocomplete="off" required onfocus="openCsUnitDropdown()" oninput="filterCsUnitOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
-                            <button type="button" onclick="toggleCsUnitDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
-                                <i id="csUnitIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
-                            </button>
+                <!-- ========================================== -->
+                <!-- 🔹 LANGKAH 1: IDENTITAS & LOKASI UNIT     -->
+                <!-- ========================================== -->
+                <div id="csStep1" class="cs-step-pane space-y-3.5 sm:space-y-4 animate-fadeIn">
+                    <div class="p-2.5 sm:p-3 rounded-xl bg-emerald-50/70 border border-emerald-100 flex items-center gap-2 text-xs text-emerald-900 font-medium">
+                        <i class="fa-solid fa-circle-info text-emerald-600 text-xs flex-shrink-0"></i>
+                        <span class="text-[11px] sm:text-xs">Lengkapi data diri dan tentukan lokasi kendala kebersihan.</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between flex-wrap gap-1">
+                                <span>Nama Pengirim <span class="text-rose-500">*</span></span>
+                                <?php if ($isLoggedIn): ?>
+                                    <span class="text-[9px] sm:text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 flex items-center gap-0.5">
+                                        <i class="fa-solid fa-lock text-[8px]"></i> Otomatis
+                                    </span>
+                                <?php endif; ?>
+                            </label>
+                            <input type="text" id="cs_nama_pengirim" name="nama_pengirim" value="<?= esc($defaultNamaPengirim ?? $userUnit['pj_nama'] ?? session()->get('nama_lengkap') ?? '') ?>" <?= $isLoggedIn ? 'readonly' : '' ?> placeholder="Misal: Santri / Warga / Kader" required class="w-full px-3.5 py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 text-xs font-bold <?= $isLoggedIn ? 'bg-slate-100/90 text-slate-800 cursor-not-allowed' : 'bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500' ?> transition shadow-2xs">
                         </div>
-                        <!-- Dropdown List -->
-                        <div id="csUnitDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
-                            <?php if (!empty($unitList)): ?>
-                                <?php foreach ($unitList as $u): ?>
-                                    <div class="cs-unit-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $u['id'] ?>" data-nama="<?= esc($u['nama_unit']) ?>" onclick="selectCsUnit(this)">
-                                        <div>
-                                            <div class="font-extrabold text-xs text-slate-900"><?= esc($u['nama_unit']) ?></div>
-                                            <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
-                                                <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200/60"><?= esc($u['tipe']) ?></span>
-                                                <?php if (!empty($u['kode_unit'])): ?>
-                                                    <span>&bull;</span>
-                                                    <span class="font-mono text-slate-400"><?= esc($u['kode_unit']) ?></span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                        <span class="text-xs text-slate-300 group-hover:text-emerald-600"><i class="fa-solid fa-check text-[10px]"></i></span>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <div class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium">
-                                    Belum ada data unit aktif.
-                                </div>
-                            <?php endif; ?>
-                            <div id="noCsUnitFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
-                                Tidak ditemukan unit yang sesuai.
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between flex-wrap gap-1">
+                                <span>WhatsApp / HP <span class="text-rose-500">*</span></span>
+                                <?php if ($isLoggedIn): ?>
+                                    <span class="text-[9px] sm:text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 flex items-center gap-0.5">
+                                        <i class="fa-solid fa-lock text-[8px]"></i> Otomatis
+                                    </span>
+                                <?php endif; ?>
+                            </label>
+                            <input type="text" id="cs_kontak_hp" name="kontak_hp" value="<?= esc($defaultKontakHp ?? $userUnit['pj_kontak'] ?? '') ?>" <?= $isLoggedIn ? 'readonly' : '' ?> placeholder="081234567890" required class="w-full px-3.5 py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 text-xs font-bold <?= $isLoggedIn ? 'bg-slate-100/90 text-slate-800 cursor-not-allowed' : 'bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500' ?> transition shadow-2xs">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        <!-- Searchable Unit Picker in CS Form -->
+                        <div class="relative">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between flex-wrap gap-1">
+                                <span>1. Lokasi / Unit <span class="text-rose-500">*</span></span>
+                                <span class="text-[9px] sm:text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 flex items-center gap-0.5">
+                                    <i class="fa-solid fa-magnifying-glass text-[8px]"></i> Cari Unit
+                                </span>
+                            </label>
+                            <input type="hidden" id="cs_unit_id" name="unit_id" value="">
+                            <input type="hidden" id="cs_unit_lokasi" name="unit_lokasi" required value="">
+                            <div class="relative">
+                                <i class="fa-solid fa-building text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2 text-xs pointer-events-none"></i>
+                                <input type="text" id="cs_unit_search" placeholder="Pilih unit / asrama terkait..." autocomplete="off" required onfocus="openCsUnitDropdown()" oninput="filterCsUnitOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
+                                <button type="button" onclick="toggleCsUnitDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                                    <i id="csUnitIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                                </button>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Searchable Wilayah Picker in CS Form -->
-                    <div class="relative">
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                            <span>2. Wilayah Pemetaan</span>
-                            <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
-                                <i class="fa-solid fa-filter text-[9px]"></i> Sesuai Unit
-                            </span>
-                        </label>
-                        <input type="hidden" id="cs_wilayah_id" name="wilayah_id" value="">
-                        <div class="relative">
-                            <i class="fa-solid fa-map-location-dot absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-600 text-xs pointer-events-none"></i>
-                            <input type="text" id="cs_wilayah_search" placeholder="Pilih unit terlebih dahulu..." autocomplete="off" onclick="openCsWilayahDropdown()" onfocus="openCsWilayahDropdown()" oninput="filterCsWilayahOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
-                            <button type="button" onclick="toggleCsWilayahDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
-                                <i id="csWilayahIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
-                            </button>
-                        </div>
-                        <!-- Dropdown List -->
-                        <div id="csWilayahDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
-                            <div class="cs-wilayah-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="" data-name="" data-lokasi-gedung="" onclick="selectCsWilayah(this)">
-                                <div>
-                                    <div class="font-extrabold text-xs text-slate-600 italic">-- Bukan Wilayah Khusus / Umum --</div>
-                                    <div class="text-[10px] text-slate-400 font-medium">Laporan umum lingkungan unit (tanpa spot wilayah khusus)</div>
+                            <!-- Dropdown List -->
+                            <div id="csUnitDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                                <?php if (!empty($unitList)): ?>
+                                    <?php foreach ($unitList as $u): ?>
+                                        <div class="cs-unit-item px-3.5 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $u['id'] ?>" data-nama="<?= esc($u['nama_unit']) ?>" onclick="selectCsUnit(this)">
+                                            <div>
+                                                <div class="font-extrabold text-xs text-slate-900"><?= esc($u['nama_unit']) ?></div>
+                                                <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
+                                                    <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200/60"><?= esc($u['tipe']) ?></span>
+                                                    <?php if (!empty($u['kode_unit'])): ?>
+                                                        <span>&bull;</span>
+                                                        <span class="font-mono text-slate-400"><?= esc($u['kode_unit']) ?></span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                            <span class="text-xs text-slate-300 group-hover:text-emerald-600"><i class="fa-solid fa-check text-[10px]"></i></span>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <div class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium">
+                                        Belum ada data unit aktif.
+                                    </div>
+                                <?php endif; ?>
+                                <div id="noCsUnitFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
+                                    Tidak ditemukan unit yang sesuai.
                                 </div>
                             </div>
-                            <?php if (!empty($wilayahList)): ?>
-                                <?php foreach ($wilayahList as $w): ?>
-                                    <div class="cs-wilayah-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $w['id'] ?>" data-name="<?= esc($w['nama_wilayah']) ?>" data-lokasi-gedung="<?= esc(strtolower($w['lokasi_gedung'] ?? '')) ?>" onclick="selectCsWilayah(this)">
-                                        <div>
-                                            <div class="font-extrabold text-xs text-slate-900"><?= esc($w['nama_wilayah']) ?></div>
-                                            <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5 flex-wrap">
-                                                <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/60"><?= esc($w['kategori_area']) ?></span>
-                                                <?php if (!empty($w['luas_area'])): ?>
-                                                    <span class="text-slate-300">&bull;</span>
-                                                    <span class="inline-flex items-center gap-0.5 text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200/60 font-bold" title="Ukuran / Luas Area">
-                                                        <i class="fa-solid fa-ruler-combined text-[9px] text-teal-600"></i> <?= esc($w['luas_area']) ?>
-                                                    </span>
-                                                <?php endif; ?>
-                                                <?php if (!empty($w['lokasi_gedung'])): ?>
-                                                    <span class="text-slate-300">&bull;</span>
-                                                    <span><i class="fa-solid fa-location-dot text-rose-500 mr-0.5"></i><?= esc($w['lokasi_gedung']) ?></span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                        <span class="text-[10px] font-mono font-bold text-slate-400"><?= esc($w['kode_wilayah'] ?: 'WIL-' . $w['id']) ?></span>
+                        </div>
+
+                        <!-- Searchable Wilayah Picker in CS Form -->
+                        <div class="relative">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between flex-wrap gap-1">
+                                <span>2. Wilayah / Spot Area</span>
+                                <span class="text-[9px] sm:text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 flex items-center gap-0.5">
+                                    <i class="fa-solid fa-filter text-[8px]"></i> Opsional
+                                </span>
+                            </label>
+                            <input type="hidden" id="cs_wilayah_id" name="wilayah_id" value="">
+                            <div class="relative">
+                                <i class="fa-solid fa-map-location-dot absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-600 text-xs pointer-events-none"></i>
+                                <input type="text" id="cs_wilayah_search" placeholder="Pilih unit terlebih dahulu..." autocomplete="off" onclick="openCsWilayahDropdown()" onfocus="openCsWilayahDropdown()" oninput="filterCsWilayahOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
+                                <button type="button" onclick="toggleCsWilayahDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                                    <i id="csWilayahIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                                </button>
+                            </div>
+                            <!-- Dropdown List -->
+                            <div id="csWilayahDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                                <div class="cs-wilayah-item px-3.5 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="" data-name="" data-lokasi-gedung="" onclick="selectCsWilayah(this)">
+                                    <div>
+                                        <div class="font-extrabold text-xs text-slate-600 italic">-- Bukan Wilayah Khusus / Umum --</div>
+                                        <div class="text-[10px] text-slate-400 font-medium">Laporan umum lingkungan unit (tanpa spot wilayah khusus)</div>
                                     </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                            <div id="noCsWilayahFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
-                                Tidak ada spot wilayah pemetaan di unit ini.
+                                </div>
+                                <?php if (!empty($wilayahList)): ?>
+                                    <?php foreach ($wilayahList as $w): ?>
+                                        <div class="cs-wilayah-item px-3.5 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $w['id'] ?>" data-name="<?= esc($w['nama_wilayah']) ?>" data-lokasi-gedung="<?= esc(strtolower($w['lokasi_gedung'] ?? '')) ?>" onclick="selectCsWilayah(this)">
+                                            <div>
+                                                <div class="font-extrabold text-xs text-slate-900"><?= esc($w['nama_wilayah']) ?></div>
+                                                <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                                    <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/60"><?= esc($w['kategori_area']) ?></span>
+                                                    <?php if (!empty($w['luas_area'])): ?>
+                                                        <span class="text-slate-300">&bull;</span>
+                                                        <span class="inline-flex items-center gap-0.5 text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200/60 font-bold" title="Ukuran / Luas Area">
+                                                            <i class="fa-solid fa-ruler-combined text-[9px] text-teal-600"></i> <?= esc($w['luas_area']) ?>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                    <?php if (!empty($w['lokasi_gedung'])): ?>
+                                                        <span class="text-slate-300">&bull;</span>
+                                                        <span><i class="fa-solid fa-location-dot text-rose-500 mr-0.5"></i><?= esc($w['lokasi_gedung']) ?></span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                            <span class="text-[10px] font-mono font-bold text-slate-400"><?= esc($w['kode_wilayah'] ?: 'WIL-' . $w['id']) ?></span>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                                <div id="noCsWilayahFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
+                                    Tidak ada spot wilayah pemetaan di unit ini.
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Tombol Lanjut ke Langkah 2 -->
+                    <div class="pt-3 sm:pt-4 border-t border-slate-100 flex justify-end">
+                        <button type="button" onclick="nextCsStep(1)" class="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 group cursor-pointer active:scale-[0.98]">
+                            <span>Lanjut: Detail & Foto Bukti</span>
+                            <i class="fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Dynamic Step 3: Shift Selection with Smart PJ Routing (Revealed once Wilayah is picked) -->
-                <div id="csPublicShiftContainer" class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-2.5 hidden animate-fadeIn">
-                    <div class="flex items-center justify-between">
-                        <label class="block text-xs font-extrabold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-regular fa-clock text-emerald-600"></i>
-                            <span>3. Pilih Shift & Penanggung Jawab Terkait</span>
+                <!-- ========================================== -->
+                <!-- 🔹 LANGKAH 2: DETAIL KENDALA & FOTO BUKTI -->
+                <!-- ========================================== -->
+                <div id="csStep2" class="cs-step-pane space-y-3.5 sm:space-y-4 hidden animate-fadeIn">
+                    <!-- Dynamic Shift Selection with Smart PJ Routing -->
+                    <div id="csPublicShiftContainer" class="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-2 hidden animate-fadeIn">
+                        <div class="flex items-center justify-between gap-1 flex-wrap">
+                            <label class="block text-xs font-extrabold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fa-regular fa-clock text-emerald-600 text-xs"></i>
+                                <span>Pilih Shift & PJ Terkait</span>
+                            </label>
+                            <span id="csShiftAutoBadge" class="text-[9px] sm:text-[10px] text-emerald-700 bg-white px-2 py-0.5 rounded-full border border-emerald-200 font-bold flex items-center gap-1 shadow-2xs">
+                                <i class="fa-solid fa-wand-magic-sparkles text-[8px]"></i> Rekomendasi
+                            </span>
+                        </div>
+                        <select id="cs_public_shift" name="shift" onchange="onPublicShiftChange(this)" class="w-full px-3 py-2 rounded-xl border border-emerald-300 text-xs font-bold bg-white text-slate-800 focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer">
+                            <!-- Populated dynamically via JS -->
+                        </select>
+                        <div id="csShiftInfoPj" class="text-[11px] text-emerald-900 font-medium flex items-center gap-1.5">
+                            <i class="fa-solid fa-shield-halved text-emerald-600 text-xs flex-shrink-0"></i>
+                            <span>Diteruskan ke PJ: <b id="csTargetUnitName" class="text-emerald-950 underline font-extrabold">-</b></span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Kategori Kendala <span class="text-rose-500">*</span></label>
+                        <select id="cs_kategori" name="kategori" class="w-full px-3.5 py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer">
+                            <option value="Kendala Kebersihan">Kendala Kebersihan / Sampah Penuh</option>
+                            <option value="Fasilitas Rusak">Fasilitas Tempat Kebersihan Rusak</option>
+                            <option value="Pertanyaan/Konsultasi">Pertanyaan / Konsultasi</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between flex-wrap gap-1">
+                            <span>Isi Pesan / Keluhan <span class="text-rose-500">*</span></span>
+                            <span class="text-[10px] text-slate-400 font-medium">Jelaskan detail</span>
                         </label>
-                        <span id="csShiftAutoBadge" class="text-[10px] text-emerald-700 bg-white px-2.5 py-0.5 rounded-full border border-emerald-200 font-bold flex items-center gap-1 shadow-2xs">
-                            <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i> Rekomendasi Waktu
-                        </span>
+                        <textarea id="cs_isi_laporan" name="isi_laporan" rows="4" placeholder="Jelaskan kendala kebersihan atau hal yang ingin disampaikan ke Tim Kebersihan..." required class="w-full px-3.5 py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 text-xs font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs"></textarea>
                     </div>
-                    <select id="cs_public_shift" name="shift" onchange="onPublicShiftChange(this)" class="w-full px-4 py-2.5 rounded-xl border border-emerald-300 text-xs font-bold bg-white text-slate-800 focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer">
-                        <!-- Populated dynamically via JS -->
-                    </select>
-                    <div id="csShiftInfoPj" class="text-[11px] text-emerald-900 font-semibold flex items-center gap-1.5 pt-0.5">
-                        <i class="fa-solid fa-shield-halved text-emerald-600 text-xs"></i>
-                        <span>Laporan akan otomatis diteruskan ke Penanggung Jawab: <b id="csTargetUnitName" class="text-emerald-950 underline font-extrabold">-</b></span>
+
+                    <!-- Multiple Photo Upload with Separate Camera & Gallery Buttons and Delete Feature -->
+                    <div class="space-y-2.5 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50/90 border border-slate-200">
+                        <div class="flex items-center justify-between gap-1 flex-wrap">
+                            <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fa-solid fa-camera-retro text-emerald-600 text-xs"></i>
+                                <span>Foto Bukti Kendala</span>
+                            </label>
+                            <span class="text-[10px] text-slate-500 font-medium">Bisa > 1 foto (Opsional)</span>
+                        </div>
+
+                        <!-- Hidden Inputs for Camera and Gallery -->
+                        <input type="file" id="publicCameraInput" accept="image/*" capture="environment" class="hidden" onchange="handlePublicFiles(this.files)">
+                        <input type="file" id="publicGalleryInput" accept="image/*" multiple class="hidden" onchange="handlePublicFiles(this.files)">
+                        <!-- Real Form File Input Container managed by DataTransfer -->
+                        <input type="file" id="publicRealInput" name="foto_files[]" multiple class="hidden">
+
+                        <!-- Action Buttons: Kamera & Galeri -->
+                        <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                            <button type="button" onclick="document.getElementById('publicCameraInput').click()" class="py-2.5 sm:py-3 px-3 rounded-xl sm:rounded-2xl bg-white hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-400 text-slate-700 hover:text-emerald-700 font-heading font-bold text-xs transition shadow-2xs flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]">
+                                <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0 text-xs">
+                                    <i class="fa-solid fa-camera"></i>
+                                </div>
+                                <span>Buka Kamera</span>
+                            </button>
+
+                            <button type="button" onclick="document.getElementById('publicGalleryInput').click()" class="py-2.5 sm:py-3 px-3 rounded-xl sm:rounded-2xl bg-white hover:bg-teal-50/80 border border-slate-200 hover:border-teal-400 text-slate-700 hover:text-teal-700 font-heading font-bold text-xs transition shadow-2xs flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]">
+                                <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center flex-shrink-0 text-xs">
+                                    <i class="fa-solid fa-images"></i>
+                                </div>
+                                <span>Pilih Galeri</span>
+                            </button>
+                        </div>
+
+                        <!-- Live Thumbnail Preview Container with Delete Button -->
+                        <div id="publicFotoPreviewContainer" class="flex flex-wrap gap-2 pt-2 hidden border-t border-slate-200/70"></div>
+                    </div>
+
+                    <!-- Tombol Navigasi Langkah 2 -->
+                    <div class="pt-3 sm:pt-4 border-t border-slate-100 flex items-center justify-between gap-2 sm:gap-3">
+                        <button type="button" onclick="prevCsStep(2)" class="px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-heading font-bold text-xs transition flex items-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-arrow-left text-[11px]"></i>
+                            <span>Kembali</span>
+                        </button>
+                        <button type="button" onclick="nextCsStep(2)" class="px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 flex items-center gap-2 group cursor-pointer active:scale-[0.98]">
+                            <span>Lanjut: Konfirmasi</span>
+                            <i class="fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform"></i>
+                        </button>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Kategori Pengaduan</label>
-                    <select name="kategori" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                        <option value="Kendala Kebersihan">Kendala Kebersihan / Sampah Penuh</option>
-                        <option value="Fasilitas Rusak">Fasilitas Tempat Kebersihan Rusak</option>
-                        <option value="Pertanyaan/Konsultasi">Pertanyaan / Konsultasi</option>
-                        <option value="Lainnya">Lainnya</option>
-                    </select>
-                </div>
+                <!-- ========================================== -->
+                <!-- 🔹 LANGKAH 3: KONFIRMASI & VERIFIKASI      -->
+                <!-- ========================================== -->
+                <div id="csStep3" class="cs-step-pane space-y-3.5 sm:space-y-4 hidden animate-fadeIn">
+                    <!-- Review Summary Card -->
+                    <div class="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-emerald-50/80 via-teal-50/40 to-slate-50 p-3.5 sm:p-5 border border-emerald-200/80 shadow-xs space-y-3 sm:space-y-4">
+                        <div class="flex items-center justify-between border-b border-emerald-200/60 pb-2.5">
+                            <h3 class="font-heading font-extrabold text-xs text-emerald-950 flex items-center gap-1.5 uppercase tracking-wider">
+                                <i class="fa-solid fa-clipboard-check text-emerald-600 text-xs sm:text-sm"></i>
+                                <span>Ringkasan Pengaduan</span>
+                            </h3>
+                            <button type="button" onclick="goToCsStep(1)" class="text-[10px] sm:text-[11px] text-emerald-700 hover:text-emerald-800 font-bold bg-white px-2 py-0.5 sm:py-1 rounded-lg sm:rounded-xl border border-emerald-200 shadow-2xs flex items-center gap-1 hover:shadow-xs transition">
+                                <i class="fa-solid fa-pen-to-square text-[9px]"></i> Ubah
+                            </button>
+                        </div>
 
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Isi Pesan Laporan / Pengaduan</label>
-                    <textarea name="isi_laporan" rows="4" placeholder="Jelaskan kendala kebersihan atau hal yang ingin disampaikan ke Admin Kebersihan..." required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs"></textarea>
-                </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 text-xs">
+                            <div class="bg-white/90 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-emerald-100 shadow-2xs space-y-0.5 sm:space-y-1">
+                                <span class="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                                    <i class="fa-solid fa-user text-emerald-600"></i> Pengirim
+                                </span>
+                                <div id="reviewPengirim" class="font-bold text-slate-900 text-xs">-</div>
+                                <div id="reviewKontak" class="text-[11px] text-slate-500 font-semibold font-mono">-</div>
+                            </div>
 
-                <!-- Multiple Photo Upload with Separate Camera & Gallery Buttons and Delete Feature -->
-                <div class="space-y-3 p-4 rounded-2xl bg-slate-50/90 border border-slate-200">
-                    <div class="flex items-center justify-between">
+                            <div class="bg-white/90 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-emerald-100 shadow-2xs space-y-0.5 sm:space-y-1">
+                                <span class="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                                    <i class="fa-solid fa-location-dot text-rose-500"></i> Lokasi & Shift
+                                </span>
+                                <div id="reviewLokasi" class="font-bold text-slate-900 text-xs">-</div>
+                                <div id="reviewShiftPj" class="text-[11px] text-emerald-700 font-semibold">-</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white/90 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl border border-emerald-100 shadow-2xs space-y-1.5 sm:space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                                    <i class="fa-solid fa-tag text-teal-600"></i> Kategori
+                                </span>
+                                <span id="reviewKategori" class="text-[9px] sm:text-[10px] font-extrabold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-full border border-emerald-200">-</span>
+                            </div>
+                            <div>
+                                <span class="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">Isi Kendala / Pesan:</span>
+                                <div id="reviewIsi" class="p-2.5 rounded-lg sm:rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-700 font-normal whitespace-pre-wrap leading-relaxed italic">-</div>
+                            </div>
+                        </div>
+
+                        <div id="reviewFotosWrapper" class="hidden bg-white/90 p-3 rounded-xl sm:rounded-2xl border border-emerald-100 shadow-2xs space-y-1.5">
+                            <span class="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                                <i class="fa-solid fa-images text-emerald-600"></i> Foto Terlampir (<span id="reviewFotoCount">0</span>)
+                            </span>
+                            <div id="reviewFotosContainer" class="flex flex-wrap gap-2 pt-0.5"></div>
+                        </div>
+                    </div>
+
+                    <!-- Anti-SPAM Security Verification Code -->
+                    <div class="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-100/90 border border-slate-200 space-y-2">
                         <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-camera-retro text-emerald-600"></i>
-                            <span>Foto Bukti / Lokasi Kendala</span>
+                            <i class="fa-solid fa-shield-halved text-emerald-600"></i>
+                            <span>Verifikasi Anti-SPAM <span class="text-rose-500">*</span></span>
                         </label>
-                        <span class="text-[10px] text-slate-500 font-medium">Bisa lebih dari 1 foto</span>
-                    </div>
-
-                    <!-- Hidden Inputs for Camera and Gallery -->
-                    <input type="file" id="publicCameraInput" accept="image/*" capture="environment" class="hidden" onchange="handlePublicFiles(this.files)">
-                    <input type="file" id="publicGalleryInput" accept="image/*" multiple class="hidden" onchange="handlePublicFiles(this.files)">
-                    <!-- Real Form File Input Container managed by DataTransfer -->
-                    <input type="file" id="publicRealInput" name="foto_files[]" multiple class="hidden">
-
-                    <!-- Action Buttons: Kamera & Galeri -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <button type="button" onclick="document.getElementById('publicCameraInput').click()" class="py-3 px-4 rounded-2xl bg-white hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-400 text-slate-700 hover:text-emerald-700 font-heading font-extrabold text-xs transition shadow-2xs flex items-center justify-center gap-2">
-                            <div class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
-                                <i class="fa-solid fa-camera"></i>
+                        <div class="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
+                            <div class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white border border-slate-300 font-mono font-bold text-xs sm:text-sm text-emerald-800 shadow-inner whitespace-nowrap">
+                                <?= esc($captcha_num1) ?> + <?= esc($captcha_num2) ?> = ?
                             </div>
-                            <span>Buka Kamera</span>
-                        </button>
-
-                        <button type="button" onclick="document.getElementById('publicGalleryInput').click()" class="py-3 px-4 rounded-2xl bg-white hover:bg-teal-50/80 border border-slate-200 hover:border-teal-400 text-slate-700 hover:text-teal-700 font-heading font-extrabold text-xs transition shadow-2xs flex items-center justify-center gap-2">
-                            <div class="w-7 h-7 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center">
-                                <i class="fa-solid fa-images"></i>
-                            </div>
-                            <span>Pilih Galeri</span>
-                        </button>
-                    </div>
-
-                    <!-- Live Thumbnail Preview Container with Delete Button -->
-                    <div id="publicFotoPreviewContainer" class="flex flex-wrap gap-3 pt-2 hidden border-t border-slate-200/70"></div>
-                </div>
-
-                <!-- Anti-SPAM Security Verification Code -->
-                <div class="p-4 rounded-2xl bg-slate-100/90 border border-slate-200 space-y-2">
-                    <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider">
-                        <i class="fa-solid fa-robot text-emerald-600 mr-1"></i> Verifikasi Keamanan Anti-SPAM
-                    </label>
-                    <div class="flex items-center gap-3">
-                        <div class="px-4 py-2 rounded-xl bg-white border border-slate-300 font-mono font-extrabold text-sm text-emerald-800 shadow-inner">
-                            Berapa <?= esc($captcha_num1) ?> + <?= esc($captcha_num2) ?> = ?
+                            <input type="number" id="cs_captcha_user" name="captcha_user" placeholder="Jawaban..." required class="flex-1 sm:w-32 px-3 py-2 sm:py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-center bg-white focus:ring-2 focus:ring-emerald-500 shadow-2xs">
                         </div>
-                        <input type="number" name="captcha_user" placeholder="Jawaban..." required class="w-32 px-4 py-2 rounded-xl border border-slate-300 text-xs font-bold text-center bg-white focus:ring-2 focus:ring-emerald-500 shadow-2xs">
+                        <p class="text-[10px] text-slate-500 font-normal leading-tight">Jawab penjumlahan di atas untuk memverifikasi laporan.</p>
                     </div>
-                    <p class="text-[10px] text-slate-500 font-medium">Jawab pertanyaan penjumlahan matematika sederhana di atas untuk membuktikan Anda bukan bot spam.</p>
-                </div>
 
-                <button type="submit" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 allow-auditor">
-                    <i class="fa-solid fa-paper-plane"></i>
-                    <span>Kirim Pengaduan Ke Tim CS Kebersihan</span>
-                </button>
+                    <!-- Tombol Navigasi Langkah 3 / Submit -->
+                    <div class="pt-3 sm:pt-4 border-t border-slate-100 flex items-center justify-between gap-2 sm:gap-3">
+                        <button type="button" onclick="prevCsStep(3)" class="px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-heading font-bold text-xs transition flex items-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-arrow-left text-[11px]"></i>
+                            <span>Kembali</span>
+                        </button>
+                        <button type="submit" id="btnSubmitCsPublic" class="flex-1 sm:flex-none px-5 sm:px-7 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 allow-auditor cursor-pointer active:scale-[0.98]">
+                            <i class="fa-solid fa-paper-plane text-[11px]"></i>
+                            <span>Kirim Pengaduan</span>
+                        </button>
+                    </div>
+                </div>
             </form>
         </div>
 
         <!-- Quick Contacts Column -->
-        <div class="space-y-5">
-            <div class="glass-card rounded-3xl p-6 shadow-xl border border-slate-200/80 bg-white space-y-4">
-                <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-xl shadow-lg shadow-emerald-500/20">
-                    <i class="fa-brands fa-whatsapp"></i>
-                </div>
-                <div class="space-y-1">
-                    <h3 class="font-heading font-extrabold text-base text-slate-900">WhatsApp Live CS</h3>
-                    <p class="text-xs text-slate-500 font-medium">Layanan respon instan via WA Admin Kebersihan.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 lg:self-start">
+            <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-lg border border-slate-200/80 bg-white space-y-3 h-fit">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-lg shadow-md shadow-emerald-500/20 flex-shrink-0">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="font-heading font-extrabold text-sm text-slate-900 leading-tight">WhatsApp Live CS</h3>
+                        <p class="text-[11px] text-slate-500 font-normal">Respon cepat via WA Admin Kebersihan.</p>
+                    </div>
                 </div>
                 <?php
                     $rawWa = $settings['hotline_wa'] ?? '081802787499';
@@ -284,23 +430,25 @@
                         $cleanWa = '62' . substr($cleanWa, 1);
                     }
                 ?>
-                <a href="https://wa.me/<?= $cleanWa ?>?text=Halo%20Admin%20Kebersihan,%20saya%20butuh%20bantuan" target="_blank" class="w-full py-3 rounded-2xl bg-emerald-600 text-white font-heading font-extrabold text-xs hover:bg-emerald-700 transition flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20">
+                <a href="https://wa.me/<?= $cleanWa ?>?text=Halo%20Admin%20Kebersihan,%20saya%20butuh%20bantuan" target="_blank" class="w-full py-2.5 rounded-xl bg-emerald-600 text-white font-heading font-bold text-xs hover:bg-emerald-700 transition flex items-center justify-center gap-2 shadow-sm shadow-emerald-600/20 active:scale-[0.98]">
                     <i class="fa-brands fa-whatsapp text-sm"></i>
                     <span>Chat WhatsApp CS</span>
                 </a>
             </div>
 
-            <div class="glass-card rounded-3xl p-6 shadow-xl border border-slate-200/80 bg-white space-y-4">
-                <div class="w-12 h-12 rounded-2xl bg-teal-600 text-white flex items-center justify-center text-xl shadow-lg shadow-teal-500/20">
-                    <i class="fa-solid fa-building-flag"></i>
+            <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-lg border border-slate-200/80 bg-white space-y-3 h-fit">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center text-lg shadow-md shadow-teal-500/20 flex-shrink-0">
+                        <i class="fa-solid fa-building-flag"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="font-heading font-extrabold text-sm text-slate-900 leading-tight">Kantor Sekretariat</h3>
+                        <p class="text-[11px] text-slate-500 font-normal">Kantor K3L Yayasan Assalafiyyah Mlangi.</p>
+                    </div>
                 </div>
-                <div class="space-y-1">
-                    <h3 class="font-heading font-extrabold text-base text-slate-900">Kantor Sekretariat</h3>
-                    <p class="text-xs text-slate-500 font-medium">Kantor K3L Yayasan Assalafiyyah Mlangi.</p>
-                </div>
-                <span class="inline-block w-full py-2.5 rounded-2xl bg-slate-100 text-slate-700 font-extrabold text-xs text-center border border-slate-200">
+                <div class="w-full py-2 px-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-[11px] text-center border border-slate-200/80">
                     Jam Operasional: <?= esc($settings['jam_cs_buka'] ?? '06:00') ?> – <?= esc($settings['jam_cs_tutup'] ?? '21:00') ?> WIB
-                </span>
+                </div>
             </div>
         </div>
     </div>
@@ -362,18 +510,18 @@
                 </div>
             </div>
 
-            <div class="overflow-x-auto rounded-2xl border border-emerald-800/20 shadow-2xs">
-                <table id="tableCsReports" class="w-full min-w-[760px] text-left text-xs font-semibold">
-                    <thead class="bg-gradient-to-r from-emerald-800 to-teal-800 text-white font-heading font-extrabold uppercase text-[10px] tracking-wider">
+            <div class="overflow-x-auto rounded-2xl border border-slate-200/80">
+                <table id="tableCsReports" class="w-full min-w-[720px] text-left text-[11px]">
+                    <thead class="bg-slate-800 text-white text-[10px] font-bold uppercase tracking-wider">
                         <tr>
-                            <th width="4%" class="py-3.5 px-3 text-center">NO</th>
-                            <th width="13%" class="py-3.5 px-4">TANGGAL</th>
-                            <th width="20%" class="py-3.5 px-4">PENGIRIM & KONTAK</th>
-                            <th width="15%" class="py-3.5 px-4">LOKASI / UNIT</th>
-                            <th width="<?= $isAdmin ? '27%' : '37%' ?>" class="py-3.5 px-4">ISI LAPORAN & TANGGAPAN</th>
-                            <th width="11%" class="py-3.5 px-4 text-center">STATUS</th>
+                            <th width="3%" class="py-2.5 px-2.5 text-center">#</th>
+                            <th width="10%" class="py-2.5 px-3">Tanggal</th>
+                            <th width="17%" class="py-2.5 px-3">Pengirim</th>
+                            <th width="15%" class="py-2.5 px-3">Lokasi</th>
+                            <th width="<?= $isAdmin ? '30%' : '38%' ?>" class="py-2.5 px-3">Laporan</th>
+                            <th width="8%" class="py-2.5 px-3 text-center">Status</th>
                             <?php if ($isAdmin): ?>
-                                <th width="10%" class="py-3.5 px-3 text-center">AKSI</th>
+                                <th width="10%" class="py-2.5 px-2.5 text-center">Aksi</th>
                             <?php endif; ?>
                         </tr>
                     </thead>
@@ -386,71 +534,61 @@
                                         $cleanHp = '62' . substr($cleanHp, 1);
                                     }
                                 ?>
-                                <tr class="cs-report-row hover:bg-slate-50/90 transition-all">
-                                    <td class="py-4 px-3 text-center font-extrabold text-slate-400"><?= $idx + 1 ?></td>
-                                    <td class="py-4 px-4 font-bold text-slate-600 whitespace-nowrap">
-                                        <div class="flex items-center gap-1.5">
-                                            <i class="fa-regular fa-calendar-days text-slate-400 text-xs"></i>
-                                            <span><?= date('d M Y', strtotime($r['created_at'])) ?></span>
-                                        </div>
-                                        <div class="text-[10px] text-slate-400 font-mono mt-0.5 flex items-center gap-1">
-                                            <i class="fa-regular fa-clock text-[9px]"></i>
-                                            <span><?= date('H:i', strtotime($r['created_at'])) ?> WIB</span>
-                                        </div>
+                                <tr class="cs-report-row hover:bg-slate-50/80 transition">
+                                    <td class="py-3 px-2.5 text-center font-bold text-slate-400"><?= $idx + 1 ?></td>
+                                    <td class="py-3 px-3 text-slate-600 whitespace-nowrap">
+                                        <div class="font-bold"><?= date('d M Y', strtotime($r['created_at'])) ?></div>
+                                        <div class="text-[10px] text-slate-400 font-mono"><?= date('H:i', strtotime($r['created_at'])) ?> WIB</div>
                                     </td>
-                                    <td class="py-4 px-4">
-                                        <div class="flex items-center gap-2.5">
-                                            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs flex-shrink-0">
+                                    <td class="py-3 px-3">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0">
                                                 <?= strtoupper(substr($r['nama_pengirim'] ?? 'U', 0, 1)) ?>
                                             </div>
-                                            <div>
-                                                <div class="font-extrabold text-slate-900 text-xs"><?= esc($r['nama_pengirim']) ?></div>
+                                            <div class="min-w-0">
+                                                <div class="font-bold text-slate-900 truncate"><?= esc($r['nama_pengirim']) ?></div>
                                                 <?php if (!empty($r['kontak_hp'])): ?>
-                                                    <a href="https://wa.me/<?= $cleanHp ?>?text=Halo%20<?= urlencode($r['nama_pengirim']) ?>,%20terkait%20laporan%20kebersihan%20Anda" target="_blank" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-mono text-[10px] font-bold border border-emerald-200/80 transition mt-1">
-                                                        <i class="fa-brands fa-whatsapp text-emerald-600"></i>
-                                                        <span><?= esc($r['kontak_hp']) ?></span>
+                                                    <a href="https://wa.me/<?= $cleanHp ?>?text=Halo%20<?= urlencode($r['nama_pengirim']) ?>,%20terkait%20laporan%20kebersihan%20Anda" target="_blank" class="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 font-mono text-[10px] font-bold transition">
+                                                        <i class="fa-brands fa-whatsapp"></i>
+                                                        <?= esc($r['kontak_hp']) ?>
                                                     </a>
                                                 <?php else: ?>
-                                                    <span class="text-[10px] text-slate-400 italic">Tanpa HP</span>
+                                                    <span class="text-[10px] text-slate-400 italic">No HP</span>
                                                 <?php endif; ?>
                                                 <?php if (!empty($r['ip_address'])): ?>
-                                                    <div class="text-[9.5px] text-slate-400 font-mono mt-0.5 flex items-center gap-1" title="Alamat IP Pengirim: <?= esc($r['ip_address']) ?>">
+                                                    <div class="text-[9px] text-slate-400 font-mono" title="IP: <?= esc($r['ip_address']) ?>">
                                                         <i class="fa-solid fa-network-wired text-[8px]"></i> <?= esc($r['ip_address']) ?>
                                                     </div>
                                                 <?php endif; ?>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="py-4 px-4">
+                                    <td class="py-3 px-3">
                                         <?php 
                                             $csWil = !empty($r['nama_wilayah']) ? $r['nama_wilayah'] : '';
                                             $csUnit = !empty($r['lokasi_gedung']) ? $r['lokasi_gedung'] : (!empty($r['unit_lokasi']) ? $r['unit_lokasi'] : '');
-                                            $csLokasi = $csWil ? ($csWil . ' - ' . $csUnit) : $csUnit;
+                                            $csLokasi = $csWil ? ($csWil . ' – ' . $csUnit) : $csUnit;
                                         ?>
-                                        <div class="font-extrabold text-slate-800 flex items-center gap-1.5 text-xs">
-                                            <i class="fa-solid fa-location-dot text-emerald-600 text-[11px]"></i>
-                                            <span><?= esc($csLokasi) ?></span>
+                                        <div class="font-bold text-slate-800 text-[11px] leading-snug">
+                                            <i class="fa-solid fa-location-dot text-emerald-600 text-[9px]"></i>
+                                            <?= esc($csLokasi) ?>
                                         </div>
                                         <div class="flex flex-wrap items-center gap-1 mt-1">
-                                            <span class="inline-block px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200/70">
-                                                <?= esc($r['kategori']) ?>
-                                            </span>
+                                            <span class="px-1.5 py-px rounded bg-emerald-50 text-emerald-800 text-[9px] font-bold border border-emerald-200/70"><?= esc($r['kategori']) ?></span>
                                             <?php if (!empty($r['luas_area'])): ?>
-                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 border border-teal-200/80 text-[10px] font-extrabold shadow-2xs" title="Ukuran / Luas Area">
-                                                    <i class="fa-solid fa-ruler-combined text-teal-600 text-[9px]"></i>
-                                                    <span><?= esc($r['luas_area']) ?></span>
+                                                <span class="px-1.5 py-px rounded bg-teal-50 text-teal-800 text-[9px] font-bold border border-teal-200/70" title="Luas Area">
+                                                    <i class="fa-solid fa-ruler-combined text-[8px]"></i> <?= esc($r['luas_area']) ?>
                                                 </span>
                                             <?php endif; ?>
                                             <?php if (!empty($r['shift'])): ?>
-                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200/80 text-[10px] font-extrabold shadow-2xs" title="Kejadian pada Shift <?= esc($r['shift']) ?>">
-                                                    <i class="fa-regular fa-clock text-amber-600 text-[9px]"></i>
-                                                    <span>Shift <?= esc($r['shift']) ?></span>
+                                                <span class="px-1.5 py-px rounded bg-amber-50 text-amber-800 text-[9px] font-bold border border-amber-200/70">
+                                                    <i class="fa-regular fa-clock text-[8px]"></i> Shift <?= esc($r['shift']) ?>
                                                 </span>
                                             <?php endif; ?>
                                         </div>
                                     </td>
-                                    <td class="py-4 px-4">
-                                        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/70 text-slate-800 text-xs font-medium leading-relaxed shadow-2xs">
+                                    <td class="py-3 px-3">
+                                        <div class="p-2 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-700 text-[11px] leading-relaxed">
                                             "<?= esc($r['isi_laporan']) ?>"
                                         </div>
 
@@ -458,89 +596,78 @@
                                             $fotos = json_decode($r['foto_lampiran'] ?? '[]', true) ?: [];
                                         ?>
                                         <?php if (!empty($fotos)): ?>
-                                            <div class="mt-2.5 flex flex-wrap items-center gap-1.5">
+                                            <div class="mt-1.5 flex flex-wrap items-center gap-1">
                                                 <?php foreach ($fotos as $f): ?>
                                                     <?php 
                                                         $imgUrl = (strpos($f, 'http://') === 0 || strpos($f, 'https://') === 0) ? $f : base_url('uploads/cs/' . $f);
                                                     ?>
-                                                    <a href="<?= $imgUrl ?>" target="_blank" onclick="event.stopPropagation();" class="group relative block w-10 h-10 rounded-xl overflow-hidden border border-slate-200 hover:border-emerald-500 shadow-2xs hover:scale-105 transition flex-shrink-0" title="Klik untuk perbesar foto (Cloudinary / Storage)">
-                                                        <img src="<?= $imgUrl ?>" alt="Bukti Laporan" class="w-full h-full object-cover">
-                                                        <div class="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition">
-                                                            <i class="fa-solid fa-magnifying-glass-plus text-[10px]"></i>
-                                                        </div>
+                                                    <a href="<?= $imgUrl ?>" target="_blank" onclick="event.stopPropagation();" class="group relative block w-8 h-8 rounded-lg overflow-hidden border border-slate-200 hover:border-emerald-500 hover:scale-110 transition flex-shrink-0">
+                                                        <img src="<?= $imgUrl ?>" alt="Bukti" class="w-full h-full object-cover">
                                                     </a>
                                                 <?php endforeach; ?>
-                                                <span class="text-[10px] font-extrabold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                                                    <?= count($fotos) ?> Foto Bukti
-                                                </span>
+                                                <span class="text-[9px] font-bold text-slate-500"><?= count($fotos) ?> foto</span>
                                             </div>
                                         <?php endif; ?>
 
                                         <?php if (!empty($r['tanggapan_unit'])): ?>
-                                            <div class="mt-2 p-2.5 rounded-2xl bg-sky-50/90 border border-sky-200/90 text-sky-950 text-[11px] font-semibold space-y-1 shadow-2xs">
-                                                <div class="font-extrabold text-sky-800 flex items-center justify-between text-[10px] uppercase tracking-wider">
-                                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-building-user text-sky-600"></i> Tindak Lanjut Unit (<?= esc($r['nama_penanggap_unit'] ?: 'Pengurus') ?>):</span>
+                                            <div class="mt-1.5 p-2 rounded-xl bg-sky-50 border border-sky-200/80 text-[10px] space-y-0.5">
+                                                <div class="font-bold text-sky-800 flex items-center justify-between">
+                                                    <span><i class="fa-solid fa-building-user text-sky-600 text-[9px]"></i> Unit (<?= esc($r['nama_penanggap_unit'] ?: 'Pengurus') ?>)</span>
                                                     <?php if (!empty($r['ditanggapi_unit_at'])): ?>
-                                                        <span class="font-mono text-[9px] text-sky-600 font-bold lowercase"><?= date('d M H:i', strtotime($r['ditanggapi_unit_at'])) ?> WIB</span>
+                                                        <span class="font-mono text-[9px] text-sky-500"><?= date('d M H:i', strtotime($r['ditanggapi_unit_at'])) ?></span>
                                                     <?php endif; ?>
                                                 </div>
-                                                <div class="pl-4 text-slate-700 font-medium leading-relaxed"><?= esc($r['tanggapan_unit']) ?></div>
+                                                <div class="text-slate-700 leading-snug pl-3"><?= esc($r['tanggapan_unit']) ?></div>
                                                 <?php 
                                                     $unitFotos = json_decode($r['foto_tindakan_unit'] ?? '[]', true) ?: [];
                                                 ?>
                                                 <?php if (!empty($unitFotos)): ?>
-                                                    <div class="pl-4 pt-1 flex flex-wrap items-center gap-1.5">
+                                                    <div class="pl-3 pt-0.5 flex flex-wrap items-center gap-1">
                                                         <?php foreach ($unitFotos as $uf): ?>
                                                             <?php $ufUrl = (strpos($uf, 'http://') === 0 || strpos($uf, 'https://') === 0) ? $uf : base_url('uploads/cs/' . $uf); ?>
-                                                            <a href="<?= $ufUrl ?>" target="_blank" onclick="event.stopPropagation();" class="w-8 h-8 rounded-lg overflow-hidden border border-sky-200 hover:scale-105 transition shadow-2xs" title="Foto bukti tindakan unit">
+                                                            <a href="<?= $ufUrl ?>" target="_blank" onclick="event.stopPropagation();" class="w-7 h-7 rounded-md overflow-hidden border border-sky-200 hover:scale-110 transition" title="Foto unit">
                                                                 <img src="<?= $ufUrl ?>" class="w-full h-full object-cover">
                                                             </a>
                                                         <?php endforeach; ?>
-                                                        <span class="text-[9px] font-extrabold text-sky-700 bg-white px-1.5 py-0.5 rounded border border-sky-200">
-                                                            <?= count($unitFotos) ?> Foto Bukti Unit
-                                                        </span>
+                                                        <span class="text-[9px] text-sky-600 font-bold"><?= count($unitFotos) ?> foto</span>
                                                     </div>
                                                 <?php endif; ?>
                                             </div>
                                         <?php endif; ?>
 
                                         <?php if (!empty($r['tanggapan_admin'])): ?>
-                                            <div class="mt-2 p-2.5 rounded-2xl bg-emerald-50/90 border border-emerald-200/90 text-emerald-900 text-[11px] font-semibold space-y-0.5 shadow-2xs">
-                                                <div class="font-extrabold text-emerald-800 flex items-center justify-between text-[10px] uppercase tracking-wider">
-                                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i> Tanggapan Admin:</span>
+                                            <div class="mt-1.5 p-2 rounded-xl bg-emerald-50 border border-emerald-200/80 text-[10px] space-y-0.5">
+                                                <div class="font-bold text-emerald-800 flex items-center justify-between">
+                                                    <span><i class="fa-solid fa-circle-check text-emerald-600 text-[9px]"></i> Admin</span>
                                                     <?php if (!empty($r['updated_at'])): ?>
-                                                        <span class="font-mono text-[9px] text-emerald-700 font-bold lowercase"><?= date('d M H:i', strtotime($r['updated_at'])) ?> WIB</span>
+                                                        <span class="font-mono text-[9px] text-emerald-500"><?= date('d M H:i', strtotime($r['updated_at'])) ?></span>
                                                     <?php endif; ?>
                                                 </div>
-                                                <div class="pl-4 text-slate-700 font-medium"><?= esc($r['tanggapan_admin']) ?></div>
+                                                <div class="text-slate-700 leading-snug pl-3"><?= esc($r['tanggapan_admin']) ?></div>
                                             </div>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="py-4 px-4 text-center whitespace-nowrap">
+                                    <td class="py-3 px-3 text-center whitespace-nowrap">
                                         <?php if ($r['status'] === 'Baru'): ?>
-                                            <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-extrabold border border-emerald-300/90 inline-flex items-center gap-1.5 shadow-2xs">
-                                                <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
-                                                Baru
+                                            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold inline-flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span> Baru
                                             </span>
                                         <?php elseif ($r['status'] === 'Diproses'): ?>
-                                            <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-800 text-xs font-extrabold border border-amber-200/90 inline-flex items-center gap-1.5 shadow-2xs">
-                                                <i class="fa-solid fa-hourglass-half text-amber-600 text-[10px]"></i>
-                                                Diproses
+                                            <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[10px] font-bold inline-flex items-center gap-1">
+                                                <i class="fa-solid fa-hourglass-half text-[8px]"></i> Proses
                                             </span>
                                         <?php elseif ($r['status'] === 'Ditolak'): ?>
-                                            <span class="px-3 py-1 rounded-full bg-rose-50 text-rose-800 text-xs font-extrabold border border-rose-200/90 inline-flex items-center gap-1.5 shadow-2xs">
-                                                <i class="fa-solid fa-ban text-rose-600 text-[10px]"></i>
-                                                Ditolak / Fiktif
+                                            <span class="px-2 py-0.5 rounded-full bg-rose-50 text-rose-800 text-[10px] font-bold inline-flex items-center gap-1">
+                                                <i class="fa-solid fa-ban text-[8px]"></i> Ditolak
                                             </span>
                                         <?php else: ?>
-                                            <span class="px-3 py-1 rounded-full bg-teal-50 text-teal-800 text-xs font-extrabold border border-teal-200/90 inline-flex items-center gap-1.5 shadow-2xs">
-                                                <i class="fa-solid fa-check text-teal-600 text-[10px]"></i>
-                                                Selesai
+                                            <span class="px-2 py-0.5 rounded-full bg-teal-50 text-teal-800 text-[10px] font-bold inline-flex items-center gap-1">
+                                                <i class="fa-solid fa-check text-[8px]"></i> Selesai
                                             </span>
                                         <?php endif; ?>
                                     </td>
                                     <?php if ($isAdmin): ?>
-                                        <td class="py-4 px-3 text-center">
+                                        <td class="py-3 px-2.5 text-center">
                                             <?php 
                                                 // Prepare WhatsApp Messages & Clean Phone Numbers
                                                 $cleanHp = preg_replace('/[^0-9]/', '', $r['kontak_hp'] ?? '');
@@ -580,26 +707,25 @@
                                                     . "Mohon untuk segera dicek, ditindaklanjuti, dan isi respon melalui Portal Kebersihan: https://laporkebersihan.online/app/lapor-wilayah\n\nTerima kasih.\n_Admin Kebersihan Assalafiyyah_";
                                                 $waPjUrl = !empty($cleanHpPj) ? "https://api.whatsapp.com/send?phone=" . $cleanHpPj . "&text=" . urlencode($pesanPj) : '';
                                             ?>
-                                            <div class="flex items-center justify-center gap-1.5 flex-wrap">
-                                                <button type="button" onclick="openModalTanggapiCs(<?= htmlspecialchars(json_encode($r)) ?>)" class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-1" title="Tanggapi & Ubah Status">
-                                                    <i class="fa-solid fa-pen-to-square text-[11px]"></i>
-                                                    <span>Tanggapi</span>
+                                            <div class="flex items-center justify-center gap-1 flex-wrap">
+                                                <button type="button" onclick="openModalTanggapiCs(<?= htmlspecialchars(json_encode($r)) ?>)" class="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] shadow-sm transition-all flex items-center gap-1" title="Tanggapi">
+                                                    <i class="fa-solid fa-pen-to-square text-[9px]"></i> Tanggapi
                                                 </button>
 
                                                 <?php if (!empty($waPelaporUrl)): ?>
-                                                    <a href="<?= $waPelaporUrl ?>" target="_blank" class="w-8 h-8 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 flex items-center justify-center transition shadow-2xs" title="Kirim Update WhatsApp ke Pelapor (<?= esc($r['nama_pengirim']) ?>)">
-                                                        <i class="fa-brands fa-whatsapp text-sm"></i>
+                                                    <a href="<?= $waPelaporUrl ?>" target="_blank" class="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 flex items-center justify-center transition" title="WA Pelapor">
+                                                        <i class="fa-brands fa-whatsapp text-xs"></i>
                                                     </a>
                                                 <?php endif; ?>
 
                                                 <?php if (!empty($waPjUrl)): ?>
-                                                    <a href="<?= $waPjUrl ?>" target="_blank" class="w-8 h-8 rounded-xl bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-200 flex items-center justify-center transition shadow-2xs" title="Teruskan WhatsApp ke PJ Unit Bertanggung Jawab (<?= esc($targetUnit . ' - ' . $targetPjNama) ?>)">
-                                                        <i class="fa-solid fa-share-nodes text-xs"></i>
+                                                    <a href="<?= $waPjUrl ?>" target="_blank" class="w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-200 flex items-center justify-center transition" title="WA PJ Unit">
+                                                        <i class="fa-solid fa-share-nodes text-[10px]"></i>
                                                     </a>
                                                 <?php endif; ?>
 
-                                                <a href="<?= base_url('cs/report/delete/' . $r['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus laporan ini?" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 border border-slate-200 flex items-center justify-center transition shadow-2xs" title="Hapus Laporan">
-                                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                                <a href="<?= base_url('cs/report/delete/' . $r['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus laporan ini?" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 flex items-center justify-center transition" title="Hapus">
+                                                    <i class="fa-solid fa-trash-can text-[10px]"></i>
                                                 </a>
                                             </div>
                                         </td>
@@ -608,7 +734,7 @@
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="7" class="py-12 text-center text-slate-400 italic font-medium">Belum ada laporan pengaduan masuk.</td>
+                                <td colspan="7" class="py-10 text-center text-slate-400 italic text-xs">Belum ada laporan pengaduan masuk.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -1410,20 +1536,20 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 const card = document.createElement('div');
-                card.className = 'w-32 bg-white rounded-2xl border border-slate-200 shadow-sm p-2 flex flex-col gap-1.5 flex-shrink-0';
+                card.className = 'w-28 sm:w-32 bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-2xs p-1.5 sm:p-2 flex flex-col gap-1 sm:gap-1.5 flex-shrink-0';
                 card.innerHTML = `
-                    <div class="relative w-full h-24 rounded-xl overflow-hidden bg-slate-100 border border-slate-100">
+                    <div class="relative w-full h-20 sm:h-24 rounded-lg sm:rounded-xl overflow-hidden bg-slate-100 border border-slate-100">
                         <img src="${e.target.result}" class="w-full h-full object-cover">
-                        <span class="absolute top-1 left-1 w-5 h-5 bg-emerald-700/90 text-white rounded-full text-[10px] flex items-center justify-center font-bold shadow-xs">
+                        <span class="absolute top-1 left-1 w-4 h-4 sm:w-5 sm:h-5 bg-emerald-700/90 text-white rounded-full text-[9px] sm:text-[10px] flex items-center justify-center font-bold shadow-xs">
                             ${index + 1}
                         </span>
-                        <button type="button" onclick="removePublicFile(${index})" class="absolute top-1 right-1 w-6 h-6 bg-rose-600 hover:bg-rose-700 text-white rounded-full flex items-center justify-center text-xs shadow-md transition" title="Hapus foto ini">
+                        <button type="button" onclick="removePublicFile(${index})" class="absolute top-1 right-1 w-5 h-5 sm:w-6 sm:h-6 bg-rose-600 hover:bg-rose-700 text-white rounded-full flex items-center justify-center text-[10px] sm:text-xs shadow-md transition" title="Hapus foto ini">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
-                    <div class="space-y-1">
-                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">Nama Foto:</label>
-                        <input type="text" name="foto_names[]" value="${publicFileNames[index] || ('bukti_' + (index + 1))}" onchange="publicFileNames[${index}] = this.value" placeholder="Nama gambar..." class="w-full px-2 py-1 text-[11px] font-bold rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs truncate">
+                    <div class="space-y-0.5 sm:space-y-1">
+                        <label class="block text-[8px] sm:text-[9px] font-bold text-slate-500 uppercase tracking-wider">Nama Foto:</label>
+                        <input type="text" name="foto_names[]" value="${publicFileNames[index] || ('bukti_' + (index + 1))}" onchange="publicFileNames[${index}] = this.value" placeholder="Nama gambar..." class="w-full px-1.5 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-semibold rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs truncate">
                     </div>
                 `;
                 container.appendChild(card);
@@ -1432,6 +1558,298 @@
         });
     }
     window.renderPublicPreviews = renderPublicPreviews;
+
+    // ==========================================
+    // 🧙‍♂️ MULTI-STEP CS REPORT FORM WIZARD LOGIC
+    // ==========================================
+    var csCurrentStep = 1;
+
+    function goToCsStep(targetStep) {
+        if (targetStep === csCurrentStep) return;
+
+        // If user wants to skip forward, ensure prior steps are valid
+        if (targetStep > csCurrentStep) {
+            if (csCurrentStep === 1 && !validateCsStep1()) return;
+            if (csCurrentStep === 2 && !validateCsStep2()) return;
+            if (csCurrentStep === 1 && targetStep === 3) {
+                if (!validateCsStep1() || !validateCsStep2()) return;
+            }
+        }
+
+        // Hide all step containers
+        const steps = [1, 2, 3];
+        steps.forEach(s => {
+            const el = document.getElementById('csStep' + s);
+            if (el) el.classList.add('hidden');
+        });
+
+        // Show target step container
+        const targetEl = document.getElementById('csStep' + targetStep);
+        if (targetEl) {
+            targetEl.classList.remove('hidden');
+        }
+
+        // If target is Step 3, refresh the live Review Summary
+        if (targetStep === 3) {
+            updateCsReviewSummary();
+        }
+
+        // Update Stepper UI (Circles, Labels, Progress Bar)
+        updateCsStepperUI(targetStep);
+
+        csCurrentStep = targetStep;
+
+        // Smooth scroll back to top of form card so mobile user isn't disoriented
+        const formCard = document.getElementById('formLaporCsPublic');
+        if (formCard) {
+            const rect = formCard.getBoundingClientRect();
+            if (rect.top < 50 || rect.top > window.innerHeight) {
+                formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    }
+    window.goToCsStep = goToCsStep;
+
+    function nextCsStep(fromStep) {
+        if (fromStep === 1) {
+            if (!validateCsStep1()) return;
+            goToCsStep(2);
+        } else if (fromStep === 2) {
+            if (!validateCsStep2()) return;
+            goToCsStep(3);
+        }
+    }
+    window.nextCsStep = nextCsStep;
+
+    function prevCsStep(fromStep) {
+        if (fromStep > 1) {
+            goToCsStep(fromStep - 1);
+        }
+    }
+    window.prevCsStep = prevCsStep;
+
+    function validateCsStep1() {
+        const namaInput = document.getElementById('cs_nama_pengirim');
+        const kontakInput = document.getElementById('cs_kontak_hp');
+        const unitLokasiInput = document.getElementById('cs_unit_lokasi');
+        const unitSearchInput = document.getElementById('cs_unit_search');
+
+        if (!namaInput || !namaInput.value.trim()) {
+            showCsStepAlert('Nama Pengirim Wajib Diisi', 'Silakan masukkan nama lengkap atau panggilan Anda.');
+            if (namaInput) namaInput.focus();
+            return false;
+        }
+
+        if (!kontakInput || !kontakInput.value.trim()) {
+            showCsStepAlert('Nomor WhatsApp Wajib Diisi', 'Silakan masukkan nomor WA/HP yang bisa dihubungi.');
+            if (kontakInput) kontakInput.focus();
+            return false;
+        }
+
+        if (!unitLokasiInput || !unitLokasiInput.value.trim() || !unitSearchInput || !unitSearchInput.value.trim()) {
+            showCsStepAlert('Lokasi / Unit Belum Dipilih', 'Silakan klik dan pilih unit/asrama terkait pada kolom Unit.');
+            if (unitSearchInput) {
+                unitSearchInput.focus();
+                openCsUnitDropdown();
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    function validateCsStep2() {
+        const isiInput = document.getElementById('cs_isi_laporan');
+
+        if (!isiInput || !isiInput.value.trim()) {
+            showCsStepAlert('Isi Laporan Wajib Diisi', 'Silakan jelaskan kendala kebersihan atau keluhan yang ingin disampaikan.');
+            if (isiInput) isiInput.focus();
+            return false;
+        }
+
+        if (isiInput.value.trim().length < 5) {
+            showCsStepAlert('Keterangan Terlalu Pendek', 'Mohon berikan penjelasan laporan minimal 5 karakter agar tim dapat memahami kendala.');
+            if (isiInput) isiInput.focus();
+            return false;
+        }
+
+        return true;
+    }
+
+    function showCsStepAlert(title, text) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                html: `
+                    <div class="flex flex-col items-center text-center pt-2 pb-1">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 text-amber-500 flex items-center justify-center text-2xl shadow-sm ring-8 ring-amber-500/10 mb-3.5">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <h3 class="font-heading font-extrabold text-slate-900 text-base sm:text-lg tracking-tight leading-snug mb-1.5">
+                            ${title}
+                        </h3>
+                        <p class="text-xs text-slate-500 font-medium leading-relaxed max-w-[280px]">
+                            ${text}
+                        </p>
+                    </div>
+                `,
+                showConfirmButton: true,
+                confirmButtonText: '<span class="flex items-center justify-center gap-2"><i class="fa-solid fa-check text-xs"></i><span>Baik, Saya Lengkapi</span></span>',
+                buttonsStyling: false,
+                backdrop: 'rgba(15, 23, 42, 0.6)',
+                customClass: {
+                    popup: 'rounded-3xl p-6 glass-card shadow-2xl border border-slate-200/90 font-sans max-w-sm w-[90vw]',
+                    confirmButton: 'w-full py-3 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs sm:text-sm shadow-md shadow-emerald-600/25 hover:from-emerald-700 hover:to-teal-700 transition active:scale-[0.98] cursor-pointer mt-3',
+                    htmlContainer: '!m-0 !p-0'
+                }
+            });
+        } else {
+            alert(title + ': ' + text);
+        }
+    }
+
+    function updateCsStepperUI(activeStep) {
+        const line1 = document.getElementById('csProgressLine1');
+        const line2 = document.getElementById('csProgressLine2');
+        if (line1) {
+            line1.style.width = activeStep >= 2 ? '100%' : '0%';
+        }
+        if (line2) {
+            line2.style.width = activeStep >= 3 ? '100%' : '0%';
+        }
+
+        for (let i = 1; i <= 3; i++) {
+            const circle = document.getElementById('stepCircle' + i);
+            const label = document.getElementById('stepLabel' + i);
+            if (!circle || !label) continue;
+
+            if (i < activeStep) {
+                // Completed Step
+                circle.className = 'w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center font-extrabold text-xs sm:text-sm bg-emerald-500 text-white shadow-md shadow-emerald-500/20 ring-2 sm:ring-4 ring-emerald-50 transition-all duration-300';
+                circle.innerHTML = '<i class="fa-solid fa-check text-xs sm:text-sm"></i>';
+                label.className = 'mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] font-bold text-emerald-700 tracking-tight transition-colors text-center leading-tight';
+            } else if (i === activeStep) {
+                // Active Step
+                circle.className = 'w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center font-extrabold text-xs sm:text-sm bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 ring-2 sm:ring-4 ring-emerald-100 transition-all duration-300 scale-105';
+                if (i === 1) circle.innerHTML = '<i class="fa-solid fa-user text-xs sm:text-sm"></i>';
+                else if (i === 2) circle.innerHTML = '<i class="fa-solid fa-camera text-xs sm:text-sm"></i>';
+                else if (i === 3) circle.innerHTML = '<i class="fa-solid fa-paper-plane text-xs sm:text-sm"></i>';
+                label.className = 'mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] font-extrabold text-emerald-900 tracking-tight transition-colors text-center leading-tight';
+            } else {
+                // Inactive / Upcoming Step
+                circle.className = 'w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center font-bold text-xs sm:text-sm bg-slate-100 text-slate-400 border border-slate-200 ring-2 sm:ring-4 ring-white transition-all duration-300';
+                if (i === 1) circle.innerHTML = '<i class="fa-solid fa-user text-xs sm:text-sm"></i>';
+                else if (i === 2) circle.innerHTML = '<i class="fa-solid fa-camera text-xs sm:text-sm"></i>';
+                else if (i === 3) circle.innerHTML = '<i class="fa-solid fa-paper-plane text-xs sm:text-sm"></i>';
+                label.className = 'mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] font-medium text-slate-400 tracking-tight transition-colors text-center leading-tight';
+            }
+        }
+    }
+
+    function updateCsReviewSummary() {
+        const namaVal = document.getElementById('cs_nama_pengirim')?.value || '-';
+        const kontakVal = document.getElementById('cs_kontak_hp')?.value || '-';
+        const unitVal = document.getElementById('cs_unit_search')?.value || document.getElementById('cs_unit_lokasi')?.value || '-';
+        const wilayahVal = document.getElementById('cs_wilayah_search')?.value;
+        const shiftVal = document.getElementById('cs_public_shift')?.value;
+        const targetPjVal = document.getElementById('csTargetUnitName')?.textContent || '-';
+        const kategoriVal = document.getElementById('cs_kategori')?.value || 'Kendala Kebersihan';
+        const isiVal = document.getElementById('cs_isi_laporan')?.value || '-';
+
+        // Set Pengirim
+        const reviewPengirim = document.getElementById('reviewPengirim');
+        if (reviewPengirim) reviewPengirim.textContent = namaVal;
+        const reviewKontak = document.getElementById('reviewKontak');
+        if (reviewKontak) reviewKontak.textContent = '📞 ' + kontakVal;
+
+        // Set Lokasi & Shift
+        const reviewLokasi = document.getElementById('reviewLokasi');
+        if (reviewLokasi) {
+            let locText = unitVal;
+            if (wilayahVal && wilayahVal !== '-- Bukan Wilayah Khusus / Umum --') {
+                locText += ' • ' + wilayahVal;
+            }
+            reviewLokasi.textContent = locText;
+        }
+
+        const reviewShiftPj = document.getElementById('reviewShiftPj');
+        if (reviewShiftPj) {
+            let shiftText = shiftVal ? ('Shift ' + shiftVal) : 'Shift Waktu Laporan';
+            if (targetPjVal && targetPjVal !== '-') {
+                shiftText += ' (PJ: ' + targetPjVal + ')';
+            }
+            reviewShiftPj.textContent = '⏱️ ' + shiftText;
+        }
+
+        // Set Kategori & Isi
+        const reviewKategori = document.getElementById('reviewKategori');
+        if (reviewKategori) reviewKategori.textContent = kategoriVal;
+        const reviewIsi = document.getElementById('reviewIsi');
+        if (reviewIsi) reviewIsi.textContent = isiVal;
+
+        // Set Foto Preview Thumbnails in Summary
+        const reviewFotosWrapper = document.getElementById('reviewFotosWrapper');
+        const reviewFotosContainer = document.getElementById('reviewFotosContainer');
+        const reviewFotoCount = document.getElementById('reviewFotoCount');
+        const files = publicDataTransfer.files;
+
+        if (reviewFotosWrapper && reviewFotosContainer) {
+            if (files && files.length > 0) {
+                reviewFotosWrapper.classList.remove('hidden');
+                if (reviewFotoCount) reviewFotoCount.textContent = files.length;
+                reviewFotosContainer.innerHTML = '';
+
+                Array.from(files).forEach((file, idx) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const thumb = document.createElement('div');
+                        thumb.className = 'w-14 h-14 rounded-xl overflow-hidden bg-slate-100 border border-emerald-200 shadow-2xs relative group';
+                        thumb.innerHTML = `
+                            <img src="${e.target.result}" class="w-full h-full object-cover">
+                            <span class="absolute bottom-0 right-0 bg-slate-900/70 text-white text-[9px] px-1 font-bold rounded-tl">${idx + 1}</span>
+                        `;
+                        reviewFotosContainer.appendChild(thumb);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                reviewFotosWrapper.classList.add('hidden');
+                if (reviewFotoCount) reviewFotoCount.textContent = '0';
+                reviewFotosContainer.innerHTML = '';
+            }
+        }
+    }
+    window.updateCsReviewSummary = updateCsReviewSummary;
+
+    function validateCsFinalSubmit(e) {
+        if (!validateCsStep1()) {
+            e.preventDefault();
+            goToCsStep(1);
+            return false;
+        }
+        if (!validateCsStep2()) {
+            e.preventDefault();
+            goToCsStep(2);
+            return false;
+        }
+
+        const captchaInput = document.getElementById('cs_captcha_user');
+        if (captchaInput && (!captchaInput.value || captchaInput.value.trim() === '')) {
+            e.preventDefault();
+            showCsStepAlert('Verifikasi Anti-SPAM Wajib Diisi', 'Silakan jawab pertanyaan matematika di Langkah 3.');
+            captchaInput.focus();
+            return false;
+        }
+
+        const submitBtn = document.getElementById('btnSubmitCsPublic');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i><span>Mengirim Pengaduan...</span>';
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        }
+
+        return true;
+    }
+    window.validateCsFinalSubmit = validateCsFinalSubmit;
 
     var penugasanData = <?= json_encode($penugasanList ?? []) ?>;
     var wilayahData   = <?= json_encode($wilayahList ?? []) ?>;
@@ -1448,7 +1866,7 @@
     window.getAutoShift = getAutoShift;
 
     // ==========================================
-    // PUBLIC CS FORM CASCADING LOGIC (3 STEPS)
+    // PUBLIC CS FORM CASCADING LOGIC
     // ==========================================
 
     function openCsUnitDropdown() {

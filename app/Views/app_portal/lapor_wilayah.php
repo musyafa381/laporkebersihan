@@ -1257,10 +1257,28 @@
         if (!hiddenId || !hiddenId.value || parseInt(hiddenId.value) <= 0) {
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
-                    icon: 'warning',
-                    title: 'Pilih Wilayah Terlebih Dahulu',
-                    text: 'Silakan pilih salah satu wilayah kebersihan dari opsi pencarian dropdown.',
-                    confirmButtonColor: '#059669'
+                    html: `
+                        <div class="flex flex-col items-center text-center pt-2 pb-1">
+                            <div class="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 text-amber-500 flex items-center justify-center text-2xl shadow-sm ring-8 ring-amber-500/10 mb-3.5">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                            <h3 class="font-heading font-extrabold text-slate-900 text-base sm:text-lg tracking-tight leading-snug mb-1.5">
+                                Pilih Wilayah Terlebih Dahulu
+                            </h3>
+                            <p class="text-xs text-slate-500 font-medium leading-relaxed max-w-[280px]">
+                                Silakan pilih salah satu wilayah kebersihan dari opsi pencarian dropdown.
+                            </p>
+                        </div>
+                    `,
+                    showConfirmButton: true,
+                    confirmButtonText: '<span class="flex items-center justify-center gap-2"><i class="fa-solid fa-check text-xs"></i><span>Baik, Saya Pilih</span></span>',
+                    buttonsStyling: false,
+                    backdrop: 'rgba(15, 23, 42, 0.6)',
+                    customClass: {
+                        popup: 'rounded-3xl p-6 glass-card shadow-2xl border border-slate-200/90 font-sans max-w-sm w-[90vw]',
+                        confirmButton: 'w-full py-3 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs sm:text-sm shadow-md shadow-emerald-600/25 hover:from-emerald-700 hover:to-teal-700 transition active:scale-[0.98] cursor-pointer mt-3',
+                        htmlContainer: '!m-0 !p-0'
+                    }
                 });
             } else {
                 alert('Silakan pilih salah satu wilayah kebersihan dari opsi pencarian dropdown.');

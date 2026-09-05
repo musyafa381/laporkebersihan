@@ -1865,7 +1865,9 @@
         if (modal) modal.classList.add('hidden');
     }
 
-    // Quick Preview Modal Functions
+    // Quick Preview Modal Functions & Zoom Controller
+    let currentModalZoom = 1.0;
+
     function openModalPreviewDoc(id, title) {
         const modal = document.getElementById('modalPreviewDoc');
         const iframe = document.getElementById('previewDocIframe');
@@ -1874,6 +1876,9 @@
         const tabBtn = document.getElementById('previewOpenTabBtn');
         const rawUrl = '<?= base_url('buku/cetak/') ?>' + id;
         const embedUrl = rawUrl + '?embed=1';
+
+        currentModalZoom = 1.0;
+        updateModalZoomUI(1.0);
 
         if (titleEl) titleEl.innerText = 'Preview: ' + title;
         if (tabBtn) tabBtn.href = rawUrl;
@@ -1890,8 +1895,57 @@
     function handleIframeLoaded() {
         const loader = document.getElementById('previewIframeLoader');
         if (loader) loader.classList.add('hidden');
+
+        // Auto zoom comfortably on small screens
+        const iframe = document.getElementById('previewDocIframe');
+        if (iframe && iframe.clientWidth < 880) {
+            modalFitWidth();
+        }
     }
     window.handleIframeLoaded = handleIframeLoaded;
+
+    function modalZoomDoc(delta) {
+        const iframe = document.getElementById('previewDocIframe');
+        if (!iframe || !iframe.contentWindow) return;
+        currentModalZoom = Math.min(Math.max(0.3, parseFloat((currentModalZoom + delta).toFixed(2))), 2.5);
+        updateModalZoomUI(currentModalZoom);
+        iframe.contentWindow.postMessage({ action: 'setZoom', zoom: currentModalZoom }, '*');
+    }
+    window.modalZoomDoc = modalZoomDoc;
+
+    function modalResetZoom() {
+        currentModalZoom = 1.0;
+        updateModalZoomUI(1.0);
+        const iframe = document.getElementById('previewDocIframe');
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({ action: 'resetZoom' }, '*');
+        }
+    }
+    window.modalResetZoom = modalResetZoom;
+
+    function modalFitWidth() {
+        const iframe = document.getElementById('previewDocIframe');
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({ action: 'fitWidth' }, '*');
+        }
+    }
+    window.modalFitWidth = modalFitWidth;
+
+    function updateModalZoomUI(zoomVal) {
+        const badge = document.getElementById('modalZoomBadge');
+        if (badge) {
+            badge.textContent = Math.round(zoomVal * 100) + '%';
+        }
+    }
+
+    // Sync when iframe changes zoom (e.g. from internal floating zoom widget)
+    window.addEventListener('message', function(e) {
+        if (!e.data) return;
+        if (e.data.action === 'zoomChanged' && typeof e.data.zoom === 'number') {
+            currentModalZoom = e.data.zoom;
+            updateModalZoomUI(e.data.zoom);
+        }
+    });
 
     function closeModalPreviewDoc() {
         const modal = document.getElementById('modalPreviewDoc');
@@ -1922,7 +1976,7 @@
 <div id="modalPreviewDoc" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md hidden flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden">
     <div class="bg-white rounded-3xl max-w-5xl w-full h-[92vh] max-h-[900px] shadow-2xl flex flex-col border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200">
         <!-- Preview Modal Header -->
-        <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 bg-slate-50/80 flex-shrink-0">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-3.5 border-b border-slate-100 bg-slate-50/90 gap-3 flex-shrink-0">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-cyan-600 to-teal-500 text-white flex items-center justify-center shadow-md shadow-cyan-600/20 flex-shrink-0">
                     <i class="fa-solid fa-file-invoice text-sm"></i>
@@ -1931,16 +1985,33 @@
                     <h3 id="previewDocTitle" class="font-heading font-extrabold text-sm sm:text-base text-slate-900 leading-tight">
                         Preview Dokumen LPJ
                     </h3>
-                    <p class="text-[11px] text-slate-500 font-medium">Tampilan langsung hasil dokumen tanpa meninggalkan halaman</p>
+                    <p class="text-[11px] text-slate-500 font-medium">Tampilan langsung hasil cetak dokumen LPJ</p>
                 </div>
             </div>
             
-            <div class="flex items-center gap-2">
-                <a id="previewOpenTabBtn" href="#" target="_blank" class="py-2 px-3 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition border border-slate-200 shadow-2xs" title="Buka di tab baru">
+            <div class="flex items-center gap-2 flex-wrap justify-end">
+                <!-- Zoom Controller Bar -->
+                <div class="flex items-center bg-white border border-slate-200/90 rounded-xl p-0.5 shadow-2xs">
+                    <button type="button" onclick="modalZoomDoc(-0.1)" class="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-600 flex items-center justify-center text-xs transition" title="Perkecil / Zoom Out (Ctrl -)">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <button type="button" onclick="modalResetZoom()" id="modalZoomBadge" class="px-2 py-0.5 text-[11px] font-bold text-slate-700 hover:text-emerald-700 min-w-[44px] text-center" title="Klik untuk reset 100%">
+                        100%
+                    </button>
+                    <button type="button" onclick="modalZoomDoc(0.1)" class="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-600 flex items-center justify-center text-xs transition" title="Perbesar / Zoom In (Ctrl +)">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                    <button type="button" onclick="modalFitWidth()" class="px-2 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-extrabold flex items-center gap-1 transition ml-0.5 border border-emerald-200/60" title="Sesuaikan Lebar Layar (Fit Width)">
+                        <i class="fa-solid fa-arrows-left-right text-[10px]"></i>
+                        <span class="hidden sm:inline">Fit</span>
+                    </button>
+                </div>
+
+                <a id="previewOpenTabBtn" href="#" target="_blank" class="py-1.5 px-3 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition border border-slate-200 shadow-2xs" title="Buka di tab baru">
                     <i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-slate-500"></i>
                     <span class="hidden sm:inline">Tab Baru</span>
                 </a>
-                <button type="button" onclick="printPreviewIframe()" class="py-2 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition" title="Cetak Dokumen">
+                <button type="button" onclick="printPreviewIframe()" class="py-1.5 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition" title="Cetak Dokumen">
                     <i class="fa-solid fa-print"></i>
                     <span class="hidden sm:inline">Cetak</span>
                 </button>

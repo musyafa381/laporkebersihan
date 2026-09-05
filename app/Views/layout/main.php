@@ -59,27 +59,29 @@
             border: 1px solid rgba(226, 232, 240, 0.8);
         }
 
-        /* Modern Clean Navbar Styling */
+        /* Modern Compact Unified Navbar Styling */
         .top-nav-btn {
             display: inline-flex;
             align-items: center;
+            height: 38px;
             gap: 0.45rem;
-            padding: 0.5rem 0.85rem;
-            border-radius: 0.875rem;
-            font-size: 0.8125rem;
+            padding: 0 0.8rem;
+            border-radius: 0.75rem;
+            font-size: 0.75rem;
             font-weight: 700;
             white-space: nowrap;
-            transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
             user-select: none;
+            box-sizing: border-box;
         }
         .top-nav-btn.active {
             background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
             color: #ffffff;
-            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
+            box-shadow: 0 2px 8px rgba(13, 148, 136, 0.25);
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
         .top-nav-btn:not(.active) {
-            background: rgba(248, 250, 252, 0.9);
+            background: rgba(248, 250, 252, 0.95);
             color: #334155;
             border: 1px solid rgba(226, 232, 240, 0.9);
         }
@@ -90,27 +92,83 @@
             transform: translateY(-1px);
         }
 
-        /* Top Nav Dropdown Panel with Hover Bridge */
+        /* Top Nav Profile Button with Matching Unified Height & Styling */
+        .top-nav-profile-btn {
+            display: inline-flex;
+            align-items: center;
+            height: 38px;
+            gap: 0.5rem;
+            padding: 0 0.75rem 0 0.375rem;
+            border-radius: 0.75rem;
+            background: rgba(248, 250, 252, 0.95);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            color: #334155;
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+            transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+        .top-nav-profile-btn:hover {
+            background: #f0fdf4;
+            border-color: #a7f3d0;
+            color: #047857;
+            transform: translateY(-1px);
+        }
+        .top-nav-avatar {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            min-height: 28px;
+            border-radius: 0.5rem;
+            background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+            font-weight: 900;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Top Nav Dropdown Panel with Smooth Animation & Safe Bridge */
         .nav-dropdown-wrapper {
             position: absolute;
             top: 100%;
             left: 0;
-            padding-top: 0.45rem;
+            padding-top: 0.35rem;
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
-            transform: translateY(6px) scale(0.97);
-            transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1),
-                        transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
-                        visibility 200ms;
+            transform: translateY(5px) scale(0.97);
+            transition: opacity 180ms cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+                        visibility 180ms;
             z-index: 70;
         }
-        .group:hover .nav-dropdown-wrapper,
-        .group:focus-within .nav-dropdown-wrapper {
+        .nav-dropdown-parent.is-open > .nav-dropdown-wrapper {
             opacity: 1;
             visibility: visible;
             pointer-events: auto;
             transform: translateY(0) scale(1);
+        }
+        .nav-dropdown-parent.is-open .nav-dropdown-chevron {
+            transform: rotate(180deg);
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .nav-dropdown-parent:hover > .nav-dropdown-wrapper {
+                opacity: 1;
+                visibility: visible;
+                pointer-events: auto;
+                transform: translateY(0) scale(1);
+            }
+            .nav-dropdown-parent:hover .nav-dropdown-chevron {
+                transform: rotate(180deg);
+            }
         }
         .nav-dropdown-wrapper.align-right {
             left: auto;
@@ -121,10 +179,10 @@
         .brand-logo-btn {
             display: inline-flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.35rem 0.65rem;
-            border-radius: 1.25rem;
-            transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            gap: 0.65rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
         }
         .brand-logo-btn:hover {
             background: rgba(240, 253, 244, 0.8);
@@ -154,12 +212,38 @@
             -webkit-overflow-scrolling: touch;
         }
         
-        /* Mobile Drawer Transition */
-        #mobileDrawer {
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        /* Mobile Drawer Transition & Scroll Lock */
+        body.drawer-open {
+            overflow: hidden !important;
+            position: fixed !important;
+            width: 100% !important;
+            touch-action: none !important;
         }
+
+        #mobileDrawerContainer {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: 99999999 !important;
+        }
+
         #mobileDrawerBackdrop {
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
             transition: opacity 0.3s ease;
+        }
+
+        #mobileDrawer {
+            touch-action: pan-y;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            max-height: 100vh;
+            max-height: 100dvh;
+            height: 100vh;
+            height: 100dvh;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
         }
     </style>
     <!-- SweetAlert2 CDN -->
@@ -192,10 +276,6 @@
             margin: 0 !important;
             padding: 1rem !important;
             z-index: 999999 !important;
-        }
-
-        #mobileDrawerContainer {
-            z-index: 1000000 !important;
         }
     </style>
 </head>
@@ -494,38 +574,38 @@
             ];
         }
     ?>
-    <header class="fixed top-0 left-0 right-0 z-40 w-full glass-card shadow-sm border-b border-slate-200/80">
+    <header class="fixed top-0 left-0 right-0 z-40 w-full glass-card shadow-xs border-b border-slate-200/80">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16 sm:h-20 gap-3">
+            <div class="flex items-center justify-between h-14 gap-2.5">
                 <!-- Logo & Brand Header -->
                 <a href="<?= base_url('/') ?>" title="LAPOR KEBERSIHAN - Web Manajemen Kebersihan" class="brand-logo-btn group">
-                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 flex items-center justify-center text-white shadow-md shadow-emerald-600/25 ring-2 ring-emerald-500/20 group-hover:shadow-lg group-hover:shadow-emerald-600/35 group-hover:scale-105 group-hover:rotate-2 transition-all duration-300 flex-shrink-0">
-                        <i class="fa-solid fa-leaf text-base sm:text-lg drop-shadow-xs"></i>
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 flex items-center justify-center text-white shadow-xs shadow-emerald-600/25 ring-1.5 ring-emerald-500/20 group-hover:shadow-md group-hover:shadow-emerald-600/35 group-hover:scale-105 transition-all duration-300 flex-shrink-0">
+                        <i class="fa-solid fa-leaf text-xs drop-shadow-xs"></i>
                     </div>
                     <div class="flex flex-col justify-center">
                         <div class="flex items-center gap-1.5 leading-none">
-                            <span class="font-heading font-black text-sm sm:text-base tracking-tight text-slate-900 group-hover:text-emerald-800 transition">LAPOR</span>
-                            <span class="font-heading font-black text-sm sm:text-base tracking-tight bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent">KEBERSIHAN</span>
+                            <span class="font-heading font-black text-xs sm:text-sm tracking-tight text-slate-900 group-hover:text-emerald-800 transition">LAPOR</span>
+                            <span class="font-heading font-black text-xs sm:text-sm tracking-tight bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent">KEBERSIHAN</span>
                         </div>
-                        <div class="flex items-center gap-1.5 mt-1 leading-none">
+                        <div class="flex items-center gap-1 mt-0.5 leading-none">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <p class="text-[10px] sm:text-[11px] text-slate-500 font-bold tracking-wide group-hover:text-emerald-700 transition whitespace-nowrap">Web Manajemen Kebersihan</p>
+                            <p class="text-[9.5px] sm:text-[10px] text-slate-400 font-bold tracking-wide group-hover:text-emerald-700 transition whitespace-nowrap">Web Manajemen Kebersihan</p>
                         </div>
                     </div>
                 </a>
 
                 <!-- Desktop / Tablet Horizontal Navigation -->
-                <div class="hidden lg:flex items-center gap-2">
+                <div class="hidden lg:flex items-center gap-1.5">
                     <?php foreach ($navGroups as $group): 
                         $groupHasBadge = !empty($group['badge']) && (int)$group['badge'] > 0;
                     ?>
                         <?php if ($group['type'] === 'link'): ?>
                             <!-- Single Direct Link -->
                             <a href="<?= $group['url'] ?>" class="top-nav-btn <?= $group['active'] ? 'active font-heading' : '' ?>">
-                                <i class="<?= $group['icon'] ?> text-sm flex-shrink-0 <?= $group['active'] ? 'text-white' : 'text-slate-500' ?>"></i>
+                                <i class="<?= $group['icon'] ?> text-xs flex-shrink-0 <?= $group['active'] ? 'text-white' : 'text-slate-400' ?>"></i>
                                 <span><?= $group['label'] ?></span>
                                 <?php if ($groupHasBadge): ?>
-                                    <span class="ml-1 px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-black animate-pulse">
+                                    <span class="ml-0.5 px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black animate-pulse">
                                         <?= $group['badge'] > 99 ? '99+' : $group['badge'] ?>
                                     </span>
                                 <?php endif; ?>
@@ -533,26 +613,26 @@
 
                         <?php elseif ($group['type'] === 'dropdown'): ?>
                             <!-- Dropdown Group Button -->
-                            <div class="relative group">
-                                <button type="button" class="top-nav-btn <?= $group['active'] ? 'active font-heading' : '' ?>">
-                                    <i class="<?= $group['icon'] ?> text-sm flex-shrink-0 <?= $group['active'] ? 'text-white' : 'text-slate-500' ?>"></i>
+                            <div class="relative nav-dropdown-parent">
+                                <button type="button" class="top-nav-btn nav-dropdown-toggle <?= $group['active'] ? 'active font-heading' : '' ?>">
+                                    <i class="<?= $group['icon'] ?> text-xs flex-shrink-0 <?= $group['active'] ? 'text-white' : 'text-slate-400' ?>"></i>
                                     <span><?= $group['label'] ?></span>
                                     <?php if ($groupHasBadge): ?>
                                         <span class="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black animate-pulse">
                                             <?= $group['badge'] > 99 ? '99+' : $group['badge'] ?>
                                         </span>
                                     <?php endif; ?>
-                                    <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200 group-hover:rotate-180 <?= $group['active'] ? 'text-white/80' : 'text-slate-400' ?>"></i>
+                                    <i class="fa-solid fa-chevron-down nav-dropdown-chevron text-[9px] transition-transform duration-200 <?= $group['active'] ? 'text-white/80' : 'text-slate-400' ?>"></i>
                                 </button>
 
                                 <!-- Dropdown Menu Floating Card -->
                                 <div class="nav-dropdown-wrapper">
-                                    <div class="min-w-[280px] bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/10 border border-slate-200/90 p-2 space-y-1">
+                                    <div class="min-w-[260px] bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/10 border border-slate-200/90 p-1.5 space-y-0.5">
                                         <?php foreach ($group['children'] as $child): 
                                             $childHasBadge = !empty($child['badge']) && (int)$child['badge'] > 0;
                                         ?>
-                                            <a href="<?= $child['url'] ?>" class="flex items-center gap-3 p-2.5 rounded-xl transition duration-150 <?= $child['active'] ? 'bg-emerald-50 text-emerald-800 font-extrabold border border-emerald-200/60 shadow-xs' : 'text-slate-700 hover:bg-slate-100/80 hover:text-emerald-700' ?>">
-                                                <div class="w-8 h-8 rounded-xl <?= $child['active'] ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 group-hover:bg-emerald-100 group-hover:text-emerald-700' ?> flex items-center justify-center text-xs flex-shrink-0">
+                                            <a href="<?= $child['url'] ?>" class="group/item flex items-center gap-2.5 p-2 rounded-xl transition duration-150 <?= $child['active'] ? 'bg-emerald-50 text-emerald-800 font-extrabold border border-emerald-200/60 shadow-xs' : 'text-slate-700 hover:bg-slate-100/80 hover:text-emerald-700' ?>">
+                                                <div class="w-7 h-7 rounded-lg <?= $child['active'] ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 group-hover/item:bg-emerald-100 group-hover/item:text-emerald-700' ?> flex items-center justify-center text-xs flex-shrink-0">
                                                     <i class="<?= $child['icon'] ?>"></i>
                                                 </div>
                                                 <div class="flex-1 min-w-0">
@@ -565,7 +645,7 @@
                                                         <?php endif; ?>
                                                     </div>
                                                     <?php if (!empty($child['desc'])): ?>
-                                                        <p class="text-[10.5px] text-slate-400 font-medium truncate"><?= $child['desc'] ?></p>
+                                                        <p class="text-[10px] text-slate-400 font-medium truncate"><?= $child['desc'] ?></p>
                                                     <?php endif; ?>
                                                 </div>
                                             </a>
@@ -578,32 +658,32 @@
 
                     <!-- User Profile Dropdown / Login Action -->
                     <?php if (session()->get('isLoggedIn')): ?>
-                        <div class="relative group ml-1">
-                            <button type="button" class="flex items-center gap-2.5 px-3 py-1.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:border-emerald-300 hover:bg-emerald-50/50 transition duration-200 cursor-pointer">
-                                <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center font-heading font-black text-xs shadow-2xs">
+                        <div class="relative nav-dropdown-parent ml-0.5">
+                            <button type="button" class="top-nav-profile-btn nav-dropdown-toggle">
+                                <div class="top-nav-avatar">
                                     <?= strtoupper(substr(session()->get('nama_lengkap') ?? 'U', 0, 1)) ?>
                                 </div>
-                                <div class="text-left hidden xl:block leading-tight">
-                                    <div class="font-heading font-extrabold text-xs text-slate-800 truncate max-w-[130px]"><?= esc(session()->get('nama_lengkap')) ?></div>
-                                    <span class="text-[10px] font-bold <?= session()->get('role') === 'Admin' ? 'text-emerald-700' : (session()->get('role') === 'Auditor' ? 'text-blue-700' : 'text-purple-700') ?>">
+                                <div class="text-left hidden xl:flex flex-col justify-center leading-tight">
+                                    <span class="font-heading font-extrabold text-[11px] text-slate-800 truncate max-w-[120px] leading-tight"><?= esc(session()->get('nama_lengkap')) ?></span>
+                                    <span class="text-[9px] font-bold leading-tight mt-0.5 <?= session()->get('role') === 'Admin' ? 'text-emerald-700' : (session()->get('role') === 'Auditor' ? 'text-blue-700' : 'text-purple-700') ?>">
                                         <?= esc(session()->get('role')) ?>
                                     </span>
                                 </div>
-                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 group-hover:text-slate-600 transition-transform duration-200 group-hover:rotate-180"></i>
+                                <i class="fa-solid fa-chevron-down nav-dropdown-chevron text-[9px] text-slate-400 transition-transform duration-200"></i>
                             </button>
 
                             <!-- User Profile Dropdown Card -->
                             <div class="nav-dropdown-wrapper align-right">
-                                <div class="w-60 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl shadow-xl shadow-slate-900/10 p-2 space-y-1">
-                                    <div class="px-3 py-2.5 bg-slate-50/90 rounded-xl border border-slate-100 mb-1">
-                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Login Sebagai</p>
+                                <div class="w-56 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl shadow-xl shadow-slate-900/10 p-1.5 space-y-0.5">
+                                    <div class="px-2.5 py-2 bg-slate-50/90 rounded-xl border border-slate-100 mb-0.5">
+                                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Login Sebagai</p>
                                         <p class="font-heading font-extrabold text-xs text-slate-900 truncate mt-0.5"><?= esc(session()->get('nama_lengkap')) ?></p>
-                                        <div class="flex items-center gap-1.5 mt-1">
-                                            <span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider <?= session()->get('role') === 'Admin' ? 'bg-emerald-100 text-emerald-800' : (session()->get('role') === 'Auditor' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800') ?>">
+                                        <div class="flex items-center gap-1 mt-1">
+                                            <span class="text-[8.5px] px-1.5 py-0.2 rounded-full font-bold uppercase tracking-wider <?= session()->get('role') === 'Admin' ? 'bg-emerald-100 text-emerald-800' : (session()->get('role') === 'Auditor' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800') ?>">
                                                 <?= esc(session()->get('role')) ?>
                                             </span>
                                             <?php if (session()->get('nama_unit')): ?>
-                                                <span class="text-[9px] px-2 py-0.5 rounded-full font-semibold bg-slate-200 text-slate-700 truncate max-w-[100px]">
+                                                <span class="text-[8.5px] px-1.5 py-0.2 rounded-full font-semibold bg-slate-200 text-slate-700 truncate max-w-[90px]">
                                                     <?= esc(session()->get('nama_unit')) ?>
                                                 </span>
                                             <?php endif; ?>
@@ -611,32 +691,32 @@
                                     </div>
 
                                     <?php if ($isUserAdminOrAuditor): ?>
-                                        <a href="<?= base_url('pengaturan') ?>" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition <?= $isPengaturanActive ? 'bg-emerald-50 text-emerald-700 font-extrabold' : '' ?>">
-                                            <i class="fa-solid fa-sliders text-sm text-slate-400 w-4 text-center"></i>
+                                        <a href="<?= base_url('pengaturan') ?>" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition <?= $isPengaturanActive ? 'bg-emerald-50 text-emerald-700 font-extrabold' : '' ?>">
+                                            <i class="fa-solid fa-sliders text-xs text-slate-400 w-4 text-center"></i>
                                             <span>Master Pengaturan</span>
                                         </a>
-                                        <a href="<?= base_url('profil') ?>" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition <?= $isProfilActive ? 'bg-emerald-50 text-emerald-700 font-extrabold' : '' ?>">
-                                            <i class="fa-solid fa-user-gear text-sm text-slate-400 w-4 text-center"></i>
+                                        <a href="<?= base_url('profil') ?>" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition <?= $isProfilActive ? 'bg-emerald-50 text-emerald-700 font-extrabold' : '' ?>">
+                                            <i class="fa-solid fa-user-gear text-xs text-slate-400 w-4 text-center"></i>
                                             <span>Kelola Akun & Profil</span>
                                         </a>
                                     <?php else: ?>
-                                        <a href="<?= base_url('app') ?>" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition <?= $isAppActive ? 'bg-emerald-50 text-emerald-700 font-extrabold' : '' ?>">
-                                            <i class="fa-solid fa-gauge-high text-sm text-slate-400 w-4 text-center"></i>
+                                        <a href="<?= base_url('app') ?>" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition <?= $isAppActive ? 'bg-emerald-50 text-emerald-700 font-extrabold' : '' ?>">
+                                            <i class="fa-solid fa-gauge-high text-xs text-slate-400 w-4 text-center"></i>
                                             <span>Dashboard Unit</span>
                                         </a>
                                     <?php endif; ?>
 
-                                    <div class="border-t border-slate-100 my-1"></div>
-                                    <a href="<?= base_url('logout') ?>" data-confirm-msg="Apakah Anda yakin ingin keluar/logout?" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition">
-                                        <i class="fa-solid fa-right-from-bracket text-sm text-rose-500 w-4 text-center"></i>
+                                    <div class="border-t border-slate-100 my-0.5"></div>
+                                    <a href="<?= base_url('logout') ?>" data-confirm-msg="Apakah Anda yakin ingin keluar/logout?" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition">
+                                        <i class="fa-solid fa-right-from-bracket text-xs text-rose-500 w-4 text-center"></i>
                                         <span>Keluar / Logout</span>
                                     </a>
                                 </div>
                             </div>
                         </div>
                     <?php else: ?>
-                        <a href="<?= base_url('login') ?>" title="Login Petugas / Pengurus" class="top-nav-btn bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/80 shadow-2xs ml-1">
-                            <i class="fa-solid fa-right-to-bracket text-sm flex-shrink-0 text-emerald-600"></i>
+                        <a href="<?= base_url('login') ?>" title="Login Petugas / Pengurus" class="top-nav-btn bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/80 shadow-2xs ml-0.5">
+                            <i class="fa-solid fa-right-to-bracket text-xs flex-shrink-0 text-emerald-600"></i>
                             <span>Masuk / Login</span>
                         </a>
                     <?php endif; ?>
@@ -644,8 +724,8 @@
 
                 <!-- Mobile Hamburger Toggle Button -->
                 <div class="flex items-center gap-2 lg:hidden">
-                    <button type="button" onclick="toggleMobileDrawer(true)" class="w-10 h-10 rounded-2xl bg-white border border-slate-200 text-slate-700 hover:text-emerald-700 hover:bg-emerald-50 shadow-2xs flex items-center justify-center transition" aria-label="Buka Menu Navigasi">
-                        <i class="fa-solid fa-bars text-base"></i>
+                    <button type="button" onclick="toggleMobileDrawer(true)" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-emerald-700 hover:bg-emerald-50 shadow-2xs flex items-center justify-center transition" aria-label="Buka Menu Navigasi">
+                        <i class="fa-solid fa-bars text-sm"></i>
                     </button>
                 </div>
             </div>
@@ -653,7 +733,7 @@
     </header>
 
     <!-- Fixed Header Layout Spacer (Prevents Content Underflow) -->
-    <div class="h-16 sm:h-20 w-full flex-shrink-0" aria-hidden="true"></div>
+    <div class="h-14 w-full flex-shrink-0" aria-hidden="true"></div>
 
     <!-- Mobile Off-Canvas Drawer Navigation -->
     <div id="mobileDrawerContainer" class="fixed inset-0 pointer-events-none transition-all hidden" style="z-index: 99999999 !important;">
@@ -781,6 +861,8 @@
     <script>
         (function() {
             var drawerCloseTimer = null;
+            var savedScrollY = 0;
+            var isDrawerOpen = false;
 
             function toggleMobileDrawer(open) {
                 var container = document.getElementById('mobileDrawerContainer');
@@ -789,35 +871,80 @@
                 if (!container || !drawer || !backdrop) return;
 
                 if (open) {
+                    if (isDrawerOpen) return;
+                    isDrawerOpen = true;
                     if (drawerCloseTimer) { clearTimeout(drawerCloseTimer); drawerCloseTimer = null; }
+
+                    // Record scroll position before locking
+                    savedScrollY = window.pageYOffset || document.documentElement.scrollTop || window.scrollY || 0;
 
                     container.classList.remove('hidden');
                     container.style.display = 'block';
                     container.style.pointerEvents = 'auto';
-                    document.body.classList.add('overflow-hidden');
+
+                    // Complete mobile & desktop body scroll lock
+                    document.body.style.position = 'fixed';
+                    document.body.style.top = '-' + savedScrollY + 'px';
+                    document.body.style.left = '0';
+                    document.body.style.right = '0';
+                    document.body.style.width = '100%';
+                    document.body.style.overflow = 'hidden';
+                    document.body.classList.add('drawer-open', 'overflow-hidden');
 
                     requestAnimationFrame(function() {
                         backdrop.style.opacity = '1';
                         drawer.style.transform = 'translateX(0)';
                     });
                 } else {
+                    if (!isDrawerOpen && container.classList.contains('hidden')) return;
+                    isDrawerOpen = false;
+
                     backdrop.style.opacity = '0';
                     drawer.style.transform = 'translateX(100%)';
                     container.style.pointerEvents = 'none';
-                    document.body.classList.remove('overflow-hidden');
-                    document.body.style.overflow = '';
+
+                    // Unlock body scroll and restore previous scroll position accurately
+                    var restoreY = savedScrollY;
                     document.body.style.position = '';
+                    document.body.style.top = '';
+                    document.body.style.left = '';
+                    document.body.style.right = '';
+                    document.body.style.width = '';
+                    document.body.style.overflow = '';
+                    document.body.classList.remove('drawer-open', 'overflow-hidden');
+                    window.scrollTo(0, restoreY);
 
                     drawerCloseTimer = setTimeout(function() {
                         container.classList.add('hidden');
                         container.style.display = 'none';
                         drawerCloseTimer = null;
-                        document.body.classList.remove('overflow-hidden');
-                        document.body.style.overflow = '';
                         document.body.style.position = '';
+                        document.body.style.top = '';
+                        document.body.style.left = '';
+                        document.body.style.right = '';
+                        document.body.style.width = '';
+                        document.body.style.overflow = '';
+                        document.body.classList.remove('drawer-open', 'overflow-hidden');
                     }, 300);
                 }
             }
+
+            // Prevent touchmove gestures on the backdrop from scrolling background on iOS/Android
+            document.addEventListener('DOMContentLoaded', function() {
+                var backdrop = document.getElementById('mobileDrawerBackdrop');
+                if (backdrop) {
+                    backdrop.addEventListener('touchmove', function(e) {
+                        e.preventDefault();
+                    }, { passive: false });
+                }
+            });
+
+            // Close on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && isDrawerOpen) {
+                    toggleMobileDrawer(false);
+                }
+            });
 
             window.toggleMobileDrawer = toggleMobileDrawer;
         })();
@@ -913,6 +1040,95 @@
     <div id="spaToastContainer" class="fixed bottom-6 right-6 z-[100] space-y-2 pointer-events-none"></div>
 
     <script>
+        // Desktop / Header Dropdown Navigation Manager
+        function initNavDropdowns() {
+            const dropdownParents = document.querySelectorAll('.nav-dropdown-parent');
+
+            dropdownParents.forEach(parent => {
+                const toggleBtn = parent.querySelector('.nav-dropdown-toggle');
+                if (!toggleBtn) return;
+
+                // Event listener for clicking toggle button
+                if (!toggleBtn.dataset.navToggleBound) {
+                    toggleBtn.dataset.navToggleBound = 'true';
+                    toggleBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        const wasOpen = parent.classList.contains('is-open');
+
+                        // Close all other dropdowns immediately
+                        dropdownParents.forEach(p => {
+                            if (p !== parent) {
+                                p.classList.remove('is-open');
+                            }
+                        });
+
+                        if (wasOpen) {
+                            parent.classList.remove('is-open');
+                            toggleBtn.blur();
+                        } else {
+                            parent.classList.add('is-open');
+                        }
+                    });
+                }
+
+                // Event listener for hovering over parent: immediately close other open dropdowns
+                if (!parent.dataset.navParentBound) {
+                    parent.dataset.navParentBound = 'true';
+
+                    parent.addEventListener('mouseenter', function() {
+                        dropdownParents.forEach(p => {
+                            if (p !== parent) {
+                                p.classList.remove('is-open');
+                            }
+                        });
+                    });
+
+                    parent.addEventListener('mouseleave', function() {
+                        parent.classList.remove('is-open');
+                        if (document.activeElement && parent.contains(document.activeElement)) {
+                            document.activeElement.blur();
+                        }
+                    });
+
+                    // Automatically close dropdown and blur focus when any link inside is clicked
+                    parent.querySelectorAll('a').forEach(link => {
+                        link.addEventListener('click', function() {
+                            parent.classList.remove('is-open');
+                            if (document.activeElement) {
+                                document.activeElement.blur();
+                            }
+                        });
+                    });
+                }
+            });
+        }
+        window.initNavDropdowns = initNavDropdowns;
+
+        // Global Listeners for outside click & Escape key
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.nav-dropdown-parent')) {
+                document.querySelectorAll('.nav-dropdown-parent.is-open').forEach(p => {
+                    p.classList.remove('is-open');
+                });
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.nav-dropdown-parent.is-open').forEach(p => {
+                    p.classList.remove('is-open');
+                });
+                if (document.activeElement && document.activeElement.closest('.nav-dropdown-parent')) {
+                    document.activeElement.blur();
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initNavDropdowns();
+        });
+
         // Universal Toast Notification System
         function showToast(message, type = 'success') {
             const container = document.getElementById('spaToastContainer');
@@ -993,6 +1209,9 @@
                 const currentHeaderNav = document.querySelector('header');
                 if (currentHeaderNav && newHeaderNav) {
                     currentHeaderNav.innerHTML = newHeaderNav.innerHTML;
+                    if (typeof window.initNavDropdowns === 'function') {
+                        window.initNavDropdowns();
+                    }
                 }
 
                 // Update Mobile Drawer Navigation and Profile Synchronously
@@ -1354,14 +1573,14 @@
         // Lightweight Modal Helper (Locks Body Scroll when modal is open)
         function checkModalState() {
             const hasOpenModal = document.querySelector('.fixed.inset-0:not(#mobileDrawerContainer):not(.hidden)');
-            const drawerContainer = document.getElementById('mobileDrawerContainer');
-            const isDrawerOpen = drawerContainer && !drawerContainer.classList.contains('hidden') && drawerContainer.style.display !== 'none';
-            if (hasOpenModal || isDrawerOpen) {
+            if (hasOpenModal) {
                 document.body.classList.add('overflow-hidden');
-            } else {
+            } else if (!document.body.classList.contains('drawer-open')) {
                 document.body.classList.remove('overflow-hidden');
-                document.body.style.overflow = '';
-                document.body.style.position = '';
+                if (document.body.style.position !== 'fixed') {
+                    document.body.style.overflow = '';
+                    document.body.style.position = '';
+                }
             }
         }
 

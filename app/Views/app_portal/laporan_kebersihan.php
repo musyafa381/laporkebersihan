@@ -35,216 +35,358 @@
                 </span>
             </div>
 
-            <form action="<?= base_url('cs/public/store') ?>" method="POST" enctype="multipart/form-data" class="space-y-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                            <span>Nama Lengkap Pengirim</span>
-                            <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
-                                <i class="fa-solid fa-lock text-[9px]"></i> Otomatis (PJ Unit)
-                            </span>
-                        </label>
-                        <input type="text" name="nama_pengirim" value="<?= esc($defaultNamaPengirim ?? $userUnit['pj_nama'] ?? session()->get('nama_lengkap') ?? '') ?>" readonly required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-100/90 text-slate-800 cursor-not-allowed shadow-2xs">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                            <span>Nomor WhatsApp / HP</span>
-                            <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
-                                <i class="fa-solid fa-lock text-[9px]"></i> Otomatis (PJ Unit)
-                            </span>
-                        </label>
-                        <input type="text" name="kontak_hp" value="<?= esc($defaultKontakHp ?? $userUnit['pj_kontak'] ?? '') ?>" readonly required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-100/90 text-slate-800 cursor-not-allowed shadow-2xs">
-                    </div>
-                </div>
+            <!-- Multi-Step Progress Stepper -->
+            <div class="mb-5 px-1 sm:px-2">
+                <div class="flex items-start justify-between w-full">
+                    <!-- Step 1 Trigger -->
+                    <button type="button" onclick="goToPortalStep(1)" id="portalStepTab1" class="flex flex-col items-center group cursor-pointer focus:outline-none flex-shrink-0 z-10">
+                        <div id="portalStepCircle1" class="w-10 h-10 rounded-2xl flex items-center justify-center font-extrabold text-sm bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 ring-4 ring-emerald-50 transition-all duration-300 scale-105">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <span id="portalStepLabel1" class="mt-2 text-[11px] font-extrabold text-emerald-800 tracking-tight transition-colors whitespace-nowrap">1. Identitas & Unit</span>
+                    </button>
 
-                <?php
-                    $userUnitId = session()->get('unit_id');
-                    $preselectedUnitName = '';
-                    if ($userUnitId && !empty($unitList)) {
-                        foreach ($unitList as $u) {
-                            if ((int)$u['id'] === (int)$userUnitId) {
-                                $preselectedUnitName = $u['nama_unit'];
-                                break;
+                    <!-- Connector 1-2 -->
+                    <div class="flex-1 h-1 bg-slate-200 mx-2 mt-[18px] rounded-full overflow-hidden self-start">
+                        <div id="portalProgressLine1" class="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300" style="width: 0%;"></div>
+                    </div>
+
+                    <!-- Step 2 Trigger -->
+                    <button type="button" onclick="goToPortalStep(2)" id="portalStepTab2" class="flex flex-col items-center group cursor-pointer focus:outline-none flex-shrink-0 z-10">
+                        <div id="portalStepCircle2" class="w-10 h-10 rounded-2xl flex items-center justify-center font-extrabold text-sm bg-slate-100 text-slate-500 border border-slate-300 ring-4 ring-white transition-all duration-300">
+                            <i class="fa-solid fa-camera"></i>
+                        </div>
+                        <span id="portalStepLabel2" class="mt-2 text-[11px] font-bold text-slate-500 tracking-tight transition-colors whitespace-nowrap">2. Detail & Foto</span>
+                    </button>
+
+                    <!-- Connector 2-3 -->
+                    <div class="flex-1 h-1 bg-slate-200 mx-2 mt-[18px] rounded-full overflow-hidden self-start">
+                        <div id="portalProgressLine2" class="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300" style="width: 0%;"></div>
+                    </div>
+
+                    <!-- Step 3 Trigger -->
+                    <button type="button" onclick="goToPortalStep(3)" id="portalStepTab3" class="flex flex-col items-center group cursor-pointer focus:outline-none flex-shrink-0 z-10">
+                        <div id="portalStepCircle3" class="w-10 h-10 rounded-2xl flex items-center justify-center font-extrabold text-sm bg-slate-100 text-slate-500 border border-slate-300 ring-4 ring-white transition-all duration-300">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </div>
+                        <span id="portalStepLabel3" class="mt-2 text-[11px] font-bold text-slate-500 tracking-tight transition-colors whitespace-nowrap">3. Konfirmasi</span>
+                    </button>
+                </div>
+            </div>
+
+            <form action="<?= base_url('cs/public/store') ?>" method="POST" enctype="multipart/form-data" class="space-y-4" id="formLaporCsPortal" onsubmit="return validatePortalFinalSubmit(event)">
+                <!-- ========================================== -->
+                <!-- 🔹 LANGKAH 1: IDENTITAS & LOKASI UNIT     -->
+                <!-- ========================================== -->
+                <div id="portalStep1" class="portal-step-pane space-y-4 animate-fadeIn">
+                    <div class="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-100 flex items-center gap-2.5 text-xs text-emerald-900 font-semibold">
+                        <div class="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 text-xs shadow-xs">
+                            <i class="fa-solid fa-circle-info"></i>
+                        </div>
+                        <span>Pastikan data pengirim dan unit tertuju sudah sesuai untuk penanganan kendala kebersihan.</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>Nama Lengkap Pengirim <span class="text-rose-500">*</span></span>
+                                <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                                    <i class="fa-solid fa-lock text-[9px]"></i> Otomatis (PJ Unit)
+                                </span>
+                            </label>
+                            <input type="text" id="portal_nama_pengirim" name="nama_pengirim" value="<?= esc($defaultNamaPengirim ?? $userUnit['pj_nama'] ?? session()->get('nama_lengkap') ?? '') ?>" readonly required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-100/90 text-slate-800 cursor-not-allowed shadow-2xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>Nomor WhatsApp / HP <span class="text-rose-500">*</span></span>
+                                <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                                    <i class="fa-solid fa-lock text-[9px]"></i> Otomatis (PJ Unit)
+                                </span>
+                            </label>
+                            <input type="text" id="portal_kontak_hp" name="kontak_hp" value="<?= esc($defaultKontakHp ?? $userUnit['pj_kontak'] ?? '') ?>" readonly required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-100/90 text-slate-800 cursor-not-allowed shadow-2xs">
+                        </div>
+                    </div>
+
+                    <?php
+                        $userUnitId = session()->get('unit_id');
+                        $preselectedUnitName = '';
+                        if ($userUnitId && !empty($unitList)) {
+                            foreach ($unitList as $u) {
+                                if ((int)$u['id'] === (int)$userUnitId) {
+                                    $preselectedUnitName = $u['nama_unit'];
+                                    break;
+                                }
                             }
                         }
-                    }
-                ?>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Searchable Unit Picker in Portal Form -->
-                    <div class="relative">
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                            <span>1. Lokasi / Unit Tertuju</span>
-                            <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
-                                <i class="fa-solid fa-magnifying-glass text-[9px]"></i> Bisa dicari
-                            </span>
-                        </label>
-                        <input type="hidden" id="portal_unit_id" name="unit_id" value="<?= esc($userUnit['id'] ?? '') ?>">
-                        <input type="hidden" id="portal_unit_lokasi" name="unit_lokasi" required value="<?= esc($userUnit['nama_unit'] ?? '') ?>">
+                    ?>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Searchable Unit Picker in Portal Form -->
                         <div class="relative">
-                            <i class="fa-solid fa-building text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2 text-xs pointer-events-none"></i>
-                            <input type="text" id="portal_unit_search" value="<?= esc($userUnit['nama_unit'] ?? '') ?>" placeholder="Pilih unit / asrama terkait..." autocomplete="off" required onfocus="openPortalUnitDropdown()" oninput="filterPortalUnitOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
-                            <button type="button" onclick="togglePortalUnitDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
-                                <i id="portalUnitIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
-                            </button>
-                        </div>
-                        <!-- Dropdown List -->
-                        <div id="portalUnitDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
-                            <?php if (!empty($unitList)): ?>
-                                <?php foreach ($unitList as $u): ?>
-                                    <div class="portal-unit-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $u['id'] ?>" data-nama="<?= esc($u['nama_unit']) ?>" onclick="selectPortalUnit(this)">
-                                        <div>
-                                            <div class="font-extrabold text-xs text-slate-900"><?= esc($u['nama_unit']) ?></div>
-                                            <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
-                                                <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200/60"><?= esc($u['tipe']) ?></span>
-                                                <?php if (!empty($u['kode_unit'])): ?>
-                                                    <span>&bull;</span>
-                                                    <span class="font-mono text-slate-400"><?= esc($u['kode_unit']) ?></span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                        <span class="text-xs text-slate-300 group-hover:text-emerald-600"><i class="fa-solid fa-check text-[10px]"></i></span>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <div class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium">
-                                    Belum ada data unit aktif.
-                                </div>
-                            <?php endif; ?>
-                            <div id="noPortalUnitFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
-                                Tidak ditemukan unit yang sesuai.
+                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>1. Lokasi / Unit Tertuju <span class="text-rose-500">*</span></span>
+                                <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                                    <i class="fa-solid fa-magnifying-glass text-[9px]"></i> Bisa dicari
+                                </span>
+                            </label>
+                            <input type="hidden" id="portal_unit_id" name="unit_id" value="<?= esc($userUnit['id'] ?? '') ?>">
+                            <input type="hidden" id="portal_unit_lokasi" name="unit_lokasi" required value="<?= esc($userUnit['nama_unit'] ?? '') ?>">
+                            <div class="relative">
+                                <i class="fa-solid fa-building text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2 text-xs pointer-events-none"></i>
+                                <input type="text" id="portal_unit_search" value="<?= esc($userUnit['nama_unit'] ?? '') ?>" placeholder="Pilih unit / asrama terkait..." autocomplete="off" required onfocus="openPortalUnitDropdown()" oninput="filterPortalUnitOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
+                                <button type="button" onclick="togglePortalUnitDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                                    <i id="portalUnitIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                                </button>
                             </div>
-                        </div>
-                    </div>
-                    <!-- Searchable Wilayah Picker in Portal Form -->
-                    <div class="relative">
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                            <span>2. Wilayah Pemetaan</span>
-                            <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
-                                <i class="fa-solid fa-filter text-[9px]"></i> Sesuai Unit
-                            </span>
-                        </label>
-                        <input type="hidden" id="portal_wilayah_id" name="wilayah_id" value="">
-                        <div class="relative">
-                            <i class="fa-solid fa-map-location-dot absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-600 text-xs pointer-events-none"></i>
-                            <input type="text" id="portal_wilayah_search" placeholder="Pilih unit terlebih dahulu..." autocomplete="off" onclick="openPortalWilayahDropdown()" onfocus="openPortalWilayahDropdown()" oninput="filterPortalWilayahOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
-                            <button type="button" onclick="togglePortalWilayahDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
-                                <i id="portalWilayahIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
-                            </button>
-                        </div>
-                        <!-- Dropdown List -->
-                        <div id="portalWilayahDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
-                            <div class="portal-wilayah-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="" data-name="" data-lokasi-gedung="" onclick="selectPortalWilayah(this)">
-                                <div>
-                                    <div class="font-extrabold text-xs text-slate-600 italic">-- Bukan Wilayah Khusus / Umum --</div>
-                                    <div class="text-[10px] text-slate-400 font-medium">Laporan umum lingkungan unit (tanpa spot wilayah khusus)</div>
+                            <!-- Dropdown List -->
+                            <div id="portalUnitDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                                <?php if (!empty($unitList)): ?>
+                                    <?php foreach ($unitList as $u): ?>
+                                        <div class="portal-unit-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $u['id'] ?>" data-nama="<?= esc($u['nama_unit']) ?>" onclick="selectPortalUnit(this)">
+                                            <div>
+                                                <div class="font-extrabold text-xs text-slate-900"><?= esc($u['nama_unit']) ?></div>
+                                                <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
+                                                    <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200/60"><?= esc($u['tipe']) ?></span>
+                                                    <?php if (!empty($u['kode_unit'])): ?>
+                                                        <span>&bull;</span>
+                                                        <span class="font-mono text-slate-400"><?= esc($u['kode_unit']) ?></span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                            <span class="text-xs text-slate-300 group-hover:text-emerald-600"><i class="fa-solid fa-check text-[10px]"></i></span>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <div class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium">
+                                        Belum ada data unit aktif.
+                                    </div>
+                                <?php endif; ?>
+                                <div id="noPortalUnitFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
+                                    Tidak ditemukan unit yang sesuai.
                                 </div>
                             </div>
-                            <?php if (!empty($wilayahList)): ?>
-                                <?php foreach ($wilayahList as $w): ?>
-                                    <div class="portal-wilayah-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $w['id'] ?>" data-name="<?= esc($w['nama_wilayah']) ?>" data-lokasi-gedung="<?= esc(strtolower($w['lokasi_gedung'] ?? '')) ?>" onclick="selectPortalWilayah(this)">
-                                        <div>
-                                            <div class="font-extrabold text-xs text-slate-900"><?= esc($w['nama_wilayah']) ?></div>
-                                            <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5 flex-wrap">
-                                                <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/60"><?= esc($w['kategori_area']) ?></span>
-                                                <?php if (!empty($w['luas_area'])): ?>
-                                                    <span class="text-slate-300">&bull;</span>
-                                                    <span class="inline-flex items-center gap-0.5 text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200/60 font-bold" title="Ukuran / Luas Area">
-                                                        <i class="fa-solid fa-ruler-combined text-[9px] text-teal-600"></i> <?= esc($w['luas_area']) ?>
-                                                    </span>
-                                                <?php endif; ?>
-                                                <?php if (!empty($w['lokasi_gedung'])): ?>
-                                                    <span class="text-slate-300">&bull;</span>
-                                                    <span><i class="fa-solid fa-location-dot text-rose-500 mr-0.5"></i><?= esc($w['lokasi_gedung']) ?></span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                        <span class="text-[10px] font-mono font-bold text-slate-400"><?= esc($w['kode_wilayah'] ?: 'WIL-' . $w['id']) ?></span>
+                        </div>
+                        <!-- Searchable Wilayah Picker in Portal Form -->
+                        <div class="relative">
+                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>2. Wilayah Pemetaan</span>
+                                <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                                    <i class="fa-solid fa-filter text-[9px]"></i> Sesuai Unit
+                                </span>
+                            </label>
+                            <input type="hidden" id="portal_wilayah_id" name="wilayah_id" value="">
+                            <div class="relative">
+                                <i class="fa-solid fa-map-location-dot absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-600 text-xs pointer-events-none"></i>
+                                <input type="text" id="portal_wilayah_search" placeholder="Pilih unit terlebih dahulu..." autocomplete="off" onclick="openPortalWilayahDropdown()" onfocus="openPortalWilayahDropdown()" oninput="filterPortalWilayahOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
+                                <button type="button" onclick="togglePortalWilayahDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                                    <i id="portalWilayahIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                                </button>
+                            </div>
+                            <!-- Dropdown List -->
+                            <div id="portalWilayahDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                                <div class="portal-wilayah-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="" data-name="" data-lokasi-gedung="" onclick="selectPortalWilayah(this)">
+                                    <div>
+                                        <div class="font-extrabold text-xs text-slate-600 italic">-- Bukan Wilayah Khusus / Umum --</div>
+                                        <div class="text-[10px] text-slate-400 font-medium">Laporan umum lingkungan unit (tanpa spot wilayah khusus)</div>
                                     </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                            <div id="noPortalWilayahFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
-                                Tidak ada spot wilayah pemetaan di unit ini.
+                                </div>
+                                <?php if (!empty($wilayahList)): ?>
+                                    <?php foreach ($wilayahList as $w): ?>
+                                        <div class="portal-wilayah-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $w['id'] ?>" data-name="<?= esc($w['nama_wilayah']) ?>" data-lokasi-gedung="<?= esc(strtolower($w['lokasi_gedung'] ?? '')) ?>" onclick="selectPortalWilayah(this)">
+                                            <div>
+                                                <div class="font-extrabold text-xs text-slate-900"><?= esc($w['nama_wilayah']) ?></div>
+                                                <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                                    <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/60"><?= esc($w['kategori_area']) ?></span>
+                                                    <?php if (!empty($w['luas_area'])): ?>
+                                                        <span class="text-slate-300">&bull;</span>
+                                                        <span class="inline-flex items-center gap-0.5 text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200/60 font-bold" title="Ukuran / Luas Area">
+                                                            <i class="fa-solid fa-ruler-combined text-[9px] text-teal-600"></i> <?= esc($w['luas_area']) ?>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                    <?php if (!empty($w['lokasi_gedung'])): ?>
+                                                        <span class="text-slate-300">&bull;</span>
+                                                        <span><i class="fa-solid fa-location-dot text-rose-500 mr-0.5"></i><?= esc($w['lokasi_gedung']) ?></span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                            <span class="text-[10px] font-mono font-bold text-slate-400"><?= esc($w['kode_wilayah'] ?: 'WIL-' . $w['id']) ?></span>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                                <div id="noPortalWilayahFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
+                                    Tidak ada spot wilayah pemetaan di unit ini.
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Dynamic Step 3: Shift Selection with Smart PJ Routing in Portal -->
-                <div id="portalShiftContainer" class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-2.5 hidden animate-fadeIn">
-                    <div class="flex items-center justify-between">
-                        <label class="block text-xs font-extrabold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-regular fa-clock text-emerald-600"></i>
-                            <span>3. Pilih Shift & Penanggung Jawab Terkait</span>
-                        </label>
-                        <span id="portalShiftAutoBadge" class="text-[10px] text-emerald-700 bg-white px-2.5 py-0.5 rounded-full border border-emerald-200 font-bold flex items-center gap-1 shadow-2xs">
-                            <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i> Rekomendasi Waktu
-                        </span>
-                    </div>
-                    <select id="portal_shift_select" name="shift" onchange="onPortalShiftChange(this)" class="w-full px-4 py-2.5 rounded-xl border border-emerald-300 text-xs font-bold bg-white text-slate-800 focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer">
-                        <!-- Populated dynamically via JS -->
-                    </select>
-                    <div id="portalShiftInfoPj" class="text-[11px] text-emerald-900 font-semibold flex items-center gap-1.5 pt-0.5">
-                        <i class="fa-solid fa-shield-halved text-emerald-600 text-xs"></i>
-                        <span>Laporan akan otomatis diteruskan ke Penanggung Jawab: <b id="portalTargetUnitName" class="text-emerald-950 underline font-extrabold">-</b></span>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Kategori Pengaduan</label>
-                    <select name="kategori" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                        <option value="Kendala Kebersihan">Kendala Kebersihan / Sampah Penuh</option>
-                        <option value="Fasilitas Rusak">Fasilitas Tempat Kebersihan Rusak</option>
-                        <option value="Pertanyaan/Konsultasi">Pertanyaan / Konsultasi</option>
-                        <option value="Lainnya">Lainnya</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Isi Pesan Laporan / Pengaduan</label>
-                    <textarea name="isi_laporan" rows="4" placeholder="Jelaskan kendala kebersihan atau hal yang ingin disampaikan ke Admin K3L..." required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs"></textarea>
-                </div>
-
-                <!-- Multiple Photo Upload with Separate Camera & Gallery Buttons and Delete Feature -->
-                <div class="space-y-3 p-4 rounded-2xl bg-slate-50/90 border border-slate-200">
-                    <div class="flex items-center justify-between">
-                        <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-camera-retro text-emerald-600"></i>
-                            <span>Foto Bukti / Lokasi Kendala</span>
-                        </label>
-                        <span class="text-[10px] text-slate-500 font-medium">Bisa lebih dari 1 foto</span>
-                    </div>
-
-                    <!-- Hidden Inputs for Camera and Gallery -->
-                    <input type="file" id="portalCameraInput" accept="image/*" capture="environment" class="hidden" onchange="handlePortalFiles(this.files)">
-                    <input type="file" id="portalGalleryInput" accept="image/*" multiple class="hidden" onchange="handlePortalFiles(this.files)">
-                    <!-- Real Form File Input Container managed by DataTransfer -->
-                    <input type="file" id="portalRealInput" name="foto_files[]" multiple class="hidden">
-
-                    <!-- Action Buttons: Kamera & Galeri -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <button type="button" onclick="document.getElementById('portalCameraInput').click()" class="py-3 px-4 rounded-2xl bg-white hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-400 text-slate-700 hover:text-emerald-700 font-heading font-extrabold text-xs transition shadow-2xs flex items-center justify-center gap-2">
-                            <div class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
-                                <i class="fa-solid fa-camera"></i>
-                            </div>
-                            <span>Buka Kamera</span>
-                        </button>
-
-                        <button type="button" onclick="document.getElementById('portalGalleryInput').click()" class="py-3 px-4 rounded-2xl bg-white hover:bg-teal-50/80 border border-slate-200 hover:border-teal-400 text-slate-700 hover:text-teal-700 font-heading font-extrabold text-xs transition shadow-2xs flex items-center justify-center gap-2">
-                            <div class="w-7 h-7 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center">
-                                <i class="fa-solid fa-images"></i>
-                            </div>
-                            <span>Pilih Galeri</span>
+                    <!-- Tombol Lanjut ke Langkah 2 -->
+                    <div class="pt-4 border-t border-slate-100 flex justify-end">
+                        <button type="button" onclick="nextPortalStep(1)" class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 group cursor-pointer">
+                            <span>Lanjut: Detail & Foto Bukti</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                         </button>
                     </div>
-
-                    <!-- Live Thumbnail Preview Container with Delete Button -->
-                    <div id="portalFotoPreviewContainer" class="flex flex-wrap gap-3 pt-2 hidden border-t border-slate-200/70"></div>
                 </div>
 
-                <button type="submit" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-paper-plane"></i>
-                    <span>Kirim Pengaduan Ke Tim CS K3L</span>
-                </button>
+                <!-- ========================================== -->
+                <!-- 🔹 LANGKAH 2: DETAIL KENDALA & FOTO BUKTI -->
+                <!-- ========================================== -->
+                <div id="portalStep2" class="portal-step-pane space-y-4 hidden animate-fadeIn">
+                    <!-- Dynamic Step 3: Shift Selection with Smart PJ Routing in Portal -->
+                    <div id="portalShiftContainer" class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-2.5 hidden animate-fadeIn">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-xs font-extrabold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fa-regular fa-clock text-emerald-600"></i>
+                                <span>Pilih Shift & Penanggung Jawab Terkait</span>
+                            </label>
+                            <span id="portalShiftAutoBadge" class="text-[10px] text-emerald-700 bg-white px-2.5 py-0.5 rounded-full border border-emerald-200 font-bold flex items-center gap-1 shadow-2xs">
+                                <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i> Rekomendasi Waktu
+                            </span>
+                        </div>
+                        <select id="portal_shift_select" name="shift" onchange="onPortalShiftChange(this)" class="w-full px-4 py-2.5 rounded-xl border border-emerald-300 text-xs font-bold bg-white text-slate-800 focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer">
+                            <!-- Populated dynamically via JS -->
+                        </select>
+                        <div id="portalShiftInfoPj" class="text-[11px] text-emerald-900 font-semibold flex items-center gap-1.5 pt-0.5">
+                            <i class="fa-solid fa-shield-halved text-emerald-600 text-xs"></i>
+                            <span>Laporan akan otomatis diteruskan ke Penanggung Jawab: <b id="portalTargetUnitName" class="text-emerald-950 underline font-extrabold">-</b></span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Kategori Pengaduan <span class="text-rose-500">*</span></label>
+                        <select id="portal_kategori" name="kategori" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                            <option value="Kendala Kebersihan">Kendala Kebersihan / Sampah Penuh</option>
+                            <option value="Fasilitas Rusak">Fasilitas Tempat Kebersihan Rusak</option>
+                            <option value="Pertanyaan/Konsultasi">Pertanyaan / Konsultasi</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                            <span>Isi Pesan Laporan / Pengaduan <span class="text-rose-500">*</span></span>
+                            <span class="text-[10px] text-slate-400 font-medium">Jelaskan sedetail mungkin</span>
+                        </label>
+                        <textarea id="portal_isi_laporan" name="isi_laporan" rows="4" placeholder="Jelaskan kendala kebersihan atau hal yang ingin disampaikan ke Admin K3L..." required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs"></textarea>
+                    </div>
+
+                    <!-- Multiple Photo Upload with Separate Camera & Gallery Buttons and Delete Feature -->
+                    <div class="space-y-3 p-4 rounded-2xl bg-slate-50/90 border border-slate-200">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fa-solid fa-camera-retro text-emerald-600"></i>
+                                <span>Foto Bukti / Lokasi Kendala</span>
+                            </label>
+                            <span class="text-[10px] text-slate-500 font-medium">Bisa lebih dari 1 foto (Opsional)</span>
+                        </div>
+
+                        <!-- Hidden Inputs for Camera and Gallery -->
+                        <input type="file" id="portalCameraInput" accept="image/*" capture="environment" class="hidden" onchange="handlePortalFiles(this.files)">
+                        <input type="file" id="portalGalleryInput" accept="image/*" multiple class="hidden" onchange="handlePortalFiles(this.files)">
+                        <!-- Real Form File Input Container managed by DataTransfer -->
+                        <input type="file" id="portalRealInput" name="foto_files[]" multiple class="hidden">
+
+                        <!-- Action Buttons: Kamera & Galeri -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <button type="button" onclick="document.getElementById('portalCameraInput').click()" class="py-3 px-4 rounded-2xl bg-white hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-400 text-slate-700 hover:text-emerald-700 font-heading font-extrabold text-xs transition shadow-2xs flex items-center justify-center gap-2 cursor-pointer">
+                                <div class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                                    <i class="fa-solid fa-camera"></i>
+                                </div>
+                                <span>Buka Kamera</span>
+                            </button>
+
+                            <button type="button" onclick="document.getElementById('portalGalleryInput').click()" class="py-3 px-4 rounded-2xl bg-white hover:bg-teal-50/80 border border-slate-200 hover:border-teal-400 text-slate-700 hover:text-teal-700 font-heading font-extrabold text-xs transition shadow-2xs flex items-center justify-center gap-2 cursor-pointer">
+                                <div class="w-7 h-7 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center">
+                                    <i class="fa-solid fa-images"></i>
+                                </div>
+                                <span>Pilih Galeri</span>
+                            </button>
+                        </div>
+
+                        <!-- Live Thumbnail Preview Container with Delete Button -->
+                        <div id="portalFotoPreviewContainer" class="flex flex-wrap gap-3 pt-2 hidden border-t border-slate-200/70"></div>
+                    </div>
+
+                    <!-- Tombol Navigasi Langkah 2 -->
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                        <button type="button" onclick="prevPortalStep(2)" class="px-5 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-heading font-extrabold text-xs transition flex items-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Kembali</span>
+                        </button>
+                        <button type="button" onclick="nextPortalStep(2)" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 flex items-center gap-2 group cursor-pointer">
+                            <span>Lanjut: Konfirmasi & Kirim</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- 🔹 LANGKAH 3: KONFIRMASI & KIRIM          -->
+                <!-- ========================================== -->
+                <div id="portalStep3" class="portal-step-pane space-y-4 hidden animate-fadeIn">
+                    <!-- Review Summary Card -->
+                    <div class="rounded-3xl bg-gradient-to-br from-emerald-50/80 via-teal-50/40 to-slate-50 p-5 border border-emerald-200/80 shadow-xs space-y-4">
+                        <div class="flex items-center justify-between border-b border-emerald-200/60 pb-3">
+                            <h4 class="font-heading font-extrabold text-xs text-emerald-950 flex items-center gap-2 uppercase tracking-wider">
+                                <i class="fa-solid fa-clipboard-check text-emerald-600 text-sm"></i>
+                                <span>Ringkasan Data Pengaduan Anda</span>
+                            </h4>
+                            <button type="button" onclick="goToPortalStep(1)" class="text-[11px] text-emerald-700 hover:text-emerald-800 font-bold bg-white px-2.5 py-1 rounded-xl border border-emerald-200 shadow-2xs flex items-center gap-1 hover:shadow-xs transition">
+                                <i class="fa-solid fa-pen-to-square text-[10px]"></i> Edit Data
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                            <div class="bg-white/90 p-3 rounded-2xl border border-emerald-100 shadow-2xs space-y-1">
+                                <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider flex items-center gap-1">
+                                    <i class="fa-solid fa-user text-emerald-600"></i> Pengirim Laporan
+                                </span>
+                                <div id="portalReviewPengirim" class="font-extrabold text-slate-900 text-xs">-</div>
+                                <div id="portalReviewKontak" class="text-[11px] text-slate-500 font-semibold font-mono">-</div>
+                            </div>
+
+                            <div class="bg-white/90 p-3 rounded-2xl border border-emerald-100 shadow-2xs space-y-1">
+                                <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider flex items-center gap-1">
+                                    <i class="fa-solid fa-location-dot text-rose-500"></i> Lokasi & Shift
+                                </span>
+                                <div id="portalReviewLokasi" class="font-extrabold text-slate-900 text-xs">-</div>
+                                <div id="portalReviewShiftPj" class="text-[11px] text-emerald-700 font-semibold">-</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white/90 p-3.5 rounded-2xl border border-emerald-100 shadow-2xs space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider flex items-center gap-1">
+                                    <i class="fa-solid fa-tag text-teal-600"></i> Kategori
+                                </span>
+                                <span id="portalReviewKategori" class="text-[10px] font-extrabold text-emerald-800 bg-emerald-100/80 px-2.5 py-0.5 rounded-full border border-emerald-200">-</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block mb-1">Isi Kendala / Pesan:</span>
+                                <div id="portalReviewIsi" class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-700 font-medium whitespace-pre-wrap leading-relaxed italic">-</div>
+                            </div>
+                        </div>
+
+                        <div id="portalReviewFotosWrapper" class="hidden bg-white/90 p-3.5 rounded-2xl border border-emerald-100 shadow-2xs space-y-2">
+                            <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider flex items-center gap-1">
+                                <i class="fa-solid fa-images text-emerald-600"></i> Foto Bukti Terlampir (<span id="portalReviewFotoCount">0</span>)
+                            </span>
+                            <div id="portalReviewFotosContainer" class="flex flex-wrap gap-2.5 pt-1"></div>
+                        </div>
+                    </div>
+
+                    <!-- Tombol Navigasi Langkah 3 / Submit -->
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                        <button type="button" onclick="prevPortalStep(3)" class="px-5 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-heading font-extrabold text-xs transition flex items-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Kembali</span>
+                        </button>
+                        <button type="submit" id="btnSubmitCsPortal" class="flex-1 sm:flex-none px-7 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Kirim Pengaduan Ke Tim CS K3L</span>
+                        </button>
+                    </div>
+                </div>
             </form>
         </div>
 
@@ -1009,6 +1151,290 @@
         });
     }
     window.renderPortalPreviews = renderPortalPreviews;
+
+    // ==========================================
+    // 🧙‍♂️ MULTI-STEP PORTAL CS REPORT WIZARD LOGIC
+    // ==========================================
+    var portalCurrentStep = 1;
+
+    function goToPortalStep(targetStep) {
+        if (targetStep === portalCurrentStep) return;
+
+        // If user wants to skip forward, ensure prior steps are valid
+        if (targetStep > portalCurrentStep) {
+            if (portalCurrentStep === 1 && !validatePortalStep1()) return;
+            if (portalCurrentStep === 2 && !validatePortalStep2()) return;
+            if (portalCurrentStep === 1 && targetStep === 3) {
+                if (!validatePortalStep1() || !validatePortalStep2()) return;
+            }
+        }
+
+        // Hide all step containers
+        const steps = [1, 2, 3];
+        steps.forEach(s => {
+            const el = document.getElementById('portalStep' + s);
+            if (el) el.classList.add('hidden');
+        });
+
+        // Show target step container
+        const targetEl = document.getElementById('portalStep' + targetStep);
+        if (targetEl) {
+            targetEl.classList.remove('hidden');
+        }
+
+        // If target is Step 3, refresh the live Review Summary
+        if (targetStep === 3) {
+            updatePortalReviewSummary();
+        }
+
+        // Update Stepper UI (Circles, Labels, Progress Bar)
+        updatePortalStepperUI(targetStep);
+
+        portalCurrentStep = targetStep;
+
+        // Smooth scroll back to top of form card so mobile user isn't disoriented
+        const formCard = document.getElementById('formLaporCsPortal');
+        if (formCard) {
+            const rect = formCard.getBoundingClientRect();
+            if (rect.top < 50 || rect.top > window.innerHeight) {
+                formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    }
+    window.goToPortalStep = goToPortalStep;
+
+    function nextPortalStep(fromStep) {
+        if (fromStep === 1) {
+            if (!validatePortalStep1()) return;
+            goToPortalStep(2);
+        } else if (fromStep === 2) {
+            if (!validatePortalStep2()) return;
+            goToPortalStep(3);
+        }
+    }
+    window.nextPortalStep = nextPortalStep;
+
+    function prevPortalStep(fromStep) {
+        if (fromStep > 1) {
+            goToPortalStep(fromStep - 1);
+        }
+    }
+    window.prevPortalStep = prevPortalStep;
+
+    function validatePortalStep1() {
+        const namaInput = document.getElementById('portal_nama_pengirim');
+        const kontakInput = document.getElementById('portal_kontak_hp');
+        const unitLokasiInput = document.getElementById('portal_unit_lokasi');
+        const unitSearchInput = document.getElementById('portal_unit_search');
+
+        if (!namaInput || !namaInput.value.trim()) {
+            showPortalStepAlert('Nama Pengirim Wajib Diisi', 'Data nama pengirim tidak boleh kosong.');
+            if (namaInput) namaInput.focus();
+            return false;
+        }
+
+        if (!kontakInput || !kontakInput.value.trim()) {
+            showPortalStepAlert('Nomor WhatsApp Wajib Diisi', 'Silakan isi nomor kontak PJ / Pengirim.');
+            if (kontakInput) kontakInput.focus();
+            return false;
+        }
+
+        if (!unitLokasiInput || !unitLokasiInput.value.trim() || !unitSearchInput || !unitSearchInput.value.trim()) {
+            showPortalStepAlert('Lokasi / Unit Belum Dipilih', 'Silakan pilih unit/lokasi tertuju yang dilaporkan.');
+            if (unitSearchInput) {
+                unitSearchInput.focus();
+                openPortalUnitDropdown();
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    function validatePortalStep2() {
+        const isiInput = document.getElementById('portal_isi_laporan');
+
+        if (!isiInput || !isiInput.value.trim()) {
+            showPortalStepAlert('Isi Laporan Wajib Diisi', 'Silakan jelaskan kendala kebersihan yang ingin dilaporkan.');
+            if (isiInput) isiInput.focus();
+            return false;
+        }
+
+        if (isiInput.value.trim().length < 5) {
+            showPortalStepAlert('Keterangan Terlalu Pendek', 'Mohon berikan penjelasan laporan minimal 5 karakter.');
+            if (isiInput) isiInput.focus();
+            return false;
+        }
+
+        return true;
+    }
+
+    function showPortalStepAlert(title, text) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                html: `
+                    <div class="flex flex-col items-center text-center pt-2 pb-1">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 text-amber-500 flex items-center justify-center text-2xl shadow-sm ring-8 ring-amber-500/10 mb-3.5">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <h3 class="font-heading font-extrabold text-slate-900 text-base sm:text-lg tracking-tight leading-snug mb-1.5">
+                            ${title}
+                        </h3>
+                        <p class="text-xs text-slate-500 font-medium leading-relaxed max-w-[280px]">
+                            ${text}
+                        </p>
+                    </div>
+                `,
+                showConfirmButton: true,
+                confirmButtonText: '<span class="flex items-center justify-center gap-2"><i class="fa-solid fa-check text-xs"></i><span>Baik, Saya Lengkapi</span></span>',
+                buttonsStyling: false,
+                backdrop: 'rgba(15, 23, 42, 0.6)',
+                customClass: {
+                    popup: 'rounded-3xl p-6 glass-card shadow-2xl border border-slate-200/90 font-sans max-w-sm w-[90vw]',
+                    confirmButton: 'w-full py-3 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs sm:text-sm shadow-md shadow-emerald-600/25 hover:from-emerald-700 hover:to-teal-700 transition active:scale-[0.98] cursor-pointer mt-3',
+                    htmlContainer: '!m-0 !p-0'
+                }
+            });
+        } else {
+            alert(title + ': ' + text);
+        }
+    }
+
+    function updatePortalStepperUI(activeStep) {
+        const line1 = document.getElementById('portalProgressLine1');
+        const line2 = document.getElementById('portalProgressLine2');
+        if (line1) {
+            line1.style.width = activeStep >= 2 ? '100%' : '0%';
+        }
+        if (line2) {
+            line2.style.width = activeStep >= 3 ? '100%' : '0%';
+        }
+
+        for (let i = 1; i <= 3; i++) {
+            const circle = document.getElementById('portalStepCircle' + i);
+            const label = document.getElementById('portalStepLabel' + i);
+            if (!circle || !label) continue;
+
+            if (i < activeStep) {
+                // Completed Step
+                circle.className = 'w-10 h-10 rounded-2xl flex items-center justify-center font-extrabold text-sm bg-emerald-500 text-white shadow-md shadow-emerald-500/20 ring-4 ring-emerald-50 transition-all duration-300';
+                circle.innerHTML = '<i class="fa-solid fa-check text-sm"></i>';
+                label.className = 'mt-2 text-[11px] font-extrabold text-emerald-700 tracking-tight transition-colors whitespace-nowrap';
+            } else if (i === activeStep) {
+                // Active Step
+                circle.className = 'w-10 h-10 rounded-2xl flex items-center justify-center font-extrabold text-sm bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 ring-4 ring-emerald-100 transition-all duration-300 scale-105';
+                if (i === 1) circle.innerHTML = '<i class="fa-solid fa-user text-sm"></i>';
+                else if (i === 2) circle.innerHTML = '<i class="fa-solid fa-camera text-sm"></i>';
+                else if (i === 3) circle.innerHTML = '<i class="fa-solid fa-paper-plane text-sm"></i>';
+                label.className = 'mt-2 text-[11px] font-extrabold text-emerald-900 tracking-tight transition-colors whitespace-nowrap';
+            } else {
+                // Inactive / Upcoming Step
+                circle.className = 'w-10 h-10 rounded-2xl flex items-center justify-center font-extrabold text-sm bg-slate-100 text-slate-500 border border-slate-300 ring-4 ring-white transition-all duration-300';
+                if (i === 1) circle.innerHTML = '<i class="fa-solid fa-user text-sm"></i>';
+                else if (i === 2) circle.innerHTML = '<i class="fa-solid fa-camera text-sm"></i>';
+                else if (i === 3) circle.innerHTML = '<i class="fa-solid fa-paper-plane text-sm"></i>';
+                label.className = 'mt-2 text-[11px] font-bold text-slate-500 tracking-tight transition-colors whitespace-nowrap';
+            }
+        }
+    }
+
+    function updatePortalReviewSummary() {
+        const namaVal = document.getElementById('portal_nama_pengirim')?.value || '-';
+        const kontakVal = document.getElementById('portal_kontak_hp')?.value || '-';
+        const unitVal = document.getElementById('portal_unit_search')?.value || document.getElementById('portal_unit_lokasi')?.value || '-';
+        const wilayahVal = document.getElementById('portal_wilayah_search')?.value;
+        const shiftVal = document.getElementById('portal_shift_select')?.value;
+        const targetPjVal = document.getElementById('portalTargetUnitName')?.textContent || '-';
+        const kategoriVal = document.getElementById('portal_kategori')?.value || 'Kendala Kebersihan';
+        const isiVal = document.getElementById('portal_isi_laporan')?.value || '-';
+
+        // Set Pengirim
+        const reviewPengirim = document.getElementById('portalReviewPengirim');
+        if (reviewPengirim) reviewPengirim.textContent = namaVal;
+        const reviewKontak = document.getElementById('portalReviewKontak');
+        if (reviewKontak) reviewKontak.textContent = '📞 ' + kontakVal;
+
+        // Set Lokasi & Shift
+        const reviewLokasi = document.getElementById('portalReviewLokasi');
+        if (reviewLokasi) {
+            let locText = unitVal;
+            if (wilayahVal && wilayahVal !== '-- Bukan Wilayah Khusus / Umum --') {
+                locText += ' • ' + wilayahVal;
+            }
+            reviewLokasi.textContent = locText;
+        }
+
+        const reviewShiftPj = document.getElementById('portalReviewShiftPj');
+        if (reviewShiftPj) {
+            let shiftText = shiftVal ? ('Shift ' + shiftVal) : 'Shift Waktu Laporan';
+            if (targetPjVal && targetPjVal !== '-') {
+                shiftText += ' (PJ: ' + targetPjVal + ')';
+            }
+            reviewShiftPj.textContent = '⏱️ ' + shiftText;
+        }
+
+        // Set Kategori & Isi
+        const reviewKategori = document.getElementById('portalReviewKategori');
+        if (reviewKategori) reviewKategori.textContent = kategoriVal;
+        const reviewIsi = document.getElementById('portalReviewIsi');
+        if (reviewIsi) reviewIsi.textContent = isiVal;
+
+        // Set Foto Preview Thumbnails in Summary
+        const reviewFotosWrapper = document.getElementById('portalReviewFotosWrapper');
+        const reviewFotosContainer = document.getElementById('portalReviewFotosContainer');
+        const reviewFotoCount = document.getElementById('portalReviewFotoCount');
+        const files = portalDataTransfer.files;
+
+        if (reviewFotosWrapper && reviewFotosContainer) {
+            if (files && files.length > 0) {
+                reviewFotosWrapper.classList.remove('hidden');
+                if (reviewFotoCount) reviewFotoCount.textContent = files.length;
+                reviewFotosContainer.innerHTML = '';
+
+                Array.from(files).forEach((file, idx) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const thumb = document.createElement('div');
+                        thumb.className = 'w-14 h-14 rounded-xl overflow-hidden bg-slate-100 border border-emerald-200 shadow-2xs relative group';
+                        thumb.innerHTML = `
+                            <img src="${e.target.result}" class="w-full h-full object-cover">
+                            <span class="absolute bottom-0 right-0 bg-slate-900/70 text-white text-[9px] px-1 font-bold rounded-tl">${idx + 1}</span>
+                        `;
+                        reviewFotosContainer.appendChild(thumb);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                reviewFotosWrapper.classList.add('hidden');
+                if (reviewFotoCount) reviewFotoCount.textContent = '0';
+                reviewFotosContainer.innerHTML = '';
+            }
+        }
+    }
+    window.updatePortalReviewSummary = updatePortalReviewSummary;
+
+    function validatePortalFinalSubmit(e) {
+        if (!validatePortalStep1()) {
+            e.preventDefault();
+            goToPortalStep(1);
+            return false;
+        }
+        if (!validatePortalStep2()) {
+            e.preventDefault();
+            goToPortalStep(2);
+            return false;
+        }
+
+        const submitBtn = document.getElementById('btnSubmitCsPortal');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i><span>Mengirim Pengaduan...</span>';
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        }
+
+        return true;
+    }
+    window.validatePortalFinalSubmit = validatePortalFinalSubmit;
 
     var portalPenugasanData = <?= json_encode($penugasanList ?? []) ?>;
     var portalWilayahData   = <?= json_encode($wilayahList ?? []) ?>;

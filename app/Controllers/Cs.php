@@ -12,6 +12,7 @@ class Cs extends BaseController
     protected $csModel;
     protected $pengajuanModel;
     protected $alatModel;
+    protected $unitModel;
     protected $cloudinary;
 
     public function __construct()
@@ -19,6 +20,7 @@ class Cs extends BaseController
         $this->csModel        = new CsReportModel();
         $this->pengajuanModel = new PengajuanAlatModel();
         $this->alatModel      = new AlatModel();
+        $this->unitModel      = new \App\Models\MasterUnitModel();
         $this->cloudinary     = new CloudinaryService();
     }
 
