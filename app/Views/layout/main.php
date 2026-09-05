@@ -674,42 +674,61 @@
 
                             <!-- User Profile Dropdown Card -->
                             <div class="nav-dropdown-wrapper align-right">
-                                <div class="w-56 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl shadow-xl shadow-slate-900/10 p-1.5 space-y-0.5">
-                                    <div class="px-2.5 py-2 bg-slate-50/90 rounded-xl border border-slate-100 mb-0.5">
-                                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Login Sebagai</p>
-                                        <p class="font-heading font-extrabold text-xs text-slate-900 truncate mt-0.5"><?= esc(session()->get('nama_lengkap')) ?></p>
-                                        <div class="flex items-center gap-1 mt-1">
-                                            <span class="text-[8.5px] px-1.5 py-0.2 rounded-full font-bold uppercase tracking-wider <?= session()->get('role') === 'Admin' ? 'bg-emerald-100 text-emerald-800' : (session()->get('role') === 'Auditor' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800') ?>">
-                                                <?= esc(session()->get('role')) ?>
-                                            </span>
-                                            <?php if (session()->get('nama_unit')): ?>
-                                                <span class="text-[8.5px] px-1.5 py-0.2 rounded-full font-semibold bg-slate-200 text-slate-700 truncate max-w-[90px]">
-                                                    <?= esc(session()->get('nama_unit')) ?>
-                                                </span>
-                                            <?php endif; ?>
+                                <div class="min-w-[240px] bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl shadow-xl shadow-slate-900/10 p-1.5 space-y-0.5">
+                                    <div class="p-2.5 bg-slate-50/90 rounded-xl border border-slate-100 mb-1">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-bold text-xs shadow-xs flex-shrink-0">
+                                                <?= strtoupper(substr(session()->get('nama_lengkap') ?? 'U', 0, 1)) ?>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="font-heading font-extrabold text-xs text-slate-900 truncate leading-tight"><?= esc(session()->get('nama_lengkap')) ?></p>
+                                                <div class="flex items-center gap-1 mt-1 flex-wrap">
+                                                    <span class="text-[9px] px-1.5 py-0.5 rounded-md font-extrabold uppercase tracking-wider <?= session()->get('role') === 'Admin' ? 'bg-emerald-100 text-emerald-800' : (session()->get('role') === 'Auditor' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800') ?>">
+                                                        <?= esc(session()->get('role')) ?>
+                                                    </span>
+                                                    <?php if (session()->get('role') === 'Auditor'): ?>
+                                                        <span class="text-[9px] px-1.5 py-0.5 rounded-md font-bold bg-amber-50 text-amber-700 border border-amber-200/60">
+                                                            Read-Only
+                                                        </span>
+                                                    <?php endif; ?>
+                                                    <?php if (session()->get('nama_unit')): ?>
+                                                        <span class="text-[9px] px-1.5 py-0.5 rounded-md font-semibold bg-slate-200 text-slate-700 truncate max-w-[80px]">
+                                                            <?= esc(session()->get('nama_unit')) ?>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
                                     <?php if ($isUserAdminOrAuditor): ?>
-                                        <a href="<?= base_url('pengaturan') ?>" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition <?= $isPengaturanActive ? 'bg-emerald-50 text-emerald-700 font-extrabold' : '' ?>">
-                                            <i class="fa-solid fa-sliders text-xs text-slate-400 w-4 text-center"></i>
-                                            <span>Master Pengaturan</span>
+                                        <a href="<?= base_url('pengaturan') ?>" class="group/item flex items-center gap-2.5 p-2 rounded-xl transition duration-150 <?= $isPengaturanActive ? 'bg-emerald-50 text-emerald-800 font-extrabold border border-emerald-200/60 shadow-xs' : 'text-slate-700 hover:bg-slate-100/80 hover:text-emerald-700' ?>">
+                                            <div class="w-7 h-7 rounded-lg <?= $isPengaturanActive ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 group-hover/item:bg-emerald-100 group-hover/item:text-emerald-700' ?> flex items-center justify-center text-xs flex-shrink-0">
+                                                <i class="fa-solid fa-sliders"></i>
+                                            </div>
+                                            <span class="text-xs font-heading <?= $isPengaturanActive ? 'font-extrabold text-emerald-900' : 'font-bold text-slate-800' ?> truncate">Master Pengaturan</span>
                                         </a>
-                                        <a href="<?= base_url('profil') ?>" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition <?= $isProfilActive ? 'bg-emerald-50 text-emerald-700 font-extrabold' : '' ?>">
-                                            <i class="fa-solid fa-user-gear text-xs text-slate-400 w-4 text-center"></i>
-                                            <span>Kelola Akun & Profil</span>
+                                        <a href="<?= base_url('profil') ?>" class="group/item flex items-center gap-2.5 p-2 rounded-xl transition duration-150 <?= $isProfilActive ? 'bg-emerald-50 text-emerald-800 font-extrabold border border-emerald-200/60 shadow-xs' : 'text-slate-700 hover:bg-slate-100/80 hover:text-emerald-700' ?>">
+                                            <div class="w-7 h-7 rounded-lg <?= $isProfilActive ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 group-hover/item:bg-emerald-100 group-hover/item:text-emerald-700' ?> flex items-center justify-center text-xs flex-shrink-0">
+                                                <i class="fa-solid fa-user-gear"></i>
+                                            </div>
+                                            <span class="text-xs font-heading <?= $isProfilActive ? 'font-extrabold text-emerald-900' : 'font-bold text-slate-800' ?> truncate">Kelola Akun & Profil</span>
                                         </a>
                                     <?php else: ?>
-                                        <a href="<?= base_url('app') ?>" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition <?= $isAppActive ? 'bg-emerald-50 text-emerald-700 font-extrabold' : '' ?>">
-                                            <i class="fa-solid fa-gauge-high text-xs text-slate-400 w-4 text-center"></i>
-                                            <span>Dashboard Unit</span>
+                                        <a href="<?= base_url('app') ?>" class="group/item flex items-center gap-2.5 p-2 rounded-xl transition duration-150 <?= $isAppActive ? 'bg-emerald-50 text-emerald-800 font-extrabold border border-emerald-200/60 shadow-xs' : 'text-slate-700 hover:bg-slate-100/80 hover:text-emerald-700' ?>">
+                                            <div class="w-7 h-7 rounded-lg <?= $isAppActive ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 group-hover/item:bg-emerald-100 group-hover/item:text-emerald-700' ?> flex items-center justify-center text-xs flex-shrink-0">
+                                                <i class="fa-solid fa-gauge-high"></i>
+                                            </div>
+                                            <span class="text-xs font-heading <?= $isAppActive ? 'font-extrabold text-emerald-900' : 'font-bold text-slate-800' ?> truncate">Dashboard Unit</span>
                                         </a>
                                     <?php endif; ?>
 
                                     <div class="border-t border-slate-100 my-0.5"></div>
-                                    <a href="<?= base_url('logout') ?>" data-confirm-msg="Apakah Anda yakin ingin keluar/logout?" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition">
-                                        <i class="fa-solid fa-right-from-bracket text-xs text-rose-500 w-4 text-center"></i>
-                                        <span>Keluar / Logout</span>
+                                    <a href="<?= base_url('logout') ?>" data-confirm-msg="Apakah Anda yakin ingin keluar/logout?" class="group/item flex items-center gap-2.5 p-2 rounded-xl transition duration-150 text-rose-600 hover:bg-rose-50/80 hover:text-rose-700">
+                                        <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 group-hover/item:bg-rose-100 group-hover/item:text-rose-700 flex items-center justify-center text-xs flex-shrink-0">
+                                            <i class="fa-solid fa-right-from-bracket"></i>
+                                        </div>
+                                        <span class="text-xs font-heading font-bold text-rose-600 group-hover/item:text-rose-700 truncate">Keluar / Logout</span>
                                     </a>
                                 </div>
                             </div>
