@@ -38,8 +38,10 @@
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
         <!-- Year Filter Pills -->
         <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-            <button type="button" onclick="setKeuanganYearFilter('all')" id="kug-pill-all" class="kug-filter-pill px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-200 border bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20">
-                <i class="fa-solid fa-layer-group mr-1.5"></i> Semua (<?= count($keuangan_list ?? []) ?>)
+            <button type="button" onclick="setKeuanganYearFilter('all')" id="kug-pill-all" class="kug-filter-pill px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 border bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20 flex items-center gap-2">
+                <i class="fa-solid fa-layer-group text-xs text-white"></i>
+                <span>Semua</span>
+                <span class="filter-badge px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-extrabold"><?= count($keuangan_list ?? []) ?></span>
             </button>
             <?php 
                 $uniqueYears = [];
@@ -52,8 +54,9 @@
                 }
             ?>
             <?php foreach ($uniqueYears as $yr): ?>
-                <button type="button" onclick="setKeuanganYearFilter('<?= $yr ?>')" id="kug-pill-<?= $yr ?>" class="kug-filter-pill px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-200 border bg-white text-slate-700 border-slate-200 hover:bg-slate-50">
-                    <i class="fa-regular fa-calendar mr-1"></i> <?= $yr ?>
+                <button type="button" onclick="setKeuanganYearFilter('<?= $yr ?>')" id="kug-pill-<?= $yr ?>" class="kug-filter-pill px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 border bg-white text-slate-700 border-slate-200/90 hover:bg-slate-50 flex items-center gap-2 shadow-2xs">
+                    <i class="fa-regular fa-calendar text-xs text-slate-400"></i>
+                    <span><?= $yr ?></span>
                 </button>
             <?php endforeach; ?>
         </div>
@@ -355,13 +358,23 @@
         currentKeuanganYearFilter = year;
         currentKeuanganPage = 1;
         document.querySelectorAll('.kug-filter-pill').forEach(pill => {
-            pill.className = 'kug-filter-pill px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-200 border bg-white text-slate-700 border-slate-200 hover:bg-slate-50';
+            pill.className = 'kug-filter-pill px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 border bg-white text-slate-700 border-slate-200/90 hover:bg-slate-50 flex items-center gap-2 shadow-2xs';
+            const icon = pill.querySelector('i');
+            if (icon && pill.id === 'kug-pill-all') icon.className = 'fa-solid fa-layer-group text-xs text-emerald-600';
+            else if (icon) icon.className = 'fa-regular fa-calendar text-xs text-slate-400';
+            const b = pill.querySelector('.filter-badge');
+            if (b) b.className = 'filter-badge px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-extrabold';
         });
 
         const activePillId = year === 'all' ? 'kug-pill-all' : 'kug-pill-' + year;
         const activePill = document.getElementById(activePillId);
         if (activePill) {
-            activePill.className = 'kug-filter-pill px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-200 border bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20';
+            activePill.className = 'kug-filter-pill px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 border bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20 flex items-center gap-2';
+            const icon = activePill.querySelector('i');
+            if (icon && activePillId === 'kug-pill-all') icon.className = 'fa-solid fa-layer-group text-xs text-white';
+            else if (icon) icon.className = 'fa-regular fa-calendar text-xs text-white';
+            const b = activePill.querySelector('.filter-badge');
+            if (b) b.className = 'filter-badge px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-extrabold';
         }
         filterKeuanganCards();
     }

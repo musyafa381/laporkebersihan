@@ -49,20 +49,22 @@
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-slate-200 pb-2">
         <!-- Navigation Tabs -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-            <button type="button" onclick="switchFaqTab('tab_panduan_alur')" id="btn_tab_panduan_alur" class="px-5 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition shadow-2xs flex items-center gap-2 <?= $activeTab === 'panduan_alur' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200' ?>">
-                <i class="fa-solid fa-route"></i>
-                <span>Panduan Alur Menu (<?= count($alurList) ?>)</span>
+            <button type="button" onclick="switchFaqTab('tab_panduan_alur')" id="btn_tab_panduan_alur" class="px-4 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition-all duration-200 shadow-2xs flex items-center gap-2 <?= $activeTab === 'panduan_alur' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200/90' ?>">
+                <i class="fa-solid fa-route <?= $activeTab === 'panduan_alur' ? 'text-white' : 'text-emerald-600' ?>"></i>
+                <span>Panduan Alur Menu</span>
+                <span class="tab-badge px-2 py-0.5 rounded-full text-[10px] font-extrabold <?= $activeTab === 'panduan_alur' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600' ?>"><?= count($alurList) ?></span>
             </button>
 
-            <button type="button" onclick="switchFaqTab('tab_faq_list')" id="btn_tab_faq_list" class="px-5 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition shadow-2xs flex items-center gap-2 bg-white text-slate-700 hover:bg-slate-50 border border-slate-200">
-                <i class="fa-solid fa-circle-question"></i>
-                <span>Tanya Jawab FAQ (<?= count($faqList) ?>)</span>
+            <button type="button" onclick="switchFaqTab('tab_faq_list')" id="btn_tab_faq_list" class="px-4 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition-all duration-200 shadow-2xs flex items-center gap-2 <?= $activeTab === 'faq_list' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200/90' ?>">
+                <i class="fa-solid fa-circle-question <?= $activeTab === 'faq_list' ? 'text-white' : 'text-emerald-600' ?>"></i>
+                <span>Tanya Jawab FAQ</span>
+                <span class="tab-badge px-2 py-0.5 rounded-full text-[10px] font-extrabold <?= $activeTab === 'faq_list' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600' ?>"><?= count($faqList) ?></span>
             </button>
 
             <?php if ($isAdmin): ?>
-            <button type="button" onclick="switchFaqTab('tab_admin_kelola')" id="btn_tab_admin_kelola" class="px-5 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition shadow-2xs flex items-center gap-2 <?= ($activeTab === 'faq_kelola' || $activeTab === 'alur_kelola') ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200' ?>">
-                <i class="fa-solid fa-sliders"></i>
-                <span>Kelola Konten (Admin)</span>
+            <button type="button" onclick="switchFaqTab('tab_admin_kelola')" id="btn_tab_admin_kelola" class="px-4 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition-all duration-200 shadow-2xs flex items-center gap-2 <?= ($activeTab === 'faq_kelola' || $activeTab === 'alur_kelola') ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200/90' ?>">
+                <i class="fa-solid fa-sliders <?= ($activeTab === 'faq_kelola' || $activeTab === 'alur_kelola') ? 'text-white' : 'text-emerald-600' ?>"></i>
+                <span>Kelola Konten</span>
             </button>
             <?php endif; ?>
         </div>
@@ -932,16 +934,28 @@
         document.getElementById('tab_faq_list')?.classList.toggle('hidden', tabId !== 'tab_faq_list');
         document.getElementById('tab_admin_kelola')?.classList.toggle('hidden', tabId !== 'tab_admin_kelola');
 
-        const btnAlur = document.getElementById('btn_tab_panduan_alur');
-        const btnFaq  = document.getElementById('btn_tab_faq_list');
-        const btnAdm  = document.getElementById('btn_tab_admin_kelola');
+        const buttons = [
+            { el: document.getElementById('btn_tab_panduan_alur'), id: 'tab_panduan_alur' },
+            { el: document.getElementById('btn_tab_faq_list'), id: 'tab_faq_list' },
+            { el: document.getElementById('btn_tab_admin_kelola'), id: 'tab_admin_kelola' }
+        ];
 
-        const activeClass = "px-5 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition shadow-2xs flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20";
-        const inactiveClass = "px-5 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition shadow-2xs flex items-center gap-2 bg-white text-slate-700 hover:bg-slate-50 border border-slate-200";
+        buttons.forEach(b => {
+            if (!b.el) return;
+            const isActive = (b.id === tabId);
+            const icon = b.el.querySelector('i');
+            const badge = b.el.querySelector('.tab-badge');
 
-        if (btnAlur) btnAlur.className = (tabId === 'tab_panduan_alur') ? activeClass : inactiveClass;
-        if (btnFaq) btnFaq.className = (tabId === 'tab_faq_list') ? activeClass : inactiveClass;
-        if (btnAdm) btnAdm.className = (tabId === 'tab_admin_kelola') ? activeClass : inactiveClass;
+            if (isActive) {
+                b.el.className = "px-4 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition-all duration-200 shadow-2xs flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20";
+                if (icon) icon.className = icon.className.replace('text-emerald-600', 'text-white');
+                if (badge) badge.className = "tab-badge px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-white/20 text-white";
+            } else {
+                b.el.className = "px-4 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition-all duration-200 shadow-2xs flex items-center gap-2 bg-white text-slate-700 hover:bg-slate-50 border border-slate-200/90";
+                if (icon) icon.className = icon.className.replace('text-white', 'text-emerald-600');
+                if (badge) badge.className = "tab-badge px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-600";
+            }
+        });
 
         try {
             const url = new URL(window.location.href);

@@ -38,17 +38,36 @@
     <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <!-- Kategori Filters -->
         <div class="flex flex-wrap items-center gap-2">
-            <a href="<?= base_url('sop') ?>" class="px-4 py-2 rounded-2xl text-xs font-extrabold transition border <?= empty($currentKategori) ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50' ?>">
-                <i class="fa-solid fa-layer-group mr-1.5"></i> Semua (<?= $stats['total'] ?>)
+            <!-- Semua -->
+            <?php $isAll = empty($currentKategori); ?>
+            <a href="<?= base_url('sop') ?>" class="px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center gap-2 border <?= $isAll ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 border-slate-200/90 hover:bg-slate-50 hover:border-slate-300 shadow-2xs' ?>">
+                <i class="fa-solid fa-layer-group text-xs <?= $isAll ? 'text-white' : 'text-emerald-600' ?>"></i>
+                <span>Semua</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold <?= $isAll ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600' ?>"><?= $stats['total'] ?></span>
             </a>
-            <a href="<?= base_url('sop?kategori=Peraturan') ?>" class="px-4 py-2 rounded-2xl text-xs font-extrabold transition border <?= $currentKategori === 'Peraturan' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50' ?>">
-                <i class="fa-solid fa-scale-balanced mr-1.5 text-rose-500"></i> Peraturan (<?= $stats['peraturan'] ?>)
+
+            <!-- Peraturan -->
+            <?php $isPeraturan = ($currentKategori === 'Peraturan'); ?>
+            <a href="<?= base_url('sop?kategori=Peraturan') ?>" class="px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center gap-2 border <?= $isPeraturan ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 border-slate-200/90 hover:bg-rose-50/50 hover:border-rose-200 shadow-2xs' ?>">
+                <i class="fa-solid fa-scale-balanced text-xs <?= $isPeraturan ? 'text-white' : 'text-rose-500' ?>"></i>
+                <span>Peraturan</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold <?= $isPeraturan ? 'bg-white/20 text-white' : 'bg-rose-50 text-rose-700 border border-rose-100/80' ?>"><?= $stats['peraturan'] ?></span>
             </a>
-            <a href="<?= base_url('sop?kategori=Kebijakan') ?>" class="px-4 py-2 rounded-2xl text-xs font-extrabold transition border <?= $currentKategori === 'Kebijakan' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50' ?>">
-                <i class="fa-solid fa-building-shield mr-1.5 text-teal-600"></i> Kebijakan (<?= $stats['kebijakan'] ?>)
+
+            <!-- Kebijakan -->
+            <?php $isKebijakan = ($currentKategori === 'Kebijakan'); ?>
+            <a href="<?= base_url('sop?kategori=Kebijakan') ?>" class="px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center gap-2 border <?= $isKebijakan ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 border-slate-200/90 hover:bg-teal-50/50 hover:border-teal-200 shadow-2xs' ?>">
+                <i class="fa-solid fa-building-shield text-xs <?= $isKebijakan ? 'text-white' : 'text-teal-600' ?>"></i>
+                <span>Kebijakan</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold <?= $isKebijakan ? 'bg-white/20 text-white' : 'bg-teal-50 text-teal-700 border border-teal-100/80' ?>"><?= $stats['kebijakan'] ?></span>
             </a>
-            <a href="<?= base_url('sop?kategori=' . urlencode('Program Utama')) ?>" class="px-4 py-2 rounded-2xl text-xs font-extrabold transition border <?= $currentKategori === 'Program Utama' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50' ?>">
-                <i class="fa-solid fa-sparkles mr-1.5 text-amber-500"></i> Program Utama (<?= $stats['program'] ?>)
+
+            <!-- Program Utama -->
+            <?php $isProgram = ($currentKategori === 'Program Utama'); ?>
+            <a href="<?= base_url('sop?kategori=' . urlencode('Program Utama')) ?>" class="px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center gap-2 border <?= $isProgram ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20' : 'bg-white text-slate-700 border-slate-200/90 hover:bg-amber-50/50 hover:border-amber-200 shadow-2xs' ?>">
+                <i class="fa-solid fa-sparkles text-xs <?= $isProgram ? 'text-white' : 'text-amber-500' ?>"></i>
+                <span>Program Utama</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold <?= $isProgram ? 'bg-white/20 text-white' : 'bg-amber-50 text-amber-800 border border-amber-100/80' ?>"><?= $stats['program'] ?></span>
             </a>
         </div>
 

@@ -38,17 +38,22 @@
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
         <!-- Status Filter Pills -->
         <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-            <button type="button" onclick="setBukuFilterStatus('all')" id="buku-pill-all" class="buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-200 border bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20">
-                <i class="fa-solid fa-layer-group mr-1.5"></i> Semua (<?= count($buku_list ?? []) ?>)
+            <button type="button" onclick="setBukuFilterStatus('all')" id="buku-pill-all" class="buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 border bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20 flex items-center gap-2">
+                <i class="fa-solid fa-layer-group text-xs text-white"></i>
+                <span>Semua</span>
+                <span class="filter-badge px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-extrabold"><?= count($buku_list ?? []) ?></span>
             </button>
-            <button type="button" onclick="setBukuFilterStatus('aktif')" id="buku-pill-aktif" class="buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-200 border bg-white text-slate-700 border-slate-200 hover:bg-slate-50">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-1.5"></span> Aktif
+            <button type="button" onclick="setBukuFilterStatus('aktif')" id="buku-pill-aktif" class="buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 border bg-white text-slate-700 border-slate-200/90 hover:bg-slate-50 flex items-center gap-2 shadow-2xs">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                <span>Aktif</span>
             </button>
-            <button type="button" onclick="setBukuFilterStatus('draft proker')" id="buku-pill-draft" class="buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-200 border bg-white text-slate-700 border-slate-200 hover:bg-slate-50">
-                <span class="w-2 h-2 rounded-full bg-amber-500 inline-block mr-1.5"></span> Draft Proker
+            <button type="button" onclick="setBukuFilterStatus('draft proker')" id="buku-pill-draft" class="buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 border bg-white text-slate-700 border-slate-200/90 hover:bg-slate-50 flex items-center gap-2 shadow-2xs">
+                <span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
+                <span>Draft Proker</span>
             </button>
-            <button type="button" onclick="setBukuFilterStatus('selesai')" id="buku-pill-selesai" class="buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-200 border bg-white text-slate-700 border-slate-200 hover:bg-slate-50">
-                <span class="w-2 h-2 rounded-full bg-blue-500 inline-block mr-1.5"></span> Selesai
+            <button type="button" onclick="setBukuFilterStatus('selesai')" id="buku-pill-selesai" class="buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 border bg-white text-slate-700 border-slate-200/90 hover:bg-slate-50 flex items-center gap-2 shadow-2xs">
+                <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>
+                <span>Selesai</span>
             </button>
         </div>
 
@@ -555,13 +560,21 @@
         currentBukuStatusFilter = status;
         currentBukuPage = 1;
         document.querySelectorAll('.buku-filter-pill').forEach(pill => {
-            pill.className = 'buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-200 border bg-white text-slate-700 border-slate-200 hover:bg-slate-50';
+            pill.className = 'buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 border bg-white text-slate-700 border-slate-200/90 hover:bg-slate-50 flex items-center gap-2 shadow-2xs';
+            const icon = pill.querySelector('i');
+            if (icon && pill.id === 'buku-pill-all') icon.className = 'fa-solid fa-layer-group text-xs text-emerald-600';
+            const b = pill.querySelector('.filter-badge');
+            if (b) b.className = 'filter-badge px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-extrabold';
         });
 
         const activePillId = status === 'all' ? 'buku-pill-all' : (status === 'aktif' ? 'buku-pill-aktif' : (status === 'draft proker' ? 'buku-pill-draft' : 'buku-pill-selesai'));
         const activePill = document.getElementById(activePillId);
         if (activePill) {
-            activePill.className = 'buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-200 border bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20';
+            activePill.className = 'buku-filter-pill px-3.5 py-2 rounded-2xl text-xs font-heading font-extrabold transition-all duration-200 border bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md shadow-emerald-600/20 flex items-center gap-2';
+            const icon = activePill.querySelector('i');
+            if (icon && activePillId === 'buku-pill-all') icon.className = 'fa-solid fa-layer-group text-xs text-white';
+            const b = activePill.querySelector('.filter-badge');
+            if (b) b.className = 'filter-badge px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-extrabold';
         }
         filterBukuCards();
     }
