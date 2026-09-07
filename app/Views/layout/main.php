@@ -1392,7 +1392,7 @@
                 <div class="flex items-center gap-3 text-[11px]">
                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200/80 text-slate-600 font-bold">
                         <i class="fa-solid fa-code text-[10px] text-emerald-600"></i>
-                        <span>Developed by <strong class="text-slate-800 font-extrabold">Musapang Company</strong></span>
+                        <span>Developed by <strong class="text-slate-800 font-extrabold">Musapang Tech</strong></span>
                     </span>
 
                     <button type="button" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-500 hover:text-emerald-700 border border-slate-200/80 flex items-center justify-center transition shadow-2xs group" title="Kembali ke Atas">
@@ -2163,17 +2163,32 @@
         // ==========================================
         class TablePaginator {
             constructor(tableId, infoId, buttonsId, selectId, options = {}) {
+                this.tableId = tableId;
+                this.infoId = infoId;
+                this.buttonsId = buttonsId;
+                this.selectId = selectId;
                 this.table = document.getElementById(tableId);
                 this.infoEl = document.getElementById(infoId);
                 this.buttonsEl = document.getElementById(buttonsId);
                 this.selectEl = document.getElementById(selectId);
                 this.options = options;
                 this.currentPage = 1;
-                this.pageSize = this.selectEl ? parseInt(this.selectEl.value) : (options.defaultSize || 10);
+
+                const getInitialSize = () => {
+                    const sel = this.selectEl || document.getElementById(this.selectId);
+                    if (!sel) return options.defaultSize || 10;
+                    const val = sel.value;
+                    if (val === 'all' || val === 'semua') return 999999;
+                    const n = parseInt(val);
+                    return isNaN(n) || n <= 0 ? (options.defaultSize || 10) : n;
+                };
+
+                this.pageSize = getInitialSize();
 
                 if (this.selectEl) {
                     this.selectEl.addEventListener('change', () => {
-                        this.pageSize = parseInt(this.selectEl.value);
+                        const val = this.selectEl.value;
+                        this.pageSize = (val === 'all' || val === 'semua') ? 999999 : (parseInt(val) || 10);
                         this.currentPage = 1;
                         this.render();
                     });
@@ -2181,7 +2196,24 @@
             }
 
             render() {
+                if (!this.table) this.table = document.getElementById(this.tableId);
                 if (!this.table) return;
+
+                if (!this.infoEl) this.infoEl = document.getElementById(this.infoId);
+                if (!this.buttonsEl) this.buttonsEl = document.getElementById(this.buttonsId);
+                if (!this.selectEl) {
+                    this.selectEl = document.getElementById(this.selectId);
+                    if (this.selectEl && !this.selectEl._hasPaginatorListener) {
+                        this.selectEl._hasPaginatorListener = true;
+                        this.selectEl.addEventListener('change', () => {
+                            const val = this.selectEl.value;
+                            this.pageSize = (val === 'all' || val === 'semua') ? 999999 : (parseInt(val) || 10);
+                            this.currentPage = 1;
+                            this.render();
+                        });
+                    }
+                }
+
                 const allRows = Array.from(this.table.querySelectorAll('tbody tr'));
                 const emptyRow = allRows.find(r => r.cells.length === 1 && r.cells[0].hasAttribute('colspan'));
 
@@ -2229,10 +2261,11 @@
             }
 
             renderButtons(totalPages) {
+                if (!this.buttonsEl) this.buttonsEl = document.getElementById(this.buttonsId);
                 if (!this.buttonsEl) return;
                 this.buttonsEl.innerHTML = '';
 
-                if (totalPages <= 1) return;
+                if (totalPages < 1) return;
 
                 const prevBtn = document.createElement('button');
                 prevBtn.type = 'button';

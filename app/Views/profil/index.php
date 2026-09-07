@@ -37,7 +37,8 @@
         $userRole = session()->get('role');
         $isAdmin = ($userRole === 'Admin');
         $tabParam = service('request')->getGet('tab') ?? ($_GET['tab'] ?? '');
-        $activeTab = ($isAdmin && $tabParam === 'kelola_users') ? 'kelola_users' : 'profil_saya';
+        $isKelolaUsersTab = in_array(strtolower(trim((string)$tabParam)), ['kelola_users', 'kelola_user', 'users', 'user', 'kelola', 'manajemen_user', 'manajemen_users']);
+        $activeTab = ($isAdmin && $isKelolaUsersTab) ? 'kelola_users' : 'profil_saya';
     ?>
 
     <!-- Navigation Tabs -->
@@ -190,7 +191,7 @@
             <!-- Search Input for Users -->
             <div class="relative w-full sm:w-72">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
-                <input type="text" id="searchUserInput" onkeyup="filterUserTable()" placeholder="Cari nama / username / role / unit..." class="w-full pl-9 pr-4 py-2 rounded-2xl border border-slate-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 focus:bg-white transition shadow-2xs">
+                <input type="text" id="searchUserInput" oninput="filterUserTable()" placeholder="Cari nama / username / role / unit..." class="w-full pl-9 pr-4 py-2 rounded-2xl border border-slate-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 focus:bg-white transition shadow-2xs">
             </div>
         </div>
 
@@ -304,11 +305,12 @@
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-slate-100 px-1" id="pagination-container-user">
             <div class="text-xs font-semibold text-slate-500 flex items-center gap-2">
                 <span id="page-info-user">Menampilkan 0 data</span>
-                <select id="pageSize-user" class="ml-2 px-2.5 py-1 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs">
+                <select id="pageSize-user" onchange="if(window.paginatorUser){window.paginatorUser.pageSize=(this.value==='all'?999999:parseInt(this.value));window.paginatorUser.currentPage=1;window.paginatorUser.render();}" class="ml-2 px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs">
                     <option value="5">5 / hal</option>
                     <option value="10" selected>10 / hal</option>
                     <option value="25">25 / hal</option>
                     <option value="50">50 / hal</option>
+                    <option value="all">Semua</option>
                 </select>
             </div>
             <div class="flex items-center gap-1.5" id="page-buttons-user"></div>
@@ -487,7 +489,7 @@
 </div>
 
 <script>
-    var paginatorUser;
+    var paginatorUser = null;
 
     function initUserPaginator() {
         if (typeof TablePaginator !== 'undefined' && document.getElementById('tableUserAccounts')) {
@@ -508,10 +510,15 @@
         }
     });
 
+    // Also run immediately if DOM is already interactive
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        initUserPaginator();
+    }
+
     function filterUserTable() {
         const input = document.getElementById('searchUserInput');
         if (!input) return;
-        const filter = input.value.toLowerCase();
+        const filter = input.value.toLowerCase().trim();
         const rows = document.querySelectorAll('#tableUserAccounts tbody tr.user-row');
 
         rows.forEach(row => {
@@ -519,6 +526,9 @@
             row.dataset.searchFiltered = text.includes(filter) ? 'true' : 'false';
         });
 
+        if (!paginatorUser) {
+            initUserPaginator();
+        }
         if (paginatorUser) {
             paginatorUser.currentPage = 1;
             paginatorUser.render();
@@ -674,7 +684,7 @@
     window.closeModalEditUser = closeModalEditUser;
 
     function switchProfilTab(tabId) {
-        const isUsers = (tabId === 'tab_kelola_users');
+        const isUsers = (tabId === 'tab_kelola_users' || tabId === 'kelola_users' || tabId === 'kelola_user' || tabId === 'users' || tabId === 'user');
         const tabProfil = document.getElementById('tab_profil_saya');
         const tabUsers = document.getElementById('tab_kelola_users');
         
@@ -699,7 +709,7 @@
                 btnUsers.className = "px-5 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition shadow-2xs flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20";
             }
             // Ensure table paginator renders smoothly upon tab activation
-            initUserPaginator();
+            setTimeout(initUserPaginator, 30);
         }
 
         // Update URL query string without page reload
