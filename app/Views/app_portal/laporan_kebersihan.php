@@ -1473,6 +1473,20 @@
     function filterPortalUnitOptions(query) {
         openPortalUnitDropdown();
         query = (query || '').toLowerCase().trim();
+        if (!query) {
+            const unitIdInput = document.getElementById('portal_unit_id');
+            const unitLokasiInput = document.getElementById('portal_unit_lokasi');
+            if (unitIdInput) unitIdInput.value = '';
+            if (unitLokasiInput) unitLokasiInput.value = '';
+            const wilSearch = document.getElementById('portal_wilayah_search');
+            if (wilSearch) {
+                wilSearch.value = '';
+                wilSearch.placeholder = 'Pilih unit terlebih dahulu...';
+            }
+            const wilId = document.getElementById('portal_wilayah_id');
+            if (wilId) wilId.value = '';
+            populatePortalShifts('');
+        }
         const items = document.querySelectorAll('.portal-unit-item');
         let found = 0;
         items.forEach(item => {
@@ -1506,7 +1520,7 @@
         if (wilIdEl) wilIdEl.value = '';
         if (wilSearchEl) {
             wilSearchEl.value = '';
-            wilSearchEl.placeholder = nama ? ('Pilih area / spot di ' + nama + ' (Opsional)...') : '-- Bukan Wilayah Khusus / Umum --';
+            wilSearchEl.placeholder = nama ? ('Pilih area / spot di ' + nama + ' (Opsional)...') : 'Pilih unit terlebih dahulu...';
         }
 
         populatePortalShifts('');
@@ -1515,6 +1529,24 @@
 
     // Searchable Wilayah Picker Logic in Portal Form (Cascading)
     function openPortalWilayahDropdown() {
+        const unitIdVal = (document.getElementById('portal_unit_id')?.value || '').trim();
+        const unitVal = (document.getElementById('portal_unit_lokasi')?.value || '').trim();
+
+        if (!unitIdVal && !unitVal) {
+            const dd = document.getElementById('portalWilayahDropdownList');
+            if (dd) dd.classList.add('hidden');
+            const icon = document.getElementById('portalWilayahIcon');
+            if (icon) icon.classList.remove('rotate-180');
+            
+            if (typeof showToast === 'function') {
+                showToast('Silakan pilih Lokasi / Unit terlebih dahulu.', 'error');
+            }
+            openPortalUnitDropdown();
+            const unitSearchInput = document.getElementById('portal_unit_search');
+            if (unitSearchInput) unitSearchInput.focus();
+            return;
+        }
+
         const dd = document.getElementById('portalWilayahDropdownList');
         const icon = document.getElementById('portalWilayahIcon');
         if (dd) {
@@ -1526,6 +1558,14 @@
     window.openPortalWilayahDropdown = openPortalWilayahDropdown;
 
     function togglePortalWilayahDropdown() {
+        const unitIdVal = (document.getElementById('portal_unit_id')?.value || '').trim();
+        const unitVal = (document.getElementById('portal_unit_lokasi')?.value || '').trim();
+
+        if (!unitIdVal && !unitVal) {
+            openPortalWilayahDropdown();
+            return;
+        }
+
         const dd = document.getElementById('portalWilayahDropdownList');
         if (dd && dd.classList.contains('hidden')) {
             openPortalWilayahDropdown();
@@ -1538,25 +1578,42 @@
     window.togglePortalWilayahDropdown = togglePortalWilayahDropdown;
 
     function filterPortalWilayahOptions(query) {
+        const unitIdVal = (document.getElementById('portal_unit_id')?.value || '').trim();
+        const unitVal = (document.getElementById('portal_unit_lokasi')?.value || '').toLowerCase().trim();
+
         const dd = document.getElementById('portalWilayahDropdownList');
         const icon = document.getElementById('portalWilayahIcon');
+
+        if (!unitIdVal && !unitVal) {
+            if (dd) dd.classList.add('hidden');
+            if (icon) icon.classList.remove('rotate-180');
+            return;
+        }
+
         if (dd) dd.classList.remove('hidden');
         if (icon) icon.classList.add('rotate-180');
 
-        const unitVal = (document.getElementById('portal_unit_lokasi')?.value || '').toLowerCase().trim();
-        const unitIdVal = document.getElementById('portal_unit_id')?.value || '';
         query = (query || '').toLowerCase().trim();
         const items = document.querySelectorAll('.portal-wilayah-item');
         let found = 0;
+
+        // Get list of wilayah_ids assigned to this unit from portalPenugasanData
+        const assignedWilayahIds = (typeof portalPenugasanData !== 'undefined' ? portalPenugasanData : [])
+            .filter(p => (unitIdVal && String(p.unit_id) === String(unitIdVal)) || (unitVal && String(p.nama_unit || '').toLowerCase().includes(unitVal)))
+            .map(p => String(p.wilayah_id));
 
         items.forEach(item => {
             const id = item.dataset.id || '';
             const text = item.innerText.toLowerCase();
             const gedung = (item.dataset.lokasiGedung || '').toLowerCase();
 
-            let matchUnit = !unitVal || !id;
-            if (unitVal && id) {
-                matchUnit = Boolean(gedung && (gedung.includes(unitVal) || unitVal.includes(gedung)));
+            let matchUnit = false;
+            if (!id) {
+                matchUnit = true;
+            } else {
+                const isAssigned = assignedWilayahIds.includes(String(id));
+                const isGedungMatch = Boolean(unitVal && gedung && (gedung.includes(unitVal) || unitVal.includes(gedung)));
+                matchUnit = isAssigned || isGedungMatch;
             }
 
             const matchQuery = !query || text.includes(query);
@@ -1580,7 +1637,7 @@
         document.getElementById('portal_wilayah_search').value = name ? name : '';
         if (!id) {
             const unitVal = document.getElementById('portal_unit_lokasi')?.value;
-            document.getElementById('portal_wilayah_search').placeholder = unitVal ? ('-- Bukan Wilayah Khusus di ' + unitVal + ' --') : '-- Bukan Wilayah Khusus / Umum --';
+            document.getElementById('portal_wilayah_search').placeholder = unitVal ? ('-- Bukan Wilayah Khusus di ' + unitVal + ' --') : 'Pilih unit terlebih dahulu...';
         }
         const dd = document.getElementById('portalWilayahDropdownList');
         const icon = document.getElementById('portalWilayahIcon');

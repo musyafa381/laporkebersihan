@@ -1920,6 +1920,21 @@
     function filterCsUnitOptions(query) {
         openCsUnitDropdown();
         query = (query || '').toLowerCase().trim();
+        if (!query) {
+            // Reset unit and cascading wilayah when input is cleared
+            const unitIdInput = document.getElementById('cs_unit_id');
+            const unitLokasiInput = document.getElementById('cs_unit_lokasi');
+            if (unitIdInput) unitIdInput.value = '';
+            if (unitLokasiInput) unitLokasiInput.value = '';
+            const wilSearch = document.getElementById('cs_wilayah_search');
+            if (wilSearch) {
+                wilSearch.value = '';
+                wilSearch.placeholder = 'Pilih unit terlebih dahulu...';
+            }
+            const wilId = document.getElementById('cs_wilayah_id');
+            if (wilId) wilId.value = '';
+            populatePublicShifts('');
+        }
         const items = document.querySelectorAll('.cs-unit-item');
         let found = 0;
         items.forEach(item => {
@@ -1953,7 +1968,7 @@
         if (wilIdEl) wilIdEl.value = '';
         if (wilSearchEl) {
             wilSearchEl.value = '';
-            wilSearchEl.placeholder = nama ? ('Pilih area / spot di ' + nama + ' (Opsional)...') : '-- Bukan Wilayah Khusus / Umum --';
+            wilSearchEl.placeholder = nama ? ('Pilih area / spot di ' + nama + ' (Opsional)...') : 'Pilih unit terlebih dahulu...';
         }
 
         // Hide Shift Container until Wilayah is picked
@@ -1963,6 +1978,25 @@
 
     // Wilayah Picker (Cascading based on selected Unit & Penugasan)
     function openCsWilayahDropdown() {
+        const unitIdVal = (document.getElementById('cs_unit_id')?.value || '').trim();
+        const unitVal = (document.getElementById('cs_unit_lokasi')?.value || '').trim();
+
+        if (!unitIdVal && !unitVal) {
+            // If unit is not selected yet, guide user to pick unit first
+            const dd = document.getElementById('csWilayahDropdownList');
+            if (dd) dd.classList.add('hidden');
+            const icon = document.getElementById('csWilayahIcon');
+            if (icon) icon.classList.remove('rotate-180');
+            
+            if (typeof showToast === 'function') {
+                showToast('Silakan pilih Lokasi / Unit terlebih dahulu.', 'error');
+            }
+            openCsUnitDropdown();
+            const unitSearchInput = document.getElementById('cs_unit_search');
+            if (unitSearchInput) unitSearchInput.focus();
+            return;
+        }
+
         const dd = document.getElementById('csWilayahDropdownList');
         const icon = document.getElementById('csWilayahIcon');
         if (dd) {
@@ -1974,6 +2008,14 @@
     window.openCsWilayahDropdown = openCsWilayahDropdown;
 
     function toggleCsWilayahDropdown() {
+        const unitIdVal = (document.getElementById('cs_unit_id')?.value || '').trim();
+        const unitVal = (document.getElementById('cs_unit_lokasi')?.value || '').trim();
+
+        if (!unitIdVal && !unitVal) {
+            openCsWilayahDropdown();
+            return;
+        }
+
         const dd = document.getElementById('csWilayahDropdownList');
         if (dd && dd.classList.contains('hidden')) {
             openCsWilayahDropdown();
@@ -1986,25 +2028,44 @@
     window.toggleCsWilayahDropdown = toggleCsWilayahDropdown;
 
     function filterCsWilayahOptions(query) {
+        const unitIdVal = (document.getElementById('cs_unit_id')?.value || '').trim();
+        const unitVal = (document.getElementById('cs_unit_lokasi')?.value || '').toLowerCase().trim();
+
         const dd = document.getElementById('csWilayahDropdownList');
         const icon = document.getElementById('csWilayahIcon');
+
+        if (!unitIdVal && !unitVal) {
+            if (dd) dd.classList.add('hidden');
+            if (icon) icon.classList.remove('rotate-180');
+            return;
+        }
+
         if (dd) dd.classList.remove('hidden');
         if (icon) icon.classList.add('rotate-180');
 
-        const unitVal = (document.getElementById('cs_unit_lokasi')?.value || '').toLowerCase().trim();
-        const unitIdVal = document.getElementById('cs_unit_id')?.value || '';
         query = (query || '').toLowerCase().trim();
         const items = document.querySelectorAll('.cs-wilayah-item');
         let found = 0;
+
+        // Get list of wilayah_ids assigned to this unit from penugasanData
+        const assignedWilayahIds = (penugasanData || [])
+            .filter(p => (unitIdVal && String(p.unit_id) === String(unitIdVal)) || (unitVal && String(p.nama_unit || '').toLowerCase().includes(unitVal)))
+            .map(p => String(p.wilayah_id));
 
         items.forEach(item => {
             const id = item.dataset.id || '';
             const text = item.innerText.toLowerCase();
             const gedung = (item.dataset.lokasiGedung || '').toLowerCase();
 
-            let matchUnit = !unitVal || !id;
-            if (unitVal && id) {
-                matchUnit = Boolean(gedung && (gedung.includes(unitVal) || unitVal.includes(gedung)));
+            // Default option (id is empty: "-- Bukan Wilayah Khusus --") always matches
+            let matchUnit = false;
+            if (!id) {
+                matchUnit = true;
+            } else {
+                // Match by penugasan assignment OR by gedung matching unit name
+                const isAssigned = assignedWilayahIds.includes(String(id));
+                const isGedungMatch = Boolean(unitVal && gedung && (gedung.includes(unitVal) || unitVal.includes(gedung)));
+                matchUnit = isAssigned || isGedungMatch;
             }
 
             const matchQuery = !query || text.includes(query);
@@ -2028,7 +2089,7 @@
         document.getElementById('cs_wilayah_search').value = name ? name : '';
         if (!id) {
             const unitVal = document.getElementById('cs_unit_lokasi')?.value;
-            document.getElementById('cs_wilayah_search').placeholder = unitVal ? ('-- Bukan Wilayah Khusus di ' + unitVal + ' --') : '-- Bukan Wilayah Khusus / Umum --';
+            document.getElementById('cs_wilayah_search').placeholder = unitVal ? ('-- Bukan Wilayah Khusus di ' + unitVal + ' --') : 'Pilih unit terlebih dahulu...';
         }
         const dd = document.getElementById('csWilayahDropdownList');
         const icon = document.getElementById('csWilayahIcon');
