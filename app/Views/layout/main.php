@@ -677,8 +677,8 @@
                     </div>
                 </a>
 
-                <!-- Desktop / Tablet Horizontal Navigation -->
-                <div class="hidden lg:flex items-center gap-1.5">
+                <!-- Desktop / Tablet Horizontal Navigation (Visible on Desktop, Tablets & Mobile Desktop Site Mode) -->
+                <div class="hidden md:flex items-center gap-1.5">
                     <?php foreach ($navGroups as $group): 
                         $groupHasBadge = !empty($group['badge']) && (int)$group['badge'] > 0;
                     ?>
@@ -824,8 +824,25 @@
                     <?php endif; ?>
                 </div>
 
-                <!-- Mobile Screen Header: Clean view with only Logo & Title as requested -->
-                <div class="hidden"></div>
+                <!-- Mobile Screen Header Actions (Visible on screens < 768px) -->
+                <div class="flex md:hidden items-center gap-1.5">
+                    <?php if (session()->get('isLoggedIn')): ?>
+                        <button type="button" onclick="toggleMobileDrawer(true)" class="flex items-center gap-1.5 p-1 px-2 rounded-xl bg-slate-100 hover:bg-emerald-50 border border-slate-200/80 text-slate-700 hover:text-emerald-700 transition active:scale-95 text-xs font-bold" aria-label="Buka Menu">
+                            <div class="w-6 h-6 rounded-lg bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center font-heading font-black text-[10px] shadow-2xs">
+                                <?= strtoupper(substr(session()->get('nama_lengkap') ?? 'U', 0, 1)) ?>
+                            </div>
+                            <i class="fa-solid fa-bars text-xs text-slate-500"></i>
+                        </button>
+                    <?php else: ?>
+                        <a href="<?= base_url('login') ?>" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-heading font-extrabold text-[11px] border border-emerald-200/80 transition active:scale-95 shadow-2xs">
+                            <i class="fa-solid fa-right-to-bracket text-[10px] text-emerald-600"></i>
+                            <span>Masuk</span>
+                        </a>
+                        <button type="button" onclick="toggleMobileDrawer(true)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition active:scale-95 text-xs border border-slate-200/80" aria-label="Buka Menu">
+                            <i class="fa-solid fa-bars"></i>
+                        </button>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </header>
