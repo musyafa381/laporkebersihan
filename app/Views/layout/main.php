@@ -111,16 +111,26 @@
         .top-nav-btn {
             display: inline-flex;
             align-items: center;
-            height: 38px;
-            gap: 0.45rem;
-            padding: 0 0.8rem;
-            border-radius: 0.75rem;
-            font-size: 0.75rem;
+            height: 35px;
+            gap: 0.35rem;
+            padding: 0 0.55rem;
+            border-radius: 0.65rem;
+            font-size: 0.72rem;
             font-weight: 700;
             white-space: nowrap;
             transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
             user-select: none;
             box-sizing: border-box;
+            flex-shrink: 0;
+        }
+        @media (min-width: 1280px) {
+            .top-nav-btn {
+                height: 38px;
+                gap: 0.45rem;
+                padding: 0 0.75rem;
+                border-radius: 0.75rem;
+                font-size: 0.75rem;
+            }
         }
         .top-nav-btn.active {
             background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
@@ -144,20 +154,30 @@
         .top-nav-profile-btn {
             display: inline-flex;
             align-items: center;
-            height: 38px;
-            gap: 0.5rem;
-            padding: 0 0.75rem 0 0.375rem;
-            border-radius: 0.75rem;
+            height: 35px;
+            gap: 0.35rem;
+            padding: 0 0.5rem 0 0.3rem;
+            border-radius: 0.65rem;
             background: rgba(248, 250, 252, 0.95);
             border: 1px solid rgba(226, 232, 240, 0.9);
             color: #334155;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 700;
             white-space: nowrap;
             transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
             user-select: none;
             cursor: pointer;
             box-sizing: border-box;
+            flex-shrink: 0;
+        }
+        @media (min-width: 1280px) {
+            .top-nav-profile-btn {
+                height: 38px;
+                gap: 0.5rem;
+                padding: 0 0.75rem 0 0.375rem;
+                border-radius: 0.75rem;
+                font-size: 0.75rem;
+            }
         }
         .top-nav-profile-btn:hover {
             background: #f0fdf4;
@@ -166,11 +186,11 @@
             transform: translateY(-1px);
         }
         .top-nav-avatar {
-            width: 28px;
-            height: 28px;
-            min-width: 28px;
-            min-height: 28px;
-            border-radius: 0.5rem;
+            width: 26px;
+            height: 26px;
+            min-width: 26px;
+            min-height: 26px;
+            border-radius: 0.45rem;
             background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
             color: #ffffff;
             display: flex;
@@ -178,9 +198,19 @@
             justify-content: center;
             font-family: inherit;
             font-weight: 900;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             flex-shrink: 0;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        @media (min-width: 1280px) {
+            .top-nav-avatar {
+                width: 28px;
+                height: 28px;
+                min-width: 28px;
+                min-height: 28px;
+                border-radius: 0.5rem;
+                font-size: 0.75rem;
+            }
         }
 
         /* Top Nav Dropdown Panel with Smooth Animation & Safe Bridge */
@@ -413,19 +443,21 @@
             // Mode 1: Admin & Auditor Grouped Navigation
             $navGroups = [
                 [
-                    'type'   => 'link',
-                    'url'    => base_url('/'),
-                    'icon'   => 'fa-solid fa-house',
-                    'label'  => 'Beranda',
-                    'active' => $isHomeActive,
+                    'type'        => 'link',
+                    'url'         => base_url('/'),
+                    'icon'        => 'fa-solid fa-house',
+                    'label'       => 'Beranda',
+                    'short_label' => 'Beranda',
+                    'active'      => $isHomeActive,
                 ],
                 [
-                    'type'     => 'dropdown',
-                    'label'    => 'Operasional',
-                    'icon'     => 'fa-solid fa-broom-ball',
-                    'badge'    => $notifAlatCount,
-                    'active'   => ($isWilayahActive || $isAlatActive || $isProkerActive),
-                    'children' => [
+                    'type'        => 'dropdown',
+                    'label'       => 'Operasional',
+                    'short_label' => 'Operasional',
+                    'icon'        => 'fa-solid fa-broom-ball',
+                    'badge'       => $notifAlatCount,
+                    'active'      => ($isWilayahActive || $isAlatActive || $isProkerActive),
+                    'children'    => [
                         [
                             'url'    => base_url('wilayah'),
                             'icon'   => 'fa-solid fa-map-location-dot',
@@ -451,11 +483,12 @@
                     ]
                 ],
                 [
-                    'type'     => 'dropdown',
-                    'label'    => 'Laporan & Keuangan',
-                    'icon'     => 'fa-solid fa-chart-pie',
-                    'active'   => ($isBukuActive || $isKeuanganActive),
-                    'children' => [
+                    'type'        => 'dropdown',
+                    'label'       => 'Laporan & Keuangan',
+                    'short_label' => 'Laporan',
+                    'icon'        => 'fa-solid fa-chart-pie',
+                    'active'      => ($isBukuActive || $isKeuanganActive),
+                    'children'    => [
                         [
                             'url'    => base_url('buku'),
                             'icon'   => 'fa-solid fa-book-bookmark',
@@ -473,12 +506,13 @@
                     ]
                 ],
                 [
-                    'type'     => 'dropdown',
-                    'label'    => 'Pusat Informasi',
-                    'icon'     => 'fa-solid fa-circle-info',
-                    'badge'    => $notifCsCount,
-                    'active'   => ($isStrukturActive || $isSopActive || $isFaqActive || $isCsActive),
-                    'children' => [
+                    'type'        => 'dropdown',
+                    'label'       => 'Pusat Informasi',
+                    'short_label' => 'Informasi',
+                    'icon'        => 'fa-solid fa-circle-info',
+                    'badge'       => $notifCsCount,
+                    'active'      => ($isStrukturActive || $isSopActive || $isFaqActive || $isCsActive),
+                    'children'    => [
                         [
                             'url'    => base_url('struktur'),
                             'icon'   => 'fa-solid fa-sitemap',
@@ -515,18 +549,20 @@
             // Mode 2: Pengurus & Kader Grouped Navigation
             $navGroups = [
                 [
-                    'type'   => 'link',
-                    'url'    => base_url('/'),
-                    'icon'   => 'fa-solid fa-house',
-                    'label'  => 'Beranda',
-                    'active' => $isHomeActive,
+                    'type'        => 'link',
+                    'url'         => base_url('/'),
+                    'icon'        => 'fa-solid fa-house',
+                    'label'       => 'Beranda',
+                    'short_label' => 'Beranda',
+                    'active'      => $isHomeActive,
                 ],
                 [
-                    'type'     => 'dropdown',
-                    'label'    => 'Portal Unit',
-                    'icon'     => 'fa-solid fa-gauge-high',
-                    'active'   => ($isAppActive || $isAppLpjActive || $isAppWilayahActive || $isAppAlatActive || $isAppLaporActive),
-                    'children' => [
+                    'type'        => 'dropdown',
+                    'label'       => 'Portal Unit',
+                    'short_label' => 'Portal',
+                    'icon'        => 'fa-solid fa-gauge-high',
+                    'active'      => ($isAppActive || $isAppLpjActive || $isAppWilayahActive || $isAppAlatActive || $isAppLaporActive),
+                    'children'    => [
                         [
                             'url'    => base_url('app'),
                             'icon'   => 'fa-solid fa-gauge-high',
@@ -565,11 +601,12 @@
                     ]
                 ],
                 [
-                    'type'     => 'dropdown',
-                    'label'    => 'Pusat Informasi',
-                    'icon'     => 'fa-solid fa-circle-info',
-                    'active'   => ($isProkerActive || $isStrukturActive || $isSopActive || $isFaqActive),
-                    'children' => [
+                    'type'        => 'dropdown',
+                    'label'       => 'Pusat Informasi',
+                    'short_label' => 'Informasi',
+                    'icon'        => 'fa-solid fa-circle-info',
+                    'active'      => ($isProkerActive || $isStrukturActive || $isSopActive || $isFaqActive),
+                    'children'    => [
                         [
                             'url'    => base_url('program-kerja'),
                             'icon'   => 'fa-solid fa-list-check',
@@ -605,18 +642,20 @@
             // Mode 3: Public General Visitors Menu
             $navGroups = [
                 [
-                    'type'   => 'link',
-                    'url'    => base_url('/'),
-                    'icon'   => 'fa-solid fa-house',
-                    'label'  => 'Beranda',
-                    'active' => $isHomeActive,
+                    'type'        => 'link',
+                    'url'         => base_url('/'),
+                    'icon'        => 'fa-solid fa-house',
+                    'label'       => 'Beranda',
+                    'short_label' => 'Beranda',
+                    'active'      => $isHomeActive,
                 ],
                 [
-                    'type'     => 'dropdown',
-                    'label'    => 'Informasi & Regulasi',
-                    'icon'     => 'fa-solid fa-circle-info',
-                    'active'   => ($isProkerActive || $isStrukturActive || $isSopActive || $isFaqActive),
-                    'children' => [
+                    'type'        => 'dropdown',
+                    'label'       => 'Informasi & Regulasi',
+                    'short_label' => 'Informasi',
+                    'icon'        => 'fa-solid fa-circle-info',
+                    'active'      => ($isProkerActive || $isStrukturActive || $isSopActive || $isFaqActive),
+                    'children'    => [
                         [
                             'url'    => base_url('program-kerja'),
                             'icon'   => 'fa-solid fa-list-check',
@@ -648,20 +687,21 @@
                     ]
                 ],
                 [
-                    'type'   => 'link',
-                    'url'    => base_url('cs'),
-                    'icon'   => 'fa-solid fa-headset',
-                    'label'  => 'Lapor CS',
-                    'active' => $isCsActive,
+                    'type'        => 'link',
+                    'url'         => base_url('cs'),
+                    'icon'        => 'fa-solid fa-headset',
+                    'label'       => 'Lapor CS',
+                    'short_label' => 'Lapor CS',
+                    'active'      => $isCsActive,
                 ],
             ];
         }
     ?>
     <header class="fixed top-0 left-0 right-0 z-40 w-full glass-card shadow-xs border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-14 gap-2.5">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+            <div class="flex items-center justify-between h-14 gap-1.5 sm:gap-2">
                 <!-- Logo & Brand Header -->
-                <a href="<?= base_url('/') ?>" title="LAPOR KEBERSIHAN - Web Manajemen Kebersihan" class="brand-logo-btn group">
+                <a href="<?= base_url('/') ?>" title="LAPOR KEBERSIHAN - Web Manajemen Kebersihan" class="brand-logo-btn group flex-shrink-0">
                     <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 flex items-center justify-center text-white shadow-xs shadow-emerald-600/25 ring-1.5 ring-emerald-500/20 group-hover:shadow-md group-hover:shadow-emerald-600/35 group-hover:scale-105 transition-all duration-300 flex-shrink-0">
                         <i class="fa-solid fa-leaf text-xs drop-shadow-xs"></i>
                     </div>
@@ -670,7 +710,7 @@
                             <span class="font-heading font-black text-xs sm:text-sm tracking-tight text-slate-900 group-hover:text-emerald-800 transition">LAPOR</span>
                             <span class="font-heading font-black text-xs sm:text-sm tracking-tight bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent">KEBERSIHAN</span>
                         </div>
-                        <div class="flex items-center gap-1 mt-0.5 leading-none">
+                        <div class="hidden lg:flex items-center gap-1 mt-0.5 leading-none">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                             <p class="text-[9.5px] sm:text-[10px] text-slate-400 font-bold tracking-wide group-hover:text-emerald-700 transition whitespace-nowrap">Web Manajemen Kebersihan</p>
                         </div>
@@ -678,7 +718,7 @@
                 </a>
 
                 <!-- Desktop / Tablet Horizontal Navigation (Visible on Desktop, Tablets & Mobile Desktop Site Mode) -->
-                <div class="hidden md:flex items-center gap-1.5">
+                <div class="hidden md:flex items-center gap-1 xl:gap-1.5 flex-shrink-0">
                     <?php foreach ($navGroups as $group): 
                         $groupHasBadge = !empty($group['badge']) && (int)$group['badge'] > 0;
                     ?>
@@ -686,7 +726,8 @@
                             <!-- Single Direct Link -->
                             <a href="<?= $group['url'] ?>" class="top-nav-btn <?= $group['active'] ? 'active font-heading' : '' ?>">
                                 <i class="<?= $group['icon'] ?> text-xs flex-shrink-0 <?= $group['active'] ? 'text-white' : 'text-slate-400' ?>"></i>
-                                <span><?= $group['label'] ?></span>
+                                <span class="hidden xl:inline"><?= $group['label'] ?></span>
+                                <span class="xl:hidden"><?= $group['short_label'] ?? $group['label'] ?></span>
                                 <?php if ($groupHasBadge): ?>
                                     <span class="ml-0.5 px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black animate-pulse">
                                         <?= $group['badge'] > 99 ? '99+' : $group['badge'] ?>
@@ -699,7 +740,8 @@
                             <div class="relative nav-dropdown-parent">
                                 <button type="button" class="top-nav-btn nav-dropdown-toggle <?= $group['active'] ? 'active font-heading' : '' ?>">
                                     <i class="<?= $group['icon'] ?> text-xs flex-shrink-0 <?= $group['active'] ? 'text-white' : 'text-slate-400' ?>"></i>
-                                    <span><?= $group['label'] ?></span>
+                                    <span class="hidden xl:inline"><?= $group['label'] ?></span>
+                                    <span class="xl:hidden"><?= $group['short_label'] ?? $group['label'] ?></span>
                                     <?php if ($groupHasBadge): ?>
                                         <span class="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black animate-pulse">
                                             <?= $group['badge'] > 99 ? '99+' : $group['badge'] ?>
@@ -746,8 +788,8 @@
                                 <div class="top-nav-avatar">
                                     <?= strtoupper(substr(session()->get('nama_lengkap') ?? 'U', 0, 1)) ?>
                                 </div>
-                                <div class="text-left hidden xl:flex flex-col justify-center leading-tight">
-                                    <span class="font-heading font-extrabold text-[11px] text-slate-800 truncate max-w-[120px] leading-tight"><?= esc(session()->get('nama_lengkap')) ?></span>
+                                <div class="text-left hidden 2xl:flex flex-col justify-center leading-tight">
+                                    <span class="font-heading font-extrabold text-[11px] text-slate-800 truncate max-w-[110px] leading-tight"><?= esc(session()->get('nama_lengkap')) ?></span>
                                     <span class="text-[9px] font-bold leading-tight mt-0.5 <?= session()->get('role') === 'Admin' ? 'text-emerald-700' : (session()->get('role') === 'Auditor' ? 'text-blue-700' : 'text-purple-700') ?>">
                                         <?= esc(session()->get('role')) ?>
                                     </span>
@@ -819,7 +861,8 @@
                     <?php else: ?>
                         <a href="<?= base_url('login') ?>" title="Login Petugas / Pengurus" class="top-nav-btn bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/80 shadow-2xs ml-0.5">
                             <i class="fa-solid fa-right-to-bracket text-xs flex-shrink-0 text-emerald-600"></i>
-                            <span>Masuk / Login</span>
+                            <span class="hidden xl:inline">Masuk / Login</span>
+                            <span class="xl:hidden">Masuk</span>
                         </a>
                     <?php endif; ?>
                 </div>
