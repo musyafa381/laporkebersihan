@@ -28,8 +28,7 @@
             </div>
 
             <h1 class="text-2xl sm:text-4xl md:text-5xl font-heading font-black tracking-tight leading-tight text-white drop-shadow-md">
-                Selamat Datang di Website <br>
-                <span class="bg-gradient-to-r from-emerald-300 via-teal-200 to-green-300 bg-clip-text text-transparent">Lapor Kebersihan</span><br>
+                Website <span class="bg-gradient-to-r from-emerald-300 via-teal-200 to-green-300 bg-clip-text text-transparent">Lapor Kebersihan</span><br>
                 Pondok Pesantren Assalafiyyah
             </h1>
 

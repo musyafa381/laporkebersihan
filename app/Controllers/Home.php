@@ -28,7 +28,7 @@ class Home extends BaseController
         $latestLpj = $bukuModel->orderBy('id', 'DESC')->findAll(3);
 
         $data = [
-            'title'         => 'Selamat Datang di Website Lapor Kebersihan Pondok Pesantren Assalafiyyah',
+            'title'         => 'Lapor Kebersihan - Pondok Pesantren Assalafiyyah Mlangi',
             'totalBuku'     => $totalBuku,
             'totalKeuangan' => $totalKeuangan,
             'totalAlat'     => $totalAlat,

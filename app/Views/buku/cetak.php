@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title><?= esc($buku['judul']) ?> — Cetak LPJ</title>
+    <link rel="icon" type="image/x-icon" href="<?= base_url('favicon.ico') ?>">
     <link rel="icon" type="image/svg+xml" href="<?= base_url('favicon.svg') ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

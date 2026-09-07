@@ -3,10 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= esc($title ?? 'Sistem LPJ Kebersihan - Gemerlap') ?></title>
-    <!-- Favicon / Web Logo Icon -->
+    <title><?= esc($title ?? 'Lapor Kebersihan - Pondok Pesantren Assalafiyyah Mlangi') ?></title>
+    <meta name="description" content="Layanan pengaduan kebersihan, pemeliharaan sarana lingkungan, transparansi LPJ & buku keuangan kebersihan Pondok Pesantren Assalafiyyah Mlangi.">
+    <meta name="theme-color" content="#059669">
+
+    <!-- Favicon & App Icons -->
+    <link rel="icon" type="image/x-icon" href="<?= base_url('favicon.ico') ?>">
+    <link rel="icon" type="image/png" sizes="32x32" href="<?= base_url('favicon-32x32.png') ?>">
+    <link rel="icon" type="image/png" sizes="16x16" href="<?= base_url('favicon-16x16.png') ?>">
     <link rel="icon" type="image/svg+xml" href="<?= base_url('favicon.svg') ?>">
-    <link rel="shortcut icon" href="<?= base_url('favicon.svg') ?>" type="image/svg+xml">
+    <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('apple-touch-icon.png') ?>">
+    <link rel="manifest" href="<?= base_url('site.webmanifest') ?>">
+
+    <!-- Open Graph / SEO Social Cards -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="<?= esc($title ?? 'Lapor Kebersihan - Pondok Pesantren Assalafiyyah Mlangi') ?>">
+    <meta property="og:description" content="Layanan pengaduan kebersihan, pemeliharaan sarana lingkungan, transparansi LPJ & buku keuangan kebersihan Pondok Pesantren Assalafiyyah Mlangi.">
+    <meta property="og:image" content="<?= base_url('android-chrome-512x512.png') ?>">
+    <meta property="og:url" content="<?= current_url() ?>">
     <!-- Google Fonts & Tailwind CDN & FontAwesome & SweetAlert2 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

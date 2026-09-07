@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($buku['judul']) ?> — Cetak Laporan Keuangan</title>
+    <link rel="icon" type="image/x-icon" href="<?= base_url('favicon.ico') ?>">
     <link rel="icon" type="image/svg+xml" href="<?= base_url('favicon.svg') ?>">
     <!-- Google Fonts & FontAwesome -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
