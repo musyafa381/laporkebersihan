@@ -146,10 +146,6 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ' : 'Kembali ke Buku LPJ ('
                     <i class="fa-solid fa-calendar-check text-emerald-600"></i>
                     <span><?= esc($buku['bulan']) ?> <?= esc($buku['tahun']) ?></span>
                 </span>
-                <a href="<?= base_url('buku/cetak/' . $buku['id']) ?>" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-slate-700 hover:text-emerald-700 text-xs font-extrabold shadow-2xs flex items-center gap-1.5 transition whitespace-nowrap">
-                    <i class="fa-solid fa-print text-emerald-600"></i>
-                    <span>Pratinjau Cetak</span>
-                </a>
             </div>
         </div>
     </div>
