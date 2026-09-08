@@ -18,8 +18,8 @@
 
     @media print {
         @page {
-            size: A3 landscape;
-            margin: 8mm 10mm;
+            size: portrait;
+            margin: 6mm 6mm;
         }
         *, *::before, *::after {
             box-shadow: none !important;
@@ -27,7 +27,6 @@
         }
         html, body {
             width: 100% !important;
-            height: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
             background: #ffffff !important;
@@ -44,6 +43,13 @@
             margin: 0 !important;
             space-y: 0 !important;
         }
+        .print-header {
+            display: block !important;
+            text-align: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #0f172a;
+        }
         .print-chart-container {
             border: none !important;
             box-shadow: none !important;
@@ -52,18 +58,83 @@
             width: 100% !important;
             max-width: 100% !important;
             overflow: visible !important;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
+            background: transparent !important;
         }
         .print-chart-container > div {
             min-width: 100% !important;
-            transform: scale(0.98);
-            transform-origin: top center;
+            width: 100% !important;
+            padding: 0 !important;
+            transform: none !important;
+            gap: 12px !important;
+        }
+        /* Top Level Cards in Portrait Print */
+        .print-chart-container .w-80 {
+            width: 260px !important;
+            max-width: 100% !important;
+        }
+        .print-chart-container .w-\[600px\] {
+            width: 100% !important;
+            max-width: 480px !important;
+            justify-content: center !important;
+            gap: 12px !important;
+        }
+        .print-chart-container .w-64 {
+            width: 220px !important;
+        }
+        /* 5-Column Grid in Portrait Print */
+        .print-chart-container .grid-cols-5 {
+            display: grid !important;
+            grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+            gap: 5px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            padding-top: 6px !important;
+            align-items: start !important;
+        }
+        .print-chart-container .grid-cols-5 > div {
+            gap: 6px !important;
+        }
+        /* Card styles in Print */
+        .print-chart-container .rounded-2xl {
+            border-radius: 8px !important;
+            padding: 5px 6px !important;
+            border-width: 1px !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+        .print-chart-container .font-heading.font-black.text-xs {
+            font-size: 8.5px !important;
+            line-height: 1.15 !important;
+        }
+        .print-chart-container .font-heading.font-extrabold.text-xs {
+            font-size: 8.5px !important;
+            line-height: 1.15 !important;
+        }
+        .print-chart-container .text-\[11px\] {
+            font-size: 8px !important;
+            line-height: 1.15 !important;
+        }
+        .print-chart-container .text-\[10px\] {
+            font-size: 7.5px !important;
+            line-height: 1.15 !important;
+        }
+        .print-chart-container .text-\[9\.5px\], .print-chart-container .text-\[9px\] {
+            font-size: 7px !important;
+            line-height: 1 !important;
+        }
+        .print-chart-container .fa-solid {
+            font-size: 7px !important;
         }
     }
 </style>
 
 <div class="max-w-6xl mx-auto space-y-6 sm:space-y-8 py-2 sm:py-6">
+    <!-- Print Only Header -->
+    <div class="print-header hidden">
+        <h2 class="text-base font-black uppercase tracking-wider text-slate-900">Bagan Struktur Organisasi Kebersihan</h2>
+        <p class="text-xs font-bold text-emerald-800">Yayasan Pondok Pesantren Assalafiyyah Mlangi</p>
+    </div>
+
     <!-- Hero Banner / Page Header (Frosted Glass Theme) -->
     <div class="hero-page-banner no-print relative overflow-hidden rounded-[32px] p-6 sm:p-10 shadow-[0_20px_50px_rgba(6,78,59,0.22)] border border-white/25 bg-gradient-to-br from-emerald-950/90 via-teal-900/85 to-slate-950/90 backdrop-blur-2xl text-white">
         <!-- Ambient Background Glowing Circles -->
@@ -88,7 +159,7 @@
                     <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition">
                         <i class="fa-solid fa-print text-xs"></i>
                     </div>
-                    <span>Cetak Bagan (A3)</span>
+                    <span>Cetak Bagan</span>
                 </button>
             </div>
         </div>
