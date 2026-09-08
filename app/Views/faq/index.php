@@ -51,13 +51,13 @@
         <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
             <button type="button" onclick="switchFaqTab('tab_panduan_alur')" id="btn_tab_panduan_alur" class="px-4 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition-all duration-200 shadow-2xs flex items-center gap-2 <?= $activeTab === 'panduan_alur' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'glass-card text-slate-700 hover:bg-white border border-white/80' ?>">
                 <i class="fa-solid fa-route <?= $activeTab === 'panduan_alur' ? 'text-white' : 'text-emerald-600' ?>"></i>
-                <span>Panduan Alur Menu</span>
+                <span>Panduan Alur</span>
                 <span class="tab-badge px-2 py-0.5 rounded-full text-[10px] font-extrabold <?= $activeTab === 'panduan_alur' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600' ?>"><?= count($alurList) ?></span>
             </button>
 
             <button type="button" onclick="switchFaqTab('tab_faq_list')" id="btn_tab_faq_list" class="px-4 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition-all duration-200 shadow-2xs flex items-center gap-2 <?= $activeTab === 'faq_list' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20' : 'glass-card text-slate-700 hover:bg-white border border-white/80' ?>">
                 <i class="fa-solid fa-circle-question <?= $activeTab === 'faq_list' ? 'text-white' : 'text-emerald-600' ?>"></i>
-                <span>Tanya Jawab FAQ</span>
+                <span>FAQ</span>
                 <span class="tab-badge px-2 py-0.5 rounded-full text-[10px] font-extrabold <?= $activeTab === 'faq_list' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600' ?>"><?= count($faqList) ?></span>
             </button>
 
@@ -80,20 +80,6 @@
     <!-- TAB 1: PANDUAN ALUR OPERASIONAL MENU (Card-Card Panduan Khusus & Umum)   -->
     <!-- ======================================================================= -->
     <div id="tab_panduan_alur" class="<?= $activeTab === 'panduan_alur' ? '' : 'hidden' ?> space-y-6 animate-fadeIn">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-emerald-50/60 border border-emerald-100 p-4 rounded-2xl">
-            <div class="flex items-center gap-3">
-                <span class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-sm shadow-md shadow-emerald-600/20 flex-shrink-0">
-                    <i class="fa-solid fa-diagram-project"></i>
-                </span>
-                <div>
-                    <h3 class="font-heading font-extrabold text-sm text-slate-900">Alur & Langkah Kerja Operasional</h3>
-                    <p class="text-xs text-slate-500 font-medium">Panduan visual step-by-step untuk mempermudah Pengurus, Kader, dan Petugas dalam menjalankan tugas sistem.</p>
-                </div>
-            </div>
-            <span class="text-xs font-bold text-emerald-800 bg-emerald-100/90 px-3 py-1 rounded-full border border-emerald-200 self-start sm:self-auto">
-                <i class="fa-solid fa-check-double mr-1 text-emerald-600"></i> Terintegrasi Multi-Role
-            </span>
-        </div>
 
         <!-- Grid Cards Alur (Visual Flow Pathway) -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="alurContainer">

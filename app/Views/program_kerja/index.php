@@ -94,7 +94,7 @@
                     <i class="fa-solid fa-house text-emerald-600 text-xs"></i>
                     <span>Filter Asrama / Unit</span>
                 </label>
-                <select id="filter_unit" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                <select id="filter_unit" onchange="filterProkerTable()" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer">
                     <option value="all">Semua Asrama & Unit</option>
                     <?php foreach ($allUnits as $u): ?>
                         <option value="<?= $u['id'] ?>">
@@ -110,7 +110,7 @@
                     <i class="fa-solid fa-traffic-light text-amber-500 text-xs"></i>
                     <span>Status Program</span>
                 </label>
-                <select id="filter_status" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                <select id="filter_status" onchange="filterProkerTable()" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer">
                     <option value="all">Semua Status</option>
                     <option value="Terlaksana Rutin">Terlaksana Rutin</option>
                     <option value="Sedang Berjalan">Sedang Berjalan</option>
@@ -125,7 +125,7 @@
                     <i class="fa-solid fa-layer-group text-teal-600 text-xs"></i>
                     <span>Kelompok Program</span>
                 </label>
-                <select id="filter_kader" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                <select id="filter_kader" onchange="filterProkerTable()" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer">
                     <option value="all">Semua Kelompok</option>
                     <option value="GEMERLAP">Buku Terpadu GEMERLAP</option>
                     <option value="Satgas">Buku Terpadu SATGAS</option>
@@ -140,7 +140,7 @@
                     <span>Cari Kata Kunci</span>
                 </label>
                 <div class="relative">
-                    <input type="text" id="filter_search" onkeydown="if(event.key === 'Enter') filterProkerTable()" placeholder="Cari nama proker, PJ, tujuan..." class="w-full pl-4 pr-4 py-2.5 rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white text-xs font-bold focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                    <input type="text" id="filter_search" oninput="filterProkerTable()" onkeydown="if(event.key === 'Enter') filterProkerTable()" placeholder="Cari nama proker, PJ, tujuan..." class="w-full pl-4 pr-4 py-2.5 rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white text-xs font-bold focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
                 </div>
             </div>
 
@@ -158,7 +158,7 @@
                 </button>
                 <button type="button" onclick="filterProkerTable()" class="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-heading font-extrabold text-xs transition shadow-md shadow-emerald-600/20 flex items-center gap-2">
                     <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                    <span>Cari Program</span>
+                    <span>Cari</span>
                 </button>
             </div>
         </div>
@@ -540,10 +540,6 @@
 <?php endif; ?>
 
 <script>
-    function filterProkerTable() {
-        const unitVal   = document.getElementById('filter_unit')?.value || 'all';
-        const statusVal = document.getElementById('filter_status')?.value || 'all';
-        const kaderVal  = document.getElementById('filter_kader')?.value || 'all';
     let currentPage = 1;
     const pageSize = 8;
     let matchingRows = [];
@@ -687,8 +683,10 @@
         filterProkerTable();
     }
     window.resetProkerFilter = resetProkerFilter;
+    window.rebindPageEvents = filterProkerTable;
 
     // Initial table setup on page load
+    document.addEventListener('DOMContentLoaded', filterProkerTable);
     filterProkerTable();
 </script>
 

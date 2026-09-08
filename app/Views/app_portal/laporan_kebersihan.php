@@ -16,7 +16,7 @@
                     Customer Service & Lapor Kebersihan
                 </h1>
                 <p class="text-emerald-100/90 text-sm sm:text-base leading-relaxed">
-                    Silakan sampaikan kendala kebersihan, fasilitas rusak, atau pertanyaan seputar kebersihan pesantren. Tim K3L siap membantu.
+                    Silakan sampaikan kendala kebersihan, fasilitas rusak, atau pertanyaan seputar kebersihan pesantren. Tim Kebersihan siap membantu.
                 </p>
             </div>
         </div>
@@ -25,13 +25,13 @@
     <!-- Contact Grid & Form (Identical Layout to Public CS) -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Form Pengaduan Kendala Kebersihan -->
-        <div class="lg:col-span-2 glass-card rounded-3xl p-6 sm:p-7 shadow-xl border border-slate-200/80 bg-white space-y-5">
+        <div class="lg:col-span-2 glass-card rounded-3xl p-6 sm:p-7 shadow-xl border border-slate-200/80 bg-white space-y-5 relative z-30">
             <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
                 <h3 class="font-heading font-extrabold text-lg text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-paper-plane text-emerald-600"></i> Form Lapor Kendala Kebersihan
+                    <i class="fa-solid fa-paper-plane text-emerald-600"></i> Form Lapor Kebersihan
                 </h3>
                 <span class="text-[10px] font-extrabold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                    <i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> Akun Terverifikasi
+                    Terverifikasi
                 </span>
             </div>
 
@@ -121,7 +121,7 @@
                     ?>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <!-- Searchable Unit Picker in Portal Form -->
-                        <div class="relative">
+                        <div class="relative z-40">
                             <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                                 <span>1. Lokasi / Unit Tertuju <span class="text-rose-500">*</span></span>
                                 <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
@@ -138,7 +138,7 @@
                                 </button>
                             </div>
                             <!-- Dropdown List -->
-                            <div id="portalUnitDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                            <div id="portalUnitDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200/90 ring-1 ring-slate-900/10 max-h-56 overflow-y-auto z-[100] hidden divide-y divide-slate-100">
                                 <?php if (!empty($unitList)): ?>
                                     <?php foreach ($unitList as $u): ?>
                                         <div class="portal-unit-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $u['id'] ?>" data-nama="<?= esc($u['nama_unit']) ?>" onclick="selectPortalUnit(this)">
@@ -166,7 +166,7 @@
                             </div>
                         </div>
                         <!-- Searchable Wilayah Picker in Portal Form -->
-                        <div class="relative">
+                        <div class="relative z-30">
                             <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                                 <span>2. Wilayah Pemetaan</span>
                                 <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
@@ -182,7 +182,7 @@
                                 </button>
                             </div>
                             <!-- Dropdown List -->
-                            <div id="portalWilayahDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                            <div id="portalWilayahDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200/90 ring-1 ring-slate-900/10 max-h-56 overflow-y-auto z-[100] hidden divide-y divide-slate-100">
                                 <div class="portal-wilayah-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="" data-name="" data-lokasi-gedung="" onclick="selectPortalWilayah(this)">
                                     <div>
                                         <div class="font-extrabold text-xs text-slate-600 italic">-- Bukan Wilayah Khusus / Umum --</div>
@@ -236,12 +236,8 @@
                     <div id="portalShiftContainer" class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-2.5 hidden animate-fadeIn">
                         <div class="flex items-center justify-between">
                             <label class="block text-xs font-extrabold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
-                                <i class="fa-regular fa-clock text-emerald-600"></i>
                                 <span>Pilih Shift & Penanggung Jawab Terkait</span>
                             </label>
-                            <span id="portalShiftAutoBadge" class="text-[10px] text-emerald-700 bg-white px-2.5 py-0.5 rounded-full border border-emerald-200 font-bold flex items-center gap-1 shadow-2xs">
-                                <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i> Rekomendasi Waktu
-                            </span>
                         </div>
                         <select id="portal_shift_select" name="shift" onchange="onPortalShiftChange(this)" class="w-full px-4 py-2.5 rounded-xl border border-emerald-300 text-xs font-bold bg-white text-slate-800 focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer">
                             <!-- Populated dynamically via JS -->
@@ -264,10 +260,9 @@
 
                     <div>
                         <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                            <span>Isi Pesan Laporan / Pengaduan <span class="text-rose-500">*</span></span>
-                            <span class="text-[10px] text-slate-400 font-medium">Jelaskan sedetail mungkin</span>
+                            <span>Isi Laporans <span class="text-rose-500">*</span></span>
                         </label>
-                        <textarea id="portal_isi_laporan" name="isi_laporan" rows="4" placeholder="Jelaskan kendala kebersihan atau hal yang ingin disampaikan ke Admin K3L..." required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs"></textarea>
+                        <textarea id="portal_isi_laporan" name="isi_laporan" rows="4" placeholder="Jelaskan kendala sedetail mungkin terkait kebersihan atau hal yang ingin disampaikan ke Admin Kebersihan..." required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs"></textarea>
                     </div>
 
                     <!-- Multiple Photo Upload with Separate Camera & Gallery Buttons and Delete Feature -->
@@ -275,9 +270,8 @@
                         <div class="flex items-center justify-between">
                             <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                                 <i class="fa-solid fa-camera-retro text-emerald-600"></i>
-                                <span>Foto Bukti / Lokasi Kendala</span>
+                                <span>Foto Bukti</span>
                             </label>
-                            <span class="text-[10px] text-slate-500 font-medium">Bisa lebih dari 1 foto (Opsional)</span>
                         </div>
 
                         <!-- Hidden Inputs for Camera and Gallery -->
@@ -292,7 +286,7 @@
                                 <div class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
                                     <i class="fa-solid fa-camera"></i>
                                 </div>
-                                <span>Buka Kamera</span>
+                                <span>Kamera</span>
                             </button>
 
                             <button type="button" onclick="document.getElementById('portalGalleryInput').click()" class="py-3 px-4 rounded-2xl bg-white hover:bg-teal-50/80 border border-slate-200 hover:border-teal-400 text-slate-700 hover:text-teal-700 font-heading font-extrabold text-xs transition shadow-2xs flex items-center justify-center gap-2 cursor-pointer">
@@ -329,10 +323,10 @@
                         <div class="flex items-center justify-between border-b border-emerald-200/60 pb-3">
                             <h4 class="font-heading font-extrabold text-xs text-emerald-950 flex items-center gap-2 uppercase tracking-wider">
                                 <i class="fa-solid fa-clipboard-check text-emerald-600 text-sm"></i>
-                                <span>Ringkasan Data Pengaduan Anda</span>
+                                <span>Data Pengaduan Anda</span>
                             </h4>
                             <button type="button" onclick="goToPortalStep(1)" class="text-[11px] text-emerald-700 hover:text-emerald-800 font-bold bg-white px-2.5 py-1 rounded-xl border border-emerald-200 shadow-2xs flex items-center gap-1 hover:shadow-xs transition">
-                                <i class="fa-solid fa-pen-to-square text-[10px]"></i> Edit Data
+                                <i class="fa-solid fa-pen-to-square text-[10px]"></i> Edit
                             </button>
                         </div>
 
@@ -383,7 +377,7 @@
                         </button>
                         <button type="submit" id="btnSubmitCsPortal" class="flex-1 sm:flex-none px-7 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 cursor-pointer">
                             <i class="fa-solid fa-paper-plane"></i>
-                            <span>Kirim Pengaduan Ke Tim CS K3L</span>
+                            <span>Kirim Pengaduan</span>
                         </button>
                     </div>
                 </div>
@@ -391,28 +385,7 @@
         </div>
 
         <!-- Quick Contacts Side Cards -->
-        <div class="space-y-5">
-            <div class="glass-card rounded-3xl p-6 shadow-xl border border-slate-200/80 bg-white space-y-4">
-                <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-xl shadow-lg shadow-emerald-500/20">
-                    <i class="fa-brands fa-whatsapp"></i>
-                </div>
-                <div class="space-y-1">
-                    <h3 class="font-heading font-extrabold text-base text-slate-900">WhatsApp Live CS</h3>
-                    <p class="text-xs text-slate-500 font-medium">Layanan respon instan via WA Pengurus K3L.</p>
-                </div>
-                <?php
-                    $rawWa = $settings['hotline_wa'] ?? '081802787499';
-                    $cleanWa = preg_replace('/[^0-9]/', '', $rawWa);
-                    if (str_starts_with($cleanWa, '0')) {
-                        $cleanWa = '62' . substr($cleanWa, 1);
-                    }
-                ?>
-                <a href="https://wa.me/<?= $cleanWa ?>?text=Halo%20Admin%20K3L,%20saya%20butuh%20bantuan" target="_blank" class="w-full py-3 rounded-2xl bg-emerald-600 text-white font-heading font-extrabold text-xs hover:bg-emerald-700 transition flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20">
-                    <i class="fa-brands fa-whatsapp text-sm"></i>
-                    <span>Chat WhatsApp CS</span>
-                </a>
-            </div>
-
+        <div class="space-y-5 relative z-10">
             <div class="glass-card rounded-3xl p-6 shadow-xl border border-slate-200/80 bg-white space-y-4">
                 <div class="w-12 h-12 rounded-2xl bg-teal-600 text-white flex items-center justify-center text-xl shadow-lg shadow-teal-500/20">
                     <i class="fa-solid fa-building-flag"></i>
@@ -441,11 +414,7 @@
                         <h3 class="font-heading font-extrabold text-lg text-slate-900">
                             Pengaduan & Kendala Masuk ke Unit <?= esc($userUnit['nama_unit'] ?? 'Saya') ?>
                         </h3>
-                        <span class="text-[11px] font-extrabold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/90 shadow-2xs whitespace-nowrap">
-                            <?= count($unitAssignedReports) ?> Aduan
-                        </span>
                     </div>
-                    <p class="text-xs text-slate-500 font-medium">Laporan kendala kebersihan dari warga/santri di area unit Anda. Silakan tindak lanjuti dan beri konfirmasi.</p>
                 </div>
             </div>
 
@@ -626,7 +595,6 @@
                     <h3 class="font-heading font-extrabold text-lg text-slate-900">
                         Riwayat Lapor Kendala Kebersihan Saya
                     </h3>
-                    <p class="text-xs text-slate-500 font-medium">Status pengaduan & tanggapan admin Kebersihan atas laporan yang Anda kirimkan.</p>
                 </div>
             </div>
 
