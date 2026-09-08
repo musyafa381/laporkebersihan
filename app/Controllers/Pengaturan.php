@@ -912,12 +912,13 @@ class Pengaturan extends BaseController
 
         foreach ($tables as $table) {
             // Get Create Table Query
-            $query = $db->query("SHOW CREATE TABLE `$table`");
-            $row = $query->getRowArray();
-            if (isset($row['Create Table'])) {
+            $createTableQuery = $db->query("SHOW CREATE TABLE `$table`");
+            $row = $createTableQuery ? $createTableQuery->getRowArray() : null;
+            $createTableSql = $row['Create Table'] ?? ($row['create table'] ?? null);
+            if ($createTableSql) {
                 $output .= "-- Structure for table `$table` --\n";
                 $output .= "DROP TABLE IF EXISTS `$table`;\n";
-                $output .= $row['Create Table'] . ";\n\n";
+                $output .= $createTableSql . ";\n\n";
             }
 
             // Get Data

@@ -101,7 +101,7 @@
                             <!-- Card Edit & Delete Dropdown Buttons -->
                             <?php if (session()->get('role') === 'Admin'): ?>
                             <div class="flex items-center gap-1">
-                                <button onclick="openModalEdit(<?= $buku['id'] ?>, '<?= esc(addslashes($buku['judul'])) ?>', '<?= esc($buku['bulan']) ?>', <?= esc($buku['tahun']) ?>, '<?= esc($buku['status']) ?>')" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition flex items-center justify-center text-xs" title="Edit Informasi Buku">
+                                <button type="button" onclick="openModalEditFromBtn(this)" data-id="<?= $buku['id'] ?>" data-judul="<?= esc($buku['judul']) ?>" data-bulan="<?= esc($buku['bulan']) ?>" data-tahun="<?= esc($buku['tahun']) ?>" data-status="<?= esc($buku['status']) ?>" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition flex items-center justify-center text-xs" title="Edit Informasi Buku">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
                                 <a href="<?= base_url('buku/delete/' . $buku['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus Buku LPJ ini beserta seluruh datanya?" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Hapus Buku">
@@ -161,7 +161,7 @@
                                 <i class="fa-solid fa-eye text-emerald-600"></i> <span>Lihat LPJ (Hanya Lihat)</span>
                             </a>
                         <?php endif; ?>
-                        <button type="button" onclick="openModalPreviewDoc(<?= $buku['id'] ?>, 'Buku LPJ <?= esc(addslashes($buku['bulan'] . ' ' . $buku['tahun'])) ?>')" class="py-2.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-extrabold text-xs transition-all duration-200 border border-emerald-200/90 flex items-center justify-center gap-1.5 shadow-2xs" title="Preview Hasil Dokumen LPJ Langsung">
+                        <button type="button" onclick="openModalPreviewDocFromBtn(this)" data-id="<?= $buku['id'] ?>" data-title="Buku LPJ <?= esc($buku['bulan'] . ' ' . $buku['tahun']) ?>" class="py-2.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-extrabold text-xs transition-all duration-200 border border-emerald-200/90 flex items-center justify-center gap-1.5 shadow-2xs" title="Preview Hasil Dokumen LPJ Langsung">
                             <i class="fa-solid fa-eye text-emerald-600"></i>
                         </button>
                         <a href="<?= base_url('buku/cetak/' . $buku['id']) ?>" target="_blank" class="py-2.5 px-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 transition border border-slate-200 flex items-center justify-center" title="Buka Halaman Cetak (Tab Baru)">
@@ -405,6 +405,17 @@
     }
     window.closeModalCreate = closeModalCreate;
 
+    function openModalEditFromBtn(btn) {
+        if (!btn) return;
+        const id = btn.getAttribute('data-id');
+        const judul = btn.getAttribute('data-judul') || '';
+        const bulan = btn.getAttribute('data-bulan') || '';
+        const tahun = btn.getAttribute('data-tahun') || '';
+        const status = btn.getAttribute('data-status') || 'Aktif';
+        openModalEdit(id, judul, bulan, tahun, status);
+    }
+    window.openModalEditFromBtn = openModalEditFromBtn;
+
     function openModalEdit(id, judul, bulan, tahun, status) {
         const form = document.getElementById('formEditBuku');
         if (form) form.action = '<?= base_url('buku/update/') ?>' + id;
@@ -438,6 +449,14 @@
 
     // Quick Preview Modal Functions & Zoom Controller
     let currentModalZoom = 1.0;
+
+    function openModalPreviewDocFromBtn(btn) {
+        if (!btn) return;
+        const id = btn.getAttribute('data-id');
+        const title = btn.getAttribute('data-title') || 'Dokumen LPJ';
+        openModalPreviewDoc(id, title);
+    }
+    window.openModalPreviewDocFromBtn = openModalPreviewDocFromBtn;
 
     function openModalPreviewDoc(id, title) {
         const modal = document.getElementById('modalPreviewDoc');

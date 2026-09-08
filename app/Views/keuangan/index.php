@@ -94,7 +94,7 @@
 
                             <?php if (session()->get('role') === 'Admin'): ?>
                             <div class="flex items-center gap-1">
-                                <button onclick="openModalEditKeuangan(<?= $buku['id'] ?>, '<?= esc(addslashes($buku['kode_keuangan'] ?? '')) ?>', '<?= esc($buku['bulan']) ?>', <?= esc($buku['tahun']) ?>)" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition flex items-center justify-center text-xs" title="Edit Buku Keuangan">
+                                <button type="button" onclick="openModalEditKeuanganFromBtn(this)" data-id="<?= $buku['id'] ?>" data-kode="<?= esc($buku['kode_keuangan'] ?? '') ?>" data-bulan="<?= esc($buku['bulan']) ?>" data-tahun="<?= esc($buku['tahun']) ?>" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition flex items-center justify-center text-xs" title="Edit Buku Keuangan">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
                                 <a href="<?= base_url('keuangan/delete/' . $buku['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus Buku Keuangan ini beserta seluruh data transaksinya?" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Hapus Buku Keuangan">
@@ -321,6 +321,16 @@
         if (modal) modal.classList.add('hidden');
     }
     window.closeModalCreateKeuangan = closeModalCreateKeuangan;
+
+    function openModalEditKeuanganFromBtn(btn) {
+        if (!btn) return;
+        const id = btn.getAttribute('data-id');
+        const kode = btn.getAttribute('data-kode') || '';
+        const bulan = btn.getAttribute('data-bulan') || '';
+        const tahun = btn.getAttribute('data-tahun') || '';
+        openModalEditKeuangan(id, kode, bulan, tahun);
+    }
+    window.openModalEditKeuanganFromBtn = openModalEditKeuanganFromBtn;
 
     function openModalEditKeuangan(id, kode, bulan, tahun) {
         const form = document.getElementById('formEditKeuangan');
