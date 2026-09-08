@@ -471,12 +471,10 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ' : 'Kembali ke Buku LPJ ('
 
                 <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
                     <button type="button" id="btnAsyncSave" onclick="saveFormAsync()" class="py-3 px-9 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-heading font-extrabold text-xs transition flex items-center gap-2 border border-slate-200 shadow-2xs">
-                        <i id="asyncSaveIcon" class="fa-regular fa-floppy-disk text-slate-600"></i>
                         <span id="asyncSaveText">Simpan Cepat</span>
                     </button>
 
                     <button type="submit" class="py-3 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-lg shadow-emerald-600/25 flex items-center gap-2">
-                        <i class="fa-solid fa-check"></i>
                         <span>Simpan & Selesai</span>
                     </button>
                 </div>
