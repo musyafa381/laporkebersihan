@@ -89,7 +89,6 @@
 
                             <div>
                                 <h4 class="font-heading font-extrabold text-base text-slate-900 leading-snug"><?= esc($b['judul']) ?></h4>
-                                <p class="text-xs text-slate-500 mt-1 line-clamp-2"><?= esc($b['deskripsi'] ?? 'Laporan kinerja dan evaluasi bulanan bidang kebersihan & penataan lingkungan.') ?></p>
                             </div>
 
                             <div class="pt-2 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-2">
@@ -110,11 +109,6 @@
                                         Detail Buku LPJ
                                     </a>
                                 <?php endif; ?>
-
-                                <a href="<?= base_url('buku/cetak/' . $b['id']) ?>" target="_blank" class="w-full sm:w-auto py-2.5 px-3.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition border border-emerald-200/80 flex items-center justify-center gap-1.5 shadow-2xs" title="Lihat hasil format cetak buku LPJ lengkap">
-                                    <i class="fa-solid fa-print"></i>
-                                    <span class="hidden sm:inline">Cetak</span>
-                                </a>
                             </div>
                         </div>
                     <?php endforeach; ?>

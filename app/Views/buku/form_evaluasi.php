@@ -108,7 +108,7 @@ $isStatusAktif = (strtolower(trim($statusBuku)) === 'aktif' || strtolower(trim($
 $isReadOnly = ($role !== 'Admin') && !$isStatusAktif;
 
 $backUrl = $isPengurusOrKader ? base_url('app/lpj') : base_url('buku/detail/' . $buku['id'] . '?tab=evaluasi');
-$backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku LPJ (' . esc($buku['bulan']) . ' ' . esc($buku['tahun']) . ')';
+$backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ' : 'Kembali ke Buku LPJ (' . esc($buku['bulan']) . ' ' . esc($buku['tahun']) . ')';
 ?>
 
 <div class="max-w-5xl mx-auto space-y-6">
@@ -205,11 +205,8 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
             <div class="pb-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <h2 class="font-heading font-extrabold text-lg text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-circle-check text-emerald-600"></i> Langkah 1: Capaian Realisasi Bulan Ini
+                        <i class="fa-solid fa-circle-check text-emerald-600"></i>Capaian Realisasi Bulan Ini
                     </h2>
-                    <p class="text-xs text-slate-500 font-medium">
-                        <?= $isReadOnly ? 'Daftar capaian realisasi kebersihan yang tercatat pada unit ini.' : 'Klik "Tambah Capaian" untuk menambahkan poin-poin realisasi kebersihan yang telah terlaksana.' ?>
-                    </p>
                 </div>
 
                 <?php if (!$isReadOnly): ?>
@@ -255,11 +252,8 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
             <div class="pb-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <h2 class="font-heading font-extrabold text-lg text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Langkah 2: Permasalahan & Solusi Lapangan
+                        <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>Permasalahan & Solusi Lapangan
                     </h2>
-                    <p class="text-xs text-slate-500 font-medium">
-                        <?= $isReadOnly ? 'Daftar kendala permasalahan di lapangan beserta tindakan solusi yang telah dilakukan.' : 'Catat kendala / permasalahan kebersihan di lapangan beserta tindakan solusi yang dilakukan.' ?>
-                    </p>
                 </div>
 
                 <?php if (!$isReadOnly): ?>
@@ -281,10 +275,10 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
                         <div class="flex items-center justify-between pb-2 border-b border-slate-200/60">
                             <div class="flex items-center gap-2">
                                 <span class="num-badge px-2 py-0.5 rounded-lg bg-rose-100 text-rose-800 font-heading font-extrabold text-xs shadow-2xs flex items-center gap-1">
-                                    <i class="fa-solid fa-hashtag text-[9px] text-rose-500"></i> <span class="num-val"><?= $idx + 1 ?></span>
+                                     <span class="num-val"><?= $idx + 1 ?></span>
                                 </span>
                                 <span class="text-xs font-heading font-extrabold text-slate-800">
-                                    Poin Permasalahan & Solusi #<span class="num-text"><?= $idx + 1 ?></span>
+                                    Poin Permasalahan & Solusi <span class="num-text"><?= $idx + 1 ?></span>
                                 </span>
                             </div>
                             <?php if (!$isReadOnly): ?>
@@ -298,7 +292,7 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                             <div class="space-y-1.5">
                                 <label class="block text-[11px] font-extrabold text-rose-700 uppercase tracking-wider flex items-center gap-1.5">
-                                    <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Permasalahan di Lapangan
+                                    Permasalahan
                                 </label>
                                 <?php if ($isReadOnly): ?>
                                     <textarea readonly rows="2" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-100/90 text-slate-700 cursor-default shadow-2xs leading-relaxed select-all focus:outline-none"><?= esc($mRow['masalah']) ?></textarea>
@@ -309,7 +303,7 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
 
                             <div class="space-y-1.5">
                                 <label class="block text-[11px] font-extrabold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
-                                    <i class="fa-solid fa-gavel text-emerald-600"></i> Tindakan / Solusi Penanganan
+                                    Tindakan
                                 </label>
                                 <?php if ($isReadOnly): ?>
                                     <textarea readonly rows="2" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-100/90 text-slate-700 cursor-default shadow-2xs leading-relaxed select-all focus:outline-none"><?= esc($mRow['tindakan']) ?></textarea>
@@ -334,11 +328,8 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
             <div class="pb-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <h2 class="font-heading font-extrabold text-lg text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-bullseye text-teal-600"></i> Langkah 3: Target Bulan Depan & Rencana Tindakan
+                        Target Bulan Depan & Rencana Tindakan
                     </h2>
-                    <p class="text-xs text-slate-500 font-medium">
-                        <?= $isReadOnly ? 'Daftar rencana target kebersihan bulan depan dan langkah tindakan yang direncanakan.' : 'Catat target kebersihan bulan depan beserta rencana tindakan pelaksanaannya.' ?>
-                    </p>
                 </div>
 
                 <?php if (!$isReadOnly): ?>
@@ -360,10 +351,10 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
                         <div class="flex items-center justify-between pb-2 border-b border-slate-200/60">
                             <div class="flex items-center gap-2">
                                 <span class="num-badge px-2 py-0.5 rounded-lg bg-teal-100 text-teal-800 font-heading font-extrabold text-xs shadow-2xs flex items-center gap-1">
-                                    <i class="fa-solid fa-hashtag text-[9px] text-teal-600"></i> <span class="num-val"><?= $idx + 1 ?></span>
+                                   <span class="num-val"><?= $idx + 1 ?></span>
                                 </span>
                                 <span class="text-xs font-heading font-extrabold text-slate-800">
-                                    Poin Target & Rencana #<span class="num-text"><?= $idx + 1 ?></span>
+                                    Poin Target & Rencana <span class="num-text"><?= $idx + 1 ?></span>
                                 </span>
                             </div>
                             <?php if (!$isReadOnly): ?>
@@ -377,7 +368,7 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                             <div class="space-y-1.5">
                                 <label class="block text-[11px] font-extrabold text-teal-700 uppercase tracking-wider flex items-center gap-1.5">
-                                    <i class="fa-solid fa-bullseye text-teal-600"></i> Target Kebersihan Bulan Depan
+                                    Target Kebersihan Bulan Depan
                                 </label>
                                 <?php if ($isReadOnly): ?>
                                     <textarea readonly rows="2" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-100/90 text-slate-700 cursor-default shadow-2xs leading-relaxed select-all focus:outline-none"><?= esc($tRow['target']) ?></textarea>
@@ -388,7 +379,7 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
 
                             <div class="space-y-1.5">
                                 <label class="block text-[11px] font-extrabold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
-                                    <i class="fa-solid fa-list-check text-emerald-600"></i> Rencana Tindakan / Langkah
+                                    Rencana Tindakan / Langkah
                                 </label>
                                 <?php if ($isReadOnly): ?>
                                     <textarea readonly rows="2" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold bg-slate-100/90 text-slate-700 cursor-default shadow-2xs leading-relaxed select-all focus:outline-none"><?= esc($tRow['tindakan']) ?></textarea>
@@ -413,11 +404,8 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
             <div class="pb-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <h2 class="font-heading font-extrabold text-lg text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-lightbulb text-amber-500"></i> Langkah 4: Usulan / Rekomendasi Unit
+                        <i class="fa-solid fa-lightbulb text-amber-500"></i> Usulan / Rekomendasi Unit
                     </h2>
-                    <p class="text-xs text-slate-500 font-medium">
-                        <?= $isReadOnly ? 'Daftar poin usulan atau masukan rekomendasi fasilitas & kebersihan unit.' : 'Klik "+ Tambah Usulan" untuk menambahkan poin-poin usulan atau rekomendasi fasilitas/kebersihan unit.' ?>
-                    </p>
                 </div>
 
                 <?php if (!$isReadOnly): ?>
@@ -481,12 +469,12 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
                         <i class="fa-solid fa-chevron-left mr-1"></i> Sebelumnya
                     </button>
                     <button type="button" id="nextBtn" onclick="nextStep()" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-heading font-extrabold text-xs transition border border-emerald-200/80">
-                        Lanjut ke Langkah Berikutnya <i class="fa-solid fa-chevron-right ml-1"></i>
+                        Berikutnya <i class="fa-solid fa-chevron-right ml-1"></i>
                     </button>
                 </div>
 
                 <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
-                    <button type="button" id="btnAsyncSave" onclick="saveFormAsync()" class="py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-heading font-extrabold text-xs transition flex items-center gap-2 border border-slate-200 shadow-2xs">
+                    <button type="button" id="btnAsyncSave" onclick="saveFormAsync()" class="py-3 px-9 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-heading font-extrabold text-xs transition flex items-center gap-2 border border-slate-200 shadow-2xs">
                         <i id="asyncSaveIcon" class="fa-regular fa-floppy-disk text-slate-600"></i>
                         <span id="asyncSaveText">Simpan Cepat</span>
                     </button>
@@ -549,7 +537,7 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
                 nextBtn.disabled = true;
                 nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
             } else {
-                nextBtn.innerHTML = 'Lanjut ke Langkah Berikutnya <i class="fa-solid fa-chevron-right ml-1"></i>';
+                nextBtn.innerHTML = 'Berikutnya <i class="fa-solid fa-chevron-right ml-1"></i>';
                 nextBtn.disabled = false;
                 nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
@@ -667,10 +655,10 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
                 <div class="flex items-center justify-between pb-2 border-b border-slate-200/60">
                     <div class="flex items-center gap-2">
                         <span class="num-badge px-2 py-0.5 rounded-lg bg-rose-100 text-rose-800 font-heading font-extrabold text-xs shadow-2xs flex items-center gap-1">
-                            <i class="fa-solid fa-hashtag text-[9px] text-rose-500"></i> <span class="num-val">1</span>
+                            <span class="num-val">1</span>
                         </span>
                         <span class="text-xs font-heading font-extrabold text-slate-800">
-                            Poin Permasalahan & Solusi #<span class="num-text">1</span>
+                            Poin Permasalahan & Solusi <span class="num-text">1</span>
                         </span>
                     </div>
                     <button type="button" onclick="removeRowElement('${rowId}', '.masalah-row', 'masalahContainer')" class="px-2.5 py-1 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs" title="Hapus Baris Ini">
@@ -682,13 +670,13 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                     <div class="space-y-1.5">
                         <label class="block text-[11px] font-extrabold text-rose-700 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Permasalahan di Lapangan
+                            Permasalahan
                         </label>
                         <textarea name="masalah[]" rows="2" placeholder="Tuliskan kendala / masalah di lapangan..." class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white transition shadow-2xs leading-relaxed">${mVal}</textarea>
                     </div>
                     <div class="space-y-1.5">
                         <label class="block text-[11px] font-extrabold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-gavel text-emerald-600"></i> Tindakan / Solusi Penanganan
+                             Tindakan
                         </label>
                         <textarea name="tindakan[]" rows="2" placeholder="Tuliskan tindakan / solusi yang dilakukan..." class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white transition shadow-2xs leading-relaxed">${tVal}</textarea>
                     </div>
@@ -709,10 +697,10 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
                 <div class="flex items-center justify-between pb-2 border-b border-slate-200/60">
                     <div class="flex items-center gap-2">
                         <span class="num-badge px-2 py-0.5 rounded-lg bg-teal-100 text-teal-800 font-heading font-extrabold text-xs shadow-2xs flex items-center gap-1">
-                            <i class="fa-solid fa-hashtag text-[9px] text-teal-600"></i> <span class="num-val">1</span>
+                             <span class="num-val">1</span>
                         </span>
                         <span class="text-xs font-heading font-extrabold text-slate-800">
-                            Poin Target & Rencana #<span class="num-text">1</span>
+                            Poin Target & Rencana <span class="num-text">1</span>
                         </span>
                     </div>
                     <button type="button" onclick="removeRowElement('${rowId}', '.target-row', 'targetContainer')" class="px-2.5 py-1 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs" title="Hapus Baris Ini">
@@ -724,13 +712,13 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                     <div class="space-y-1.5">
                         <label class="block text-[11px] font-extrabold text-teal-700 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-bullseye text-teal-600"></i> Target Kebersihan Bulan Depan
+                            Target Kebersihan Bulan Depan
                         </label>
                         <textarea name="target_item[]" rows="2" placeholder="Tuliskan target kebersihan bulan depan..." class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white transition shadow-2xs leading-relaxed">${tgVal}</textarea>
                     </div>
                     <div class="space-y-1.5">
                         <label class="block text-[11px] font-extrabold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-list-check text-emerald-600"></i> Rencana Tindakan / Langkah
+                             Rencana Tindakan
                         </label>
                         <textarea name="target_tindakan[]" rows="2" placeholder="Tuliskan rencana tindakan / langkah..." class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white transition shadow-2xs leading-relaxed">${ttVal}</textarea>
                     </div>

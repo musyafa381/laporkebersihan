@@ -57,12 +57,12 @@
                     </span>
                 <?php endif; ?>
 
-                <button type="button" onclick="openModalPreviewDocFromBtn(this)" data-id="<?= $buku['id'] ?>" data-title="Buku LPJ <?= esc($buku['bulan'] . ' ' . $buku['tahun']) ?>" class="flex-shrink-0 px-3 sm:px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-extrabold text-xs transition border border-emerald-200/90 shadow-2xs flex items-center gap-2" title="Preview Dokumen LPJ Langsung">
+                <button type="button" onclick="openModalPreviewDocFromBtn(this)" data-id="<?= $buku['id'] ?>" data-title="Buku LPJ <?= esc($buku['bulan'] . ' ' . $buku['tahun']) ?>" class="flex-shrink-0 px-3 sm:px-3 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-extrabold text-xs transition border border-emerald-200/90 shadow-2xs flex items-center gap-2" title="Preview Dokumen LPJ Langsung">
                     <i class="fa-solid fa-eye text-emerald-600"></i>
                     <span>Preview Dokumen</span>
                 </button>
 
-                <a href="<?= base_url('buku/cetak/' . $buku['id']) ?>" target="_blank" class="flex-shrink-0 px-3.5 sm:px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-bold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 flex items-center gap-2 shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:-translate-y-0.5" title="Buka Halaman Cetak (Tab Baru)">
+                <a href="<?= base_url('buku/cetak/' . $buku['id']) ?>" target="_blank" class="flex-shrink-0 px-2 sm:px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-bold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 flex items-center gap-2 shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:-translate-y-0.5" title="Buka Halaman Cetak (Tab Baru)">
                     <i class="fa-solid fa-print"></i>
                     <span>Cetak / PDF</span>
                 </a>
@@ -864,12 +864,6 @@
                                         Belum diisi
                                     </span>
                                 <?php endif; ?>
-
-                                <?php if ($role === 'Admin'): ?>
-                                    <a href="<?= base_url('buku/unit/delete/' . $unit['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus unit kebersihan ini?" class="w-7 h-7 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center text-xs transition" title="Hapus Unit">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </a>
-                                <?php endif; ?>
                             </div>
                         </div>
 
@@ -936,12 +930,6 @@
                                     <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-400">
                                         Belum diisi
                                     </span>
-                                <?php endif; ?>
-
-                                <?php if ($role === 'Admin'): ?>
-                                    <a href="<?= base_url('buku/unit/delete/' . $kUnit['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus unit kader ini?" class="w-7 h-7 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center text-xs transition" title="Hapus Unit Kader">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </a>
                                 <?php endif; ?>
                             </div>
                         </div>
