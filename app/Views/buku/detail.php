@@ -93,27 +93,27 @@
     <!-- Sticky Floating Tab Navbar (Mobile Horizontal Scrollable & Clean Floating Tabs) -->
     <div class="sticky top-16 sm:top-20 z-20 bg-white/95 backdrop-blur-xl p-1.5 sm:p-2 rounded-2xl border border-slate-200/90 shadow-md shadow-slate-200/40 overflow-x-auto">
         <nav class="flex items-center gap-1.5 min-w-max">
-            <button type="button" onclick="switchTab('proker')" id="tab-proker" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20 whitespace-nowrap">
+            <button type="button" data-tab="proker" onclick="switchTab('proker')" id="tab-proker" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20 whitespace-nowrap">
                 <i class="fa-solid fa-calendar-days text-sm"></i>
                 <span>1. Proker & Kalender</span>
             </button>
 
-            <button type="button" onclick="switchTab('koordinasi')" id="tab-koordinasi" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
+            <button type="button" data-tab="koordinasi" onclick="switchTab('koordinasi')" id="tab-koordinasi" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-handshake text-sm"></i>
                 <span>2. Laporan Hasil Koordinasi</span>
             </button>
 
-            <button type="button" onclick="switchTab('evaluasi')" id="tab-evaluasi" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
+            <button type="button" data-tab="evaluasi" onclick="switchTab('evaluasi')" id="tab-evaluasi" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-building-user text-sm"></i>
                 <span>3. Capaian & Evaluasi Unit</span>
             </button>
 
-            <button type="button" onclick="switchTab('kader')" id="tab-kader" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
+            <button type="button" data-tab="kader" onclick="switchTab('kader')" id="tab-kader" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-users-gear text-sm"></i>
                 <span>4. Evaluasi Kader Kebersihan</span>
             </button>
 
-            <button type="button" onclick="switchTab('keuangan')" id="tab-keuangan" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
+            <button type="button" data-tab="keuangan" onclick="switchTab('keuangan')" id="tab-keuangan" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-file-invoice-dollar text-sm"></i>
                 <span>5. Laporan Keuangan</span>
                 <?php if (!empty($importedKeuangan)): ?>
@@ -1394,19 +1394,24 @@
 </div>
 
 <script>
+(function() {
+    'use strict';
+
     function switchTab(tabName) {
-        // Hide all contents
+        if (!tabName) return;
+
+        // Hide all tab contents
         document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
 
-        // Reset all tab button styles to inactive
+        // Reset all tab button styles to inactive state
         document.querySelectorAll('.tab-btn').forEach(el => {
             el.classList.remove('bg-gradient-to-r', 'from-emerald-600', 'to-teal-600', 'text-white', 'shadow-md', 'shadow-emerald-600/20');
             el.classList.add('text-slate-600', 'hover:text-slate-900', 'hover:bg-slate-100');
+            
             // Restore original badge colors (saved in data attributes)
             const badge = el.querySelector('.tab-badge');
             if (badge) {
                 badge.classList.remove('bg-white/20', 'text-white');
-                // Restore from data attributes if available, otherwise use defaults
                 const origBg = badge.getAttribute('data-orig-bg');
                 const origText = badge.getAttribute('data-orig-text');
                 if (origBg) badge.classList.add(origBg);
@@ -1426,7 +1431,7 @@
         }
 
         // Apply active pill styles
-        const activeBtn = document.getElementById('tab-' + tabName);
+        const activeBtn = document.getElementById('tab-' + tabName) || document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
         if (activeBtn) {
             activeBtn.classList.remove('text-slate-600', 'hover:text-slate-900', 'hover:bg-slate-100');
             activeBtn.classList.add('bg-gradient-to-r', 'from-emerald-600', 'to-teal-600', 'text-white', 'shadow-md', 'shadow-emerald-600/20');
@@ -1439,7 +1444,6 @@
                     if (bgClass) badge.setAttribute('data-orig-bg', bgClass);
                     if (textClass) badge.setAttribute('data-orig-text', textClass);
                 }
-                // Remove original styling and apply active white style
                 const origBg = badge.getAttribute('data-orig-bg');
                 const origText = badge.getAttribute('data-orig-text');
                 if (origBg) badge.classList.remove(origBg);
@@ -1464,7 +1468,6 @@
             }
         } catch (e) {}
     }
-    window.switchTab = switchTab;
 
     // Initialize tabs: save original badge classes and restore active tab
     function initLpjTabs() {
@@ -1478,24 +1481,29 @@
             }
         });
 
+        // Direct bind click events to tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.onclick = function(e) {
+                e.preventDefault();
+                const tabName = this.getAttribute('data-tab') || this.id.replace('tab-', '');
+                if (tabName) {
+                    switchTab(tabName);
+                }
+            };
+        });
+
         // Restore active tab from URL parameter or SessionStorage
-        const urlParams = new URLSearchParams(window.location.search);
-        const tabParam = urlParams.get('tab');
-        const savedTab = sessionStorage.getItem('activeTab_lpj_<?= $buku['id'] ?>');
-        const activeTab = tabParam || savedTab || 'proker';
+        let activeTab = 'proker';
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabParam = urlParams.get('tab');
+            const savedTab = sessionStorage.getItem('activeTab_lpj_<?= $buku['id'] ?>');
+            activeTab = tabParam || savedTab || 'proker';
+        } catch (e) {}
 
         if (activeTab && document.getElementById('tab-' + activeTab)) {
             switchTab(activeTab);
         }
-    }
-    window.initLpjTabs = initLpjTabs;
-
-    // Run on DOMContentLoaded (for direct page load)
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initLpjTabs);
-    } else {
-        // DOM already loaded (SPA navigation re-executed this script)
-        initLpjTabs();
     }
 
     function openModalEditProker(id, tanggal, kategori, kegiatan, keterangan) {
@@ -1595,21 +1603,8 @@
     }
 
     function rebindPageEvents() {
-        // 1. Initialize tabs (restore active tab)
-        if (typeof window.initLpjTabs === 'function') {
-            try { window.initLpjTabs(); } catch (e) {}
-        } else {
-            // Fallback: direct tab restore
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                const tabParam = urlParams.get('tab');
-                const savedTab = sessionStorage.getItem('activeTab_lpj_<?= $buku['id'] ?>');
-                const activeTab = tabParam || savedTab || 'proker';
-                if (typeof switchTab === 'function' && activeTab && document.getElementById('tab-' + activeTab)) {
-                    switchTab(activeTab);
-                }
-            } catch (e) {}
-        }
+        // 1. Initialize tabs (restore active tab and bind click handlers)
+        initLpjTabs();
 
         // 2. Re-bind draggable photo preview boxes
         document.querySelectorAll('[id^="container_preview_"]').forEach(box => {
@@ -1617,14 +1612,6 @@
             makePhotoBoxDraggable(box.id, 'img_preview_' + id, 'foto_pos_' + id);
         });
     }
-
-    // Run rebindPageEvents immediately (for SPA navigation) and on DOMContentLoaded (for direct load)
-    if (document.readyState !== 'loading') {
-        rebindPageEvents();
-    } else {
-        document.addEventListener('DOMContentLoaded', rebindPageEvents);
-    }
-    window.rebindPageEvents = rebindPageEvents;
 
     function openModalUnit(id, nama, capaian, target, permasalahan, evaluasi) {
         document.getElementById('unit_id_field').value = id;
@@ -2000,7 +1987,6 @@
         if (iframe) iframe.src = '';
         if (modal) modal.classList.add('hidden');
     }
-    window.closeModalPreviewDoc = closeModalPreviewDoc;
 
     function printPreviewIframe() {
         const iframe = document.getElementById('previewDocIframe');
@@ -2009,7 +1995,6 @@
             iframe.contentWindow.print();
         }
     }
-    window.printPreviewIframe = printPreviewIframe;
 
     // Close preview modal on ESC key
     document.addEventListener('keydown', function(e) {
@@ -2017,6 +2002,50 @@
             closeModalPreviewDoc();
         }
     });
+
+    // Expose all functions to global window object
+    window.switchTab = switchTab;
+    window.switchLpjTab = switchTab;
+    window.initLpjTabs = initLpjTabs;
+    window.rebindPageEvents = rebindPageEvents;
+    window.openModalEditProker = openModalEditProker;
+    window.closeModalEditProker = closeModalEditProker;
+    window.makePhotoBoxDraggable = makePhotoBoxDraggable;
+    window.previewImageLive = previewImageLive;
+    window.resetPhotoPosition = resetPhotoPosition;
+    window.openModalUnit = openModalUnit;
+    window.closeModalUnit = closeModalUnit;
+    window.openModalTambahUnit = openModalTambahUnit;
+    window.closeModalTambahUnit = closeModalTambahUnit;
+    window.openModalTambahKader = openModalTambahKader;
+    window.closeModalTambahKader = closeModalTambahKader;
+    window.addTargetRow = addTargetRow;
+    window.addCapaianRow = addCapaianRow;
+    window.addEvaluasiRow = addEvaluasiRow;
+    window.removeRowElement = removeRowElement;
+    window.reindexNumberBadges = reindexNumberBadges;
+    window.formatRupiahInput = formatRupiahInput;
+    window.parseRupiah = parseRupiah;
+    window.updateKeuanganTotals = updateKeuanganTotals;
+    window.addKpRow = addKpRow;
+    window.removeKpRow = removeKpRow;
+    window.reindexKpBadges = reindexKpBadges;
+    window.addKmRow = addKmRow;
+    window.removeKmRow = removeKmRow;
+    window.reindexKmBadges = reindexKmBadges;
+    window.openModalImportKeuangan = openModalImportKeuangan;
+    window.closeModalImportKeuangan = closeModalImportKeuangan;
+    window.openModalPreviewDoc = openModalPreviewDoc;
+    window.handleIframeLoaded = handleIframeLoaded;
+    window.modalZoomDoc = modalZoomDoc;
+    window.modalResetZoom = modalResetZoom;
+    window.modalFitWidth = modalFitWidth;
+    window.closeModalPreviewDoc = closeModalPreviewDoc;
+    window.printPreviewIframe = printPreviewIframe;
+
+    // Run tab initialization immediately
+    initLpjTabs();
+})();
 </script>
 
 <!-- Modal Quick Preview Dokumen LPJ -->
