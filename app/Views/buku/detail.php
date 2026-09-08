@@ -30,12 +30,12 @@
                 $canEditBuku = ($role === 'Admin') || $isStatusAktif;
             ?>
 
-            <!-- Right: Status Control & Action Buttons (Mobile-Responsive Grid/Wrap) -->
-            <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto">
+            <!-- Right: Status Control & Action Buttons -->
+            <div class="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto">
                 <?php if ($role === 'Admin'): ?>
-                    <form action="<?= base_url('buku/update-status/' . $buku['id']) ?>" method="POST" class="col-span-1 sm:flex-initial">
-                        <div class="relative w-full">
-                            <select name="status" onchange="this.form.submit()" class="w-full appearance-none pl-3 pr-8 py-2.5 rounded-xl border border-slate-200 text-xs font-extrabold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 hover:bg-white shadow-2xs cursor-pointer transition">
+                    <form action="<?= base_url('buku/update-status/' . $buku['id']) ?>" method="POST" class="flex-shrink-0">
+                        <div class="relative">
+                            <select name="status" onchange="this.form.submit()" class="appearance-none pl-3 pr-8 py-2.5 rounded-xl border border-slate-200 text-xs font-extrabold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 hover:bg-white shadow-2xs cursor-pointer transition">
                                 <option value="Aktif" <?= ($buku['status'] === 'Aktif' || $buku['status'] === 'AKTIF' || $buku['status'] === 'Berjalan' || empty($buku['status'])) ? 'selected' : '' ?>>🟢 Aktif</option>
                                 <option value="Draft Proker" <?= ($buku['status'] === 'Draft Proker') ? 'selected' : '' ?>>🟠 Draft Proker</option>
                                 <option value="Selesai" <?= ($buku['status'] === 'Selesai') ? 'selected' : '' ?>>🔵 Selesai</option>
@@ -46,23 +46,23 @@
                         </div>
                     </form>
 
-                    <button onclick="openModalImportKeuangan()" class="col-span-1 sm:flex-initial px-3 sm:px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-extrabold text-xs transition border border-emerald-200/90 shadow-2xs flex items-center justify-center gap-2">
+                    <button type="button" onclick="openModalImportKeuangan()" class="flex-shrink-0 px-3 sm:px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-extrabold text-xs transition border border-emerald-200/90 shadow-2xs flex items-center gap-2">
                         <i class="fa-solid fa-file-import text-emerald-600"></i>
                         <span>Import Keuangan</span>
                     </button>
                 <?php else: ?>
-                    <span class="col-span-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl <?= $isStatusAktif ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200' ?> font-extrabold text-xs border shadow-2xs">
+                    <span class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl <?= $isStatusAktif ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200' ?> font-extrabold text-xs border shadow-2xs">
                         <i class="fa-solid <?= $isStatusAktif ? 'fa-circle-check text-emerald-600' : 'fa-lock text-amber-600' ?>"></i>
                         Status: <?= esc($statusBuku) ?>
                     </span>
                 <?php endif; ?>
 
-                <button type="button" onclick="openModalPreviewDoc(<?= $buku['id'] ?>, 'Buku LPJ <?= esc(addslashes($buku['bulan'] . ' ' . $buku['tahun'])) ?>')" class="col-span-1 sm:flex-initial px-3 sm:px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-extrabold text-xs transition border border-emerald-200/90 shadow-2xs flex items-center justify-center gap-2" title="Preview Dokumen LPJ Langsung">
+                <button type="button" onclick="openModalPreviewDoc(<?= $buku['id'] ?>, 'Buku LPJ <?= esc(addslashes($buku['bulan'] . ' ' . $buku['tahun'])) ?>')" class="flex-shrink-0 px-3 sm:px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-extrabold text-xs transition border border-emerald-200/90 shadow-2xs flex items-center gap-2" title="Preview Dokumen LPJ Langsung">
                     <i class="fa-solid fa-eye text-emerald-600"></i>
                     <span>Preview Dokumen</span>
                 </button>
 
-                <a href="<?= base_url('buku/cetak/' . $buku['id']) ?>" target="_blank" class="col-span-1 sm:flex-initial px-3.5 sm:px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-bold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:-translate-y-0.5" title="Buka Halaman Cetak (Tab Baru)">
+                <a href="<?= base_url('buku/cetak/' . $buku['id']) ?>" target="_blank" class="flex-shrink-0 px-3.5 sm:px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-bold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 flex items-center gap-2 shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:-translate-y-0.5" title="Buka Halaman Cetak (Tab Baru)">
                     <i class="fa-solid fa-print"></i>
                     <span>Cetak / PDF</span>
                 </a>
@@ -93,27 +93,27 @@
     <!-- Sticky Floating Tab Navbar (Mobile Horizontal Scrollable & Clean Floating Tabs) -->
     <div class="sticky top-16 sm:top-20 z-20 bg-white/95 backdrop-blur-xl p-1.5 sm:p-2 rounded-2xl border border-slate-200/90 shadow-md shadow-slate-200/40 overflow-x-auto">
         <nav class="flex items-center gap-1.5 min-w-max">
-            <button onclick="switchTab('proker')" id="tab-proker" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20 whitespace-nowrap">
+            <button type="button" onclick="switchTab('proker')" id="tab-proker" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20 whitespace-nowrap">
                 <i class="fa-solid fa-calendar-days text-sm"></i>
                 <span>1. Proker & Kalender</span>
             </button>
 
-            <button onclick="switchTab('koordinasi')" id="tab-koordinasi" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
+            <button type="button" onclick="switchTab('koordinasi')" id="tab-koordinasi" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-handshake text-sm"></i>
                 <span>2. Laporan Hasil Koordinasi</span>
             </button>
 
-            <button onclick="switchTab('evaluasi')" id="tab-evaluasi" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
+            <button type="button" onclick="switchTab('evaluasi')" id="tab-evaluasi" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-building-user text-sm"></i>
                 <span>3. Capaian & Evaluasi Unit</span>
             </button>
 
-            <button onclick="switchTab('kader')" id="tab-kader" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
+            <button type="button" onclick="switchTab('kader')" id="tab-kader" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-users-gear text-sm"></i>
                 <span>4. Evaluasi Kader Kebersihan</span>
             </button>
 
-            <button onclick="switchTab('keuangan')" id="tab-keuangan" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
+            <button type="button" onclick="switchTab('keuangan')" id="tab-keuangan" class="tab-btn flex-1 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-file-invoice-dollar text-sm"></i>
                 <span>5. Laporan Keuangan</span>
                 <?php if (!empty($importedKeuangan)): ?>
@@ -1179,6 +1179,7 @@
             </div>
         <?php endif; ?>
     </div>
+</div><!-- end space-y-6 wrapper -->
 
 <!-- Modal Import Laporan Keuangan -->
 <div id="modalImportKeuangan" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
@@ -1401,10 +1402,15 @@
         document.querySelectorAll('.tab-btn').forEach(el => {
             el.classList.remove('bg-gradient-to-r', 'from-emerald-600', 'to-teal-600', 'text-white', 'shadow-md', 'shadow-emerald-600/20');
             el.classList.add('text-slate-600', 'hover:text-slate-900', 'hover:bg-slate-100');
+            // Restore original badge colors (saved in data attributes)
             const badge = el.querySelector('.tab-badge');
             if (badge) {
                 badge.classList.remove('bg-white/20', 'text-white');
-                badge.classList.add('bg-slate-100', 'text-slate-600');
+                // Restore from data attributes if available, otherwise use defaults
+                const origBg = badge.getAttribute('data-orig-bg');
+                const origText = badge.getAttribute('data-orig-text');
+                if (origBg) badge.classList.add(origBg);
+                if (origText) badge.classList.add(origText);
             }
         });
 
@@ -1426,7 +1432,18 @@
             activeBtn.classList.add('bg-gradient-to-r', 'from-emerald-600', 'to-teal-600', 'text-white', 'shadow-md', 'shadow-emerald-600/20');
             const badge = activeBtn.querySelector('.tab-badge');
             if (badge) {
-                badge.classList.remove('bg-slate-100', 'text-slate-600');
+                // Save original badge classes before overriding (only first time)
+                if (!badge.getAttribute('data-orig-bg')) {
+                    const bgClass = Array.from(badge.classList).find(c => c.startsWith('bg-') && c !== 'bg-white/20');
+                    const textClass = Array.from(badge.classList).find(c => c.startsWith('text-') && !c.startsWith('text-[') && c !== 'text-white');
+                    if (bgClass) badge.setAttribute('data-orig-bg', bgClass);
+                    if (textClass) badge.setAttribute('data-orig-text', textClass);
+                }
+                // Remove original styling and apply active white style
+                const origBg = badge.getAttribute('data-orig-bg');
+                const origText = badge.getAttribute('data-orig-text');
+                if (origBg) badge.classList.remove(origBg);
+                if (origText) badge.classList.remove(origText);
                 badge.classList.add('bg-white/20', 'text-white');
             }
         }
@@ -1449,17 +1466,37 @@
     }
     window.switchTab = switchTab;
 
-    // Restore active tab on DOM load (check URL parameter first, then sessionStorage)
-    document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tabs: save original badge classes and restore active tab
+    function initLpjTabs() {
+        // Pre-save original badge classes on first init
+        document.querySelectorAll('.tab-btn .tab-badge').forEach(badge => {
+            if (!badge.getAttribute('data-orig-bg')) {
+                const bgClass = Array.from(badge.classList).find(c => c.startsWith('bg-') && c !== 'bg-white/20');
+                const textClass = Array.from(badge.classList).find(c => c.startsWith('text-') && !c.startsWith('text-[') && c !== 'text-white');
+                if (bgClass) badge.setAttribute('data-orig-bg', bgClass);
+                if (textClass) badge.setAttribute('data-orig-text', textClass);
+            }
+        });
+
+        // Restore active tab from URL parameter or SessionStorage
         const urlParams = new URLSearchParams(window.location.search);
         const tabParam = urlParams.get('tab');
         const savedTab = sessionStorage.getItem('activeTab_lpj_<?= $buku['id'] ?>');
-
         const activeTab = tabParam || savedTab || 'proker';
+
         if (activeTab && document.getElementById('tab-' + activeTab)) {
             switchTab(activeTab);
         }
-    });
+    }
+    window.initLpjTabs = initLpjTabs;
+
+    // Run on DOMContentLoaded (for direct page load)
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initLpjTabs);
+    } else {
+        // DOM already loaded (SPA navigation re-executed this script)
+        initLpjTabs();
+    }
 
     function openModalEditProker(id, tanggal, kategori, kegiatan, keterangan) {
         document.getElementById('formEditProker').action = '<?= base_url('buku/proker/update/') ?>' + id;
@@ -1558,16 +1595,21 @@
     }
 
     function rebindPageEvents() {
-        // 1. Restore active tab from URL parameter or SessionStorage
-        try {
-            const urlParams = new URLSearchParams(window.location.search);
-            const tabParam = urlParams.get('tab');
-            const savedTab = sessionStorage.getItem('activeTab_lpj_<?= $buku['id'] ?>');
-            const activeTab = tabParam || savedTab || 'proker';
-            if (typeof switchTab === 'function' && activeTab && document.getElementById('tab-' + activeTab)) {
-                switchTab(activeTab);
-            }
-        } catch (e) {}
+        // 1. Initialize tabs (restore active tab)
+        if (typeof window.initLpjTabs === 'function') {
+            try { window.initLpjTabs(); } catch (e) {}
+        } else {
+            // Fallback: direct tab restore
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const tabParam = urlParams.get('tab');
+                const savedTab = sessionStorage.getItem('activeTab_lpj_<?= $buku['id'] ?>');
+                const activeTab = tabParam || savedTab || 'proker';
+                if (typeof switchTab === 'function' && activeTab && document.getElementById('tab-' + activeTab)) {
+                    switchTab(activeTab);
+                }
+            } catch (e) {}
+        }
 
         // 2. Re-bind draggable photo preview boxes
         document.querySelectorAll('[id^="container_preview_"]').forEach(box => {
@@ -1576,7 +1618,12 @@
         });
     }
 
-    document.addEventListener('DOMContentLoaded', rebindPageEvents);
+    // Run rebindPageEvents immediately (for SPA navigation) and on DOMContentLoaded (for direct load)
+    if (document.readyState !== 'loading') {
+        rebindPageEvents();
+    } else {
+        document.addEventListener('DOMContentLoaded', rebindPageEvents);
+    }
     window.rebindPageEvents = rebindPageEvents;
 
     function openModalUnit(id, nama, capaian, target, permasalahan, evaluasi) {

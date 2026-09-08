@@ -28,12 +28,12 @@
             </div>
 
             <h1 class="text-2xl sm:text-4xl md:text-5xl font-heading font-black tracking-tight leading-tight text-white drop-shadow-md">
-                Website <span class="bg-gradient-to-r from-emerald-300 via-teal-200 to-green-300 bg-clip-text text-transparent">Lapor Kebersihan</span><br>
-                Pondok Pesantren Assalafiyyah
+                Website Resmi <span class="bg-gradient-to-r from-emerald-300 via-teal-200 to-green-300 bg-clip-text text-transparent">Pengaduan & Pengelolaan Kebersihan</span><br>
+                Assalafiyyah Mlangi
             </h1>
 
             <p class="text-xs sm:text-base text-slate-200 font-medium leading-relaxed max-w-2xl mx-auto px-2 sm:px-0 drop-shadow-xs">
-                Wadah layanan pengaduan kebersihan, pemeliharaan lingkungan yang asri, serta transparansi gerakan kebersihan bersama seluruh santri & pengurus Kebersihan.
+                Website resmi pengaduan dan pengelolaan kebersihan Assalafiyyah Mlangi - Admin <a href="https://wa.me/62895320276800" target="_blank" rel="noopener noreferrer" class="text-emerald-300 font-bold hover:underline inline-flex items-center gap-1"><i class="fa-brands fa-whatsapp text-emerald-400"></i> 0895320276800</a>
             </p>
         </div>
     </div>

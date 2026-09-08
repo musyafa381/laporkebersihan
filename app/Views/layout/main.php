@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= esc($title ?? 'Lapor Kebersihan - Pondok Pesantren Assalafiyyah Mlangi') ?></title>
-    <meta name="description" content="Layanan pengaduan kebersihan, pemeliharaan sarana lingkungan, transparansi LPJ & buku keuangan kebersihan Pondok Pesantren Assalafiyyah Mlangi.">
+    <title><?= esc($title ?? 'Website resmi pengaduan dan pengelolaan kebersihan Assalafiyyah Mlangi - Admin 0895320276800') ?></title>
+    <meta name="description" content="Website resmi pengaduan dan pengelolaan kebersihan Assalafiyyah Mlangi - Admin 0895320276800. Layanan pengaduan kebersihan, pemeliharaan sarana lingkungan, transparansi LPJ & buku keuangan kebersihan Pondok Pesantren Assalafiyyah Mlangi.">
+    <meta name="google-site-verification" content="jDXJXSLy_kMZmBDhLIS3zrMbbOelvJf5kf9w-dM92VU">
     <meta name="theme-color" content="#059669">
 
     <!-- Favicon & App Icons -->
@@ -17,8 +18,8 @@
 
     <!-- Open Graph / SEO Social Cards -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="<?= esc($title ?? 'Lapor Kebersihan - Pondok Pesantren Assalafiyyah Mlangi') ?>">
-    <meta property="og:description" content="Layanan pengaduan kebersihan, pemeliharaan sarana lingkungan, transparansi LPJ & buku keuangan kebersihan Pondok Pesantren Assalafiyyah Mlangi.">
+    <meta property="og:title" content="<?= esc($title ?? 'Website resmi pengaduan dan pengelolaan kebersihan Assalafiyyah Mlangi - Admin 0895320276800') ?>">
+    <meta property="og:description" content="Website resmi pengaduan dan pengelolaan kebersihan Assalafiyyah Mlangi - Admin 0895320276800. Layanan pengaduan kebersihan, pemeliharaan sarana lingkungan, transparansi LPJ & buku keuangan kebersihan Pondok Pesantren Assalafiyyah Mlangi.">
     <meta property="og:image" content="<?= base_url('android-chrome-512x512.png') ?>">
     <meta property="og:url" content="<?= current_url() ?>">
     <!-- Google Fonts & Tailwind CDN & FontAwesome & SweetAlert2 -->
