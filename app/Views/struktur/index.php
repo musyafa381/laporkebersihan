@@ -2,18 +2,28 @@
 
 <?= $this->section('content') ?>
 <style>
-    /* Organization Tree Diagram Connectors */
-    .tree-connector-v {
+    /* Tree Connectors */
+    .tree-line-v {
         width: 2px;
-        height: 24px;
-        background-color: #cbd5e1;
+        background-color: #10b981;
+        margin: 0 auto;
+    }
+    .tree-line-h {
+        height: 2px;
+        background-color: #10b981;
+    }
+    .tree-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 9999px;
+        background-color: #059669;
         margin: 0 auto;
     }
     .node-btn {
         transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .node-btn:hover {
-        transform: translateY(-4px) scale(1.03);
+        transform: translateY(-3px) scale(1.02);
     }
 
     @media print {
@@ -41,14 +51,13 @@
             max-width: 100% !important;
             padding: 0 !important;
             margin: 0 !important;
-            space-y: 0 !important;
         }
         .print-header {
             display: block !important;
             text-align: center;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #0f172a;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #065f46;
         }
         .print-chart-container {
             border: none !important;
@@ -65,74 +74,79 @@
             width: 100% !important;
             padding: 0 !important;
             transform: none !important;
-            gap: 12px !important;
+            gap: 6px !important;
         }
         /* Top Level Cards in Portrait Print */
         .print-chart-container .w-80 {
-            width: 260px !important;
+            width: 250px !important;
             max-width: 100% !important;
         }
-        .print-chart-container .w-\[600px\] {
+        .print-chart-container .w-\[540px\] {
             width: 100% !important;
-            max-width: 480px !important;
+            max-width: 440px !important;
             justify-content: center !important;
             gap: 12px !important;
         }
-        .print-chart-container .w-64 {
-            width: 220px !important;
+        .print-chart-container .w-60 {
+            width: 205px !important;
         }
         /* 5-Column Grid in Portrait Print */
         .print-chart-container .grid-cols-5 {
             display: grid !important;
             grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-            gap: 5px !important;
+            gap: 4.5px !important;
             width: 100% !important;
             max-width: 100% !important;
-            padding-top: 6px !important;
+            padding-top: 2px !important;
             align-items: start !important;
         }
         .print-chart-container .grid-cols-5 > div {
-            gap: 6px !important;
+            gap: 5px !important;
         }
         /* Card styles in Print */
-        .print-chart-container .rounded-2xl {
-            border-radius: 8px !important;
-            padding: 5px 6px !important;
+        .print-unit-card {
+            border-radius: 6px !important;
+            padding: 4.5px 5px !important;
             border-width: 1px !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
         }
-        .print-chart-container .font-heading.font-black.text-xs {
-            font-size: 8.5px !important;
-            line-height: 1.15 !important;
-        }
-        .print-chart-container .font-heading.font-extrabold.text-xs {
-            font-size: 8.5px !important;
-            line-height: 1.15 !important;
-        }
-        .print-chart-container .text-\[11px\] {
+        .print-unit-card .unit-title {
             font-size: 8px !important;
-            line-height: 1.15 !important;
+            line-height: 1.1 !important;
         }
-        .print-chart-container .text-\[10px\] {
-            font-size: 7.5px !important;
-            line-height: 1.15 !important;
-        }
-        .print-chart-container .text-\[9\.5px\], .print-chart-container .text-\[9px\] {
+        .print-unit-card .unit-badge {
             font-size: 7px !important;
             line-height: 1 !important;
+            padding: 1px 3px !important;
         }
-        .print-chart-container .fa-solid {
+        .print-unit-card .member-item {
             font-size: 7px !important;
+            line-height: 1.1 !important;
+        }
+        .print-unit-card .fa-solid, .print-unit-card .fa-regular {
+            font-size: 6.5px !important;
+        }
+        .tree-line-v {
+            background-color: #059669 !important;
+        }
+        .tree-line-h {
+            background-color: #059669 !important;
+        }
+        .tree-dot {
+            background-color: #047857 !important;
         }
     }
 </style>
 
 <div class="max-w-6xl mx-auto space-y-6 sm:space-y-8 py-2 sm:py-6">
-    <!-- Print Only Header -->
+    <!-- Print Only Formal Header / Kop Bagan -->
     <div class="print-header hidden">
-        <h2 class="text-base font-black uppercase tracking-wider text-slate-900">Bagan Struktur Organisasi Kebersihan</h2>
-        <p class="text-xs font-bold text-emerald-800">Yayasan Pondok Pesantren Assalafiyyah Mlangi</p>
+        <div class="inline-block px-3 py-0.5 mb-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-900 font-extrabold text-[9px] uppercase tracking-widest">
+            TIM K3L (Kebersihan, Ketertiban & Keindahan Lingkungan)
+        </div>
+        <h2 class="text-sm font-black uppercase tracking-wider text-slate-900">BAGAN STRUKTUR ORGANISASI KEBERSIHAN</h2>
+        <p class="text-[10.5px] font-bold text-emerald-800">YAYASAN PONDOK PESANTREN ASSALAFIYYAH MLANGI YOGYAKARTA</p>
     </div>
 
     <!-- Hero Banner / Page Header (Frosted Glass Theme) -->
@@ -159,83 +173,125 @@
                     <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition">
                         <i class="fa-solid fa-print text-xs"></i>
                     </div>
-                    <span>Cetak Bagan</span>
+                    <span>Cetak Bagan (Portrait)</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- INTERACTIVE ORGANIZATIONAL TREE DIAGRAM (GLASSMORPHISM CARD) -->
-    <div class="print-chart-container glass-card rounded-[32px] p-6 sm:p-10 shadow-[0_12px_40px_rgba(0,0,0,0.06)] border border-white/80 bg-white/75 backdrop-blur-2xl overflow-x-auto">
-        <div class="min-w-[980px] flex flex-col items-center py-4 space-y-8 text-center">
+    <!-- ORGANIZATIONAL TREE DIAGRAM CARD -->
+    <div class="print-chart-container glass-card rounded-[32px] p-4 sm:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.06)] border border-white/80 bg-white/80 backdrop-blur-2xl overflow-x-auto">
+        <div class="min-w-[980px] flex flex-col items-center py-2 space-y-0 text-center">
 
-            <!-- LEVEL 1: KETUA K3L (THEME EMERALD GRADIENT) -->
-            <div class="w-80">
-                <div class="rounded-2xl bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 text-white p-4 shadow-xl shadow-emerald-900/20 border border-emerald-700/60 relative group hover:scale-105 transition-all duration-300">
-                    <div class="text-xs font-heading font-black uppercase tracking-widest text-emerald-200 pb-1.5 border-b border-emerald-700/60">
-                        <?= esc($pimpinan['ketua']['jabatan'] ?? 'KETUA K3L') ?>
+            <!-- LEVEL 1: KETUA K3L -->
+            <div class="w-80 relative z-10">
+                <div class="rounded-2xl bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-900 text-white p-3.5 shadow-lg shadow-emerald-900/25 border-2 border-emerald-500/70 relative group hover:scale-105 transition-all duration-300">
+                    <div class="inline-block px-2.5 py-0.5 rounded-full bg-white/15 text-[10px] font-heading font-black uppercase tracking-widest text-emerald-200 border border-white/20">
+                        <?= esc($pimpinan['ketua']['jabatan'] ?? 'KETUA PENGURUS K3L ASSALAFIYYAH') ?>
                     </div>
-                    <div class="pt-2 text-sm font-heading font-extrabold text-white tracking-wide">
+                    <div class="pt-1.5 text-sm sm:text-base font-heading font-black text-white tracking-wide">
                         <?= esc($pimpinan['ketua']['nama_penanggung_jawab'] ?? 'Bapak Afif Muzayyin') ?>
                     </div>
                     <?php if (!empty($pimpinan['ketua']['kontak_hp'])): ?>
-                        <div class="text-[11px] text-emerald-300/80 font-medium mt-0.5"><?= esc($pimpinan['ketua']['kontak_hp']) ?></div>
+                        <div class="text-[10.5px] text-emerald-300 font-semibold mt-0.5 flex items-center justify-center gap-1">
+                            <i class="fa-brands fa-whatsapp text-[10px]"></i>
+                            <span><?= esc($pimpinan['ketua']['kontak_hp']) ?></span>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
 
-            <!-- LEVEL 2: KOORDINATOR UTAMA (CLEAN WHITE CARD WITH EMERALD ACCENT) -->
-            <div class="w-80">
-                <div class="rounded-2xl bg-white text-slate-800 p-4 shadow-lg shadow-slate-200/50 border-2 border-emerald-500/80 relative group hover:scale-105 transition-all duration-300">
-                    <div class="text-xs font-heading font-black uppercase tracking-widest text-emerald-800 pb-1.5 border-b border-slate-100">
-                        <?= esc($pimpinan['koordinator']['jabatan'] ?? 'KOORDINATOR UTAMA') ?>
+            <!-- CONNECTOR LEVEL 1 -> LEVEL 2 -->
+            <div class="w-full flex flex-col items-center">
+                <div class="tree-line-v h-5"></div>
+                <div class="tree-dot"></div>
+                <div class="tree-line-v h-5"></div>
+            </div>
+
+            <!-- LEVEL 2: KOORDINATOR KEBERSIHAN -->
+            <div class="w-80 relative z-10">
+                <div class="rounded-2xl bg-white text-slate-800 p-3.5 shadow-md border-t-4 border-t-emerald-600 border-x border-b border-slate-200 relative group hover:scale-105 transition-all duration-300">
+                    <div class="inline-block px-2 py-0.5 rounded-md bg-emerald-50 text-[10px] font-heading font-black uppercase tracking-wider text-emerald-800 border border-emerald-200">
+                        <?= esc($pimpinan['koordinator']['jabatan'] ?? 'KOORDINATOR KEBERSIHAN') ?>
                     </div>
-                    <div class="pt-2 text-sm font-heading font-extrabold text-slate-900">
+                    <div class="pt-1.5 text-sm sm:text-base font-heading font-black text-slate-900">
                         <?= esc($pimpinan['koordinator']['nama_penanggung_jawab'] ?? 'Bapak Muhammad Ashar') ?>
                     </div>
                     <?php if (!empty($pimpinan['koordinator']['kontak_hp'])): ?>
-                        <div class="text-[11px] text-slate-400 font-medium mt-0.5"><?= esc($pimpinan['koordinator']['kontak_hp']) ?></div>
+                        <div class="text-[10.5px] text-slate-500 font-semibold mt-0.5 flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-phone text-[9px] text-emerald-600"></i>
+                            <span><?= esc($pimpinan['koordinator']['kontak_hp']) ?></span>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
 
-            <!-- LEVEL 3: SEKRETARIS (KIRI) & LOGISTIK (KANAN) -->
-            <div class="w-[600px] flex justify-between gap-8 pt-0">
+            <!-- CONNECTOR LEVEL 2 -> LEVEL 3 (T-SPLIT) -->
+            <div class="w-full flex flex-col items-center">
+                <div class="tree-line-v h-4"></div>
+                <div class="w-[380px] tree-line-h"></div>
+                <div class="w-[380px] flex justify-between">
+                    <div class="tree-line-v h-4"></div>
+                    <div class="tree-line-v h-4"></div>
+                </div>
+            </div>
+
+            <!-- LEVEL 3: SEKRETARIS (KIRI) & DIVISI LOGISTIK (KANAN) -->
+            <div class="w-[540px] flex justify-between gap-6 relative z-10">
                 <!-- Card Sekretaris -->
-                <div class="w-64">
-                    <div class="rounded-2xl bg-white text-slate-800 p-3.5 shadow-md border border-slate-200/90 hover:border-emerald-500 hover:scale-105 transition-all duration-300">
-                        <div class="text-xs font-heading font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-100">
-                            <?= esc($pimpinan['sekretaris']['jabatan'] ?? 'SEKRETARIS') ?>
+                <div class="w-60">
+                    <div class="rounded-2xl bg-white text-slate-800 p-3 shadow-sm border-t-3 border-t-teal-600 border-x border-b border-slate-200 hover:border-teal-500 hover:scale-105 transition-all duration-300">
+                        <div class="text-[10px] font-heading font-black uppercase tracking-wider text-slate-700 pb-0.5">
+                            <i class="fa-solid fa-pen-fancy text-[9px] text-teal-600 mr-1"></i>
+                            <?= esc($pimpinan['sekretaris']['jabatan'] ?? 'SEKRETARIS KEBERSIHAN') ?>
                         </div>
-                        <div class="pt-1.5 text-xs font-heading font-extrabold text-emerald-800">
+                        <div class="pt-0.5 text-xs sm:text-sm font-heading font-extrabold text-emerald-900">
                             <?= esc($pimpinan['sekretaris']['nama_penanggung_jawab'] ?? 'Ahmad Musyafa') ?>
                         </div>
                     </div>
                 </div>
 
                 <!-- Card Logistik -->
-                <div class="w-64">
-                    <div class="rounded-2xl bg-white text-slate-800 p-3.5 shadow-md border border-slate-200/90 hover:border-emerald-500 hover:scale-105 transition-all duration-300">
-                        <div class="text-xs font-heading font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-100">
-                            <?= esc($pimpinan['logistik']['jabatan'] ?? 'LOGISTIK') ?>
+                <div class="w-60">
+                    <div class="rounded-2xl bg-white text-slate-800 p-3 shadow-sm border-t-3 border-t-emerald-600 border-x border-b border-slate-200 hover:border-emerald-500 hover:scale-105 transition-all duration-300">
+                        <div class="text-[10px] font-heading font-black uppercase tracking-wider text-slate-700 pb-0.5">
+                            <i class="fa-solid fa-boxes-stacked text-[9px] text-emerald-600 mr-1"></i>
+                            <?= esc($pimpinan['logistik']['jabatan'] ?? 'DIVISI LOGISTIK & GUDANG') ?>
                         </div>
-                        <div class="pt-1.5 text-xs font-heading font-extrabold text-emerald-800">
+                        <div class="pt-0.5 text-xs sm:text-sm font-heading font-extrabold text-emerald-900">
                             <?= esc($pimpinan['logistik']['nama_penanggung_jawab'] ?? 'Ahmad Fakhri Maulana') ?>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- CONNECTOR LEVEL 3 -> 5 COLUMNS DISTRIBUTION TREE -->
+            <div class="w-full flex flex-col items-center">
+                <!-- Central Trunk Down from Center -->
+                <div class="tree-line-v h-4"></div>
+                <!-- 5-Way Horizontal Distribution Bar -->
+                <div class="w-[90%] max-w-5xl tree-line-h"></div>
+                <!-- 5 Downward Drop Lines into each Column Header -->
+                <div class="w-[90%] max-w-5xl grid grid-cols-5">
+                    <div class="flex justify-center"><div class="tree-line-v h-4"></div></div>
+                    <div class="flex justify-center"><div class="tree-line-v h-4"></div></div>
+                    <div class="flex justify-center"><div class="tree-line-v h-4"></div></div>
+                    <div class="flex justify-center"><div class="tree-line-v h-4"></div></div>
+                    <div class="flex justify-center"><div class="tree-line-v h-4"></div></div>
+                </div>
+            </div>
+
             <!-- LEVEL 4 & 5: 5 COLUMNS HIERARCHY (ASRAMA, GEMERLAP, LEMBAGA LAIN, SEKOLAH, SATGAS) -->
-            <div class="grid grid-cols-5 gap-4 w-full max-w-5xl pt-4 items-start">
+            <div class="grid grid-cols-5 gap-3.5 w-full max-w-5xl items-start relative z-10">
 
                 <!-- KOLOM 1: ASRAMA -->
-                <div class="flex flex-col items-center space-y-3">
-                    <div class="w-full p-3 rounded-2xl bg-emerald-50/80 border border-emerald-200 shadow-sm text-center">
-                        <div class="font-heading font-black text-xs text-emerald-950 uppercase tracking-widest">
-                            ASRAMA
+                <div class="flex flex-col items-center space-y-2">
+                    <div class="w-full p-2.5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50/80 border border-emerald-300/80 shadow-2xs text-center">
+                        <div class="font-heading font-black text-xs text-emerald-950 uppercase tracking-wider flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-hotel text-[10px] text-emerald-700"></i>
+                            <span>ASRAMA</span>
                         </div>
-                        <span class="text-[10px] font-extrabold text-emerald-700 bg-white px-2.5 py-0.5 rounded-full mt-1.5 inline-block border border-emerald-200/80 shadow-2xs">
+                        <span class="text-[9.5px] font-extrabold text-emerald-800 bg-white px-2 py-0.2 rounded-full mt-1 inline-block border border-emerald-200 shadow-2xs">
                             <?= count($asramaUnits) ?> Unit
                         </span>
                     </div>
@@ -246,23 +302,28 @@
                             <?php foreach ($asramaUnits as $u): 
                                 $pjList = $u['pj_list'] ?? [];
                                 $primaryPj = !empty($pjList) ? $pjList[0] : null;
-                                $primaryPjName = $primaryPj ? $primaryPj['nama_pj'] : ($u['pj_nama'] ?: 'Belum ada PJ');
+                                $primaryPjName = $primaryPj ? $primaryPj['nama_pj'] : ($u['pj_nama'] ?: '');
                             ?>
-                                <div class="p-3 rounded-2xl bg-white border border-slate-200 shadow-2xs text-left hover:shadow-md hover:border-emerald-400 transition space-y-1">
-                                    <div class="font-heading font-extrabold text-xs text-slate-900 truncate" title="<?= esc($u['nama_unit']) ?>">
+                                <div class="print-unit-card p-2.5 rounded-xl bg-white border border-slate-200/90 border-l-4 border-l-emerald-600 shadow-2xs text-left hover:shadow-md hover:border-emerald-400 transition space-y-1">
+                                    <div class="unit-title font-heading font-black text-[11px] text-slate-900 leading-tight truncate" title="<?= esc($u['nama_unit']) ?>">
                                         <?= esc($u['nama_unit']) ?>
                                     </div>
                                     <div class="space-y-0.5 pt-0.5">
                                         <?php if (!empty($pjList)): ?>
                                             <?php foreach ($pjList as $pj): ?>
-                                                <div class="text-[11px] text-slate-600 font-semibold flex items-center gap-1 truncate" title="<?= esc($pj['nama_pj']) ?>">
-                                                    <i class="fa-solid fa-user-check text-[9px] text-emerald-600"></i>
+                                                <div class="member-item text-[10px] text-slate-700 font-semibold flex items-center gap-1 truncate" title="<?= esc($pj['nama_pj']) ?>">
+                                                    <i class="fa-solid fa-user-tie text-[9px] text-emerald-700"></i>
                                                     <span><?= esc($pj['nama_pj']) ?></span>
                                                 </div>
                                             <?php endforeach; ?>
+                                        <?php elseif (!empty($primaryPjName)): ?>
+                                            <div class="member-item text-[10px] text-slate-700 font-semibold flex items-center gap-1 truncate">
+                                                <i class="fa-solid fa-user-tie text-[9px] text-emerald-700"></i>
+                                                <span><?= esc($primaryPjName) ?></span>
+                                            </div>
                                         <?php else: ?>
-                                            <div class="text-[11px] text-slate-500 font-semibold truncate">
-                                                <?= esc($primaryPjName) ?>
+                                            <div class="member-item text-[9.5px] text-slate-400 italic">
+                                                <i class="fa-regular fa-circle-question text-[8.5px] mr-0.5"></i> Belum ada PJ
                                             </div>
                                         <?php endif; ?>
                                     </div>
@@ -275,12 +336,13 @@
                 </div>
 
                 <!-- KOLOM 2: GEMERLAP (Kader Asrama) -->
-                <div class="flex flex-col items-center space-y-3">
-                    <div class="w-full p-3 rounded-2xl bg-emerald-50/80 border border-emerald-200 shadow-sm text-center">
-                        <div class="font-heading font-black text-xs text-emerald-950 uppercase tracking-widest">
-                            GEMERLAP
+                <div class="flex flex-col items-center space-y-2">
+                    <div class="w-full p-2.5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50/80 border border-emerald-300/80 shadow-2xs text-center">
+                        <div class="font-heading font-black text-xs text-emerald-950 uppercase tracking-wider flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-sparkles text-[10px] text-emerald-700"></i>
+                            <span>GEMERLAP</span>
                         </div>
-                        <span class="text-[10px] font-extrabold text-emerald-700 bg-white px-2.5 py-0.5 rounded-full mt-1.5 inline-block border border-emerald-200/80 shadow-2xs">
+                        <span class="text-[9.5px] font-extrabold text-emerald-800 bg-white px-2 py-0.2 rounded-full mt-1 inline-block border border-emerald-200 shadow-2xs">
                             <?= count($gemerlapUnits) ?> Posko Kader
                         </span>
                     </div>
@@ -292,30 +354,32 @@
                                 $cleanName = preg_replace('/^GEMERLAP\s*(Asrama\s*)?/i', '', $u['nama_unit']);
                                 $kaderMembers = $u['kader_members'] ?? [];
                                 $primaryPj = !empty($u['pj_list']) ? $u['pj_list'][0] : null;
-                                $primaryPjName = $primaryPj ? $primaryPj['nama_pj'] : ($u['pj_nama'] ?: '-');
+                                $primaryPjName = $primaryPj ? $primaryPj['nama_pj'] : ($u['pj_nama'] ?: '');
                             ?>
-                                <div class="p-3 rounded-2xl bg-white border border-slate-200 shadow-2xs text-left hover:shadow-md hover:border-emerald-400 transition space-y-1">
-                                    <div class="font-heading font-extrabold text-xs text-slate-900 truncate" title="<?= esc($u['nama_unit']) ?>">
+                                <div class="print-unit-card p-2.5 rounded-xl bg-white border border-slate-200/90 border-l-4 border-l-teal-600 shadow-2xs text-left hover:shadow-md hover:border-emerald-400 transition space-y-1">
+                                    <div class="unit-title font-heading font-black text-[11px] text-slate-900 leading-tight truncate" title="<?= esc($u['nama_unit']) ?>">
                                         <?= esc($cleanName ?: $u['nama_unit']) ?>
                                     </div>
-                                    <div class="text-[11px] text-emerald-700 font-bold truncate flex items-center justify-between">
+                                    <div class="unit-badge text-[10px] text-teal-800 font-bold truncate flex items-center justify-between">
                                         <span>Kader GEMERLAP</span>
                                         <?php if (!empty($kaderMembers)): ?>
-                                            <span class="text-[9.5px] px-1.5 py-0.2 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-extrabold"><?= count($kaderMembers) ?> Anggota</span>
+                                            <span class="text-[8.5px] px-1.5 py-0.2 rounded bg-teal-50 text-teal-800 border border-teal-200 font-black"><?= count($kaderMembers) ?> Anggota</span>
                                         <?php endif; ?>
                                     </div>
                                     
                                     <?php if (!empty($kaderMembers)): ?>
                                         <div class="pt-1 border-t border-slate-100 space-y-0.5">
                                             <?php foreach ($kaderMembers as $km): ?>
-                                                <div class="text-[10px] text-slate-700 font-semibold flex items-center gap-1 truncate" title="<?= esc($km['nama_kader']) ?>">
-                                                    <i class="fa-solid fa-circle-user text-[9px] text-emerald-600"></i>
+                                                <div class="member-item text-[9.5px] text-slate-700 font-semibold flex items-center gap-1 truncate" title="<?= esc($km['nama_kader']) ?>">
+                                                    <i class="fa-solid fa-circle-user text-[8.5px] text-teal-600"></i>
                                                     <span><?= esc($km['nama_kader']) ?></span>
                                                 </div>
                                             <?php endforeach; ?>
                                         </div>
+                                    <?php elseif (!empty($primaryPjName)): ?>
+                                        <div class="member-item text-[9.5px] text-slate-600 font-medium">PJ: <?= esc($primaryPjName) ?></div>
                                     <?php else: ?>
-                                        <div class="text-[10px] text-slate-400 font-medium">PJ: <?= esc($primaryPjName) ?></div>
+                                        <div class="member-item text-[9px] text-slate-400 italic">Belum ada kader</div>
                                     <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
@@ -326,12 +390,13 @@
                 </div>
 
                 <!-- KOLOM 3: LEMBAGA LAIN (KSY, Gedung Umum, Kos, dll) -->
-                <div class="flex flex-col items-center space-y-3">
-                    <div class="w-full p-3 rounded-2xl bg-emerald-50/80 border border-emerald-200 shadow-sm text-center">
-                        <div class="font-heading font-black text-xs text-emerald-950 uppercase tracking-widest">
-                            LEMBAGA LAIN
+                <div class="flex flex-col items-center space-y-2">
+                    <div class="w-full p-2.5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50/80 border border-emerald-300/80 shadow-2xs text-center">
+                        <div class="font-heading font-black text-xs text-emerald-950 uppercase tracking-wider flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-building-columns text-[10px] text-emerald-700"></i>
+                            <span>LEMBAGA LAIN</span>
                         </div>
-                        <span class="text-[10px] font-extrabold text-emerald-700 bg-white px-2.5 py-0.5 rounded-full mt-1.5 inline-block border border-emerald-200/80 shadow-2xs">
+                        <span class="text-[9.5px] font-extrabold text-emerald-800 bg-white px-2 py-0.2 rounded-full mt-1 inline-block border border-emerald-200 shadow-2xs">
                             <?= count($lembagaUnits) ?> Unit
                         </span>
                     </div>
@@ -342,27 +407,32 @@
                             <?php foreach ($lembagaUnits as $u): 
                                 $pjList = $u['pj_list'] ?? [];
                                 $primaryPj = !empty($pjList) ? $pjList[0] : null;
-                                $primaryPjName = $primaryPj ? $primaryPj['nama_pj'] : ($u['pj_nama'] ?: 'Belum ada PJ');
+                                $primaryPjName = $primaryPj ? $primaryPj['nama_pj'] : ($u['pj_nama'] ?: '');
                             ?>
-                                <div class="p-3 rounded-2xl bg-white border border-slate-200 shadow-2xs text-left hover:shadow-md hover:border-emerald-400 transition space-y-1">
-                                    <div class="font-heading font-extrabold text-xs text-slate-900 truncate" title="<?= esc($u['nama_unit']) ?>">
+                                <div class="print-unit-card p-2.5 rounded-xl bg-white border border-slate-200/90 border-l-4 border-l-emerald-600 shadow-2xs text-left hover:shadow-md hover:border-emerald-400 transition space-y-1">
+                                    <div class="unit-title font-heading font-black text-[11px] text-slate-900 leading-tight truncate" title="<?= esc($u['nama_unit']) ?>">
                                         <?= esc($u['nama_unit']) ?>
                                     </div>
                                     <div class="space-y-0.5 pt-0.5">
                                         <?php if (!empty($pjList)): ?>
                                             <?php foreach ($pjList as $pj): ?>
-                                                <div class="text-[11px] text-slate-600 font-semibold flex items-center gap-1 truncate" title="<?= esc($pj['nama_pj']) ?>">
-                                                    <i class="fa-solid fa-user-check text-[9px] text-emerald-600"></i>
+                                                <div class="member-item text-[10px] text-slate-700 font-semibold flex items-center gap-1 truncate" title="<?= esc($pj['nama_pj']) ?>">
+                                                    <i class="fa-solid fa-user-check text-[9px] text-emerald-700"></i>
                                                     <span><?= esc($pj['nama_pj']) ?></span>
                                                 </div>
                                             <?php endforeach; ?>
+                                        <?php elseif (!empty($primaryPjName)): ?>
+                                            <div class="member-item text-[10px] text-slate-700 font-semibold flex items-center gap-1 truncate">
+                                                <i class="fa-solid fa-user-check text-[9px] text-emerald-700"></i>
+                                                <span><?= esc($primaryPjName) ?></span>
+                                            </div>
                                         <?php else: ?>
-                                            <div class="text-[11px] text-slate-500 font-semibold truncate">
-                                                <?= esc($primaryPjName) ?>
+                                            <div class="member-item text-[9.5px] text-slate-400 italic">
+                                                <i class="fa-regular fa-circle-question text-[8.5px] mr-0.5"></i> Belum ada PJ
                                             </div>
                                         <?php endif; ?>
                                     </div>
-                                    <div class="text-[10px] text-emerald-700 font-medium"><?= esc($u['tipe'] ?: 'Lembaga') ?></div>
+                                    <div class="unit-badge text-[9px] text-emerald-700 font-bold"><?= esc($u['tipe'] ?: 'Pusat K3L') ?></div>
                                 </div>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -372,12 +442,13 @@
                 </div>
 
                 <!-- KOLOM 4: SEKOLAH (MTS, MA, SMK, dll) -->
-                <div class="flex flex-col items-center space-y-3">
-                    <div class="w-full p-3 rounded-2xl bg-emerald-50/80 border border-emerald-200 shadow-sm text-center">
-                        <div class="font-heading font-black text-xs text-emerald-950 uppercase tracking-widest">
-                            SEKOLAH
+                <div class="flex flex-col items-center space-y-2">
+                    <div class="w-full p-2.5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50/80 border border-emerald-300/80 shadow-2xs text-center">
+                        <div class="font-heading font-black text-xs text-emerald-950 uppercase tracking-wider flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-graduation-cap text-[10px] text-emerald-700"></i>
+                            <span>SEKOLAH</span>
                         </div>
-                        <span class="text-[10px] font-extrabold text-emerald-700 bg-white px-2.5 py-0.5 rounded-full mt-1.5 inline-block border border-emerald-200/80 shadow-2xs">
+                        <span class="text-[9.5px] font-extrabold text-emerald-800 bg-white px-2 py-0.2 rounded-full mt-1 inline-block border border-emerald-200 shadow-2xs">
                             <?= count($sekolahUnits) ?> Lembaga
                         </span>
                     </div>
@@ -388,23 +459,28 @@
                             <?php foreach ($sekolahUnits as $u): 
                                 $pjList = $u['pj_list'] ?? [];
                                 $primaryPj = !empty($pjList) ? $pjList[0] : null;
-                                $primaryPjName = $primaryPj ? $primaryPj['nama_pj'] : ($u['pj_nama'] ?: 'Belum ada PJ');
+                                $primaryPjName = $primaryPj ? $primaryPj['nama_pj'] : ($u['pj_nama'] ?: '');
                             ?>
-                                <div class="p-3 rounded-2xl bg-white border border-slate-200 shadow-2xs text-left hover:shadow-md hover:border-emerald-400 transition space-y-1">
-                                    <div class="font-heading font-extrabold text-xs text-slate-900 truncate" title="<?= esc($u['nama_unit']) ?>">
+                                <div class="print-unit-card p-2.5 rounded-xl bg-white border border-slate-200/90 border-l-4 border-l-emerald-600 shadow-2xs text-left hover:shadow-md hover:border-emerald-400 transition space-y-1">
+                                    <div class="unit-title font-heading font-black text-[11px] text-slate-900 leading-tight truncate" title="<?= esc($u['nama_unit']) ?>">
                                         <?= esc($u['nama_unit']) ?>
                                     </div>
                                     <div class="space-y-0.5 pt-0.5">
                                         <?php if (!empty($pjList)): ?>
                                             <?php foreach ($pjList as $pj): ?>
-                                                <div class="text-[11px] text-slate-600 font-semibold flex items-center gap-1 truncate" title="<?= esc($pj['nama_pj']) ?>">
-                                                    <i class="fa-solid fa-user-check text-[9px] text-emerald-600"></i>
+                                                <div class="member-item text-[10px] text-slate-700 font-semibold flex items-center gap-1 truncate" title="<?= esc($pj['nama_pj']) ?>">
+                                                    <i class="fa-solid fa-user-check text-[9px] text-emerald-700"></i>
                                                     <span><?= esc($pj['nama_pj']) ?></span>
                                                 </div>
                                             <?php endforeach; ?>
+                                        <?php elseif (!empty($primaryPjName)): ?>
+                                            <div class="member-item text-[10px] text-slate-700 font-semibold flex items-center gap-1 truncate">
+                                                <i class="fa-solid fa-user-check text-[9px] text-emerald-700"></i>
+                                                <span><?= esc($primaryPjName) ?></span>
+                                            </div>
                                         <?php else: ?>
-                                            <div class="text-[11px] text-slate-500 font-semibold truncate">
-                                                <?= esc($primaryPjName) ?>
+                                            <div class="member-item text-[9.5px] text-slate-400 italic">
+                                                <i class="fa-regular fa-circle-question text-[8.5px] mr-0.5"></i> Belum ada PJ
                                             </div>
                                         <?php endif; ?>
                                     </div>
@@ -417,12 +493,13 @@
                 </div>
 
                 <!-- KOLOM 5: SATGAS (Satgas Sekolah) -->
-                <div class="flex flex-col items-center space-y-3">
-                    <div class="w-full p-3 rounded-2xl bg-emerald-50/80 border border-emerald-200 shadow-sm text-center">
-                        <div class="font-heading font-black text-xs text-emerald-950 uppercase tracking-widest">
-                            SATGAS
+                <div class="flex flex-col items-center space-y-2">
+                    <div class="w-full p-2.5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50/80 border border-emerald-300/80 shadow-2xs text-center">
+                        <div class="font-heading font-black text-xs text-emerald-950 uppercase tracking-wider flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-shield-halved text-[10px] text-emerald-700"></i>
+                            <span>SATGAS</span>
                         </div>
-                        <span class="text-[10px] font-extrabold text-emerald-700 bg-white px-2.5 py-0.5 rounded-full mt-1.5 inline-block border border-emerald-200/80 shadow-2xs">
+                        <span class="text-[9.5px] font-extrabold text-emerald-800 bg-white px-2 py-0.2 rounded-full mt-1 inline-block border border-emerald-200 shadow-2xs">
                             <?= count($satgasUnits) ?> Posko Satgas
                         </span>
                     </div>
@@ -434,30 +511,32 @@
                                 $cleanSatgasName = preg_replace('/^Satgas\s*(Kebersihan\s*)?/i', '', $u['nama_unit']);
                                 $kaderMembers = $u['kader_members'] ?? [];
                                 $primaryPj = !empty($u['pj_list']) ? $u['pj_list'][0] : null;
-                                $primaryPjName = $primaryPj ? $primaryPj['nama_pj'] : ($u['pj_nama'] ?: '-');
+                                $primaryPjName = $primaryPj ? $primaryPj['nama_pj'] : ($u['pj_nama'] ?: '');
                             ?>
-                                <div class="p-3 rounded-2xl bg-white border border-slate-200 shadow-2xs text-left hover:shadow-md hover:border-emerald-400 transition space-y-1">
-                                    <div class="font-heading font-extrabold text-xs text-slate-900 truncate" title="<?= esc($u['nama_unit']) ?>">
+                                <div class="print-unit-card p-2.5 rounded-xl bg-white border border-slate-200/90 border-l-4 border-l-teal-600 shadow-2xs text-left hover:shadow-md hover:border-emerald-400 transition space-y-1">
+                                    <div class="unit-title font-heading font-black text-[11px] text-slate-900 leading-tight truncate" title="<?= esc($u['nama_unit']) ?>">
                                         <?= esc($cleanSatgasName ?: $u['nama_unit']) ?>
                                     </div>
-                                    <div class="text-[11px] text-emerald-700 font-bold truncate flex items-center justify-between">
+                                    <div class="unit-badge text-[10px] text-teal-800 font-bold truncate flex items-center justify-between">
                                         <span>Satgas Kebersihan</span>
                                         <?php if (!empty($kaderMembers)): ?>
-                                            <span class="text-[9.5px] px-1.5 py-0.2 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-extrabold"><?= count($kaderMembers) ?> Anggota</span>
+                                            <span class="text-[8.5px] px-1.5 py-0.2 rounded bg-teal-50 text-teal-800 border border-teal-200 font-black"><?= count($kaderMembers) ?> Anggota</span>
                                         <?php endif; ?>
                                     </div>
 
                                     <?php if (!empty($kaderMembers)): ?>
                                         <div class="pt-1 border-t border-slate-100 space-y-0.5">
                                             <?php foreach ($kaderMembers as $km): ?>
-                                                <div class="text-[10px] text-slate-700 font-semibold flex items-center gap-1 truncate" title="<?= esc($km['nama_kader']) ?>">
-                                                    <i class="fa-solid fa-circle-user text-[9px] text-emerald-600"></i>
+                                                <div class="member-item text-[9.5px] text-slate-700 font-semibold flex items-center gap-1 truncate" title="<?= esc($km['nama_kader']) ?>">
+                                                    <i class="fa-solid fa-circle-user text-[8.5px] text-teal-600"></i>
                                                     <span><?= esc($km['nama_kader']) ?></span>
                                                 </div>
                                             <?php endforeach; ?>
                                         </div>
+                                    <?php elseif (!empty($primaryPjName)): ?>
+                                        <div class="member-item text-[9.5px] text-slate-600 font-medium">PJ: <?= esc($primaryPjName) ?></div>
                                     <?php else: ?>
-                                        <div class="text-[10px] text-slate-400 font-medium">PJ: <?= esc($primaryPjName) ?></div>
+                                        <div class="member-item text-[9px] text-slate-400 italic">Belum ada anggota satgas</div>
                                     <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
