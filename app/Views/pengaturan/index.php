@@ -449,27 +449,6 @@
         </div>
     </div>
 
-    <!-- Script Image Preview Helper -->
-    <script>
-        function previewImage(input, previewId, placeholderId) {
-            const previewEl = document.getElementById(previewId);
-            const placeholderEl = document.getElementById(placeholderId);
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    if (previewEl) {
-                        previewEl.src = e.target.result;
-                        previewEl.classList.remove('hidden');
-                    }
-                    if (placeholderEl) {
-                        placeholderEl.classList.add('hidden');
-                    }
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-    </script>
-
     <!-- ==================== TAB 3: KELOLA INSTANSI / UNIT & PJ / KADER ==================== -->
     <div id="tab-content-units" class="tab-content-panel hidden space-y-6">
         <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-6">
@@ -1200,8 +1179,32 @@
 </div>
 
 <script>
+(function() {
+    'use strict';
+
+    function previewImage(input, previewId, placeholderId) {
+        const previewEl = document.getElementById(previewId);
+        const placeholderEl = document.getElementById(placeholderId);
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (previewEl) {
+                    previewEl.src = e.target.result;
+                    previewEl.classList.remove('hidden');
+                }
+                if (placeholderEl) {
+                    placeholderEl.classList.add('hidden');
+                }
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    window.previewImage = previewImage;
+
     function switchTab(tabName) {
-        // Hide all content panels
+        if (!tabName) tabName = 'general';
+
+        // Hide all content panels in Pengaturan
         const panels = document.querySelectorAll('.tab-content-panel');
         panels.forEach(p => p.classList.add('hidden'));
 
@@ -1238,6 +1241,7 @@
         } catch (e) {}
     }
     window.switchTab = switchTab;
+    window.switchPengaturanTab = switchTab;
 
     function rebindPageEvents() {
         try {
@@ -1245,15 +1249,19 @@
             const tabParam = urlParams.get('tab');
             const savedTab = sessionStorage.getItem('activeTab_pengaturan');
             const activeTab = tabParam || savedTab || '<?= esc($activeTab ?? 'general') ?>' || 'general';
-            if (typeof switchTab === 'function' && activeTab && document.getElementById('tab-btn-' + activeTab)) {
+            if (activeTab && document.getElementById('tab-btn-' + activeTab)) {
                 switchTab(activeTab);
+            } else {
+                switchTab('general');
             }
 
             // Initialize Unit Pagination
             if (typeof initUnitPagination === 'function') {
                 initUnitPagination();
             }
-        } catch (e) {}
+        } catch (e) {
+            switchTab('general');
+        }
     }
     window.rebindPageEvents = rebindPageEvents;
 
@@ -1412,7 +1420,7 @@
     }
     window.goToUnitPage = goToUnitPage;
 
-    const allUsersDataPengaturan = <?= json_encode(array_map(function($u) {
+    var allUsersDataPengaturan = <?= json_encode(array_map(function($u) {
         return [
             'id' => (string)$u['id'],
             'nama_lengkap' => $u['nama_lengkap'],
@@ -1769,12 +1777,14 @@
     }
     window.resetFormKategoriAlat = resetFormKategoriAlat;
 
-    // Auto activate tab on initial page load
-    document.addEventListener("DOMContentLoaded", function() {
-        const activeTab = "<?= esc($activeTab ?? 'general') ?>";
-        switchTab(activeTab);
-    });
-    // Also run immediately
-    rebindPageEvents();
+    // Run tab activation
+    if (document.readyState === 'loading') {
+        document.addEventListener("DOMContentLoaded", function() {
+            rebindPageEvents();
+        });
+    } else {
+        rebindPageEvents();
+    }
+})();
 </script>
 <?= $this->endSection() ?>

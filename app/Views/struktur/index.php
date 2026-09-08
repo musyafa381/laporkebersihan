@@ -236,15 +236,12 @@
                                     
                                     <?php if (!empty($kaderMembers)): ?>
                                         <div class="pt-1 border-t border-slate-100 space-y-0.5">
-                                            <?php foreach (array_slice($kaderMembers, 0, 3) as $km): ?>
+                                            <?php foreach ($kaderMembers as $km): ?>
                                                 <div class="text-[10px] text-slate-700 font-semibold flex items-center gap-1 truncate" title="<?= esc($km['nama_kader']) ?>">
                                                     <i class="fa-solid fa-circle-user text-[9px] text-emerald-600"></i>
                                                     <span><?= esc($km['nama_kader']) ?></span>
                                                 </div>
                                             <?php endforeach; ?>
-                                            <?php if (count($kaderMembers) > 3): ?>
-                                                <div class="text-[9px] text-slate-400 italic">+<?= count($kaderMembers) - 3 ?> anggota lainnya</div>
-                                            <?php endif; ?>
                                         </div>
                                     <?php else: ?>
                                         <div class="text-[10px] text-slate-400 font-medium">PJ: <?= esc($primaryPjName) ?></div>
@@ -381,15 +378,12 @@
 
                                     <?php if (!empty($kaderMembers)): ?>
                                         <div class="pt-1 border-t border-slate-100 space-y-0.5">
-                                            <?php foreach (array_slice($kaderMembers, 0, 3) as $km): ?>
+                                            <?php foreach ($kaderMembers as $km): ?>
                                                 <div class="text-[10px] text-slate-700 font-semibold flex items-center gap-1 truncate" title="<?= esc($km['nama_kader']) ?>">
                                                     <i class="fa-solid fa-circle-user text-[9px] text-emerald-600"></i>
                                                     <span><?= esc($km['nama_kader']) ?></span>
                                                 </div>
                                             <?php endforeach; ?>
-                                            <?php if (count($kaderMembers) > 3): ?>
-                                                <div class="text-[9px] text-slate-400 italic">+<?= count($kaderMembers) - 3 ?> anggota lainnya</div>
-                                            <?php endif; ?>
                                         </div>
                                     <?php else: ?>
                                         <div class="text-[10px] text-slate-400 font-medium">PJ: <?= esc($primaryPjName) ?></div>
