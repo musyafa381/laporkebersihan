@@ -57,29 +57,33 @@
 
     <!-- Assigned Zones Section: 4 Cards Per Row -->
     <div class="space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-wrap">
-            <div>
-                <h2 class="font-heading font-extrabold text-base sm:text-lg text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-list-check text-emerald-600"></i> Wilayah Tugas Kebersihan Hari Ini (<?= date('d M Y') ?>)
-                </h2>
-                <p class="text-xs text-slate-500 font-medium">Terdapat <strong class="text-emerald-700 font-bold"><?= $activeCountToday ?> wilayah</strong> yang terjadwal aktif dan wajib dilaporkan hari ini.</p>
-            </div>
-            <div class="flex items-center gap-2 flex-wrap">
-                <div class="relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
-                    <input type="text" id="searchAssignedCardInput" onkeyup="filterAssignedCards()" placeholder="Cari wilayah / shift / hari..." class="pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-2xs">
+        <div class="glass-card rounded-3xl p-4 sm:p-6 shadow-xl border border-slate-200/80 bg-white space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+                <div class="space-y-1">
+                    <h2 class="font-heading font-extrabold text-base sm:text-lg text-slate-900 flex items-center gap-2">
+                        Tugas Kebersihan Hari Ini (<?= date('d M Y') ?>)
+                    </h2>
+                    <p class="text-xs text-slate-500 font-medium">Terdapat <strong class="text-emerald-700 font-bold"><?= $activeCountToday ?> wilayah</strong> yang terjadwal aktif dan wajib dilaporkan hari ini.</p>
                 </div>
-                <button type="button" onclick="openModalTambahShiftExisting()" class="px-3.5 py-1.5 rounded-xl bg-white hover:bg-emerald-50 text-emerald-700 font-heading font-extrabold text-xs border border-emerald-300 transition flex items-center justify-center gap-1.5 shadow-2xs hover:-translate-y-0.5 whitespace-nowrap">
-                    <i class="fa-solid fa-clock text-emerald-600"></i>
-                    <span>Shift Wilayah Ada</span>
-                </button>
-                <button type="button" onclick="openModalTambahWilayahUnit()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 whitespace-nowrap">
-                    <i class="fa-solid fa-plus-circle"></i>
-                    <span>Wilayah Baru</span>
-                </button>
-                <span class="text-xs font-extrabold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200/80 whitespace-nowrap">
+                <span class="text-xs font-extrabold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200/80 self-start sm:self-auto whitespace-nowrap shadow-2xs">
                     <?= $activeCountToday ?> / <?= count($penugasanList ?? []) ?> Aktif
                 </span>
+            </div>
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <div class="relative flex-1 max-w-full sm:max-w-xs">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+                    <input type="text" id="searchAssignedCardInput" onkeyup="filterAssignedCards()" placeholder="Cari wilayah / shift / hari..." class="w-full pl-9 pr-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 focus:bg-white transition shadow-2xs">
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="openModalTambahShiftExisting()" class="flex-1 sm:flex-initial px-4 py-2.5 rounded-2xl bg-white hover:bg-emerald-50 text-emerald-700 font-heading font-extrabold text-xs border border-emerald-300 transition flex items-center justify-center gap-1.5 shadow-2xs hover:-translate-y-0.5 whitespace-nowrap cursor-pointer">
+                        <i class="fa-solid fa-clock text-emerald-600"></i>
+                        <span>Shift Wilayah Ada</span>
+                    </button>
+                    <button type="button" onclick="openModalTambahWilayahUnit()" class="flex-1 sm:flex-initial px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 whitespace-nowrap cursor-pointer">
+                        <i class="fa-solid fa-plus-circle"></i>
+                        <span>Wilayah Baru</span>
+                    </button>
+                </div>
             </div>
         </div>
 

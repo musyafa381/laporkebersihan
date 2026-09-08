@@ -10,7 +10,7 @@
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div class="space-y-2 max-w-2xl">
                 <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/20 backdrop-blur-md text-emerald-200 text-xs font-bold uppercase tracking-wider border border-emerald-400/30">
-                    <i class="fa-solid fa-book-open"></i> Modul Pengisian LPJ Unit Kebersihan
+                    <i class="fa-solid fa-book-open"></i> Modul Pengisian LPJ Kebersihan
                 </span>
                 <h1 class="text-3xl sm:text-4xl font-heading font-extrabold tracking-tight leading-tight">
                     Laporan Pertanggungjawaban (LPJ) Unit
@@ -62,28 +62,25 @@
                         <div class="glass-card rounded-2xl p-5 border border-slate-200/80 bg-white space-y-4 shadow-2xs hover:shadow-md transition">
                             <div class="flex items-center justify-between">
                                 <span class="px-3 py-1 rounded-full <?= $isAktif ? 'bg-emerald-100 text-emerald-900 border-emerald-200' : 'bg-slate-100 text-slate-700 border-slate-200' ?> text-xs font-extrabold border">
-                                    <i class="fa-regular fa-calendar-days mr-1 text-emerald-700"></i>
                                     <?= esc($b['bulan']) ?> <?= esc($b['tahun']) ?>
                                 </span>
                                 <div class="flex items-center gap-1.5">
                                     <?php if ($hasEvaluasi): ?>
                                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                            <i class="fa-solid fa-check-double text-[9px] text-emerald-600"></i> Sudah Diisi
+                                            Sudah Diisi
                                         </span>
                                     <?php else: ?>
                                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200">
-                                            <i class="fa-solid fa-clock text-[9px] text-amber-600"></i> Belum Diisi
+                                            Belum Diisi
                                         </span>
                                     <?php endif; ?>
 
                                     <?php if ($isAktif): ?>
                                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                                             Aktif
                                         </span>
                                     <?php else: ?>
                                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                                            <i class="fa-solid fa-lock text-[10px]"></i>
                                             Terkunci
                                         </span>
                                     <?php endif; ?>

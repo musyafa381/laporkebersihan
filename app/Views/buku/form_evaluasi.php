@@ -113,35 +113,44 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
 
 <div class="max-w-5xl mx-auto space-y-6">
 
-    <!-- Header Navigation & Title -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <a href="<?= $backUrl ?>" class="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-emerald-600 transition mb-2">
-                <i class="fa-solid fa-arrow-left"></i> <?= $backText ?>
+    <!-- Header Card Navigation & Title -->
+    <div class="glass-card rounded-3xl p-5 sm:p-6 shadow-xl border border-slate-200/80 bg-white space-y-4">
+        <!-- Top row: Back link + Status Badge -->
+        <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <a href="<?= $backUrl ?>" class="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-emerald-700 bg-slate-50 hover:bg-emerald-50 px-3 py-1.5 rounded-xl border border-slate-200 transition">
+                <i class="fa-solid fa-arrow-left text-xs"></i> <span><?= $backText ?></span>
             </a>
-            <div class="flex items-center gap-3">
-                <span class="px-3 py-1 rounded-xl text-xs font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 shadow-2xs">
-                    <?= esc($unit['tipe'] ?? $unit['kategori'] ?? 'Unit Kebersihan') ?>
-                </span>
-                <h1 class="font-heading font-extrabold text-2xl text-slate-900 tracking-tight">
-                    Laporan Unit : <?= esc($unit['nama_unit']) ?>
-                </h1>
-            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-extrabold border <?= $isStatusAktif ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200' ?> inline-flex items-center gap-1.5 shadow-2xs whitespace-nowrap">
+                <i class="fa-solid <?= $isStatusAktif ? 'fa-circle-check text-emerald-600' : 'fa-lock text-amber-600' ?>"></i>
+                <span>Status: <?= esc($statusBuku) ?></span>
+            </span>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
-            <a href="<?= base_url('buku/cetak/' . $buku['id']) ?>" target="_blank" class="px-3.5 py-1.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-extrabold shadow-2xs flex items-center gap-1.5 transition">
-                <i class="fa-solid fa-print text-emerald-600"></i>
-                Pratinjau Cetak
-            </a>
-            <span class="px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 text-xs font-extrabold shadow-2xs flex items-center gap-1.5">
-                <i class="fa-solid fa-calendar-check text-emerald-600"></i>
-                <?= esc($buku['bulan']) ?> <?= esc($buku['tahun']) ?>
-            </span>
-            <span class="px-3.5 py-1.5 rounded-full text-xs font-extrabold border <?= $isStatusAktif ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200' ?> flex items-center gap-1.5 shadow-2xs">
-                <i class="fa-solid <?= $isStatusAktif ? 'fa-circle-check text-emerald-600' : 'fa-lock text-amber-600' ?>"></i>
-                Status: <?= esc($statusBuku) ?>
-            </span>
+        <!-- Main row: Unit Title & Badges -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="space-y-1.5">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        <?= esc($unit['tipe'] ?? $unit['kategori'] ?? 'Unit Kebersihan') ?>
+                    </span>
+                    <span class="text-xs text-slate-400 font-semibold">• Form LPJ Evaluasi Bulanan</span>
+                </div>
+                <h1 class="font-heading font-extrabold text-xl sm:text-2xl text-slate-900 tracking-tight leading-tight">
+                    Laporan Unit : <span class="text-emerald-700"><?= esc($unit['nama_unit']) ?></span>
+                </h1>
+            </div>
+
+            <!-- Action / Info Pills -->
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold shadow-2xs flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-calendar-check text-emerald-600"></i>
+                    <span><?= esc($buku['bulan']) ?> <?= esc($buku['tahun']) ?></span>
+                </span>
+                <a href="<?= base_url('buku/cetak/' . $buku['id']) ?>" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-slate-700 hover:text-emerald-700 text-xs font-extrabold shadow-2xs flex items-center gap-1.5 transition whitespace-nowrap">
+                    <i class="fa-solid fa-print text-emerald-600"></i>
+                    <span>Pratinjau Cetak</span>
+                </a>
+            </div>
         </div>
     </div>
 
