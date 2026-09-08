@@ -9,7 +9,9 @@ $rawCapaian = $evaluasi['capaian_text'] ?? '';
 $decodedCapaian = json_decode($rawCapaian, true);
 
 if (is_array($decodedCapaian)) {
-    $capaianRows = $decodedCapaian;
+    foreach ($decodedCapaian as $c) {
+        $capaianRows[] = is_array($c) ? ($c['capaian'] ?? ($c['capaian_text'] ?? '')) : (string)$c;
+    }
 } else {
     $cLines = explode("\n", $rawCapaian);
     foreach ($cLines as $c) {
@@ -25,7 +27,19 @@ $rawPermasalahan = $evaluasi['permasalahan_text'] ?? '';
 $decodedMasalah = json_decode($rawPermasalahan, true);
 
 if (is_array($decodedMasalah)) {
-    $masalahRows = $decodedMasalah;
+    foreach ($decodedMasalah as $m) {
+        if (is_array($m)) {
+            $masalahRows[] = [
+                'masalah'  => $m['masalah'] ?? '',
+                'tindakan' => $m['tindakan'] ?? '',
+            ];
+        } else {
+            $masalahRows[] = [
+                'masalah'  => (string)$m,
+                'tindakan' => '',
+            ];
+        }
+    }
 } else {
     $mLines = explode("\n", $rawPermasalahan);
     $sLines = explode("\n", $evaluasi['evaluasi_solusi_text'] ?? '');
@@ -48,7 +62,19 @@ $rawTarget = $evaluasi['target_text'] ?? '';
 $decodedTarget = json_decode($rawTarget, true);
 
 if (is_array($decodedTarget)) {
-    $targetRows = $decodedTarget;
+    foreach ($decodedTarget as $t) {
+        if (is_array($t)) {
+            $targetRows[] = [
+                'target'   => $t['target'] ?? ($t['target_text'] ?? ''),
+                'tindakan' => $t['tindakan'] ?? ($t['rencana'] ?? ''),
+            ];
+        } else {
+            $targetRows[] = [
+                'target'   => (string)$t,
+                'tindakan' => '',
+            ];
+        }
+    }
 } else {
     $tLines = explode("\n", $rawTarget);
     foreach ($tLines as $t) {
@@ -332,7 +358,7 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
                                 </span>
                             </div>
                             <?php if (!$isReadOnly): ?>
-                                <button type="button" onclick="removeRowElement('${tId}', '.target-row', 'targetContainer')" class="px-2.5 py-1 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs" title="Hapus Baris Ini">
+                                <button type="button" onclick="removeRowElement('<?= $tId ?>', '.target-row', 'targetContainer')" class="px-2.5 py-1 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs" title="Hapus Baris Ini">
                                     <i class="fa-solid fa-trash text-[11px]"></i>
                                     <span class="text-[11px]">Hapus</span>
                                 </button>
@@ -480,8 +506,11 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
 </div>
 
 <script>
-    let currentStep = 1;
-    const totalSteps = 4;
+(function() {
+    'use strict';
+
+    var currentStep = 1;
+    var totalSteps = 4;
 
     function goToStep(step) {
         currentStep = step;
@@ -517,21 +546,18 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
             }
         }
     }
-    window.goToStep = goToStep;
 
     function nextStep() {
         if (currentStep < totalSteps) {
             goToStep(currentStep + 1);
         }
     }
-    window.nextStep = nextStep;
 
     function prevStep() {
         if (currentStep > 1) {
             goToStep(currentStep - 1);
         }
     }
-    window.prevStep = prevStep;
 
     // Async AJAX Save
     async function saveFormAsync() {
@@ -566,7 +592,6 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
             if (text) text.innerText = 'Simpan Cepat';
         }
     }
-    window.saveFormAsync = saveFormAsync;
 
     function showAsyncToast(title, desc, isSuccess = true) {
         const toast = document.getElementById('asyncToast');
@@ -605,6 +630,7 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
 
     function addCapaianRow(val = '') {
         const container = document.getElementById('capaianContainer');
+        if (!container) return;
         const rowId = 'capaian_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
 
         const html = `
@@ -621,10 +647,10 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
         container.insertAdjacentHTML('beforeend', html);
         updateRowNumbers('capaianContainer');
     }
-    window.addCapaianRow = addCapaianRow;
 
     function addMasalahRow(mVal = '', tVal = '') {
         const container = document.getElementById('masalahContainer');
+        if (!container) return;
         const rowId = 'masalah_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
 
         const html = `
@@ -663,10 +689,10 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
         container.insertAdjacentHTML('beforeend', html);
         updateRowNumbers('masalahContainer');
     }
-    window.addMasalahRow = addMasalahRow;
 
     function addTargetRow(tgVal = '', ttVal = '') {
         const container = document.getElementById('targetContainer');
+        if (!container) return;
         const rowId = 'target_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
 
         const html = `
@@ -705,10 +731,10 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
         container.insertAdjacentHTML('beforeend', html);
         updateRowNumbers('targetContainer');
     }
-    window.addTargetRow = addTargetRow;
 
     function addUsulanRow(val = '') {
         const container = document.getElementById('usulanContainer');
+        if (!container) return;
         const rowId = 'usulan_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
 
         const html = `
@@ -725,7 +751,6 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
         container.insertAdjacentHTML('beforeend', html);
         updateRowNumbers('usulanContainer');
     }
-    window.addUsulanRow = addUsulanRow;
 
     function removeRowElement(rowId, selectorClass, containerId) {
         const row = document.getElementById(rowId);
@@ -739,6 +764,31 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ Unit' : 'Kembali ke Buku L
             }
         }
     }
+
+    // Export cleanly to window
+    window.goToStep = goToStep;
+    window.nextStep = nextStep;
+    window.prevStep = prevStep;
+    window.saveFormAsync = saveFormAsync;
+    window.showAsyncToast = showAsyncToast;
+    window.updateRowNumbers = updateRowNumbers;
+    window.addCapaianRow = addCapaianRow;
+    window.addMasalahRow = addMasalahRow;
+    window.addTargetRow = addTargetRow;
+    window.addUsulanRow = addUsulanRow;
     window.removeRowElement = removeRowElement;
+
+    window.rebindPageEvents = function() {
+        goToStep(currentStep || 1);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            goToStep(1);
+        });
+    } else {
+        goToStep(1);
+    }
+})();
 </script>
 <?= $this->endSection() ?>

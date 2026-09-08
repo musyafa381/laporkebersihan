@@ -57,7 +57,7 @@
                     </span>
                 <?php endif; ?>
 
-                <button type="button" onclick="openModalPreviewDoc(<?= $buku['id'] ?>, 'Buku LPJ <?= esc(addslashes($buku['bulan'] . ' ' . $buku['tahun'])) ?>')" class="flex-shrink-0 px-3 sm:px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-extrabold text-xs transition border border-emerald-200/90 shadow-2xs flex items-center gap-2" title="Preview Dokumen LPJ Langsung">
+                <button type="button" onclick="openModalPreviewDocFromBtn(this)" data-id="<?= $buku['id'] ?>" data-title="Buku LPJ <?= esc($buku['bulan'] . ' ' . $buku['tahun']) ?>" class="flex-shrink-0 px-3 sm:px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-extrabold text-xs transition border border-emerald-200/90 shadow-2xs flex items-center gap-2" title="Preview Dokumen LPJ Langsung">
                     <i class="fa-solid fa-eye text-emerald-600"></i>
                     <span>Preview Dokumen</span>
                 </button>
@@ -443,7 +443,15 @@
                                         <td class="p-3.5 text-center">
                                             <?php if ($canEditBuku): ?>
                                                 <div class="flex items-center justify-center gap-1.5">
-                                                    <button onclick="openModalEditProker(<?= $p['id'] ?>, '<?= esc($p['tanggal']) ?>', '<?= esc(addslashes($p['kategori_badge'])) ?>', '<?= esc(addslashes($p['kegiatan'])) ?>', '<?= esc(addslashes($p['keterangan'])) ?>')" class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white transition-all flex items-center justify-center text-xs shadow-2xs" title="Edit Agenda">
+                                                    <button type="button" 
+                                                            onclick="openModalEditProkerFromBtn(this)" 
+                                                            data-id="<?= $p['id'] ?>" 
+                                                            data-tanggal="<?= esc($p['tanggal']) ?>" 
+                                                            data-kategori="<?= esc($p['kategori_badge']) ?>" 
+                                                            data-kegiatan="<?= esc($p['kegiatan']) ?>" 
+                                                            data-keterangan="<?= esc($p['keterangan']) ?>" 
+                                                            class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white transition-all flex items-center justify-center text-xs shadow-2xs" 
+                                                            title="Edit Agenda">
                                                         <i class="fa-solid fa-pen-to-square"></i>
                                                     </button>
                                                     <a href="<?= base_url('buku/proker/delete/' . $p['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus agenda ini?" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all flex items-center justify-center text-xs shadow-2xs" title="Hapus Agenda">
@@ -1506,17 +1514,43 @@
         }
     }
 
+    function openModalEditProkerFromBtn(btn) {
+        if (!btn) return;
+        const id = btn.getAttribute('data-id');
+        const tanggal = btn.getAttribute('data-tanggal') || '';
+        const kategori = btn.getAttribute('data-kategori') || 'Koordinasi PJ';
+        const kegiatan = btn.getAttribute('data-kegiatan') || '';
+        const keterangan = btn.getAttribute('data-keterangan') || '';
+        openModalEditProker(id, tanggal, kategori, kegiatan, keterangan);
+    }
+
+    function openModalPreviewDocFromBtn(btn) {
+        if (!btn) return;
+        const id = btn.getAttribute('data-id');
+        const title = btn.getAttribute('data-title') || 'Dokumen LPJ';
+        openModalPreviewDoc(id, title);
+    }
+
     function openModalEditProker(id, tanggal, kategori, kegiatan, keterangan) {
-        document.getElementById('formEditProker').action = '<?= base_url('buku/proker/update/') ?>' + id;
-        document.getElementById('edit_proker_tanggal').value = tanggal;
-        document.getElementById('edit_proker_kategori').value = kategori;
-        document.getElementById('edit_proker_kegiatan').value = kegiatan;
-        document.getElementById('edit_proker_keterangan').value = keterangan;
-        document.getElementById('modalEditProker').classList.remove('hidden');
+        const form = document.getElementById('formEditProker');
+        if (form) {
+            form.action = '<?= base_url('buku/proker/update/') ?>' + id;
+        }
+        const tglInp = document.getElementById('edit_proker_tanggal');
+        if (tglInp) tglInp.value = tanggal;
+        const katInp = document.getElementById('edit_proker_kategori');
+        if (katInp) katInp.value = kategori;
+        const kegInp = document.getElementById('edit_proker_kegiatan');
+        if (kegInp) kegInp.value = kegiatan;
+        const ketInp = document.getElementById('edit_proker_keterangan');
+        if (ketInp) ketInp.value = keterangan;
+        const modal = document.getElementById('modalEditProker');
+        if (modal) modal.classList.remove('hidden');
     }
 
     function closeModalEditProker() {
-        document.getElementById('modalEditProker').classList.add('hidden');
+        const modal = document.getElementById('modalEditProker');
+        if (modal) modal.classList.add('hidden');
     }
 
     function makePhotoBoxDraggable(containerId, imgId, posInputId) {
@@ -2009,7 +2043,9 @@
     window.initLpjTabs = initLpjTabs;
     window.rebindPageEvents = rebindPageEvents;
     window.openModalEditProker = openModalEditProker;
+    window.openModalEditProkerFromBtn = openModalEditProkerFromBtn;
     window.closeModalEditProker = closeModalEditProker;
+    window.openModalPreviewDocFromBtn = openModalPreviewDocFromBtn;
     window.makePhotoBoxDraggable = makePhotoBoxDraggable;
     window.previewImageLive = previewImageLive;
     window.resetPhotoPosition = resetPhotoPosition;

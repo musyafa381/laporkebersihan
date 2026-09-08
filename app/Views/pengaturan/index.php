@@ -711,8 +711,8 @@
                     <div class="font-heading font-extrabold text-sm text-slate-900 flex items-center gap-2">
                         <i class="fa-solid fa-database text-emerald-600"></i> Backup Full Database (.SQL)
                     </div>
-                    <p class="text-xs text-slate-600 font-medium max-w-xl">
-                        Mengekspor seluruh tabel database `master_unit`, `tbl_pengaturan`, `buku_lpj`, `keuangan_item`, `cs_report`, `users`, dan struktur bagan.
+                    <p class="text-xs text-slate-600 font-medium max-w-xl leading-relaxed">
+                        Mengekspor seluruh tabel database secara menyeluruh dan dinamis (master unit, buku LPJ, proker & kalender, laporan koordinasi, evaluasi capaian unit & kader, laporan keuangan, inventaris alat, CS & pengaduan, pemetaan wilayah, SOP, struktur, pengguna, dan pengaturan sistem) dalam file format .SQL siap restore.
                     </p>
                 </div>
 

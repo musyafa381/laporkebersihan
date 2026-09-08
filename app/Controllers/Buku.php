@@ -380,6 +380,14 @@ class Buku extends BaseController
             'kategori_badge' => $badge,
         ]);
 
+        // Keep linked koordinasi in sync
+        if ($tanggal && $kegiatan) {
+            $this->koordinasiModel->where('proker_id', $prokerId)->set([
+                'kegiatan'     => $kegiatan,
+                'hari_tanggal' => date('d M Y', strtotime($tanggal))
+            ])->update();
+        }
+
         return $this->respondJsonOrRedirect('Agenda Proker berhasil diperbarui!');
     }
 
@@ -392,6 +400,19 @@ class Buku extends BaseController
 
         if (!$this->isBukuEditable($proker['buku_id'])) {
             return $this->respondJsonOrRedirect("Buku LPJ tidak dalam status 'Aktif' sehingga tidak dapat diubah.", false);
+        }
+
+        // Clean up linked koordinasi & foto
+        $linkedKoor = $this->koordinasiModel->where('proker_id', $prokerId)->findAll();
+        foreach ($linkedKoor as $lk) {
+            if (!empty($lk['foto'])) {
+                if (str_contains($lk['foto'], 'cloudinary.com')) {
+                    $this->cloudinary->delete($lk['foto']);
+                } elseif (file_exists(FCPATH . 'uploads/' . $lk['foto'])) {
+                    @unlink(FCPATH . 'uploads/' . $lk['foto']);
+                }
+            }
+            $this->koordinasiModel->delete($lk['id']);
         }
 
         $this->prokerModel->delete($prokerId);
@@ -619,8 +640,16 @@ class Buku extends BaseController
             if ($fotoName) $updateData['foto'] = $fotoName;
 
             $this->koordinasiModel->update($existing['id'], $updateData);
+
+            // Clean up any remaining duplicate rows for this proker_id in this buku
+            if (!empty($prokerId)) {
+                $this->koordinasiModel->where('buku_id', $bukuId)
+                    ->where('proker_id', $prokerId)
+                    ->where('id !=', $existing['id'])
+                    ->delete();
+            }
         } else {
-            $this->koordinasiModel->insert([
+            $insertedId = $this->koordinasiModel->insert([
                 'buku_id'       => $bukuId,
                 'proker_id'     => $prokerId,
                 'kegiatan'      => $kegiatan,
@@ -632,6 +661,18 @@ class Buku extends BaseController
                 'foto_position' => $fotoPosition,
                 'jenis'         => $jenis,
             ]);
+
+            // Clean up any duplicate unlinked rows with same name
+            if (!empty($prokerId) && !empty($kegiatan)) {
+                $this->koordinasiModel->where('buku_id', $bukuId)
+                    ->where('kegiatan', $kegiatan)
+                    ->where('id !=', $insertedId)
+                    ->groupStart()
+                        ->where('proker_id', null)
+                        ->orWhere('proker_id', 0)
+                    ->groupEnd()
+                    ->delete();
+            }
         }
 
         return $this->respondJsonOrRedirect('Laporan Hasil Koordinasi berhasil disimpan!');
@@ -1010,6 +1051,52 @@ class Buku extends BaseController
                 $koordinasiMap[$k['proker_id']] = $k;
             }
         }
+
+        // Build deduplicated and ordered koordinasi list for print view
+        $printKoordinasi = [];
+        $handledKoorIds  = [];
+
+        if (!empty($proker)) {
+            foreach ($proker as $p) {
+                $k = $koordinasiMap[$p['id']] ?? null;
+                if (!$k) {
+                    // Try legacy matching
+                    foreach ($koordinasi as $cand) {
+                        if (!in_array($cand['id'], $handledKoorIds) && trim(strtolower($cand['kegiatan'])) === trim(strtolower($p['kegiatan']))) {
+                            $k = $cand;
+                            $handledKoorIds[] = $cand['id'];
+                            break;
+                        }
+                    }
+                } else {
+                    $handledKoorIds[] = $k['id'];
+                }
+
+                if ($k) {
+                    $k['kegiatan'] = !empty($k['kegiatan']) ? $k['kegiatan'] : $p['kegiatan'];
+                    $k['hari_tanggal'] = !empty($k['hari_tanggal']) ? $k['hari_tanggal'] : date('d M Y', strtotime($p['tanggal']));
+                    $printKoordinasi[] = $k;
+                }
+            }
+        }
+
+        // Include any remaining standalone koordinasi (not duplicates)
+        foreach ($koordinasi as $k) {
+            if (!in_array($k['id'], $handledKoorIds)) {
+                $isDup = false;
+                foreach ($printKoordinasi as $pk) {
+                    if (trim(strtolower($pk['kegiatan'])) === trim(strtolower($k['kegiatan']))) {
+                        $isDup = true;
+                        break;
+                    }
+                }
+                if (!$isDup) {
+                    $printKoordinasi[] = $k;
+                    $handledKoorIds[]  = $k['id'];
+                }
+            }
+        }
+
         $keuanganMasuk     = $importedKeuangan ? $this->keuanganMasukModel->where('keuangan_id', $importedKeuangan['id'])->orderBy('id', 'ASC')->findAll() : [];
         $keuanganPembelian = $importedKeuangan ? $this->keuanganItemModel->where('keuangan_id', $importedKeuangan['id'])->orderBy('id', 'ASC')->findAll() : [];
 
@@ -1024,7 +1111,7 @@ class Buku extends BaseController
             'targets'             => $targets,
             'capaianList'         => $capaianList,
             'evaluasiBulananList' => $evaluasiBulananList,
-            'koordinasi'          => $koordinasi,
+            'koordinasi'          => $printKoordinasi,
             'koordinasiMap'       => $koordinasiMap,
             'evaluasiMap'         => $evaluasiMap,
             'importedKeuangan'    => $importedKeuangan,
