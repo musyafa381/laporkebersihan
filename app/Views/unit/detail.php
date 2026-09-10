@@ -419,43 +419,71 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50 border-b border-slate-200/80 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
-                            <th class="py-3 px-4">Tanggal</th>
-                            <th class="py-3 px-4">Alat Diajukan</th>
-                            <th class="py-3 px-4 text-center">Jumlah</th>
+                            <th class="py-3 px-4">Tanggal & Kode</th>
+                            <th class="py-3 px-4">Daftar Alat</th>
                             <th class="py-3 px-4">Pemohon</th>
-                            <th class="py-3 px-4">Alasan / Keperluan</th>
+                            <th class="py-3 px-4">Alasan & Catatan</th>
                             <th class="py-3 px-4 text-center">Status</th>
+                            <th class="py-3 px-4 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-xs">
                         <?php if (!empty($pengajuanHistory)): ?>
                             <?php foreach ($pengajuanHistory as $p): ?>
                                 <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-4 font-mono text-slate-600 font-semibold">
-                                        <?= date('d/m/Y', strtotime($p['created_at'])) ?>
+                                    <td class="py-3.5 px-4 whitespace-nowrap">
+                                        <div class="font-mono text-slate-600 font-bold"><?= date('d/m/Y H:i', strtotime($p['created_at'])) ?></div>
+                                        <?php if (!empty($p['kode_pengajuan'])): ?>
+                                            <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 font-mono text-[10px] font-extrabold border border-emerald-200 inline-block mt-1">
+                                                <?= esc($p['kode_pengajuan']) ?>
+                                            </span>
+                                        <?php endif; ?>
                                     </td>
-                                    <td class="py-3.5 px-4 font-heading font-extrabold text-slate-900">
-                                        <?= esc($p['nama_alat'] ?: 'Alat Kebersihan') ?>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-center font-black text-slate-900">
-                                        <?= number_format($p['jumlah']) ?> <?= esc($p['satuan'] ?: 'Pcs') ?>
+                                    <td class="py-3.5 px-4">
+                                        <?php if (!empty($p['items']) && is_array($p['items'])): ?>
+                                            <div class="space-y-1 max-w-xs">
+                                                <?php foreach ($p['items'] as $it): ?>
+                                                    <div class="p-1.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between gap-1.5 text-[11px]">
+                                                        <span class="font-extrabold text-slate-800 truncate"><?= esc($it['nama_alat']) ?></span>
+                                                        <span class="px-1.5 py-0.5 rounded bg-white text-[10px] font-mono font-bold text-slate-700 border border-slate-200">
+                                                            <?= (int)($it['jumlah_setuju'] !== null ? $it['jumlah_setuju'] : $it['jumlah_minta']) ?>/<?= $it['jumlah_minta'] ?> <?= esc($it['satuan'] ?? 'Unit') ?>
+                                                        </span>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="font-heading font-extrabold text-slate-900"><?= esc($p['nama_alat'] ?: 'Alat Kebersihan') ?></div>
+                                            <div class="text-[10px] text-slate-500 font-bold"><?= number_format($p['jumlah']) ?> <?= esc($p['satuan'] ?: 'Pcs') ?></div>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="py-3.5 px-4 font-semibold text-slate-700">
-                                        <?= esc($p['pemohon_nama'] ?: $p['pemohon_username'] ?: '-') ?>
+                                        <?= esc($p['nama_lengkap'] ?: ($p['username'] ?: '-')) ?>
                                     </td>
-                                    <td class="py-3.5 px-4 text-slate-600 font-medium max-w-xs truncate">
-                                        <?= esc($p['alasan_keperluan'] ?: '-') ?>
+                                    <td class="py-3.5 px-4 text-slate-600 font-medium max-w-xs">
+                                        <div class="truncate">"<?= esc($p['alasan_keperluan'] ?: '-') ?>"</div>
+                                        <?php if (!empty($p['catatan_admin'])): ?>
+                                            <div class="text-[10px] text-emerald-800 font-bold mt-0.5">Admin: <?= esc($p['catatan_admin']) ?></div>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="py-3.5 px-4 text-center">
                                         <?php
                                             $st = strtolower($p['status'] ?? 'pending');
                                             $badgeClass = 'bg-amber-50 text-amber-800 border-amber-200';
-                                            if ($st === 'disetujui' || $st === 'approved') $badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+                                            if ($st === 'disetujui' || $st === 'approved' || $st === 'selesai') $badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-200';
                                             if ($st === 'ditolak' || $st === 'rejected') $badgeClass = 'bg-rose-50 text-rose-800 border-rose-200';
                                         ?>
                                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border <?= $badgeClass ?>">
                                             <?= ucfirst(esc($p['status'] ?? 'Pending')) ?>
                                         </span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center">
+                                        <?php if (in_array(strtolower($p['status'] ?? ''), ['disetujui', 'approved', 'selesai'])): ?>
+                                            <a href="<?= base_url('cs/pengajuan/cetak/' . $p['id']) ?>" target="_blank" class="px-2.5 py-1 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 font-extrabold text-[10px] border border-teal-200 transition inline-flex items-center gap-1" title="Cetak Nota / Bukti Serah Terima">
+                                                <i class="fa-solid fa-print"></i> Cetak
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="text-slate-400 text-[10px] italic">-</span>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

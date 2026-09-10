@@ -203,16 +203,53 @@ class Buku extends BaseController
             return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus Buku LPJ.', false);
         }
 
+        // Verify the book exists
+        $buku = $this->bukuModel->find($id);
+        if (!$buku) {
+            return $this->respondJsonOrRedirect('Buku LPJ tidak ditemukan.', false);
+        }
+
+        // Require password confirmation to prevent accidental deletion
+        $password = $this->request->getPost('password_konfirmasi');
+        if (empty($password)) {
+            return $this->respondJsonOrRedirect('Password konfirmasi wajib diisi untuk menghapus Buku LPJ.', false);
+        }
+
+        $userModel = new \App\Models\UserModel();
+        $currentUser = $userModel->find(session()->get('user_id'));
+        if (!$currentUser || !password_verify($password, $currentUser['password'])) {
+            return $this->respondJsonOrRedirect('Password konfirmasi salah. Penghapusan dibatalkan.', false);
+        }
+
+        // Count related data for feedback message
+        $totalProker     = $this->prokerModel->where('buku_id', $id)->countAllResults();
+        $totalKoordinasi = $this->koordinasiModel->where('buku_id', $id)->countAllResults();
+
+        // Clean up linked koordinasi photos before deletion
+        $linkedKoor = $this->koordinasiModel->where('buku_id', $id)->findAll();
+        foreach ($linkedKoor as $lk) {
+            if (!empty($lk['foto'])) {
+                if (str_contains($lk['foto'], 'cloudinary.com')) {
+                    $this->cloudinary->delete($lk['foto']);
+                } elseif (file_exists(FCPATH . 'uploads/' . $lk['foto'])) {
+                    @unlink(FCPATH . 'uploads/' . $lk['foto']);
+                }
+            }
+        }
+
         // Delete related children
         $this->prokerModel->where('buku_id', $id)->delete();
         $this->targetModel->where('buku_id', $id)->delete();
         $this->koordinasiModel->where('buku_id', $id)->delete();
         $this->evaluasiModel->where('buku_id', $id)->delete();
+        $this->capaianBulananModel->where('buku_id', $id)->delete();
+        $this->evaluasiBulananModel->where('buku_id', $id)->delete();
 
         // Delete parent book
         $this->bukuModel->delete($id);
 
-        return $this->respondJsonOrRedirect('Buku LPJ Berhasil Dihapus!', true, '/buku');
+        $label = esc($buku['bulan'] . ' ' . $buku['tahun']);
+        return $this->respondJsonOrRedirect("Buku LPJ {$label} berhasil dihapus beserta {$totalProker} agenda dan {$totalKoordinasi} laporan koordinasi.", true, '/buku');
     }
 
     public function detail($id)
@@ -289,7 +326,7 @@ class Buku extends BaseController
 
         $bukuKeuanganModel = new \App\Models\BukuKeuanganModel();
         $allKeuanganBooks  = $bukuKeuanganModel->findAll();
-        $this->sortByTahunBulan($allKeuanganBooks, 'ASC');
+        $this->sortByTahunBulan($allKeuanganBooks, 'DESC');
 
         $importedKeuangan = null;
         $keuanganMasuk = [];

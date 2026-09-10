@@ -68,7 +68,7 @@ class Keuangan extends BaseController
     public function index()
     {
         $keuanganList = $this->bukuKeuanganModel->findAll();
-        $this->sortByTahunBulan($keuanganList, 'ASC');
+        $this->sortByTahunBulan($keuanganList, 'DESC');
 
         foreach ($keuanganList as &$buku) {
             $kId = $buku['id'];

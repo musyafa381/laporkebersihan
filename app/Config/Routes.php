@@ -9,7 +9,7 @@ $routes->get('/', 'Home::index');
 $routes->get('/buku', 'Buku::index');
 $routes->post('/buku/store', 'Buku::store');
 $routes->post('/buku/update/(:num)', 'Buku::updateBuku/$1');
-$routes->get('/buku/delete/(:num)', 'Buku::deleteBuku/$1');
+$routes->post('/buku/delete/(:num)', 'Buku::deleteBuku/$1');
 
 $routes->get('/buku/detail/(:num)', 'Buku::detail/$1');
 $routes->post('/buku/update-status/(:num)', 'Buku::updateStatus/$1');
@@ -120,6 +120,7 @@ $routes->post('/cs/report/update/(:num)', 'Cs::updateReportStatus/$1');
 $routes->get('/cs/report/delete/(:num)', 'Cs::deleteReport/$1');
 $routes->post('/cs/pengajuan/update/(:num)', 'Cs::updatePengajuanStatus/$1');
 $routes->get('/cs/pengajuan/delete/(:num)', 'Cs::deletePengajuan/$1');
+$routes->get('/cs/pengajuan/cetak/(:num)', 'Cs::cetakNotaPengajuan/$1');
 $routes->post('/pengaturan/test-fonnte', 'Pengaturan::testFonnte');
 
 // Frontend Mobile App Portal (Pengurus & Kader)

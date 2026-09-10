@@ -104,9 +104,9 @@
                                 <button type="button" onclick="openModalEditFromBtn(this)" data-id="<?= $buku['id'] ?>" data-judul="<?= esc($buku['judul']) ?>" data-bulan="<?= esc($buku['bulan']) ?>" data-tahun="<?= esc($buku['tahun']) ?>" data-status="<?= esc($buku['status']) ?>" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition flex items-center justify-center text-xs" title="Edit Informasi Buku">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
-                                <a href="<?= base_url('buku/delete/' . $buku['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus Buku LPJ ini beserta seluruh datanya?" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Hapus Buku">
+                                <button type="button" onclick="openModalDeleteBuku(this)" data-id="<?= $buku['id'] ?>" data-bulan="<?= esc($buku['bulan']) ?>" data-tahun="<?= esc($buku['tahun']) ?>" data-proker="<?= $buku['total_proker'] ?>" data-koordinasi="<?= $buku['total_koordinasi'] ?>" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Hapus Buku">
                                     <i class="fa-solid fa-trash-can"></i>
-                                </a>
+                                </button>
                             </div>
                             <?php endif; ?>
                         </div>
@@ -784,6 +784,136 @@
         filterBukuCards();
     }
     setTimeout(filterBukuCards, 50);
+</script>
+
+<!-- Modal: Konfirmasi Hapus Buku LPJ (Dengan Password) -->
+<div id="modalDeleteBuku" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-7 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center">
+                    <i class="fa-solid fa-triangle-exclamation text-sm"></i>
+                </div>
+                <h3 class="font-heading font-bold text-lg text-slate-900">Hapus Buku LPJ</h3>
+            </div>
+            <button onclick="closeModalDeleteBuku()" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+
+        <div class="rounded-2xl bg-rose-50 border border-rose-200/80 p-4 space-y-2">
+            <p class="text-xs font-bold text-rose-800">
+                <i class="fa-solid fa-exclamation-circle mr-1"></i>
+                Anda akan menghapus <span id="deleteBukuLabel" class="font-extrabold">Buku LPJ</span>
+            </p>
+            <p class="text-[11px] text-rose-700 leading-relaxed">
+                Tindakan ini akan menghapus secara <strong>permanen</strong> seluruh data berikut:
+            </p>
+            <ul class="text-[11px] text-rose-700 space-y-1 pl-4 list-disc">
+                <li><strong id="deleteBukuProkerCount">0</strong> agenda proker & kalender kegiatan</li>
+                <li><strong id="deleteBukuKoordinasiCount">0</strong> laporan hasil koordinasi</li>
+                <li>Target bulanan, capaian, & evaluasi terkait</li>
+            </ul>
+        </div>
+
+        <form id="formDeleteBuku" action="" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">
+                    <i class="fa-solid fa-lock text-slate-400 mr-1"></i> Konfirmasi Password Admin
+                </label>
+                <input type="password" name="password_konfirmasi" id="delete_buku_password" required placeholder="Masukkan password Anda untuk melanjutkan..." autocomplete="off" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 text-xs font-semibold bg-slate-50">
+            </div>
+
+            <div class="pt-3 flex justify-end gap-2 border-t border-slate-100">
+                <button type="button" onclick="closeModalDeleteBuku()" class="px-5 py-2.5 rounded-xl text-slate-600 text-xs font-semibold hover:bg-slate-100">Batal</button>
+                <button type="submit" class="px-6 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 shadow-md shadow-rose-500/20 flex items-center gap-2">
+                    <i class="fa-solid fa-trash-can text-[11px]"></i>
+                    <span>Ya, Hapus Permanen</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Delete Buku LPJ Modal Functions
+    function openModalDeleteBuku(btn) {
+        const id = btn.getAttribute('data-id');
+        const bulan = btn.getAttribute('data-bulan');
+        const tahun = btn.getAttribute('data-tahun');
+        const proker = btn.getAttribute('data-proker') || '0';
+        const koordinasi = btn.getAttribute('data-koordinasi') || '0';
+
+        document.getElementById('deleteBukuLabel').textContent = 'Buku LPJ ' + bulan + ' ' + tahun;
+        document.getElementById('deleteBukuProkerCount').textContent = proker;
+        document.getElementById('deleteBukuKoordinasiCount').textContent = koordinasi;
+        document.getElementById('formDeleteBuku').action = '<?= base_url('buku/delete/') ?>' + id;
+        document.getElementById('delete_buku_password').value = '';
+        document.getElementById('modalDeleteBuku').classList.remove('hidden');
+    }
+    window.openModalDeleteBuku = openModalDeleteBuku;
+
+    function closeModalDeleteBuku() {
+        document.getElementById('modalDeleteBuku').classList.add('hidden');
+        document.getElementById('delete_buku_password').value = '';
+    }
+    window.closeModalDeleteBuku = closeModalDeleteBuku;
+
+    // Handle form submit via AJAX (consistent with app's existing pattern)
+    document.getElementById('formDeleteBuku').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const form = this;
+        const password = document.getElementById('delete_buku_password').value;
+
+        if (!password) {
+            if (typeof Swal !== 'undefined') {
+                SwalCustom.fire({ icon: 'error', title: 'Password Kosong', text: 'Masukkan password Admin Anda untuk konfirmasi.', timer: 3000 });
+            }
+            return;
+        }
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalHtml = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[11px]"></i> <span>Memproses...</span>';
+
+        try {
+            const formData = new FormData(form);
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+            const result = await response.json();
+
+            closeModalDeleteBuku();
+
+            if (typeof Swal !== 'undefined') {
+                await SwalCustom.fire({
+                    icon: result.status === 'success' ? 'success' : 'error',
+                    title: result.status === 'success' ? 'Berhasil!' : 'Gagal!',
+                    text: result.message,
+                    timer: result.status === 'success' ? 2500 : 4000
+                });
+            }
+
+            if (result.status === 'success') {
+                if (result.redirect) {
+                    window.location.href = result.redirect;
+                } else {
+                    window.location.reload();
+                }
+            }
+        } catch (err) {
+            if (typeof Swal !== 'undefined') {
+                SwalCustom.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan jaringan. Silakan coba lagi.' });
+            }
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalHtml;
+        }
+    });
 </script>
 
 <?= $this->endSection() ?>

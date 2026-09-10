@@ -367,47 +367,26 @@
             100% { background-position: -100% 0; }
         }
 
-        /* 2. Page Content Ultra-Smooth Transitions */
+        /* 2. Page Content Ultra-Smooth Transitions (Without Stacking Context Trap) */
         main {
-            will-change: transform, opacity;
-            transition: opacity 120ms ease-out, transform 120ms ease-out;
+            transition: opacity 120ms ease-out;
         }
 
         .spa-exit {
             opacity: 0.55 !important;
-            transform: translateY(-4px) !important;
             pointer-events: none;
         }
 
         .spa-enter {
-            animation: spaPageEnter 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+            animation: spaPageEnter 240ms cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
 
         @keyframes spaPageEnter {
             0% {
                 opacity: 0;
-                transform: translateY(8px);
             }
             100% {
                 opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Mobile App-like Entrance for smaller devices */
-        @media (max-width: 640px) {
-            .spa-enter {
-                animation: spaMobileEnter 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
-            }
-            @keyframes spaMobileEnter {
-                0% {
-                    opacity: 0;
-                    transform: translateY(6px);
-                }
-                100% {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
             }
         }
 
@@ -433,6 +412,69 @@
             background: rgba(255, 255, 255, 0.98) !important;
             backdrop-filter: blur(20px) !important;
         }
+
+        /* ==========================================================================
+           UNIVERSAL FULL-SCREEN MODAL ENGINE
+           Ensures the modal backdrop covers 100% of the entire screen (including navbar & margins)
+           and prevents modal content from getting cut off.
+           ========================================================================== */
+        div[id^="modal"]:not(#mobileDrawerContainer),
+        div[id*="Modal"]:not(#mobileDrawerContainer) {
+            position: fixed !important;
+            inset: 0 !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            height: 100dvh !important;
+            z-index: 9999999 !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch;
+            padding: 1rem !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+        div[id^="modal"]:not(#mobileDrawerContainer).hidden,
+        div[id*="Modal"]:not(#mobileDrawerContainer).hidden {
+            display: none !important;
+        }
+        div[id^="modal"]:not(#mobileDrawerContainer) > div:not(.relative.max-w-4xl):not(#previewDocContainer),
+        div[id*="Modal"]:not(#mobileDrawerContainer) > div:not(.relative.max-w-4xl):not(#previewDocContainer) {
+            max-height: calc(100vh - 2rem) !important;
+            max-height: calc(100dvh - 2rem) !important;
+            margin-top: auto !important;
+            margin-bottom: auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+            position: relative !important;
+            z-index: 10000000 !important;
+        }
+        div[id^="modal"]:not(#mobileDrawerContainer) > div > form,
+        div[id*="Modal"]:not(#mobileDrawerContainer) > div > form {
+            display: flex !important;
+            flex-direction: column !important;
+            flex: 1 1 auto !important;
+            min-height: 0 !important;
+            overflow-y: auto !important;
+            scrollbar-width: thin !important;
+            scrollbar-color: #cbd5e1 transparent !important;
+            padding-right: 2px !important;
+        }
+        div[id^="modal"]:not(#mobileDrawerContainer) > div > form::-webkit-scrollbar,
+        div[id*="Modal"]:not(#mobileDrawerContainer) > div > form::-webkit-scrollbar {
+            width: 5px;
+        }
+        div[id^="modal"]:not(#mobileDrawerContainer) > div > form::-webkit-scrollbar-thumb,
+        div[id*="Modal"]:not(#mobileDrawerContainer) > div > form::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 9999px;
+        }
         .swal2-timer-progress-bar {
             background: linear-gradient(90deg, #10b981, #14b8a6) !important;
             height: 5px !important;
@@ -440,19 +482,6 @@
         }
         body.overflow-hidden {
             overflow: hidden !important;
-        }
-        /* Ensure modal overlay covers 100% of viewport over all headers without causing 100vw horizontal overflow */
-        .fixed.inset-0:not(.hidden):not(#mobileDrawerContainer) {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            margin: 0 !important;
-            padding: 1rem !important;
-            z-index: 999999 !important;
         }
     </style>
 </head>
@@ -523,7 +552,9 @@
             if ($db->tableExists('cs_reports')) {
                 $notifCsCount = $db->table('cs_reports')->where('status', 'Baru')->countAllResults();
             }
-            if ($db->tableExists('alat_pengajuan')) {
+            if ($db->tableExists('pengajuan_alat')) {
+                $notifAlatCount = $db->table('pengajuan_alat')->where('status', 'Pending')->countAllResults();
+            } elseif ($db->tableExists('alat_pengajuan')) {
                 $notifAlatCount = $db->table('alat_pengajuan')->where('status', 'Pending')->countAllResults();
             }
             if ($db->tableExists('tbl_pengaturan')) {
@@ -2605,6 +2636,51 @@
             }
         }
         window.TablePaginator = TablePaginator;
+
+        // Auto-teleport all modals to document.body so they are 100% full-screen and never trapped inside <main>
+        function teleportModalsToBody() {
+            document.querySelectorAll('div[id^="modal"], div[id*="Modal"]').forEach(function(el) {
+                if (el.id !== 'mobileDrawerContainer' && el.parentElement && el.parentElement !== document.body) {
+                    document.body.appendChild(el);
+                }
+            });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', teleportModalsToBody);
+        } else {
+            teleportModalsToBody();
+        }
+        window.teleportModalsToBody = teleportModalsToBody;
+
+        // Universal Modal Backdrop Click & Escape Key Handlers
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const openModals = document.querySelectorAll('div[id^="modal"]:not(.hidden):not(#mobileDrawerContainer), div[id*="Modal"]:not(.hidden):not(#mobileDrawerContainer)');
+                if (openModals.length > 0) {
+                    const lastModal = openModals[openModals.length - 1];
+                    const closeBtn = lastModal.querySelector('button[onclick*="close"], button[onclick*="Close"]');
+                    if (closeBtn) {
+                        closeBtn.click();
+                    } else {
+                        lastModal.classList.add('hidden');
+                    }
+                }
+            }
+        });
+
+        document.addEventListener('mousedown', function(e) {
+            const openModals = document.querySelectorAll('div[id^="modal"]:not(.hidden):not(#mobileDrawerContainer), div[id*="Modal"]:not(.hidden):not(#mobileDrawerContainer)');
+            openModals.forEach(modal => {
+                if (e.target === modal) {
+                    const closeBtn = modal.querySelector('button[onclick*="close"], button[onclick*="Close"]');
+                    if (closeBtn) {
+                        closeBtn.click();
+                    } else {
+                        modal.classList.add('hidden');
+                    }
+                }
+            });
+        });
     </script>
 
 </body>

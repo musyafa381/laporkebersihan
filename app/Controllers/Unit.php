@@ -155,13 +155,8 @@ class Unit extends BaseController
         // 4. Equipment Request History (pengajuan_alat) if exists
         $pengajuanHistory = [];
         if ($db->tableExists('pengajuan_alat')) {
-            $builder = $db->table('pengajuan_alat p');
-            $builder->select('p.*, a.nama_alat, a.kode_alat, a.satuan, u.nama_lengkap as pemohon_nama, u.username as pemohon_username');
-            $builder->join('alat_inventaris a', 'a.id = p.alat_id', 'left');
-            $builder->join('users u', 'u.id = p.user_id', 'left');
-            $builder->where('u.unit_id', $id);
-            $builder->orderBy('p.created_at', 'DESC');
-            $pengajuanHistory = $builder->get()->getResultArray();
+            $pengajuanModel = new \App\Models\PengajuanAlatModel();
+            $pengajuanHistory = $pengajuanModel->getListWithItems(['unit_id' => $id]);
         }
 
         $data = [

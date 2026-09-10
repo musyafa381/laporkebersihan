@@ -244,13 +244,13 @@
     <?php endif; ?>
 </div>
 
-<!-- Modal Tambah Wilayah Baru (Spacious & Clean Layout) -->
-<div id="modalTambahWilayah" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-    <div class="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200 max-h-[92vh] overflow-y-auto">
-        <!-- Header -->
-        <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+<!-- Modal Tambah Wilayah Baru (Spacious & Clean Layout, Pinned Footer) -->
+<div id="modalTambahWilayah" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-4xl w-full p-5 sm:p-7 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200 max-h-[90vh] flex flex-col my-auto">
+        <!-- Header (Pinned) -->
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3.5 mb-4 flex-shrink-0">
             <div class="flex items-center gap-3">
-                <span class="w-11 h-11 rounded-2xl bg-emerald-100/80 text-emerald-700 flex items-center justify-center text-lg shadow-2xs flex-shrink-0">
+                <span class="w-10 h-10 rounded-2xl bg-emerald-100/80 text-emerald-700 flex items-center justify-center text-lg shadow-2xs flex-shrink-0">
                     <i class="fa-solid fa-plus-circle"></i>
                 </span>
                 <div>
@@ -265,106 +265,110 @@
             </button>
         </div>
 
-        <form action="<?= base_url('wilayah/store') ?>" method="POST" enctype="multipart/form-data" class="space-y-5">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
-                <!-- Left Column -->
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Nama Wilayah / Area <span class="text-rose-500">*</span></label>
-                        <input type="text" name="nama_wilayah" placeholder="Misal: Lapangan Utama Putri / Masjid" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs placeholder-slate-400">
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <!-- Form with scrollable body & pinned footer -->
+        <form action="<?= base_url('wilayah/store') ?>" method="POST" enctype="multipart/form-data" class="flex flex-col flex-1 min-h-0">
+            <div class="overflow-y-auto pr-1 sm:pr-2 space-y-4 flex-1">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                    <!-- Left Column -->
+                    <div class="space-y-3.5">
                         <div>
-                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Kategori Area</label>
-                            <select name="kategori_area" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                                <option value="Lapangan & Outdoor">Lapangan</option>
-                                <option value="Tempat Ibadah & Selasar">Tempat Ibadah</option>
-                                <option value="Gedung Sekolah & Kelas">Sekolah & Kelas</option>
-                                <option value="Asrama & Kamar Mandi">Asrama & KM</option>
-                                <option value="Dapur & Kantin">Dapur/Kantin</option>
-                                <option value="Jalan & Saluran Air">Saluran Air</option>
-                                <option value="Lainnya">Lainnya</option>
-                            </select>
+                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Nama Wilayah / Area <span class="text-rose-500">*</span></label>
+                            <input type="text" name="nama_wilayah" placeholder="Misal: Lapangan Utama Putri / Masjid" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs placeholder-slate-400">
                         </div>
-                        <div>
-                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Kode (Opsional)</label>
-                            <input type="text" name="kode_wilayah" placeholder="Auto-generate" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs placeholder-slate-400">
-                        </div>
-                    </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                        <div class="relative">
-                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                                <span>Lokasi Komplek</span>
-                                <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
-                                    Bisa dicari
-                                </span>
-                            </label>
-                            <input type="hidden" id="tambah_wilayah_lokasi_gedung" name="lokasi_gedung" value="">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Kategori Area</label>
+                                <select name="kategori_area" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                                    <option value="Lapangan & Outdoor">Lapangan</option>
+                                    <option value="Tempat Ibadah & Selasar">Tempat Ibadah</option>
+                                    <option value="Gedung Sekolah & Kelas">Sekolah & Kelas</option>
+                                    <option value="Asrama & Kamar Mandi">Asrama & KM</option>
+                                    <option value="Dapur & Kantin">Dapur/Kantin</option>
+                                    <option value="Jalan & Saluran Air">Saluran Air</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Kode (Opsional)</label>
+                                <input type="text" name="kode_wilayah" placeholder="Auto-generate" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs placeholder-slate-400">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div class="relative">
-                                <i class="fa-solid fa-building text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2 text-xs pointer-events-none"></i>
-                                <input type="text" id="tambah_wilayah_lokasi_search" placeholder="Pilih / cari unit..." autocomplete="off" onfocus="openTambahWilayahLokasiDropdown()" oninput="filterTambahWilayahLokasiOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
-                                <button type="button" onclick="toggleTambahWilayahLokasiDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
-                                    <i id="tambahWilayahLokasiIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
-                                </button>
-                            </div>
-                            <!-- Dropdown List -->
-                            <div id="tambahWilayahLokasiDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-52 overflow-y-auto z-50 hidden divide-y divide-slate-100">
-                                <div class="tambah-wilayah-lokasi-item px-4 py-2.5 hover:bg-slate-50 transition flex items-center justify-between cursor-pointer text-slate-400 italic text-xs font-medium" data-nama="" onclick="selectTambahWilayahLokasi(this)">
-                                    <span>-- Tanpa Gedung Khusus / Umum --</span>
+                                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                    <span>Lokasi Komplek</span>
+                                    <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                                        Bisa dicari
+                                    </span>
+                                </label>
+                                <input type="hidden" id="tambah_wilayah_lokasi_gedung" name="lokasi_gedung" value="">
+                                <div class="relative">
+                                    <i class="fa-solid fa-building text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2 text-xs pointer-events-none"></i>
+                                    <input type="text" id="tambah_wilayah_lokasi_search" placeholder="Pilih / cari unit..." autocomplete="off" onfocus="openTambahWilayahLokasiDropdown()" oninput="filterTambahWilayahLokasiOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
+                                    <button type="button" onclick="toggleTambahWilayahLokasiDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                                        <i id="tambahWilayahLokasiIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                                    </button>
                                 </div>
-                                <?php if (!empty($unitsList)): ?>
-                                    <?php foreach ($unitsList as $u): ?>
-                                        <div class="tambah-wilayah-lokasi-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-nama="<?= esc($u['nama_unit']) ?>" onclick="selectTambahWilayahLokasi(this)">
-                                            <div>
-                                                <div class="font-extrabold text-xs text-slate-900"><?= esc($u['nama_unit']) ?></div>
-                                                <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
-                                                    <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200/60 text-[10px]"><?= esc($u['tipe']) ?></span>
-                                                    <?php if (!empty($u['kode_unit'])): ?>
-                                                        <span>&bull;</span>
-                                                        <span class="font-mono text-slate-400"><?= esc($u['kode_unit']) ?></span>
-                                                    <?php endif; ?>
+                                <!-- Dropdown List -->
+                                <div id="tambahWilayahLokasiDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-52 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                                    <div class="tambah-wilayah-lokasi-item px-4 py-2.5 hover:bg-slate-50 transition flex items-center justify-between cursor-pointer text-slate-400 italic text-xs font-medium" data-nama="" onclick="selectTambahWilayahLokasi(this)">
+                                        <span>-- Tanpa Gedung Khusus / Umum --</span>
+                                    </div>
+                                    <?php if (!empty($unitsList)): ?>
+                                        <?php foreach ($unitsList as $u): ?>
+                                            <div class="tambah-wilayah-lokasi-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-nama="<?= esc($u['nama_unit']) ?>" onclick="selectTambahWilayahLokasi(this)">
+                                                <div>
+                                                    <div class="font-extrabold text-xs text-slate-900"><?= esc($u['nama_unit']) ?></div>
+                                                    <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
+                                                        <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200/60 text-[10px]"><?= esc($u['tipe']) ?></span>
+                                                        <?php if (!empty($u['kode_unit'])): ?>
+                                                            <span>&bull;</span>
+                                                            <span class="font-mono text-slate-400"><?= esc($u['kode_unit']) ?></span>
+                                                        <?php endif; ?>
+                                                    </div>
                                                 </div>
+                                                <span class="text-xs text-slate-300 group-hover:text-emerald-600"><i class="fa-solid fa-check text-[10px]"></i></span>
                                             </div>
-                                            <span class="text-xs text-slate-300 group-hover:text-emerald-600"><i class="fa-solid fa-check text-[10px]"></i></span>
-                                        </div>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                                <div id="noTambahWilayahLokasiFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
-                                    Tidak ditemukan unit yang sesuai.
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                    <div id="noTambahWilayahLokasiFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
+                                        Tidak ditemukan unit yang sesuai.
+                                    </div>
                                 </div>
                             </div>
+                            <div>
+                                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Luas Area</label>
+                                <input type="text" name="luas_area" placeholder="Misal: 600 m²" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs placeholder-slate-400">
+                            </div>
                         </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="space-y-3.5">
                         <div>
-                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Luas Area</label>
-                            <input type="text" name="luas_area" placeholder="Misal: 600 m²" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs placeholder-slate-400">
+                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Deskripsi & Batasan Area</label>
+                            <textarea name="deskripsi" rows="3" placeholder="Jelaskan batasan area yang harus disapu, dipel, atau dikontrol..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs resize-none placeholder-slate-400"></textarea>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Right Column -->
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Deskripsi & Batasan Area</label>
-                        <textarea name="deskripsi" rows="3" placeholder="Jelaskan batasan area yang harus disapu, dipel, atau dikontrol..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs resize-none placeholder-slate-400"></textarea>
-                    </div>
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>Foto Master Wilayah</span>
+                            </label>
+                            <input type="file" name="foto_wilayah[]" multiple accept="image/*" class="w-full px-3.5 py-2 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-emerald-100 file:text-emerald-800 hover:file:bg-emerald-200 transition shadow-2xs cursor-pointer">
+                        </div>
 
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                            <span>Foto Master Wilayah</span>
-                        </label>
-                        <input type="file" name="foto_wilayah[]" multiple accept="image/*" class="w-full px-3.5 py-2 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-emerald-100 file:text-emerald-800 hover:file:bg-emerald-200 transition shadow-2xs cursor-pointer">
-                    </div>
-
-                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 font-medium flex items-center gap-2.5">
-                        <i class="fa-solid fa-images text-emerald-600 flex-shrink-0 text-sm"></i>
-                        <span>Foto master tersimpan paten sebagai identitas visual wilayah kebersihan.</span>
+                        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 font-medium flex items-center gap-2.5">
+                            <i class="fa-solid fa-images text-emerald-600 flex-shrink-0 text-sm"></i>
+                            <span>Foto master tersimpan paten sebagai identitas visual wilayah kebersihan.</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="pt-4 flex justify-end gap-3 border-t border-slate-100 mt-2">
+            <!-- Footer (Pinned) -->
+            <div class="pt-4 flex justify-end gap-3 border-t border-slate-100 mt-3 flex-shrink-0">
                 <button type="button" onclick="closeModalTambahWilayah()" class="px-5 py-2.5 rounded-2xl text-slate-600 text-xs font-bold hover:bg-slate-100 transition">Batal</button>
                 <button type="submit" class="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-extrabold hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 transition flex items-center gap-2">
                     <i class="fa-solid fa-floppy-disk"></i>

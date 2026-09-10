@@ -122,12 +122,7 @@ class AppPortal extends BaseController
             $bukuAktif = $allBuku[0] ?? null;
         }
 
-        $myPengajuan = $this->pengajuanModel
-            ->select('pengajuan_alat.*, alat_inventaris.nama_alat, alat_inventaris.kode_alat, alat_inventaris.satuan, alat_inventaris.stok_sisa, alat_inventaris.kategori, alat_inventaris.lokasi_gudang')
-            ->join('alat_inventaris', 'alat_inventaris.id = pengajuan_alat.alat_id', 'left')
-            ->where('user_id', $session->get('userId'))
-            ->orderBy('id', 'DESC')
-            ->findAll();
+        $myPengajuan = $this->pengajuanModel->getListWithItems(['user_id' => $session->get('userId')]);
 
         $myReports = $this->csModel
             ->where('nama_pengirim', $session->get('nama_lengkap'))
@@ -230,14 +225,10 @@ class AppPortal extends BaseController
         $this->checkAuth();
 
         $session  = session();
+        $userId   = $session->get('userId') ?: $session->get('user_id');
         $alatList = $this->alatModel->orderBy('nama_alat', 'ASC')->findAll();
 
-        $myPengajuan = $this->pengajuanModel
-            ->select('pengajuan_alat.*, alat_inventaris.nama_alat, alat_inventaris.kode_alat, alat_inventaris.satuan, alat_inventaris.stok_sisa, alat_inventaris.kategori, alat_inventaris.lokasi_gudang')
-            ->join('alat_inventaris', 'alat_inventaris.id = pengajuan_alat.alat_id', 'left')
-            ->where('user_id', $session->get('userId'))
-            ->orderBy('id', 'DESC')
-            ->findAll();
+        $myPengajuan = $this->pengajuanModel->getListWithItems(['user_id' => $userId]);
 
         $data = [
             'title'       => 'Pengajuan Alat Kebersihan',
@@ -254,6 +245,12 @@ class AppPortal extends BaseController
 
         $session = session();
         $userId  = $session->get('userId') ?: $session->get('user_id');
+        $unitId  = $session->get('unit_id');
+        if (!$unitId && $userId) {
+            $uObj = (new \App\Models\UserModel())->find($userId);
+            $unitId = $uObj['unit_id'] ?? null;
+        }
+
         $alasan  = trim($this->request->getPost('alasan_keperluan') ?? '');
 
         if (empty($alasan)) {
@@ -261,103 +258,55 @@ class AppPortal extends BaseController
         }
 
         $items = $this->request->getPost('items');
-        $insertedCount = 0;
-
-        if (is_array($items) && count($items) > 0) {
-            foreach ($items as $item) {
-                $alatId = (int)($item['alat_id'] ?? 0);
-                $jumlah = (int)($item['jumlah'] ?? 0);
-                if ($alatId > 0 && $jumlah > 0) {
-                    $this->pengajuanModel->insert([
-                        'user_id'          => $userId,
-                        'alat_id'          => $alatId,
-                        'jumlah'           => $jumlah,
-                        'alasan_keperluan' => $alasan,
-                        'status'           => 'Pending',
-                    ]);
-                    $insertedCount++;
-                }
-            }
-        } else {
+        if (!is_array($items) || count($items) === 0) {
             // Fallback for single item
-            $alatId = (int)$this->request->getPost('alat_id');
-            $jumlah = (int)$this->request->getPost('jumlah');
-            if ($alatId > 0 && $jumlah > 0) {
-                $this->pengajuanModel->insert([
-                    'user_id'          => $userId,
-                    'alat_id'          => $alatId,
-                    'jumlah'           => $jumlah,
-                    'alasan_keperluan' => $alasan,
-                    'status'           => 'Pending',
-                ]);
-                $insertedCount++;
+            $singleAlat = (int)$this->request->getPost('alat_id');
+            $singleQty  = (int)$this->request->getPost('jumlah');
+            if ($singleAlat > 0 && $singleQty > 0) {
+                $items = [
+                    ['alat_id' => $singleAlat, 'jumlah' => $singleQty]
+                ];
             }
         }
 
-        if ($insertedCount === 0) {
+        // Validate items
+        $validItems = [];
+        if (is_array($items)) {
+            foreach ($items as $it) {
+                $alatId = (int)($it['alat_id'] ?? 0);
+                $jumlah = (int)($it['jumlah'] ?? 0);
+                if ($alatId > 0 && $jumlah > 0) {
+                    $validItems[] = [
+                        'alat_id'      => $alatId,
+                        'jumlah_minta' => $jumlah,
+                        'status_item'  => 'Pending',
+                    ];
+                }
+            }
+        }
+
+        if (empty($validItems)) {
             return redirect()->to('/app/pengajuan-alat')->with('error', 'Pilih minimal 1 jenis alat dan tentukan jumlah yang valid.')->withInput();
         }
 
-        return redirect()->to('/app/pengajuan-alat')->with('success', $insertedCount . ' jenis alat kebersihan berhasil diajukan ke Admin K3L!');
-    }
+        // Generate transaction code
+        $kode = $this->pengajuanModel->generateKodePengajuan();
 
-    public function updatePengajuanAlat($id)
-    {
-        $this->checkAuth();
-
-        $pengajuan = $this->pengajuanModel->find($id);
-        if (!$pengajuan) {
-            return $this->respondJsonOrRedirect('Pengajuan alat tidak ditemukan.', false, base_url('app/pengajuan-alat'));
-        }
-
-        $session = session();
-        $userId  = $session->get('userId') ?: $session->get('user_id');
-        $role    = strtolower($session->get('role') ?? '');
-
-        // Check permission (must be submitter or admin)
-        if ($pengajuan['user_id'] != $userId && $role !== 'admin') {
-            return $this->respondJsonOrRedirect('Anda tidak memiliki izin untuk mengubah pengajuan ini.', false, base_url('app/pengajuan-alat'));
-        }
-
-        // Prevent edit if already approved by warehouse
-        if ($pengajuan['status'] === 'Disetujui') {
-            return $this->respondJsonOrRedirect('Pengajuan yang sudah Disetujui oleh gudang tidak dapat diedit lagi.', false, base_url('app/pengajuan-alat'));
-        }
-
-        $alatId = (int)$this->request->getPost('alat_id');
-        $jumlah = (int)$this->request->getPost('jumlah');
-        $alasan = trim($this->request->getPost('alasan_keperluan') ?? '');
-
-        if ($alatId <= 0) {
-            return $this->respondJsonOrRedirect('Silakan pilih jenis alat yang valid.', false, base_url('app/pengajuan-alat'));
-        }
-
-        if ($jumlah <= 0) {
-            return $this->respondJsonOrRedirect('Jumlah alat harus lebih dari 0.', false, base_url('app/pengajuan-alat'));
-        }
-
-        if (empty($alasan)) {
-            return $this->respondJsonOrRedirect('Alasan keperluan pengajuan alat wajib diisi.', false, base_url('app/pengajuan-alat'));
-        }
-
-        // If previously rejected, re-setting status to Pending so admin can review again
-        $status = ($pengajuan['status'] === 'Ditolak') ? 'Pending' : $pengajuan['status'];
-
-        $updateData = [
-            'alat_id'          => $alatId,
-            'jumlah'           => $jumlah,
+        $pengajuanId = $this->pengajuanModel->insert([
+            'kode_pengajuan'   => $kode,
+            'user_id'          => $userId,
+            'unit_id'          => $unitId,
             'alasan_keperluan' => $alasan,
-            'status'           => $status,
-        ];
+            'status'           => 'Pending',
+        ]);
 
-        // Clear rejection notes if re-submitted
-        if ($pengajuan['status'] === 'Ditolak') {
-            $updateData['catatan_admin'] = null;
+        $itemModel = new \App\Models\PengajuanAlatItemModel();
+        foreach ($validItems as $vi) {
+            $vi['pengajuan_id'] = $pengajuanId;
+            $itemModel->insert($vi);
         }
 
-        $this->pengajuanModel->update($id, $updateData);
-
-        return $this->respondJsonOrRedirect('Pengajuan alat berhasil diperbarui!', true, base_url('app/pengajuan-alat'));
+        return redirect()->to('/app/pengajuan-alat')->with('success', "Permohonan pengajuan alat ({$kode}) dengan " . count($validItems) . " jenis alat berhasil dikirim ke Admin K3L!");
     }
 
     public function deletePengajuanAlat($id)
@@ -377,13 +326,15 @@ class AppPortal extends BaseController
             return $this->respondJsonOrRedirect('Anda tidak memiliki izin untuk membatalkan pengajuan ini.', false, base_url('app/pengajuan-alat'));
         }
 
-        if ($pengajuan['status'] === 'Disetujui') {
-            return $this->respondJsonOrRedirect('Pengajuan yang sudah Disetujui tidak dapat dihapus/dibatalkan.', false, base_url('app/pengajuan-alat'));
+        if ($pengajuan['status'] === 'Disetujui' || $pengajuan['status'] === 'Selesai') {
+            return $this->respondJsonOrRedirect('Pengajuan yang sudah Disetujui / Selesai tidak dapat dihapus/dibatalkan.', false, base_url('app/pengajuan-alat'));
         }
 
+        $db = \Config\Database::connect();
+        $db->table('pengajuan_alat_item')->where('pengajuan_id', $id)->delete();
         $this->pengajuanModel->delete($id);
 
-        return $this->respondJsonOrRedirect('Pengajuan alat berhasil dibatalkan.', true, base_url('app/pengajuan-alat'));
+        return $this->respondJsonOrRedirect('Pengajuan alat berhasil dibatalkan / dihapus.', true, base_url('app/pengajuan-alat'));
     }
 
     public function laporanKebersihan()

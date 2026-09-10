@@ -932,21 +932,28 @@ class Pengaturan extends BaseController
         $tables = $db->listTables();
 
         $output = "-- Backup Database K3L Kebersihan Assalafiyyah Mlangi\n";
-        $output .= "-- Generated on: " . date('Y-m-d H:i:s') . "\n\n";
+        $output .= "-- Generated on: " . date('Y-m-d H:i:s') . "\n";
+        $output .= "-- AMAN: File ini menggunakan CREATE TABLE IF NOT EXISTS dan INSERT IGNORE\n";
+        $output .= "-- sehingga TIDAK akan menghapus data yang sudah ada jika di-import ulang.\n\n";
         $output .= "SET FOREIGN_KEY_CHECKS=0;\n\n";
 
         foreach ($tables as $table) {
-            // Get Create Table Query
+            // Get Create Table Query — use IF NOT EXISTS to prevent overwriting
             $createTableQuery = $db->query("SHOW CREATE TABLE `$table`");
             $row = $createTableQuery ? $createTableQuery->getRowArray() : null;
             $createTableSql = $row['Create Table'] ?? ($row['create table'] ?? null);
             if ($createTableSql) {
                 $output .= "-- Structure for table `$table` --\n";
-                $output .= "DROP TABLE IF EXISTS `$table`;\n";
-                $output .= $createTableSql . ";\n\n";
+                // Replace 'CREATE TABLE' with 'CREATE TABLE IF NOT EXISTS' to prevent data loss
+                $safeCreateSql = preg_replace(
+                    '/^CREATE TABLE\b/i',
+                    'CREATE TABLE IF NOT EXISTS',
+                    $createTableSql
+                );
+                $output .= $safeCreateSql . ";\n\n";
             }
 
-            // Get Data
+            // Get Data — use INSERT IGNORE to skip duplicates instead of overwriting
             $queryData = $db->query("SELECT * FROM `$table`");
             $rows = $queryData->getResultArray();
             if (!empty($rows)) {
@@ -957,7 +964,7 @@ class Pengaturan extends BaseController
                         return ($v === null) ? 'NULL' : $db->escape($v);
                     }, array_values($r));
 
-                    $output .= "INSERT INTO `$table` (" . implode(', ', $keys) . ") VALUES (" . implode(', ', $vals) . ");\n";
+                    $output .= "INSERT IGNORE INTO `$table` (" . implode(', ', $keys) . ") VALUES (" . implode(', ', $vals) . ");\n";
                 }
                 $output .= "\n";
             }

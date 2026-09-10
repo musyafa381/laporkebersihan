@@ -163,12 +163,12 @@
                 <table id="tableMyPengajuanPage" class="w-full text-left text-xs font-semibold">
                     <thead class="bg-gradient-to-r from-emerald-800 to-teal-800 text-white font-heading font-extrabold uppercase text-[10px] tracking-wider">
                         <tr>
-                            <th width="5%" class="py-3.5 px-3 text-center">NO</th>
-                            <th width="15%" class="py-3.5 px-4">TANGGAL</th>
-                            <th width="25%" class="py-3.5 px-4">PERALATAN</th>
-                            <th width="25%" class="py-3.5 px-4">ALASAN KEPERLUAN</th>
-                            <th width="15%" class="py-3.5 px-4 text-center">STATUS</th>
-                            <th width="15%" class="py-3.5 px-4 text-center">AKSI</th>
+                            <th width="4%" class="py-3.5 px-3 text-center">NO</th>
+                            <th width="15%" class="py-3.5 px-4">TANGGAL & KODE</th>
+                            <th width="32%" class="py-3.5 px-4">DAFTAR PERALATAN</th>
+                            <th width="24%" class="py-3.5 px-4">ALASAN & CATATAN</th>
+                            <th width="12%" class="py-3.5 px-4 text-center">STATUS</th>
+                            <th width="13%" class="py-3.5 px-4 text-center">AKSI</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 bg-white">
@@ -185,21 +185,65 @@
                                             <i class="fa-regular fa-clock text-[9px]"></i>
                                             <span><?= date('H:i', strtotime($p['created_at'])) ?> WIB</span>
                                         </div>
+                                        <?php if (!empty($p['kode_pengajuan'])): ?>
+                                            <div class="mt-1">
+                                                <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[10px] font-mono font-extrabold border border-emerald-200 shadow-2xs">
+                                                    <?= esc($p['kode_pengajuan']) ?>
+                                                </span>
+                                            </div>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="py-4 px-4">
-                                        <div class="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
-                                            <i class="fa-solid fa-box text-emerald-600"></i>
-                                            <span><?= esc($p['nama_alat']) ?></span>
-                                        </div>
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-extrabold mt-1 border border-emerald-200/80 shadow-2xs">
-                                            <i class="fa-solid fa-layer-group text-[9px]"></i>
-                                            <?= $p['jumlah'] ?> <?= esc($p['satuan']) ?>
-                                        </span>
+                                        <?php if (!empty($p['items']) && is_array($p['items'])): ?>
+                                            <div class="space-y-1.5">
+                                                <?php foreach ($p['items'] as $it): ?>
+                                                    <div class="p-2 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2 shadow-2xs">
+                                                        <div class="min-w-0 flex-1">
+                                                            <div class="font-extrabold text-slate-800 text-xs truncate flex items-center gap-1.5">
+                                                                <i class="fa-solid fa-box text-emerald-600 text-[10px]"></i>
+                                                                <span><?= esc($it['nama_alat']) ?></span>
+                                                            </div>
+                                                            <?php if (!empty($it['catatan_item'])): ?>
+                                                                <div class="text-[9px] text-slate-500 italic truncate"><?= esc($it['catatan_item']) ?></div>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                        <div class="text-right flex-shrink-0 flex items-center gap-1">
+                                                            <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-white border border-slate-200 text-slate-700 shadow-2xs" title="Jumlah Diminta">
+                                                                <?= $it['jumlah_minta'] ?> <?= esc($it['satuan'] ?? 'Unit') ?>
+                                                            </span>
+                                                            <?php if ($p['status'] === 'Disetujui' || $p['status'] === 'Selesai' || $it['jumlah_setuju'] !== null): ?>
+                                                                <i class="fa-solid fa-arrow-right text-[9px] text-slate-400"></i>
+                                                                <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold <?= (int)$it['jumlah_setuju'] > 0 ? ((int)$it['jumlah_setuju'] < (int)$it['jumlah_minta'] ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-emerald-100 text-emerald-900 border border-emerald-300') : 'bg-rose-100 text-rose-900 border border-rose-300' ?>" title="Jumlah Disetujui">
+                                                                    <?= (int)$it['jumlah_setuju'] ?> <?= esc($it['satuan'] ?? 'Unit') ?>
+                                                                </span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
+                                                <i class="fa-solid fa-box text-emerald-600"></i>
+                                                <span><?= esc($p['nama_alat']) ?></span>
+                                            </div>
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-extrabold mt-1 border border-emerald-200/80 shadow-2xs">
+                                                <i class="fa-solid fa-layer-group text-[9px]"></i>
+                                                <?= $p['jumlah'] ?> <?= esc($p['satuan']) ?>
+                                            </span>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="py-4 px-4">
                                         <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/70 text-slate-800 text-xs font-medium leading-relaxed shadow-2xs">
                                             "<?= esc($p['alasan_keperluan']) ?>"
                                         </div>
+                                        <?php if (!empty($p['catatan_admin'])): ?>
+                                            <div class="mt-2 p-2 rounded-xl bg-emerald-50/90 border border-emerald-200/90 text-emerald-900 text-[10px] font-semibold shadow-2xs">
+                                                <div class="font-extrabold text-emerald-800 flex items-center gap-1">
+                                                    <i class="fa-solid fa-circle-info text-emerald-600"></i> Catatan Admin:
+                                                </div>
+                                                <div class="text-slate-700 font-medium mt-0.5"><?= esc($p['catatan_admin']) ?></div>
+                                            </div>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="py-4 px-4 text-center whitespace-nowrap">
                                         <?php if ($p['status'] === 'Pending'): ?>
@@ -207,7 +251,7 @@
                                                 <i class="fa-solid fa-hourglass-half text-amber-600 text-[10px]"></i>
                                                 Pending
                                             </span>
-                                        <?php elseif ($p['status'] === 'Disetujui'): ?>
+                                        <?php elseif ($p['status'] === 'Disetujui' || $p['status'] === 'Selesai'): ?>
                                             <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-extrabold border border-emerald-200/90 inline-flex items-center gap-1.5 shadow-2xs">
                                                 <i class="fa-solid fa-circle-check text-emerald-600 text-[10px]"></i>
                                                 Disetujui
@@ -218,46 +262,22 @@
                                                 Ditolak
                                             </span>
                                         <?php endif; ?>
-
-                                        <?php if (!empty($p['catatan_admin'])): ?>
-                                            <div class="mt-1.5 text-[10px] text-slate-500 font-semibold italic text-left max-w-xs" title="<?= esc($p['catatan_admin']) ?>">
-                                                Catatan: <?= esc($p['catatan_admin']) ?>
-                                            </div>
-                                        <?php endif; ?>
                                     </td>
                                     <td class="py-4 px-4 text-center whitespace-nowrap">
                                         <div class="flex items-center justify-center gap-1.5">
-                                            <?php if ($p['status'] !== 'Disetujui'): ?>
+                                            <?php if ($p['status'] === 'Disetujui' || $p['status'] === 'Selesai'): ?>
+                                                <a href="<?= base_url('cs/pengajuan/cetak/' . $p['id']) ?>" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 text-[11px] font-extrabold border border-teal-200/80 transition flex items-center gap-1 shadow-2xs" title="Cetak Bukti Serah Terima">
+                                                    <i class="fa-solid fa-print text-[10px]"></i>
+                                                    <span>Cetak</span>
+                                                </a>
+                                            <?php else: ?>
                                                 <button type="button"
-                                                        onclick='openEditPengajuanModal(<?= json_encode([
-                                                            'id' => (int)$p['id'],
-                                                            'alat_id' => (int)$p['alat_id'],
-                                                            'nama_alat' => $p['nama_alat'] ?? '',
-                                                            'jumlah' => (int)$p['jumlah'],
-                                                            'satuan' => $p['satuan'] ?? 'Unit',
-                                                            'stok_sisa' => (int)($p['stok_sisa'] ?? 0),
-                                                            'kategori' => $p['kategori'] ?? 'Umum',
-                                                            'alasan_keperluan' => $p['alasan_keperluan'] ?? '',
-                                                            'status' => $p['status'] ?? 'Pending',
-                                                            'catatan_admin' => $p['catatan_admin'] ?? '',
-                                                        ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)'
-                                                        class="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-800 text-[11px] font-extrabold border border-emerald-200/80 transition flex items-center gap-1 shadow-2xs hover:shadow-sm"
-                                                        title="Edit Pengajuan">
-                                                    <i class="fa-solid fa-pen-to-square text-[10px]"></i>
-                                                    <span>Edit</span>
-                                                </button>
-                                                <button type="button"
-                                                        onclick="confirmDeletePengajuan('<?= base_url('app/pengajuan-alat/delete/' . $p['id']) ?>', '<?= esc($p['nama_alat'] ?? 'Alat') ?>')"
+                                                        onclick="confirmDeletePengajuan('<?= base_url('app/pengajuan-alat/delete/' . $p['id']) ?>', '<?= esc($p['kode_pengajuan'] ?: ($p['nama_alat'] ?? 'Pengajuan')) ?>')"
                                                         class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-800 text-[11px] font-extrabold border border-rose-200/80 transition flex items-center gap-1 shadow-2xs hover:shadow-sm"
                                                         title="Batalkan Pengajuan">
                                                     <i class="fa-solid fa-trash-can text-[10px]"></i>
                                                     <span>Batal</span>
                                                 </button>
-                                            <?php else: ?>
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 text-slate-400 text-[10px] font-bold border border-slate-200 cursor-not-allowed" title="Pengajuan telah disetujui oleh gudang dan tidak dapat diubah">
-                                                    <i class="fa-solid fa-lock text-[9px]"></i>
-                                                    <span>Terkunci</span>
-                                                </span>
                                             <?php endif; ?>
                                         </div>
                                     </td>

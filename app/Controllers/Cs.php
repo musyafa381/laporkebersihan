@@ -165,12 +165,7 @@ class Cs extends BaseController
             unset($r);
             $reportsList = $reports;
 
-            $pengajuanList = $this->pengajuanModel
-                ->select('pengajuan_alat.*, users.nama_lengkap, users.username, alat_inventaris.nama_alat, alat_inventaris.kode_alat, alat_inventaris.satuan')
-                ->join('users', 'users.id = pengajuan_alat.user_id', 'left')
-                ->join('alat_inventaris', 'alat_inventaris.id = pengajuan_alat.alat_id', 'left')
-                ->orderBy('pengajuan_alat.id', 'DESC')
-                ->findAll();
+            $pengajuanList = $this->pengajuanModel->getListWithItems();
         }
 
         $userUnit = null;
@@ -593,19 +588,143 @@ class Cs extends BaseController
             return $this->respondJsonOrRedirect('Pengajuan alat tidak ditemukan.', false);
         }
 
-        $jumlah          = (int)($this->request->getPost('jumlah') ?: $pengajuan['jumlah']);
-        $alasanKeperluan = trim($this->request->getPost('alasan_keperluan') ?? $pengajuan['alasan_keperluan']);
-        $status          = $this->request->getPost('status') ?: $pengajuan['status'];
-        $catatan         = trim($this->request->getPost('catatan_admin') ?? '');
+        $status       = $this->request->getPost('status') ?: $pengajuan['status'];
+        $catatanAdmin = trim($this->request->getPost('catatan_admin') ?? '');
+        $itemsInput   = $this->request->getPost('items');
+
+        $db = \Config\Database::connect();
+        $itemModel = new \App\Models\PengajuanAlatItemModel();
+        $alatModel = new \App\Models\AlatModel();
+        $alatTransaksiModel = new \App\Models\AlatTransaksiModel();
+
+        // Get user details for transaction logging
+        $pemohon = (new \App\Models\UserModel())->find($pengajuan['user_id']);
+        $namaPemohon = $pemohon['nama_lengkap'] ?? 'Unit';
+
+        // Check if previously already deducted
+        $wasAlreadyDeducted = ($pengajuan['status'] === 'Disetujui' || $pengajuan['status'] === 'Selesai');
+        $isNowApproved = ($status === 'Disetujui' || $status === 'Selesai');
+
+        $currentItems = $itemModel->where('pengajuan_id', $id)->findAll();
+
+        if (is_array($itemsInput) && !empty($itemsInput)) {
+            foreach ($itemsInput as $itemId => $itemData) {
+                $dbItem = $itemModel->find($itemId);
+                if (!$dbItem || $dbItem['pengajuan_id'] != $id) continue;
+
+                $jumlahMinta  = (int)$dbItem['jumlah_minta'];
+                $jumlahSetuju = isset($itemData['jumlah_setuju']) ? max(0, (int)$itemData['jumlah_setuju']) : $jumlahMinta;
+                $catatanItem  = trim($itemData['catatan_item'] ?? '');
+
+                // Auto determine status_item
+                if ($status === 'Ditolak') {
+                    $statusItem = 'Ditolak';
+                    $jumlahSetuju = 0;
+                } elseif ($jumlahSetuju === 0) {
+                    $statusItem = 'Ditolak';
+                } elseif ($jumlahSetuju < $jumlahMinta) {
+                    $statusItem = 'Sebagian';
+                } else {
+                    $statusItem = 'Disetujui';
+                }
+
+                $itemModel->update($itemId, [
+                    'jumlah_setuju' => $jumlahSetuju,
+                    'status_item'   => $statusItem,
+                    'catatan_item'  => $catatanItem
+                ]);
+
+                // Stock deduction logic: if approving now and was not previously deducted
+                if ($isNowApproved && !$wasAlreadyDeducted && $jumlahSetuju > 0) {
+                    $alat = $alatModel->find($dbItem['alat_id']);
+                    if ($alat) {
+                        $stokLama = (int)$alat['stok_sisa'];
+                        $stokBaru = max(0, $stokLama - $jumlahSetuju);
+                        $alatModel->update($alat['id'], ['stok_sisa' => $stokBaru]);
+
+                        if ($db->tableExists('alat_transaksi')) {
+                            $alatTransaksiModel->insert([
+                                'alat_id'      => $alat['id'],
+                                'tipe'         => 'Keluar',
+                                'jumlah'       => $jumlahSetuju,
+                                'satuan'       => $alat['satuan'] ?? 'Unit',
+                                'penerima'     => $namaPemohon,
+                                'keterangan'   => "Realisasi Pengajuan {$pengajuan['kode_pengajuan']}",
+                                'created_at'   => date('Y-m-d H:i:s'),
+                            ]);
+                        }
+                    }
+                }
+            }
+        } else {
+            // Simple status change
+            if ($status === 'Ditolak') {
+                $itemModel->where('pengajuan_id', $id)->set([
+                    'jumlah_setuju' => 0,
+                    'status_item'   => 'Ditolak'
+                ])->update();
+            } elseif ($status === 'Disetujui' || $status === 'Selesai') {
+                foreach ($currentItems as $cItem) {
+                    $jSetuju = $cItem['jumlah_setuju'] !== null ? (int)$cItem['jumlah_setuju'] : (int)$cItem['jumlah_minta'];
+                    $itemModel->update($cItem['id'], [
+                        'jumlah_setuju' => $jSetuju,
+                        'status_item'   => ($jSetuju < $cItem['jumlah_minta'] && $jSetuju > 0) ? 'Sebagian' : 'Disetujui'
+                    ]);
+
+                    if (!$wasAlreadyDeducted && $jSetuju > 0) {
+                        $alat = $alatModel->find($cItem['alat_id']);
+                        if ($alat) {
+                            $stokLama = (int)$alat['stok_sisa'];
+                            $stokBaru = max(0, $stokLama - $jSetuju);
+                            $alatModel->update($alat['id'], ['stok_sisa' => $stokBaru]);
+
+                            if ($db->tableExists('alat_transaksi')) {
+                                $alatTransaksiModel->insert([
+                                    'alat_id'      => $alat['id'],
+                                    'tipe'         => 'Keluar',
+                                    'jumlah'       => $jSetuju,
+                                    'satuan'       => $alat['satuan'] ?? 'Unit',
+                                    'penerima'     => $namaPemohon,
+                                    'keterangan'   => "Realisasi Pengajuan {$pengajuan['kode_pengajuan']}",
+                                    'created_at'   => date('Y-m-d H:i:s'),
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $session = session();
+        $adminId = $session->get('userId') ?: $session->get('user_id');
 
         $this->pengajuanModel->update($id, [
-            'jumlah'           => $jumlah,
-            'alasan_keperluan' => $alasanKeperluan,
-            'status'           => $status,
-            'catatan_admin'    => $catatan
+            'status'         => $status,
+            'catatan_admin'  => $catatanAdmin,
+            'disetujui_oleh' => $adminId,
+            'disetujui_pada' => date('Y-m-d H:i:s')
         ]);
 
-        return $this->respondJsonOrRedirect("Pengajuan alat berhasil diperbarui & status diset ke '{$status}'!");
+        return $this->respondJsonOrRedirect("Pengajuan alat ({$pengajuan['kode_pengajuan']}) berhasil diproses & status diset ke '{$status}'!");
+    }
+
+    public function cetakNotaPengajuan($id)
+    {
+        $requests = $this->pengajuanModel->getListWithItems(['id' => $id]);
+        if (empty($requests)) {
+            return redirect()->to('/cs')->with('error', 'Data pengajuan tidak ditemukan.');
+        }
+
+        $pengajuan = $requests[0];
+        $settings  = (new \App\Models\PengaturanModel())->getAllSettings();
+
+        $data = [
+            'title'     => 'Bukti Serah Terima Alat - ' . ($pengajuan['kode_pengajuan'] ?? 'REQ'),
+            'p'         => $pengajuan,
+            'settings'  => $settings,
+        ];
+
+        return view('cs/cetak_nota_pengajuan', $data);
     }
 
     public function deleteReport($id)
@@ -638,7 +757,10 @@ class Cs extends BaseController
             return $this->respondJsonOrRedirect('Pengajuan alat tidak ditemukan.', false);
         }
 
+        $db = \Config\Database::connect();
+        $db->table('pengajuan_alat_item')->where('pengajuan_id', $id)->delete();
         $this->pengajuanModel->delete($id);
+
         return $this->respondJsonOrRedirect('Pengajuan alat berhasil dihapus.');
     }
 }

@@ -872,13 +872,13 @@
                     <thead class="bg-slate-100/90 text-slate-700 font-heading font-extrabold uppercase text-[10px] tracking-wider border-b border-slate-200">
                         <tr>
                             <th width="4%" class="py-3 px-3 text-center">NO</th>
-                            <th width="13%" class="py-3 px-4">TANGGAL</th>
-                            <th width="18%" class="py-3 px-4">PEMOHON</th>
-                            <th width="20%" class="py-3 px-4">PERALATAN</th>
-                            <th width="<?= $isAdmin ? '24%' : '34%' ?>" class="py-3 px-4">ALASAN & CATATAN</th>
-                            <th width="11%" class="py-3 px-4 text-center">STATUS</th>
+                            <th width="14%" class="py-3 px-4">TANGGAL & KODE</th>
+                            <th width="18%" class="py-3 px-4">PEMOHON & UNIT</th>
+                            <th width="24%" class="py-3 px-4">DETAIL PERALATAN</th>
+                            <th width="<?= $isAdmin ? '22%' : '30%' ?>" class="py-3 px-4">ALASAN & CATATAN</th>
+                            <th width="10%" class="py-3 px-4 text-center">STATUS</th>
                             <?php if ($isAdmin): ?>
-                                <th width="10%" class="py-3 px-3 text-center">PROSES</th>
+                                <th width="8%" class="py-3 px-3 text-center">PROSES</th>
                             <?php endif; ?>
                         </tr>
                     </thead>
@@ -896,6 +896,13 @@
                                             <i class="fa-regular fa-clock text-[9px]"></i>
                                             <span><?= date('H:i', strtotime($p['created_at'])) ?> WIB</span>
                                         </div>
+                                        <?php if (!empty($p['kode_pengajuan'])): ?>
+                                            <div class="mt-1">
+                                                <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[10px] font-mono font-extrabold border border-emerald-200 shadow-2xs">
+                                                    <?= esc($p['kode_pengajuan']) ?>
+                                                </span>
+                                            </div>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="py-4 px-4">
                                         <div class="flex items-center gap-2.5">
@@ -905,18 +912,53 @@
                                             <div>
                                                 <div class="font-extrabold text-slate-900 text-xs"><?= esc($p['nama_lengkap'] ?: 'Pengurus Unit') ?></div>
                                                 <div class="text-[10px] text-slate-400 font-medium">@<?= esc($p['username']) ?></div>
+                                                <?php if (!empty($p['nama_unit'])): ?>
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[9px] font-extrabold mt-1 border border-slate-200">
+                                                        <i class="fa-solid fa-building text-[8px] text-emerald-600"></i>
+                                                        <?= esc($p['nama_unit']) ?>
+                                                    </span>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="py-4 px-4">
-                                        <div class="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
-                                            <i class="fa-solid fa-box text-emerald-600"></i>
-                                            <span><?= esc($p['nama_alat']) ?></span>
-                                        </div>
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-extrabold mt-1 border border-emerald-200/80 shadow-2xs">
-                                            <i class="fa-solid fa-layer-group text-[9px]"></i>
-                                            <?= $p['jumlah'] ?> <?= esc($p['satuan']) ?>
-                                        </span>
+                                        <?php if (!empty($p['items']) && is_array($p['items'])): ?>
+                                            <div class="space-y-1.5 max-w-xs">
+                                                <?php foreach ($p['items'] as $it): ?>
+                                                    <div class="p-2 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2 shadow-2xs">
+                                                        <div class="min-w-0 flex-1">
+                                                            <div class="font-extrabold text-slate-800 text-[11px] truncate flex items-center gap-1.5">
+                                                                <i class="fa-solid fa-box text-emerald-600 text-[10px]"></i>
+                                                                <span><?= esc($it['nama_alat']) ?></span>
+                                                            </div>
+                                                            <?php if (!empty($it['catatan_item'])): ?>
+                                                                <div class="text-[9px] text-slate-500 italic truncate"><?= esc($it['catatan_item']) ?></div>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                        <div class="text-right flex-shrink-0 flex items-center gap-1">
+                                                            <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-white border border-slate-200 text-slate-700 shadow-2xs" title="Jumlah Diminta">
+                                                                <?= $it['jumlah_minta'] ?> <?= esc($it['satuan'] ?? 'Unit') ?>
+                                                            </span>
+                                                            <?php if ($p['status'] === 'Disetujui' || $p['status'] === 'Selesai' || $it['jumlah_setuju'] !== null): ?>
+                                                                <i class="fa-solid fa-arrow-right text-[9px] text-slate-400"></i>
+                                                                <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold <?= (int)$it['jumlah_setuju'] > 0 ? ((int)$it['jumlah_setuju'] < (int)$it['jumlah_minta'] ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-emerald-100 text-emerald-900 border border-emerald-300') : 'bg-rose-100 text-rose-900 border border-rose-300' ?>" title="Jumlah Disetujui">
+                                                                    <?= (int)$it['jumlah_setuju'] ?> <?= esc($it['satuan'] ?? 'Unit') ?>
+                                                                </span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
+                                                <i class="fa-solid fa-box text-emerald-600"></i>
+                                                <span><?= esc($p['nama_alat']) ?></span>
+                                            </div>
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-extrabold mt-1 border border-emerald-200/80 shadow-2xs">
+                                                <i class="fa-solid fa-layer-group text-[9px]"></i>
+                                                <?= $p['jumlah'] ?> <?= esc($p['satuan']) ?>
+                                            </span>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="py-4 px-4">
                                         <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/70 text-slate-800 text-xs font-medium leading-relaxed shadow-2xs">
@@ -930,6 +972,12 @@
                                                 <div class="pl-4 text-slate-700 font-medium"><?= esc($p['catatan_admin']) ?></div>
                                             </div>
                                         <?php endif; ?>
+                                        <?php if (!empty($p['disetujui_pada'])): ?>
+                                            <div class="mt-1 text-[9px] text-slate-400 font-medium flex items-center gap-1">
+                                                <i class="fa-solid fa-check-double text-emerald-600"></i>
+                                                <span>Disetujui: <?= date('d/m/Y H:i', strtotime($p['disetujui_pada'])) ?></span>
+                                            </div>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="py-4 px-4 text-center whitespace-nowrap">
                                         <?php if ($p['status'] === 'Pending'): ?>
@@ -937,7 +985,7 @@
                                                 <i class="fa-solid fa-hourglass-half text-amber-600 text-[10px]"></i>
                                                 Pending
                                             </span>
-                                        <?php elseif ($p['status'] === 'Disetujui'): ?>
+                                        <?php elseif ($p['status'] === 'Disetujui' || $p['status'] === 'Selesai'): ?>
                                             <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-extrabold border border-emerald-200/90 inline-flex items-center gap-1.5 shadow-2xs">
                                                 <i class="fa-solid fa-circle-check text-emerald-600 text-[10px]"></i>
                                                 Disetujui
@@ -956,6 +1004,9 @@
                                                     <i class="fa-solid fa-sliders"></i>
                                                     <span>Proses</span>
                                                 </button>
+                                                <a href="<?= base_url('cs/pengajuan/cetak/' . $p['id']) ?>" target="_blank" class="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 hover:bg-teal-100 hover:text-teal-900 border border-teal-200 flex items-center justify-center transition shadow-2xs" title="Cetak Bukti Serah Terima">
+                                                    <i class="fa-solid fa-print text-xs"></i>
+                                                </a>
                                                 <a href="<?= base_url('cs/pengajuan/delete/' . $p['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus pengajuan alat ini?" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 border border-slate-200 flex items-center justify-center transition shadow-2xs" title="Hapus Pengajuan">
                                                     <i class="fa-solid fa-trash-can text-xs"></i>
                                                 </a>
@@ -1273,7 +1324,7 @@
 
     <!-- Modal Edit / Proses Pengajuan Alat (Admin Only) -->
     <div id="modalProsesPengajuan" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md hidden flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-        <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl space-y-6 border border-slate-100 my-auto animate-in fade-in zoom-in duration-200">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl space-y-6 border border-slate-100 my-auto animate-in fade-in zoom-in duration-200">
             <!-- Modal Header -->
             <div class="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div class="flex items-center gap-3">
@@ -1284,7 +1335,7 @@
                         <h3 class="font-heading font-extrabold text-lg text-slate-900 leading-tight">
                             Edit & Proses Pengajuan Alat
                         </h3>
-                        <p class="text-xs text-slate-500 font-medium">Tinjau permohonan dan tetapkan status alokasi alat.</p>
+                        <p class="text-xs text-slate-500 font-medium">Tinjau permohonan dan tetapkan jumlah alokasi per item alat.</p>
                     </div>
                 </div>
                 <button onclick="closeModalProsesPengajuan()" class="w-9 h-9 rounded-2xl bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center transition shadow-2xs">
@@ -1294,36 +1345,64 @@
 
             <!-- Modal Form -->
             <form id="formProsesPengajuan" action="" method="POST" class="space-y-4">
-                <!-- Info Box Permohonan -->
-                <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 flex items-center justify-between gap-4">
-                    <div class="space-y-0.5">
-                        <div class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Peralatan Diminta</div>
-                        <div class="font-heading font-extrabold text-sm text-slate-900" id="pengajuan_nama_alat_display">Peralatan: -</div>
+                <!-- Info Header Box -->
+                <div class="p-4 rounded-2xl bg-gradient-to-r from-emerald-50/90 via-teal-50/70 to-emerald-50/90 border border-emerald-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                    <div class="space-y-1">
+                        <div class="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-receipt text-emerald-600"></i> Kode Transaksi
+                        </div>
+                        <div id="pengajuan_kode_display" class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-mono text-xs font-bold shadow-2xs">REQ-000000-000</span>
+                        </div>
                     </div>
-                    <div class="text-right space-y-0.5">
-                        <div class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Pemohon</div>
-                        <div class="font-bold text-xs text-slate-700" id="pengajuan_pemohon_display">Pemohon: -</div>
+                    <div class="sm:text-right space-y-0.5">
+                        <div class="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">Pemohon / Unit</div>
+                        <div class="font-extrabold text-xs text-slate-800" id="pengajuan_pemohon_display">Pemohon: -</div>
                     </div>
                 </div>
 
+                <!-- Items Section with interactive table -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-boxes-stacked text-emerald-600"></i>
+                            <span>Daftar Peralatan & Jumlah Disetujui</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="setujuSemuaSesuaiMinta()" class="text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition flex items-center gap-1">
+                                <i class="fa-solid fa-check-double text-[9px]"></i> Penuhi Semua
+                            </button>
+                            <button type="button" onclick="tolakSemuaItem()" class="text-[10px] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded-lg border border-rose-200 transition flex items-center gap-1">
+                                <i class="fa-solid fa-ban text-[9px]"></i> Nol-kan
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/50 shadow-2xs">
+                        <div class="max-h-60 overflow-y-auto divide-y divide-slate-100" id="modalPengajuanItemsContainer">
+                            <!-- Dynamically populated by openModalProsesPengajuan -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Overall Status & Info -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div>
                         <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                            <i class="fa-solid fa-boxes-stacked text-emerald-600 text-[10px]"></i>
-                            <span>Jumlah Disetujui</span>
-                        </label>
-                        <input type="number" id="pengajuan_jumlah" name="jumlah" min="1" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50/80 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
                             <i class="fa-solid fa-traffic-light text-emerald-600 text-[10px]"></i>
-                            <span>Keputusan Status</span>
+                            <span>Keputusan Status Transaksi</span>
                         </label>
                         <select id="pengajuan_status" name="status" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-extrabold bg-slate-50/80 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs">
                             <option value="Pending">⏳ Pending (Menunggu Peninjauan)</option>
-                            <option value="Disetujui">🟢 Disetujui (Alat Dialokasikan)</option>
+                            <option value="Disetujui">🟢 Disetujui (Alokasikan & Kurangi Stok)</option>
                             <option value="Ditolak">🔴 Ditolak (Belum Disetujui)</option>
                         </select>
+                    </div>
+                    <div class="flex flex-col justify-end">
+                        <div class="p-2.5 rounded-2xl bg-amber-50 border border-amber-200/80 text-[11px] text-amber-900 leading-tight flex items-start gap-2">
+                            <i class="fa-solid fa-circle-info text-amber-600 mt-0.5 flex-shrink-0"></i>
+                            <span>Stok fisik gudang otomatis dikurangi sejumlah item yang <strong>Disetujui</strong> saat status disimpan.</span>
+                        </div>
                     </div>
                 </div>
 
@@ -1332,7 +1411,9 @@
                         <i class="fa-solid fa-file-lines text-emerald-600 text-[10px]"></i>
                         <span>Alasan Keperluan Pemohon</span>
                     </label>
-                    <textarea id="pengajuan_alasan" name="alasan_keperluan" rows="2.5" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-medium bg-slate-50/80 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs leading-relaxed"></textarea>
+                    <div id="pengajuan_alasan_display" class="p-3 rounded-2xl bg-slate-100/70 border border-slate-200 text-slate-700 text-xs italic font-medium leading-relaxed max-h-20 overflow-y-auto">
+                        "-"
+                    </div>
                 </div>
 
                 <div>
@@ -1340,17 +1421,25 @@
                         <i class="fa-solid fa-clipboard-check text-emerald-600 text-[10px]"></i>
                         <span>Catatan / Alasan Keputusan Admin</span>
                     </label>
-                    <textarea id="pengajuan_catatan" name="catatan_admin" rows="3" placeholder="Tuliskan catatan alokasi atau alasan keputusan admin..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-medium bg-slate-50/80 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs leading-relaxed"></textarea>
+                    <textarea id="pengajuan_catatan" name="catatan_admin" rows="2.5" placeholder="Tuliskan catatan alokasi atau alasan keputusan admin..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-medium bg-slate-50/80 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs leading-relaxed"></textarea>
                 </div>
 
-                <div class="pt-3 flex items-center justify-end gap-2.5 border-t border-slate-100">
-                    <button type="button" onclick="closeModalProsesPengajuan()" class="px-5 py-2.5 rounded-2xl text-slate-600 hover:text-slate-800 text-xs font-bold hover:bg-slate-100 transition">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-extrabold hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-600/20 hover:shadow-lg transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-floppy-disk"></i>
-                        <span>Simpan Keputusan</span>
-                    </button>
+                <div class="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100">
+                    <div id="modal_cetak_nota_container" class="hidden">
+                        <a id="btn_modal_cetak_nota" href="#" target="_blank" class="px-4 py-2 rounded-2xl bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold border border-teal-200 transition flex items-center gap-1.5 shadow-2xs">
+                            <i class="fa-solid fa-print"></i>
+                            <span>Cetak Bukti Serah Terima</span>
+                        </a>
+                    </div>
+                    <div class="flex items-center gap-2.5 ml-auto">
+                        <button type="button" onclick="closeModalProsesPengajuan()" class="px-5 py-2.5 rounded-2xl text-slate-600 hover:text-slate-800 text-xs font-bold hover:bg-slate-100 transition">
+                            Batal
+                        </button>
+                        <button type="submit" class="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-extrabold hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-600/20 hover:shadow-lg transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>Simpan Keputusan</span>
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -1537,18 +1626,83 @@
             if (form) {
                 form.action = "<?= base_url('cs/pengajuan/update/') ?>" + pengajuan.id;
             }
-            const alatEl = document.getElementById('pengajuan_nama_alat_display');
-            if (alatEl) alatEl.innerText = 'Peralatan: ' + (pengajuan.nama_alat || '-');
+            const kodeEl = document.getElementById('pengajuan_kode_display');
+            if (kodeEl) {
+                kodeEl.innerHTML = `<span class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-mono text-xs font-bold shadow-2xs">${pengajuan.kode_pengajuan || ('REQ-#' + pengajuan.id)}</span>`;
+            }
             const pemohonEl = document.getElementById('pengajuan_pemohon_display');
-            if (pemohonEl) pemohonEl.innerText = 'Pemohon: ' + (pengajuan.nama_lengkap || pengajuan.username || 'Pengurus Unit');
-            const jmlEl = document.getElementById('pengajuan_jumlah');
-            if (jmlEl) jmlEl.value = pengajuan.jumlah || 1;
+            if (pemohonEl) {
+                pemohonEl.innerText = (pengajuan.nama_lengkap || pengajuan.username || 'Pengurus Unit') + (pengajuan.nama_unit ? ' (' + pengajuan.nama_unit + ')' : '');
+            }
             const statEl = document.getElementById('pengajuan_status');
             if (statEl) statEl.value = pengajuan.status || 'Pending';
-            const alasanEl = document.getElementById('pengajuan_alasan');
-            if (alasanEl) alasanEl.value = pengajuan.alasan_keperluan || '';
+            const alasanEl = document.getElementById('pengajuan_alasan_display');
+            if (alasanEl) alasanEl.innerText = '"' + (pengajuan.alasan_keperluan || '-') + '"';
             const catatanEl = document.getElementById('pengajuan_catatan');
             if (catatanEl) catatanEl.value = pengajuan.catatan_admin || '';
+
+            // Cetak nota button toggle
+            const cetakContainer = document.getElementById('modal_cetak_nota_container');
+            const btnCetak = document.getElementById('btn_modal_cetak_nota');
+            if (cetakContainer && btnCetak) {
+                if (pengajuan.id) {
+                    btnCetak.href = "<?= base_url('cs/pengajuan/cetak/') ?>" + pengajuan.id;
+                    cetakContainer.classList.remove('hidden');
+                } else {
+                    cetakContainer.classList.add('hidden');
+                }
+            }
+
+            // Render items in container
+            const itemsContainer = document.getElementById('modalPengajuanItemsContainer');
+            if (itemsContainer) {
+                itemsContainer.innerHTML = '';
+                const items = (pengajuan.items && pengajuan.items.length > 0) ? pengajuan.items : [{
+                    id: pengajuan.id,
+                    nama_alat: pengajuan.nama_alat || 'Alat',
+                    satuan: pengajuan.satuan || 'Unit',
+                    stok_alat: pengajuan.stok_sisa || 0,
+                    jumlah_minta: pengajuan.jumlah || 1,
+                    jumlah_setuju: pengajuan.jumlah || 1,
+                    catatan_item: ''
+                }];
+
+                items.forEach((it, idx) => {
+                    const minta = parseInt(it.jumlah_minta || 1, 10);
+                    const setuju = (it.jumlah_setuju !== null && it.jumlah_setuju !== undefined) ? parseInt(it.jumlah_setuju, 10) : minta;
+                    const stok = parseInt(it.stok_alat || 0, 10);
+                    const satuan = it.satuan || 'Unit';
+
+                    const row = document.createElement('div');
+                    row.className = 'p-3.5 bg-white hover:bg-slate-50 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3';
+                    row.innerHTML = `
+                        <div class="flex-1 min-w-0 space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="w-5 h-5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-extrabold flex items-center justify-center flex-shrink-0">
+                                    ${idx + 1}
+                                </span>
+                                <div class="font-extrabold text-slate-900 text-xs truncate">${it.nama_alat || 'Peralatan'}</div>
+                            </div>
+                            <div class="flex items-center gap-2 text-[10px] pl-7">
+                                <span class="text-slate-500 font-semibold">Minta: <strong class="text-slate-800 font-bold">${minta} ${satuan}</strong></span>
+                                <span class="text-slate-300">&bull;</span>
+                                <span class="font-bold ${stok > 0 ? 'text-emerald-700' : 'text-rose-600'}">Stok Gudang: ${stok} ${satuan}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 sm:w-64 flex-shrink-0">
+                            <div class="w-24 flex-shrink-0">
+                                <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-0.5">Disetujui</label>
+                                <input type="number" name="items[${it.id}][jumlah_setuju]" value="${setuju}" min="0" max="${minta}" class="item-jumlah-setuju-input w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-extrabold text-center bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs" data-minta="${minta}">
+                            </div>
+                            <div class="flex-1">
+                                <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-0.5">Catatan Item</label>
+                                <input type="text" name="items[${it.id}][catatan_item]" value="${it.catatan_item || ''}" placeholder="Ket. khusus..." class="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                            </div>
+                        </div>
+                    `;
+                    itemsContainer.appendChild(row);
+                });
+            }
 
             const modal = document.getElementById('modalProsesPengajuan');
             if (modal) modal.classList.remove('hidden');
@@ -1560,6 +1714,20 @@
             if (modal) modal.classList.add('hidden');
         }
         window.closeModalProsesPengajuan = closeModalProsesPengajuan;
+
+        function setujuSemuaSesuaiMinta() {
+            document.querySelectorAll('.item-jumlah-setuju-input').forEach(input => {
+                input.value = input.dataset.minta || 1;
+            });
+        }
+        window.setujuSemuaSesuaiMinta = setujuSemuaSesuaiMinta;
+
+        function tolakSemuaItem() {
+            document.querySelectorAll('.item-jumlah-setuju-input').forEach(input => {
+                input.value = 0;
+            });
+        }
+        window.tolakSemuaItem = tolakSemuaItem;
     </script>
 <?php endif; ?>
 
