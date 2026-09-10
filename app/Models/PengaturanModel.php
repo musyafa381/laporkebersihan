@@ -73,9 +73,12 @@ class PengaturanModel extends Model
             'kota_dokumen'         => 'Sleman',
             'wa_template_terima'   => 'Assalamu\'alaikum Wr. Wb. Laporan pengaduan kebersihan Anda dengan ID #{REPORT_ID} telah diterima oleh Tim CS K3L dan sedang dalam penanganan. Terima kasih.',
             'wa_template_selesai'  => 'Assalamu\'alaikum Wr. Wb. Laporan pengaduan kebersihan #{REPORT_ID} di lokasi {LOKASI} telah SELESAI ditindaklanjuti. Terima kasih atas partisipasi Anda.',
+            'wa_template_otp'      => "*[K3L YAYASAN ASSALAFIYYAH MLANGI]*\n\nHalo *{NAMA}*,\nKode Verifikasi (OTP) pelaporan kebersihan Anda adalah:\n\n👉 *{OTP}*\n\n⚠️ Kode ini berlaku selama *5 menit*. Jangan bagikan kode ini kepada siapapun demi keamanan pelaporan.\n\n_Pesan otomatis oleh Sistem Mutu Kebersihan Assalafiyyah._",
             'jam_cs_buka'          => '06:00',
             'jam_cs_tutup'         => '21:00',
             'plafon_pengajuan'     => '500000',
+            'fonnte_token'         => '',
+            'otp_enabled'          => '1',
         ];
 
         foreach ($defaults as $key => $val) {

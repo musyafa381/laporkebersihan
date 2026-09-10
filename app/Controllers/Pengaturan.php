@@ -497,13 +497,38 @@ class Pengaturan extends BaseController
 
     public function updateCs()
     {
-        $fields = ['wa_template_terima', 'wa_template_selesai', 'jam_cs_buka', 'jam_cs_tutup', 'plafon_pengajuan'];
+        $fields = ['wa_template_otp', 'wa_template_terima', 'wa_template_selesai', 'jam_cs_buka', 'jam_cs_tutup', 'plafon_pengajuan', 'fonnte_token', 'otp_enabled'];
         foreach ($fields as $f) {
             $val = $this->request->getPost($f);
             $this->pengaturanModel->updateKey($f, $val);
         }
 
-        return $this->respondJsonOrRedirect('Pengaturan notifikasi CS & operasional berhasil diperbarui.', true, base_url('pengaturan?tab=cs'));
+        return $this->respondJsonOrRedirect('Pengaturan notifikasi CS & gateway WhatsApp Fonnte berhasil diperbarui.', true, base_url('pengaturan?tab=cs'));
+    }
+
+    public function testFonnte()
+    {
+        $this->checkAdmin();
+
+        $token  = trim($this->request->getPost('fonnte_token') ?? '');
+        $target = trim($this->request->getPost('target_wa') ?? '');
+
+        if (empty($target)) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Nomor WhatsApp tujuan tes wajib diisi.',
+            ]);
+        }
+
+        $fonnte = new \App\Libraries\FonnteService($token ?: null);
+        $pesan  = "*[TES KONEKSI GATEWAY WHATSAPP]*\n\n"
+                . "Halo Admin, ini adalah pesan tes dari *Sistem Kebersihan Yayasan Assalafiyyah Mlangi*.\n"
+                . "✅ Integrasi Fonnte WhatsApp Gateway Anda BERHASIL terhubung dan aktif!\n\n"
+                . "Waktu: " . date('d M Y H:i:s') . " WIB";
+
+        $res = $fonnte->sendMessage($target, $pesan);
+
+        return $this->response->setJSON($res);
     }
 
     public function storeUnit()

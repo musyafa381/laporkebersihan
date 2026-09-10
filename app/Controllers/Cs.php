@@ -214,50 +214,138 @@ class Cs extends BaseController
         return view('cs/index', $data);
     }
 
+    public function sendOtp()
+    {
+        $kontak = trim($this->request->getPost('kontak_hp') ?? '');
+        $nama   = trim($this->request->getPost('nama_pengirim') ?? 'Pengguna');
+
+        if (empty($kontak)) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Nomor WhatsApp wajib diisi sebelum meminta kode OTP.',
+            ]);
+        }
+
+        $cleanPhone = preg_replace('/[^0-9]/', '', $kontak);
+        if (strlen($cleanPhone) < 9 || strlen($cleanPhone) > 15) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Format nomor WhatsApp tidak valid. Masukkan nomor yang benar.',
+            ]);
+        }
+
+        $session = session();
+        $now = time();
+
+        // 1. Cooldown Check (60 Detik)
+        $lastSent = (int)$session->get('cs_otp_last_sent');
+        if ($lastSent && ($now - $lastSent) < 60) {
+            $remaining = 60 - ($now - $lastSent);
+            return $this->response->setJSON([
+                'status'    => false,
+                'message'   => "Mohon tunggu {$remaining} detik sebelum meminta kode OTP kembali.",
+                'remaining' => $remaining,
+            ]);
+        }
+
+        // 2. Rate Limiting per session (Maks. 5x per 10 menit)
+        $reqCount  = (int)$session->get('cs_otp_req_count');
+        $reqWindow = (int)$session->get('cs_otp_req_window');
+        if (!$reqWindow || ($now - $reqWindow) > 600) {
+            $session->set('cs_otp_req_window', $now);
+            $session->set('cs_otp_req_count', 1);
+        } else {
+            if ($reqCount >= 5) {
+                return $this->response->setJSON([
+                    'status'  => false,
+                    'message' => 'Batas pengiriman OTP tercapai (maks. 5x per 10 menit). Mohon tunggu beberapa saat.',
+                ]);
+            }
+            $session->set('cs_otp_req_count', $reqCount + 1);
+        }
+
+        // 3. Generate 6 Digit OTP
+        $otpCode   = (string)rand(100000, 999999);
+        $expiresAt = $now + (5 * 60); // 5 Menit
+
+        // 4. Send Message via Fonnte Service
+        $fonnte = new \App\Libraries\FonnteService();
+        $settings = (new \App\Models\PengaturanModel())->getAllAsMap();
+        $rawTemplate = $settings['wa_template_otp'] ?? '';
+
+        if (!empty(trim($rawTemplate))) {
+            $pesan = str_replace(
+                ['{NAMA}', '{OTP}'],
+                [$nama ?: 'Bapak/Ibu/Santri', $otpCode],
+                $rawTemplate
+            );
+        } else {
+            $pesan = "*[K3L YAYASAN ASSALAFIYYAH MLANGI]*\n\n"
+                   . "Halo *" . ($nama ?: 'Bapak/Ibu/Santri') . "*,\n"
+                   . "Kode Verifikasi (OTP) pelaporan kebersihan Anda adalah:\n\n"
+                   . "👉 *{$otpCode}*\n\n"
+                   . "⚠️ Kode ini berlaku selama *5 menit*. Jangan bagikan kode ini kepada siapapun demi keamanan pelaporan.\n\n"
+                   . "_Pesan otomatis oleh Sistem Mutu Kebersihan Assalafiyyah._";
+        }
+
+        $res = $fonnte->sendMessage($cleanPhone, $pesan);
+
+        if (!$res['status']) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => $res['message'],
+            ]);
+        }
+
+        // Save OTP info to session
+        $session->set([
+            'cs_otp_code'      => $otpCode,
+            'cs_otp_phone'     => $cleanPhone,
+            'cs_otp_expires'   => $expiresAt,
+            'cs_otp_last_sent' => $now,
+        ]);
+
+        return $this->response->setJSON([
+            'status'    => true,
+            'message'   => 'Kode OTP 6-digit berhasil dikirim ke WhatsApp ' . $kontak . '. Silakan periksa pesan masuk Anda.',
+            'cooldown'  => 60,
+            'expiresIn' => 300,
+        ]);
+    }
+
     public function storePublicReport()
     {
         $session = session();
         $isLoggedIn = (bool)$session->get('isLoggedIn');
 
-        // Only enforce captcha check for guest / public non-logged in users
+        // Only enforce OTP verification for guest / public non-logged in users
         if (!$isLoggedIn) {
-            $userAnswer   = (int)$this->request->getPost('captcha_user');
-            $actualAnswer = (int)$session->get('captcha_answer');
+            $userOtp        = trim($this->request->getPost('otp_code') ?? '');
+            $sessionOtp     = (string)$session->get('cs_otp_code');
+            $sessionPhone   = (string)$session->get('cs_otp_phone');
+            $sessionExpires = (int)$session->get('cs_otp_expires');
+            $kontakPost     = trim($this->request->getPost('kontak_hp') ?? '');
+            $cleanPhone     = preg_replace('/[^0-9]/', '', $kontakPost);
 
-            if ($actualAnswer === 0 || $userAnswer !== $actualAnswer) {
-                // Generate pertanyaan baru jika salah
-                $num1 = rand(3, 9);
-                $num2 = rand(2, 8);
-                $session->set([
-                    'captcha_num1'   => $num1,
-                    'captcha_num2'   => $num2,
-                    'captcha_answer' => $num1 + $num2
-                ]);
-
-                if ($this->request->isAJAX()) {
-                    return $this->response->setJSON([
-                        'status'       => 'error',
-                        'message'      => 'Verifikasi Keamanan (Anti-SPAM) salah. Silakan coba lagi.',
-                        'new_captcha'  => [
-                            'num1'   => $num1,
-                            'num2'   => $num2,
-                            'prompt' => "Berapa {$num1} + {$num2} = ?"
-                        ]
-                    ]);
-                }
-
-                return $this->respondJsonOrRedirect('Verifikasi Keamanan (Anti-SPAM) salah. Silakan coba lagi.', false);
+            if (empty($userOtp)) {
+                return $this->respondJsonOrRedirect('Kode OTP verifikasi WhatsApp wajib diisi.', false);
             }
-        }
 
-        // Generate CAPTCHA baru untuk laporan berikutnya
-        $num1 = rand(3, 9);
-        $num2 = rand(2, 8);
-        $session->set([
-            'captcha_num1'   => $num1,
-            'captcha_num2'   => $num2,
-            'captcha_answer' => $num1 + $num2
-        ]);
+            if (empty($sessionOtp) || time() > $sessionExpires) {
+                return $this->respondJsonOrRedirect('Kode OTP belum diminta atau telah kedaluwarsa (berlaku 5 menit). Silakan klik "Kirim Kode OTP" kembali.', false);
+            }
+
+            if ($cleanPhone !== $sessionPhone && ('62' . ltrim($cleanPhone, '0')) !== $sessionPhone) {
+                return $this->respondJsonOrRedirect('Nomor WhatsApp berbeda dengan nomor yang menerima OTP. Silakan minta ulang kode OTP untuk nomor baru.', false);
+            }
+
+            if ($userOtp !== $sessionOtp) {
+                return $this->respondJsonOrRedirect('Kode OTP yang Anda masukkan salah. Silakan periksa kembali pesan WhatsApp Anda.', false);
+            }
+
+            // OTP verified successfully! Clear session OTP to prevent reuse
+            $session->remove(['cs_otp_code', 'cs_otp_phone', 'cs_otp_expires']);
+        }
 
         $nama     = trim($this->request->getPost('nama_pengirim') ?? '');
         $kontak   = trim($this->request->getPost('kontak_hp') ?? '');

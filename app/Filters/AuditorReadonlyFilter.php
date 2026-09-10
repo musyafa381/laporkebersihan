@@ -24,8 +24,8 @@ class AuditorReadonlyFilter implements FilterInterface
             $isMutatingMethod = in_array($method, ['POST', 'PUT', 'DELETE', 'PATCH']);
             $isDeleteUri      = (strpos($uri, 'delete') !== false || strpos($uri, 'unlink') !== false);
 
-            // Allow Auditor to submit CS reports (Lapor Kendala Kebersihan)
-            $isCsReportSubmission = (strpos($uri, 'cs/public/store') !== false);
+            // Allow Auditor to submit CS reports & request OTP (Lapor Kendala Kebersihan)
+            $isCsReportSubmission = (strpos($uri, 'cs/public/store') !== false || strpos($uri, 'cs/public/send-otp') !== false);
             if ($isCsReportSubmission) {
                 return; // Allowed for Auditor!
             }

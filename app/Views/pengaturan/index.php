@@ -630,13 +630,58 @@
             <div class="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div>
                     <h2 class="font-heading font-extrabold text-lg text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-comments text-emerald-600"></i> Notifikasi & CS WhatsApp Settings
+                        <i class="fa-solid fa-comments text-emerald-600"></i> Notifikasi & WhatsApp Gateway Settings
                     </h2>
-                    <p class="text-xs text-slate-500 font-semibold mt-0.5">Atur jam operasional layanan pengaduan CS dan template balasan notifikasi otomatis.</p>
+                    <p class="text-xs text-slate-500 font-semibold mt-0.5">Konfigurasi token Fonnte untuk verifikasi OTP pelaporan publik, jam operasional CS, dan template pesan otomatis.</p>
                 </div>
             </div>
 
-            <form action="<?= base_url('pengaturan/update-cs') ?>" method="POST" class="space-y-5">
+            <form action="<?= base_url('pengaturan/update-cs') ?>" method="POST" class="space-y-6">
+                <!-- Fonnte Gateway Integration Card -->
+                <div class="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-emerald-50/70 via-teal-50/40 to-slate-50 border border-emerald-200/80 space-y-4">
+                    <div class="flex items-center justify-between gap-3 flex-wrap border-b border-emerald-200/60 pb-3">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-base shadow-md shadow-emerald-600/20">
+                                <i class="fa-brands fa-whatsapp"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-heading font-extrabold text-sm text-emerald-950">Integrasi Fonnte WhatsApp Gateway</h3>
+                                <p class="text-[11px] text-emerald-700 font-medium">Digunakan untuk mengirim kode OTP verifikasi anti-spam kepada pelapor publik.</p>
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100/80 text-emerald-800 text-xs font-bold border border-emerald-200">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span>OTP Active</span>
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>Token API Fonnte</span>
+                                <a href="https://md.fonnte.com/" target="_blank" class="text-[10px] text-emerald-700 font-bold hover:underline flex items-center gap-1">
+                                    <span>Buka Dashboard Fonnte</span>
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
+                                </a>
+                            </label>
+                            <input type="password" id="input_fonnte_token" name="fonnte_token" value="<?= esc($settings['fonnte_token'] ?? '') ?>" placeholder="Masukkan token akun Fonnte Anda..." class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs font-mono font-bold bg-white focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                            <p class="text-[10px] text-slate-500 font-medium mt-1">Dapatkan token API gratis dari menu Device di <code class="text-emerald-700 font-bold">md.fonnte.com</code>.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Uji Coba Pengiriman Pesan (Tes Koneksi)</label>
+                            <div class="flex items-center gap-2">
+                                <input type="text" id="test_target_wa" placeholder="Nomor WA tes (cth: 08123456789)" class="flex-1 px-4 py-3 rounded-2xl border border-slate-200 text-xs font-bold bg-white focus:ring-2 focus:ring-emerald-500 shadow-2xs">
+                                <button type="button" onclick="runTestFonnte()" id="btnTestFonnte" class="px-4 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold text-xs transition shadow-md shadow-emerald-600/20 flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+                                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                                    <span>Tes Kirim</span>
+                                </button>
+                            </div>
+                            <div id="testFonnteResult" class="hidden mt-2 p-2.5 rounded-xl text-xs font-bold"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div>
                         <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Jam Buka Layanan CS</label>
@@ -649,6 +694,18 @@
                     <div>
                         <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Plafon Pengajuan Alat Maksimal (Rp)</label>
                         <input type="number" name="plafon_pengajuan" value="<?= esc($settings['plafon_pengajuan'] ?? '500000') ?>" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-key text-emerald-600"></i> Template Pesan WhatsApp OTP (Verifikasi Nomor CS)
+                    </label>
+                    <textarea name="wa_template_otp" rows="5" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs leading-relaxed font-mono"><?= esc($settings['wa_template_otp'] ?? "*[K3L YAYASAN ASSALAFIYYAH MLANGI]*\n\nHalo *{NAMA}*,\nKode Verifikasi (OTP) pelaporan kebersihan Anda adalah:\n\n👉 *{OTP}*\n\n⚠️ Kode ini berlaku selama *5 menit*. Jangan bagikan kode ini kepada siapapun demi keamanan pelaporan.\n\n_Pesan otomatis oleh Sistem Mutu Kebersihan Assalafiyyah._") ?></textarea>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-[11px] text-slate-400 font-medium">Variabel dinamis:</span>
+                        <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-mono font-bold">{OTP} = Kode 6 digit</span>
+                        <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-mono font-bold">{NAMA} = Nama Pelapor</span>
                     </div>
                 </div>
 
@@ -1776,6 +1833,75 @@
         if (btnCancel) btnCancel.classList.add('hidden');
     }
     window.resetFormKategoriAlat = resetFormKategoriAlat;
+
+    function runTestFonnte() {
+        const tokenInput = document.getElementById('input_fonnte_token');
+        const targetInput = document.getElementById('test_target_wa');
+        const resBox = document.getElementById('testFonnteResult');
+        const btn = document.getElementById('btnTestFonnte');
+
+        const token = (tokenInput?.value || '').trim();
+        const target = (targetInput?.value || '').trim();
+
+        if (!target) {
+            alert('Masukkan nomor WhatsApp tujuan tes terlebih dahulu.');
+            if (targetInput) targetInput.focus();
+            return;
+        }
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i><span>Mengirim...</span>';
+            btn.classList.add('opacity-75');
+        }
+
+        if (resBox) {
+            resBox.classList.add('hidden');
+        }
+
+        const formData = new FormData();
+        formData.append('fonnte_token', token);
+        formData.append('target_wa', target);
+
+        fetch('<?= base_url('pengaturan/test-fonnte') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane text-xs"></i><span>Tes Kirim</span>';
+                btn.classList.remove('opacity-75');
+            }
+            if (resBox) {
+                resBox.classList.remove('hidden');
+                if (data.status) {
+                    resBox.className = 'mt-2 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold space-y-1';
+                    resBox.innerHTML = '<div class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i><span>Sukses! Pesan tes berhasil dikirim ke ' + target + '.</span></div><p class="text-[11px] font-normal text-emerald-700">Token Fonnte Anda valid dan siap digunakan.</p>';
+                } else {
+                    resBox.className = 'mt-2 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 text-xs font-bold space-y-1';
+                    resBox.innerHTML = '<div class="flex items-center gap-1.5"><i class="fa-solid fa-circle-exclamation text-rose-600"></i><span>Gagal: ' + (data.message || 'Koneksi gagal') + '</span></div><p class="text-[11px] font-normal text-rose-700">Pastikan Device di md.fonnte.com berstatus "Connected" dan token sesuai.</p>';
+                }
+            }
+        })
+        .catch(err => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane text-xs"></i><span>Tes Kirim</span>';
+                btn.classList.remove('opacity-75');
+            }
+            if (resBox) {
+                resBox.classList.remove('hidden');
+                resBox.className = 'mt-2 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 text-xs font-bold';
+                resBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-rose-600 mr-1"></i> Terjadi kesalahan jaringan saat tes koneksi.';
+            }
+        });
+    }
+    window.runTestFonnte = runTestFonnte;
 
     // Run tab activation
     if (document.readyState === 'loading') {

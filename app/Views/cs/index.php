@@ -380,20 +380,77 @@
                         </div>
                     </div>
 
-                    <!-- Anti-SPAM Security Verification Code -->
-                    <div class="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-100/90 border border-slate-200 space-y-2">
-                        <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-shield-halved text-emerald-600"></i>
-                            <span>Verifikasi Anti-SPAM <span class="text-rose-500">*</span></span>
-                        </label>
-                        <div class="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
-                            <div class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white border border-slate-300 font-mono font-bold text-xs sm:text-sm text-emerald-800 shadow-inner whitespace-nowrap">
-                                <?= esc($captcha_num1) ?> + <?= esc($captcha_num2) ?> = ?
+                    <!-- Verifikasi Keamanan OTP WhatsApp (Khusus Tamu / Publik) -->
+                    <?php if (!session()->get('isLoggedIn')): ?>
+                        <div class="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-emerald-50/70 border border-emerald-200/90 space-y-3.5 shadow-2xs">
+                            <div class="flex items-center justify-between gap-2 flex-wrap border-b border-emerald-200/60 pb-2.5">
+                                <label class="block text-xs font-extrabold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-brands fa-whatsapp text-emerald-600 text-sm"></i>
+                                    <span>Verifikasi OTP WhatsApp <span class="text-rose-500">*</span></span>
+                                </label>
+                                <span class="text-[10px] font-extrabold text-emerald-800 bg-white px-2.5 py-0.5 rounded-full border border-emerald-200/70 shadow-2xs">
+                                    Anti-SPAM Resmi
+                                </span>
                             </div>
-                            <input type="number" id="cs_captcha_user" name="captcha_user" placeholder="Jawaban..." required class="flex-1 sm:w-32 px-3 py-2 sm:py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-center bg-white focus:ring-2 focus:ring-emerald-500 shadow-2xs">
+
+                            <p class="text-[11px] text-slate-600 font-medium leading-relaxed">
+                                Demi keamanan & memastikan nomor kontak Anda valid untuk penanganan kebersihan, silakan minta kode OTP 6-digit yang akan dikirim langsung ke nomor WhatsApp Anda.
+                            </p>
+
+                            <!-- Request OTP Button & Countdown -->
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                                <button type="button" id="btnRequestOtp" onclick="requestCsOtp()" class="px-5 py-2.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]">
+                                    <i class="fa-brands fa-whatsapp text-sm"></i>
+                                    <span>Kirim Kode OTP via WhatsApp</span>
+                                </button>
+                                <div id="otpCountdownWrapper" class="hidden text-center sm:text-left text-xs font-bold text-slate-500 flex items-center gap-1.5">
+                                    <i class="fa-regular fa-clock text-emerald-600"></i>
+                                    <span>Kirim ulang dalam <b id="otpTimerSeconds" class="text-emerald-700 font-mono">60</b>s</span>
+                                </div>
+                            </div>
+
+                            <!-- OTP Status Box -->
+                            <div id="otpStatusBox" class="hidden p-3 rounded-xl bg-white border border-emerald-200 shadow-2xs">
+                                <div id="otpStatusMsg" class="text-xs font-bold text-emerald-800 flex items-center gap-1.5"></div>
+                            </div>
+
+                            <!-- 6-Box OTP PIN Input -->
+                            <div class="space-y-2 pt-1" id="otpBoxWrapper">
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                                        <i class="fa-solid fa-shield-halved text-emerald-600 text-xs"></i>
+                                        <span>Masukkan 6 Digit Kode OTP</span>
+                                    </label>
+                                    <span id="otpLiveBadge" class="text-[10px] font-bold text-slate-400">0/6 Digit</span>
+                                </div>
+
+                                <!-- 6-Digit PIN Boxes Grid -->
+                                <div class="flex items-center gap-2 sm:gap-3 justify-start" id="otpInputsGrid">
+                                    <?php for ($i = 0; $i < 6; $i++): ?>
+                                        <input type="text"
+                                               maxlength="1"
+                                               inputmode="numeric"
+                                               pattern="[0-9]*"
+                                               data-index="<?= $i ?>"
+                                               id="otp_digit_<?= $i ?>"
+                                               class="otp-digit-box w-10 h-12 sm:w-12 sm:h-14 rounded-2xl border-2 border-slate-300 text-center font-mono font-black text-lg sm:text-xl text-slate-900 bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 shadow-sm transition-all duration-150 outline-none"
+                                               autocomplete="off">
+                                    <?php endfor; ?>
+                                </div>
+                                <input type="hidden" id="cs_otp_code" name="otp_code" value="">
+
+                                <!-- Live Error Banner Alert for Wrong/Incomplete OTP -->
+                                <div id="otpInlineErrorAlert" class="hidden p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 text-xs font-bold flex items-center gap-2.5 animate-in fade-in zoom-in duration-200 shadow-2xs">
+                                    <div class="w-6 h-6 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center flex-shrink-0 text-xs shadow-2xs">
+                                        <i class="fa-solid fa-circle-xmark"></i>
+                                    </div>
+                                    <span id="otpInlineErrorText">Kode OTP yang Anda masukkan salah atau belum lengkap.</span>
+                                </div>
+
+                                <p class="text-[10px] text-slate-400 font-medium">Kode berlaku selama 5 menit sejak dikirim ke nomor WhatsApp di Langkah 1.</p>
+                            </div>
                         </div>
-                        <p class="text-[10px] text-slate-500 font-normal leading-tight">Jawab penjumlahan di atas untuk memverifikasi laporan.</p>
-                    </div>
+                    <?php endif; ?>
 
                     <!-- Tombol Navigasi Langkah 3 / Submit -->
                     <div class="pt-3 sm:pt-4 border-t border-slate-100 flex items-center justify-between gap-2 sm:gap-3">
@@ -1506,17 +1563,81 @@
     </script>
 <?php endif; ?>
 
+<style>
+@keyframes otpShakeAnim {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+.animate-shake {
+    animation: otpShakeAnim 0.4s ease-in-out;
+}
+</style>
+
 <script>
     var publicDataTransfer = new DataTransfer();
     var publicFileNames = [];
 
-    function handlePublicFiles(files) {
-        if (!files || files.length === 0) return;
-        Array.from(files).forEach(file => {
-            publicDataTransfer.items.add(file);
-            const defaultName = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_\-\s]/g, "");
-            publicFileNames.push(defaultName || `bukti_${publicFileNames.length + 1}`);
+    // Client-side image compression for ultra-fast uploads
+    function compressImage(file, maxWidth = 1600, maxHeight = 1600, quality = 0.82) {
+        return new Promise((resolve) => {
+            if (!file.type.match(/image.*/)) {
+                return resolve(file);
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width = Math.round((width * maxHeight) / height);
+                            height = maxHeight;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        if (blob && blob.size < file.size) {
+                            const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+                            resolve(newFile);
+                        } else {
+                            resolve(file);
+                        }
+                    }, 'image/jpeg', quality);
+                };
+                img.onerror = () => resolve(file);
+                img.src = e.target.result;
+            };
+            reader.onerror = () => resolve(file);
+            reader.readAsDataURL(file);
         });
+    }
+
+    async function handlePublicFiles(files) {
+        if (!files || files.length === 0) return;
+        for (const file of Array.from(files)) {
+            const processedFile = await compressImage(file);
+            publicDataTransfer.items.add(processedFile);
+            const defaultName = processedFile.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_\-\s]/g, "");
+            publicFileNames.push(defaultName || `bukti_${publicFileNames.length + 1}`);
+        }
         syncPublicRealInput();
         renderPublicPreviews();
     }
@@ -1616,9 +1737,10 @@
             targetEl.classList.remove('hidden');
         }
 
-        // If target is Step 3, refresh the live Review Summary
+        // If target is Step 3, refresh the live Review Summary & bind OTP boxes
         if (targetStep === 3) {
             updateCsReviewSummary();
+            setTimeout(initOtpBoxes, 50);
         }
 
         // Update Stepper UI (Circles, Labels, Progress Bar)
@@ -1847,6 +1969,247 @@
     }
     window.updateCsReviewSummary = updateCsReviewSummary;
 
+    var otpTimerInterval = null;
+
+    function initOtpBoxes() {
+        const boxes = document.querySelectorAll('.otp-digit-box');
+        const hiddenOtp = document.getElementById('cs_otp_code');
+        const badge = document.getElementById('otpLiveBadge');
+        if (!boxes || boxes.length === 0) return;
+
+        boxes.forEach((box, idx) => {
+            if (box._hasOtpBound) return;
+            box._hasOtpBound = true;
+
+            box.addEventListener('input', function(e) {
+                clearOtpErrorState();
+                // Hanya izinkan 1 angka numerik
+                this.value = this.value.replace(/[^0-9]/g, '');
+
+                if (this.value.length >= 1) {
+                    this.value = this.value.slice(-1);
+                    if (idx < boxes.length - 1) {
+                        boxes[idx + 1].focus();
+                        boxes[idx + 1].select();
+                    }
+                }
+                updateHiddenOtpValue();
+            });
+
+            box.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace') {
+                    if (!this.value && idx > 0) {
+                        boxes[idx - 1].focus();
+                        boxes[idx - 1].value = '';
+                        updateHiddenOtpValue();
+                        e.preventDefault();
+                    }
+                } else if (e.key === 'ArrowLeft' && idx > 0) {
+                    boxes[idx - 1].focus();
+                } else if (e.key === 'ArrowRight' && idx < boxes.length - 1) {
+                    boxes[idx + 1].focus();
+                }
+            });
+
+            box.addEventListener('paste', function(e) {
+                e.preventDefault();
+                clearOtpErrorState();
+                const pasted = (e.clipboardData || window.clipboardData).getData('text');
+                const digits = pasted.replace(/[^0-9]/g, '').slice(0, 6);
+                if (digits.length > 0) {
+                    for (let i = 0; i < boxes.length; i++) {
+                        boxes[i].value = digits[i] || '';
+                    }
+                    const nextFocus = Math.min(digits.length, 5);
+                    boxes[nextFocus].focus();
+                    updateHiddenOtpValue();
+                }
+            });
+
+            box.addEventListener('focus', function() {
+                this.select();
+            });
+        });
+
+        function updateHiddenOtpValue() {
+            let code = '';
+            boxes.forEach(b => code += b.value);
+            if (hiddenOtp) hiddenOtp.value = code;
+            if (badge) {
+                if (code.length === 6) {
+                    badge.className = 'text-[10px] font-extrabold text-emerald-700 bg-emerald-100/90 px-2 py-0.5 rounded-full border border-emerald-300 shadow-2xs';
+                    badge.innerHTML = '<i class="fa-solid fa-check text-[9px]"></i> 6/6 Lengkap';
+                } else {
+                    badge.className = 'text-[10px] font-bold text-slate-400';
+                    badge.innerText = code.length + '/6 Digit';
+                }
+            }
+        }
+    }
+    window.initOtpBoxes = initOtpBoxes;
+
+    function showOtpErrorState(message) {
+        const boxes = document.querySelectorAll('.otp-digit-box');
+        const grid = document.getElementById('otpInputsGrid');
+        const alertBox = document.getElementById('otpInlineErrorAlert');
+        const alertText = document.getElementById('otpInlineErrorText');
+
+        boxes.forEach(b => {
+            b.classList.remove('border-slate-300', 'bg-white', 'text-slate-900', 'focus:border-emerald-500', 'focus:ring-emerald-500/20');
+            b.classList.add('border-rose-500', 'bg-rose-50/80', 'text-rose-700', 'focus:border-rose-600', 'focus:ring-rose-500/25');
+        });
+
+        if (grid) {
+            grid.classList.remove('animate-shake');
+            void grid.offsetWidth; // Trigger reflow for shake animation
+            grid.classList.add('animate-shake');
+        }
+
+        if (alertBox) {
+            alertBox.classList.remove('hidden');
+        }
+        if (alertText && message) {
+            alertText.innerText = message;
+        }
+    }
+    window.showOtpErrorState = showOtpErrorState;
+
+    function clearOtpErrorState() {
+        const boxes = document.querySelectorAll('.otp-digit-box');
+        const alertBox = document.getElementById('otpInlineErrorAlert');
+
+        boxes.forEach(b => {
+            b.classList.remove('border-rose-500', 'bg-rose-50/80', 'text-rose-700', 'focus:border-rose-600', 'focus:ring-rose-500/25');
+            b.classList.add('border-slate-300', 'bg-white', 'text-slate-900', 'focus:border-emerald-500', 'focus:ring-emerald-500/20');
+        });
+
+        if (alertBox) {
+            alertBox.classList.add('hidden');
+        }
+    }
+    window.clearOtpErrorState = clearOtpErrorState;
+
+    function requestCsOtp() {
+        const kontakInput = document.getElementById('cs_kontak_hp');
+        const namaInput   = document.getElementById('cs_nama_pengirim');
+        const kontak = (kontakInput?.value || '').trim();
+        const nama   = (namaInput?.value || '').trim();
+
+        if (!kontak || kontak.length < 9) {
+            showCsStepAlert('Nomor WhatsApp Belum Diisi', 'Silakan masukkan nomor WhatsApp yang aktif dan valid pada Langkah 1 terlebih dahulu.');
+            goToCsStep(1);
+            if (kontakInput) kontakInput.focus();
+            return;
+        }
+
+        clearOtpErrorState();
+
+        const btn = document.getElementById('btnRequestOtp');
+        const statusBox = document.getElementById('otpStatusBox');
+        const statusMsg = document.getElementById('otpStatusMsg');
+        const originalHtml = btn ? btn.innerHTML : '';
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i><span>Mengirim Kode via WA...</span>';
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+        }
+
+        const formData = new FormData();
+        formData.append('kontak_hp', kontak);
+        formData.append('nama_pengirim', nama);
+
+        fetch('<?= base_url('cs/public/send-otp') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status) {
+                if (statusBox) statusBox.classList.remove('hidden');
+                if (statusMsg) {
+                    statusMsg.className = 'text-xs font-bold text-emerald-800 flex items-center gap-1.5';
+                    statusMsg.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i><span>' + (data.message || 'Kode OTP berhasil dikirim ke WhatsApp!') + '</span>';
+                }
+                // Focus on first OTP box
+                const firstBox = document.getElementById('otp_digit_0');
+                if (firstBox) {
+                    firstBox.focus();
+                    firstBox.select();
+                }
+
+                // Start Countdown 60s
+                startOtpCountdown(data.cooldown || 60);
+            } else {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                    btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                }
+                if (statusBox) statusBox.classList.remove('hidden');
+                if (statusMsg) {
+                    statusMsg.className = 'text-xs font-bold text-rose-800 flex items-center gap-1.5';
+                    statusMsg.innerHTML = '<i class="fa-solid fa-circle-exclamation text-rose-600"></i><span>' + (data.message || 'Gagal mengirim kode OTP.') + '</span>';
+                }
+                if (data.remaining) {
+                    startOtpCountdown(data.remaining);
+                }
+                showOtpErrorState(data.message || 'Gagal mengirim kode OTP.');
+            }
+        })
+        .catch(err => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+            if (statusBox) statusBox.classList.remove('hidden');
+            if (statusMsg) {
+                statusMsg.className = 'text-xs font-bold text-rose-800 flex items-center gap-1.5';
+                statusMsg.innerHTML = '<i class="fa-solid fa-circle-exclamation text-rose-600"></i><span>Terjadi gangguan koneksi saat mengirim kode OTP. Silakan coba lagi.</span>';
+            }
+            showOtpErrorState('Terjadi gangguan koneksi saat mengirim kode OTP.');
+        });
+    }
+    window.requestCsOtp = requestCsOtp;
+
+    function startOtpCountdown(seconds) {
+        if (otpTimerInterval) clearInterval(otpTimerInterval);
+
+        const btn = document.getElementById('btnRequestOtp');
+        const countdownWrapper = document.getElementById('otpCountdownWrapper');
+        const timerSeconds = document.getElementById('otpTimerSeconds');
+
+        if (btn) {
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+        }
+        if (countdownWrapper) countdownWrapper.classList.remove('hidden');
+
+        let remaining = seconds;
+        if (timerSeconds) timerSeconds.innerText = remaining;
+
+        otpTimerInterval = setInterval(() => {
+            remaining--;
+            if (timerSeconds) timerSeconds.innerText = remaining;
+
+            if (remaining <= 0) {
+                clearInterval(otpTimerInterval);
+                otpTimerInterval = null;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    btn.innerHTML = '<i class="fa-brands fa-whatsapp text-emerald-600 text-sm"></i><span>Kirim Ulang Kode OTP</span>';
+                }
+                if (countdownWrapper) countdownWrapper.classList.add('hidden');
+            }
+        }, 1000);
+    }
+    window.startOtpCountdown = startOtpCountdown;
+
     function validateCsFinalSubmit(e) {
         if (!validateCsStep1()) {
             e.preventDefault();
@@ -1859,18 +2222,21 @@
             return false;
         }
 
-        const captchaInput = document.getElementById('cs_captcha_user');
-        if (captchaInput && (!captchaInput.value || captchaInput.value.trim() === '')) {
+        const otpVal = (document.getElementById('cs_otp_code')?.value || '').trim();
+        if (document.getElementById('otpInputsGrid') && otpVal.length < 6) {
             e.preventDefault();
-            showCsStepAlert('Verifikasi Anti-SPAM Wajib Diisi', 'Silakan jawab pertanyaan matematika di Langkah 3.');
-            captchaInput.focus();
+            showOtpErrorState('Kode OTP belum lengkap. Silakan masukkan 6 digit kode yang dikirim ke WhatsApp Anda.');
+            const firstEmpty = Array.from(document.querySelectorAll('.otp-digit-box')).find(b => !b.value);
+            if (firstEmpty) {
+                firstEmpty.focus();
+            }
             return false;
         }
 
         const submitBtn = document.getElementById('btnSubmitCsPublic');
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i><span>Mengirim Pengaduan...</span>';
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i><span>Mengirim Pengaduan & Menyimpan Foto...</span>';
             submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
         }
 
@@ -2656,6 +3022,10 @@
             const icon = document.getElementById('csEditWilayahIcon');
             if (icon) icon.classList.remove('rotate-180');
         }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initOtpBoxes();
     });
 </script>
 

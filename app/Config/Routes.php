@@ -114,11 +114,13 @@ $routes->get('/faq/alur/delete/(:num)', 'Faq::deleteAlur/$1');
 
 // Public & Admin Customer Service
 $routes->get('/cs', 'Cs::index');
+$routes->post('/cs/public/send-otp', 'Cs::sendOtp');
 $routes->post('/cs/public/store', 'Cs::storePublicReport');
 $routes->post('/cs/report/update/(:num)', 'Cs::updateReportStatus/$1');
 $routes->get('/cs/report/delete/(:num)', 'Cs::deleteReport/$1');
 $routes->post('/cs/pengajuan/update/(:num)', 'Cs::updatePengajuanStatus/$1');
 $routes->get('/cs/pengajuan/delete/(:num)', 'Cs::deletePengajuan/$1');
+$routes->post('/pengaturan/test-fonnte', 'Pengaturan::testFonnte');
 
 // Frontend Mobile App Portal (Pengurus & Kader)
 $routes->get('/app', 'AppPortal::index');
