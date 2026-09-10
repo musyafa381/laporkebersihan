@@ -414,7 +414,7 @@
         <div class="lg:col-span-1 space-y-4">
             <!-- Hotline WhatsApp Card -->
             <?php 
-                $csWaNum = !empty($hotlineWa) ? $hotlineWa : '081234567890';
+                $csWaNum = !empty($hotlineWa) && $hotlineWa !== '081234567890' ? $hotlineWa : (!empty($settings['hotline_wa']) && $settings['hotline_wa'] !== '081234567890' ? $settings['hotline_wa'] : '0895320276800');
                 $cleanWa = preg_replace('/[^0-9]/', '', $csWaNum);
                 if (substr($cleanWa, 0, 1) === '0') $cleanWa = '62' . substr($cleanWa, 1);
                 elseif (substr($cleanWa, 0, 2) !== '62') $cleanWa = '62' . $cleanWa;

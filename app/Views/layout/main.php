@@ -339,6 +339,89 @@
             height: auto;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
         }
+
+        /* ==========================================================================
+           🌟 ULTRA-SMOOTH SPA TRANSITIONS & TOP GLOWING PROGRESS BAR
+           ========================================================================== */
+
+        /* 1. Glowing Top Progress Bar (Consistent Brand Emerald Theme) */
+        #spa-progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            width: 0%;
+            background: linear-gradient(90deg, #059669 0%, #10b981 35%, #34d399 70%, #059669 100%);
+            background-size: 200% 100%;
+            z-index: 999999999;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.85), 0 0 20px rgba(5, 150, 105, 0.5), 0 1px 2px rgba(0, 0, 0, 0.08);
+            transition: width 240ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 180ms ease;
+            pointer-events: none;
+            opacity: 0;
+            will-change: width, opacity;
+            animation: spaGlowShimmer 2s linear infinite;
+        }
+
+        @keyframes spaGlowShimmer {
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
+        }
+
+        /* 2. Page Content Ultra-Smooth Transitions */
+        main {
+            will-change: transform, opacity;
+            transition: opacity 120ms ease-out, transform 120ms ease-out;
+        }
+
+        .spa-exit {
+            opacity: 0.55 !important;
+            transform: translateY(-4px) !important;
+            pointer-events: none;
+        }
+
+        .spa-enter {
+            animation: spaPageEnter 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+        }
+
+        @keyframes spaPageEnter {
+            0% {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile App-like Entrance for smaller devices */
+        @media (max-width: 640px) {
+            .spa-enter {
+                animation: spaMobileEnter 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+            }
+            @keyframes spaMobileEnter {
+                0% {
+                    opacity: 0;
+                    transform: translateY(6px);
+                }
+                100% {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        }
+
+        /* 3. Staggered Item Cascade Keyframes */
+        @keyframes spaItemCascade {
+            0% {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
     <!-- SweetAlert2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -374,6 +457,15 @@
     </style>
 </head>
 <body class="text-slate-800 flex flex-col min-h-screen relative selection:bg-emerald-100 selection:text-emerald-900">
+    <!-- Top Glowing Neon Progress Bar for SPA Page Transitions -->
+    <div id="spa-progress-bar" aria-hidden="true"></div>
+
+    <!-- Discreet Ambient Pulse Indicator for Network Operations -->
+    <div id="spa-pulse-indicator" aria-hidden="true" class="fixed top-3.5 right-4 z-[9999999] pointer-events-none opacity-0 scale-90 transition-all duration-200 flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 text-white backdrop-blur-xl border border-emerald-500/40 shadow-xl shadow-slate-950/20 text-[11px] font-extrabold">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        <span class="tracking-wide text-emerald-300">Memuat Halaman...</span>
+    </div>
+
     <!-- Ambient Glassmorphism Mesh Glow Background -->
     <div class="ambient-mesh" aria-hidden="true">
         <div class="orb orb-1"></div>
@@ -425,7 +517,7 @@
         $db = \Config\Database::connect();
         $notifCsCount = 0;
         $notifAlatCount = 0;
-        $hotlineWa = '081234567890';
+        $hotlineWa = '0895320276800';
 
         try {
             if ($db->tableExists('cs_reports')) {
@@ -436,7 +528,7 @@
             }
             if ($db->tableExists('tbl_pengaturan')) {
                 $settingRow = $db->table('tbl_pengaturan')->where('setting_key', 'hotline_wa')->get()->getRowArray();
-                if (!empty($settingRow['setting_value'])) {
+                if (!empty($settingRow['setting_value']) && trim($settingRow['setting_value']) !== '081234567890') {
                     $hotlineWa = trim($settingRow['setting_value']);
                 }
             }
@@ -1787,20 +1879,128 @@
         }
         window.closeAllModalsAndOverlays = closeAllModalsAndOverlays;
 
+        // ==========================================================================
+        // 🌟 ULTRA-SMOOTH SPA NAVIGATION & PROGRESS CONTROLLER
+        // ==========================================================================
+        const SpaProgressBar = {
+            bar: null,
+            pulse: null,
+            progress: 0,
+            timer: null,
+            pulseTimer: null,
+
+            init() {
+                this.bar = document.getElementById('spa-progress-bar');
+                this.pulse = document.getElementById('spa-pulse-indicator');
+            },
+
+            start() {
+                if (!this.bar || !this.pulse) this.init();
+                if (this.timer) clearInterval(this.timer);
+                if (this.pulseTimer) clearTimeout(this.pulseTimer);
+
+                this.progress = 22;
+                if (this.bar) {
+                    this.bar.style.transition = 'width 180ms cubic-bezier(0.1, 0.8, 0.2, 1), opacity 150ms ease';
+                    this.bar.style.opacity = '1';
+                    this.bar.style.width = '22%';
+                }
+
+                // Show discreet pulse indicator only if navigation takes more than 140ms
+                this.pulseTimer = setTimeout(() => {
+                    if (this.pulse && this.progress < 100) {
+                        this.pulse.classList.remove('opacity-0', 'scale-90');
+                        this.pulse.classList.add('opacity-100', 'scale-100');
+                    }
+                }, 140);
+
+                // Incremental simulation
+                this.timer = setInterval(() => {
+                    if (this.progress < 85) {
+                        this.progress += Math.random() * 14 + 5;
+                        if (this.progress > 85) this.progress = 85;
+                        if (this.bar) this.bar.style.width = this.progress + '%';
+                    }
+                }, 120);
+            },
+
+            finish() {
+                if (!this.bar || !this.pulse) this.init();
+                if (this.timer) clearInterval(this.timer);
+                if (this.pulseTimer) clearTimeout(this.pulseTimer);
+
+                this.progress = 100;
+                if (this.bar) {
+                    this.bar.style.transition = 'width 140ms ease-out, opacity 180ms ease';
+                    this.bar.style.width = '100%';
+                }
+
+                if (this.pulse) {
+                    this.pulse.classList.remove('opacity-100', 'scale-100');
+                    this.pulse.classList.add('opacity-0', 'scale-90');
+                }
+
+                setTimeout(() => {
+                    if (this.bar) {
+                        this.bar.style.opacity = '0';
+                        setTimeout(() => {
+                            if (this.bar && this.progress === 100) {
+                                this.bar.style.width = '0%';
+                            }
+                        }, 200);
+                    }
+                }, 200);
+            }
+        };
+        window.SpaProgressBar = SpaProgressBar;
+
+        // Auto-Stagger Micro Animation Engine for Newly Loaded Page Elements (Ultra Smooth & Non-Colliding)
+        function applyStaggerMicroAnimations(container) {
+            if (!container) return;
+            // Target direct top-level blocks inside main
+            const candidates = container.querySelectorAll('main > div, main > section, main > form, main > .grid > div, main .glass-card');
+            const processed = new Set();
+            let delay = 20;
+            const maxItems = 8;
+            let count = 0;
+
+            candidates.forEach(el => {
+                if (count >= maxItems) return;
+                // Exclude modals, dropdowns, drawer internals, and nested duplicates
+                if (el.closest('.fixed.inset-0') || el.closest('.nav-dropdown-wrapper') || el.closest('#mobileDrawer')) return;
+                if ([...processed].some(parent => parent.contains(el))) return;
+                processed.add(el);
+
+                el.style.opacity = '0';
+                el.style.animation = `spaItemCascade 240ms cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms forwards`;
+                delay += 25;
+                count++;
+            });
+        }
+        window.applyStaggerMicroAnimations = applyStaggerMicroAnimations;
+
         // Universal SPA Navigation Router (Zero Full Page Reloads)
         async function navigateToURL(url, pushState = true) {
             try {
                 closeAllModalsAndOverlays();
+                SpaProgressBar.start();
 
                 const currentMain = document.querySelector('main');
                 if (currentMain) {
-                    currentMain.style.opacity = '0.5';
-                    currentMain.style.transition = 'opacity 150ms ease';
+                    currentMain.classList.add('spa-exit');
+                    currentMain.classList.remove('spa-enter');
                 }
 
                 const response = await fetch(url, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
+
+                if (!response.ok && (response.status === 401 || response.status === 403)) {
+                    SpaProgressBar.finish();
+                    window.location.href = url;
+                    return;
+                }
+
                 const htmlText = await response.text();
                 const parser = new DOMParser();
                 const newDoc = parser.parseFromString(htmlText, 'text/html');
@@ -1820,8 +2020,10 @@
 
                 if (currentMain && newMain) {
                     currentMain.innerHTML = newMain.innerHTML;
-                    currentMain.style.opacity = '1';
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    currentMain.classList.remove('spa-exit');
+                    currentMain.classList.add('spa-enter');
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                    applyStaggerMicroAnimations(currentMain);
                 }
 
                 // Update active state in Header Navigation
@@ -1902,8 +2104,11 @@
                         console.error('Error in initAutoResizeTextareas:', tErr);
                     }
                 }
+
+                SpaProgressBar.finish();
             } catch (err) {
                 console.error('SPA Navigation error:', err);
+                SpaProgressBar.finish();
                 window.location.href = url;
             }
         }
@@ -2226,11 +2431,18 @@
             setTimeout(checkModalState, 50);
         });
 
-        // Ensure clean initial scroll state on load
+        // Ensure clean initial scroll state and trigger initial staggered entrance on load
         document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.remove('overflow-hidden');
             document.body.style.overflow = '';
             document.body.style.position = '';
+            const mainEl = document.querySelector('main');
+            if (mainEl) {
+                mainEl.classList.add('spa-enter');
+                if (typeof window.applyStaggerMicroAnimations === 'function') {
+                    window.applyStaggerMicroAnimations(mainEl);
+                }
+            }
         });
 
         // ==========================================

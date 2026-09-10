@@ -74,13 +74,13 @@ class Filters extends BaseFilters
     public array $globals = [
         'before' => [
             'auditor_readonly',
+            'invalidchars',
             // 'honeypot',
             // 'csrf',
-            // 'invalidchars',
         ],
         'after' => [
+            'secureheaders',
             // 'honeypot',
-            // 'secureheaders',
         ],
     ];
 

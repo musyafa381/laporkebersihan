@@ -58,7 +58,7 @@ class PengaturanModel extends Model
         $defaults = [
             'nama_instansi'        => 'K3L Yayasan Assalafiyyah Mlangi',
             'alamat_instansi'      => 'Jl. Assalafiyyah, Mlangi, Nogotirto, Gamping, Sleman, Yogyakarta 55292',
-            'hotline_wa'           => '081234567890',
+            'hotline_wa'           => '0895320276800',
             'running_text'         => 'Selamat datang di Portal Pengaduan & Kebersihan Yayasan Assalafiyyah Mlangi. Jaga kebersihan lingkungan demi kenyamanan ibadah & santri.',
             'nama_ketua_k3l'       => 'Bapak Afif Muzayyin',
             'jabatan_ketua'        => 'Ketua K3L',

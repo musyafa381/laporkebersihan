@@ -32,8 +32,15 @@
                 Assalafiyyah Mlangi
             </h1>
 
+            <?php
+                $csNum = !empty($hotlineWa) ? $hotlineWa : '0895320276800';
+                $cleanCsNum = preg_replace('/[^0-9]/', '', $csNum);
+                if (substr($cleanCsNum, 0, 1) === '0') $cleanCsNum = '62' . substr($cleanCsNum, 1);
+                elseif (substr($cleanCsNum, 0, 2) !== '62') $cleanCsNum = '62' . $cleanCsNum;
+                $csUrl = "https://wa.me/" . $cleanCsNum;
+            ?>
             <p class="text-xs sm:text-base text-slate-200 font-medium leading-relaxed max-w-2xl mx-auto px-2 sm:px-0 drop-shadow-xs">
-                Website resmi pengaduan dan pengelolaan kebersihan Assalafiyyah Mlangi - Admin <a href="https://wa.me/62895320276800" target="_blank" rel="noopener noreferrer" class="text-emerald-300 font-bold hover:underline inline-flex items-center gap-1"><i class="fa-brands fa-whatsapp text-emerald-400"></i> 0895320276800</a>
+                Website resmi pengaduan dan pengelolaan kebersihan Assalafiyyah Mlangi – Admin <a href="<?= $csUrl ?>" target="_blank" rel="noopener noreferrer" class="text-emerald-300 font-bold hover:underline inline-flex items-center gap-1"><i class="fa-brands fa-whatsapp text-emerald-400"></i> <?= esc($csNum) ?></a>
             </p>
         </div>
     </div>

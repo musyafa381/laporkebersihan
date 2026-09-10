@@ -27,8 +27,13 @@ class Home extends BaseController
         // Recent public LPJ books
         $latestLpj = $bukuModel->orderBy('id', 'DESC')->findAll(3);
 
+        $pengaturanModel = new \App\Models\PengaturanModel();
+        $settings        = $pengaturanModel->getAllAsMap();
+        $hotlineWa       = !empty($settings['hotline_wa']) && $settings['hotline_wa'] !== '081234567890' ? $settings['hotline_wa'] : '0895320276800';
+
         $data = [
-            'title'         => 'Website resmi pengaduan dan pengelolaan kebersihan Assalafiyyah Mlangi - Admin 0895320276800',
+            'title'         => 'Website resmi pengaduan dan pengelolaan kebersihan Assalafiyyah Mlangi - Admin ' . $hotlineWa,
+            'hotlineWa'     => $hotlineWa,
             'totalBuku'     => $totalBuku,
             'totalKeuangan' => $totalKeuangan,
             'totalAlat'     => $totalAlat,

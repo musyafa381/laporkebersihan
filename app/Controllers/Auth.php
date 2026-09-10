@@ -32,6 +32,21 @@ class Auth extends BaseController
             return redirect()->to('/login')->with('error', 'Username dan password wajib diisi.')->withInput();
         }
 
+        // 🛡️ Anti Brute-Force Rate Limiting (Maksimal 5 percobaan gagal per 5 menit per IP/Username)
+        $throttler = \Config\Services::throttler();
+        $ipAddress = $this->request->getIPAddress();
+        $throttleKey = 'login_attempt_' . md5($ipAddress . '_' . strtolower($username));
+
+        if ($throttler->check($throttleKey, 5, 300) === false) {
+            $secondsRemaining = $throttler->getTokenTime();
+            $minutes = ceil($secondsRemaining / 60);
+            $lockMsg = "Terlalu banyak percobaan login gagal. Demi keamanan, silakan tunggu sekitar {$minutes} menit ({$secondsRemaining} detik) sebelum mencoba kembali.";
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['status' => 'error', 'message' => $lockMsg]);
+            }
+            return redirect()->to('/login')->with('error', $lockMsg)->withInput();
+        }
+
         $userModel = new UserModel();
         $user      = $userModel->where('username', $username)->first();
 
@@ -42,8 +57,9 @@ class Auth extends BaseController
             return redirect()->to('/login')->with('error', 'Username atau password tidak cocok.')->withInput();
         }
 
-        // Set session
+        // Set session with session ID regeneration (Anti Session Fixation)
         $session = session();
+        $session->regenerate(true);
         $session->set([
             'userId'       => $user['id'],
             'user_id'      => $user['id'],

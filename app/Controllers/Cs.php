@@ -203,6 +203,7 @@ class Cs extends BaseController
             'unitList'             => $unitList,
             'penugasanList'        => $penugasanList,
             'settings'             => $settings,
+            'hotlineWa'            => !empty($settings['hotline_wa']) && $settings['hotline_wa'] !== '081234567890' ? $settings['hotline_wa'] : '0895320276800',
             'userUnit'             => $userUnit,
             'defaultNamaPengirim'  => $defaultNamaPengirim,
             'defaultKontakHp'      => $defaultKontakHp,
