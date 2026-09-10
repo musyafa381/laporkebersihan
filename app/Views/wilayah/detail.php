@@ -258,14 +258,21 @@
                 <p class="text-xs text-slate-500 font-medium">Log laporan hasil kebersihan yang telah dikirim oleh unit pelaksana tugas.</p>
             </div>
 
-            <span class="text-xs font-extrabold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/80 self-start sm:self-auto">
-                <?= count($laporanList) ?> Laporan Terakhir
-            </span>
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div class="relative w-full sm:w-60">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                    <input type="text" id="searchLaporanWilayahInput" onkeyup="filterLaporanWilayahTable()" placeholder="Cari tanggal / unit / catatan..." class="w-full pl-9 pr-4 py-2 rounded-2xl border border-slate-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 focus:bg-white transition shadow-2xs">
+                </div>
+
+                <span class="text-xs font-extrabold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200/80 self-start sm:self-auto whitespace-nowrap">
+                    <?= count($laporanList) ?> Total Laporan
+                </span>
+            </div>
         </div>
 
         <?php if (!empty($laporanList)): ?>
             <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-2xs">
-                <table class="w-full text-left text-xs font-semibold">
+                <table id="tableLaporanWilayahDetail" class="w-full text-left text-xs font-semibold">
                     <thead class="bg-slate-100 text-slate-700 font-heading font-extrabold uppercase text-[10px] tracking-wider border-b border-slate-200">
                         <tr>
                             <th class="py-3 px-4">TANGGAL & SHIFT</th>
@@ -278,7 +285,7 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100 bg-white">
                         <?php foreach ($laporanList as $lap): ?>
-                            <tr class="hover:bg-slate-50/80 transition">
+                            <tr class="laporan-wilayah-row hover:bg-slate-50/80 transition">
                                 <td class="py-3.5 px-4 font-bold text-slate-900 whitespace-nowrap">
                                     <div><?= date('d M Y', strtotime($lap['tanggal_lapor'])) ?></div>
                                     <div class="flex items-center gap-1.5 mt-0.5">
@@ -329,8 +336,27 @@
                                 </td>
                             </tr>
                         <?php endforeach; ?>
+                        <tr class="empty-filter-row hidden">
+                            <td colspan="6" class="py-8 text-center text-slate-400 italic">
+                                <i class="fa-solid fa-magnifying-glass mr-1"></i> Tidak ada laporan yang sesuai pencarian.
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Pagination Footer -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-slate-100 px-1" id="pagination-container-laporan-wilayah">
+                <div class="text-xs font-semibold text-slate-500 flex items-center gap-2">
+                    <span id="page-info-laporan-wilayah">Menampilkan 0 data</span>
+                    <select id="pageSize-laporan-wilayah" class="ml-2 px-2.5 py-1 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs">
+                        <option value="5" selected>5 / hal</option>
+                        <option value="10">10 / hal</option>
+                        <option value="25">25 / hal</option>
+                        <option value="50">50 / hal</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-1.5" id="page-buttons-laporan-wilayah"></div>
             </div>
         <?php else: ?>
             <div class="p-6 text-center bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-500 font-semibold">
@@ -1245,6 +1271,36 @@
     }
     window.closeLightbox = closeLightbox;
 
+    // Riwayat Laporan Kebersihan Wilayah Paginator & Filter
+    var paginatorLaporanWilayah;
+    function initLaporanWilayahPaginator() {
+        if (document.getElementById('tableLaporanWilayahDetail') && typeof TablePaginator !== 'undefined') {
+            paginatorLaporanWilayah = new TablePaginator('tableLaporanWilayahDetail', 'page-info-laporan-wilayah', 'page-buttons-laporan-wilayah', 'pageSize-laporan-wilayah');
+            paginatorLaporanWilayah.render();
+        }
+    }
+
+    function filterLaporanWilayahTable() {
+        const input = document.getElementById('searchLaporanWilayahInput');
+        const query = (input ? input.value : '').toLowerCase().trim();
+        const rows = document.querySelectorAll('#tableLaporanWilayahDetail tbody tr.laporan-wilayah-row');
+
+        rows.forEach(r => {
+            const text = r.innerText.toLowerCase();
+            if (!query || text.includes(query)) {
+                delete r.dataset.searchFiltered;
+            } else {
+                r.dataset.searchFiltered = 'false';
+            }
+        });
+
+        if (paginatorLaporanWilayah) {
+            paginatorLaporanWilayah.currentPage = 1;
+            paginatorLaporanWilayah.render();
+        }
+    }
+    window.filterLaporanWilayahTable = filterLaporanWilayahTable;
+
     // CS Wilayah Detail Paginator & Filter
     var paginatorCsWilayah;
     function initCsWilayahPaginator() {
@@ -1257,7 +1313,7 @@
     function filterCsDetailTable() {
         const input = document.getElementById('searchCsDetailInput');
         const query = (input ? input.value : '').toLowerCase().trim();
-        const rows = document.querySelectorAll('#tableCsWilayahDetail tbody tr');
+        const rows = document.querySelectorAll('#tableCsWilayahDetail tbody tr.cs-detail-row');
 
         rows.forEach(r => {
             const text = r.innerText.toLowerCase();
@@ -1276,6 +1332,7 @@
     window.filterCsDetailTable = filterCsDetailTable;
 
     document.addEventListener('DOMContentLoaded', function() {
+        initLaporanWilayahPaginator();
         initCsWilayahPaginator();
     });
 </script>

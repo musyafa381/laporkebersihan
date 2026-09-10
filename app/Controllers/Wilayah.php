@@ -114,14 +114,13 @@ class Wilayah extends BaseController
         $penugasan  = $this->penugasanModel->getPenugasanWithUnit($id);
         $unitsList  = $this->unitModel->orderBy('nama_unit', 'ASC')->findAll();
         
-        // Riwayat laporan kebersihan wilayah ini (30 terakhir)
+        // Riwayat laporan kebersihan wilayah ini
         $laporanList = $this->laporanModel
             ->select('tbl_wilayah_laporan_harian.*, master_unit.nama_unit, master_unit.tipe as tipe_unit')
             ->join('master_unit', 'master_unit.id = tbl_wilayah_laporan_harian.unit_id', 'left')
             ->where('tbl_wilayah_laporan_harian.wilayah_id', $id)
             ->orderBy('tbl_wilayah_laporan_harian.tanggal_lapor', 'DESC')
             ->orderBy('tbl_wilayah_laporan_harian.id', 'DESC')
-            ->limit(30)
             ->findAll();
 
         // Linked CS Reports
