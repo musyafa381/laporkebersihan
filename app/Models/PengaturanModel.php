@@ -105,6 +105,11 @@ class PengaturanModel extends Model
         return $map;
     }
 
+    public function getAllSettings(): array
+    {
+        return $this->getAllAsMap();
+    }
+
     public function updateKey(string $key, ?string $value): void
     {
         $existing = $this->where('setting_key', $key)->first();

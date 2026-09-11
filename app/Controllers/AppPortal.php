@@ -122,7 +122,14 @@ class AppPortal extends BaseController
             $bukuAktif = $allBuku[0] ?? null;
         }
 
-        $myPengajuan = $this->pengajuanModel->getListWithItems(['user_id' => $session->get('userId')]);
+        $isAdminOrAuditor = in_array(strtolower($userRole ?? ''), ['admin', 'auditor']);
+        if ($isAdminOrAuditor) {
+            $myPengajuan = $this->pengajuanModel->getListWithItems();
+        } elseif (!empty($unitId)) {
+            $myPengajuan = $this->pengajuanModel->getListWithItems(['unit_id' => $unitId]);
+        } else {
+            $myPengajuan = $this->pengajuanModel->getListWithItems(['user_id' => $session->get('userId')]);
+        }
 
         $myReports = $this->csModel
             ->where('nama_pengirim', $session->get('nama_lengkap'))
@@ -226,9 +233,18 @@ class AppPortal extends BaseController
 
         $session  = session();
         $userId   = $session->get('userId') ?: $session->get('user_id');
+        $unitId   = $this->getResolvedUnitId();
+        $userRole = $session->get('role');
         $alatList = $this->alatModel->orderBy('nama_alat', 'ASC')->findAll();
 
-        $myPengajuan = $this->pengajuanModel->getListWithItems(['user_id' => $userId]);
+        $isAdminOrAuditor = in_array(strtolower($userRole ?? ''), ['admin', 'auditor']);
+        if ($isAdminOrAuditor) {
+            $myPengajuan = $this->pengajuanModel->getListWithItems();
+        } elseif (!empty($unitId)) {
+            $myPengajuan = $this->pengajuanModel->getListWithItems(['unit_id' => $unitId]);
+        } else {
+            $myPengajuan = $this->pengajuanModel->getListWithItems(['user_id' => $userId]);
+        }
 
         $data = [
             'title'       => 'Pengajuan Alat Kebersihan',
@@ -245,7 +261,7 @@ class AppPortal extends BaseController
 
         $session = session();
         $userId  = $session->get('userId') ?: $session->get('user_id');
-        $unitId  = $session->get('unit_id');
+        $unitId  = $this->getResolvedUnitId();
         if (!$unitId && $userId) {
             $uObj = (new \App\Models\UserModel())->find($userId);
             $unitId = $uObj['unit_id'] ?? null;
@@ -295,10 +311,13 @@ class AppPortal extends BaseController
         $pengajuanId = $this->pengajuanModel->insert([
             'kode_pengajuan'   => $kode,
             'user_id'          => $userId,
-            'unit_id'          => $unitId,
+            'unit_id'          => $unitId ?: null,
             'alasan_keperluan' => $alasan,
             'status'           => 'Pending',
         ]);
+        if (!$pengajuanId) {
+            $pengajuanId = $this->pengajuanModel->getInsertID();
+        }
 
         $itemModel = new \App\Models\PengajuanAlatItemModel();
         foreach ($validItems as $vi) {

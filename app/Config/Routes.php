@@ -121,6 +121,8 @@ $routes->get('/cs/report/delete/(:num)', 'Cs::deleteReport/$1');
 $routes->post('/cs/pengajuan/update/(:num)', 'Cs::updatePengajuanStatus/$1');
 $routes->get('/cs/pengajuan/delete/(:num)', 'Cs::deletePengajuan/$1');
 $routes->get('/cs/pengajuan/cetak/(:num)', 'Cs::cetakNotaPengajuan/$1');
+$routes->get('/app/pengajuan-alat/cetak/(:num)', 'Cs::cetakNotaPengajuan/$1');
+$routes->get('/pengajuan/cetak/(:num)', 'Cs::cetakNotaPengajuan/$1');
 $routes->post('/pengaturan/test-fonnte', 'Pengaturan::testFonnte');
 
 // Frontend Mobile App Portal (Pengurus & Kader)

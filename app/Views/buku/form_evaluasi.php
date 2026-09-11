@@ -484,15 +484,18 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ' : 'Kembali ke Buku LPJ ('
 </div>
 
 <!-- Floating Toast Notification -->
-<div id="asyncToast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
-    <div class="bg-emerald-950 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-emerald-600/40 flex items-center gap-3">
-        <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold">
-            <i class="fa-solid fa-check"></i>
+<div id="asyncToast" class="fixed bottom-6 right-6 z-[99999] hidden opacity-0 transition-all duration-300 pointer-events-none transform translate-y-4">
+    <div class="bg-slate-900/95 backdrop-blur-md text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-emerald-500/30 flex items-center gap-3">
+        <div id="toastIconBg" class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold flex-shrink-0 shadow-md shadow-emerald-500/30">
+            <i id="toastIcon" class="fa-solid fa-check text-xs"></i>
         </div>
-        <div>
-            <div class="text-xs font-extrabold" id="toastTitle">Berhasil Disimpan</div>
-            <div class="text-[11px] text-emerald-200" id="toastDesc">Data laporan LPJ unit tersimpan di server.</div>
+        <div class="pr-2">
+            <div class="text-xs font-extrabold text-white" id="toastTitle">Berhasil Disimpan</div>
+            <div class="text-[11px] text-emerald-300 font-medium" id="toastDesc">Data laporan LPJ unit tersimpan di server.</div>
         </div>
+        <button type="button" onclick="hideAsyncToast()" class="text-slate-400 hover:text-white transition ml-1 p-1 pointer-events-auto cursor-pointer" title="Tutup">
+            <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
     </div>
 </div>
 
@@ -584,22 +587,63 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ' : 'Kembali ke Buku LPJ ('
         }
     }
 
+    let asyncToastTimer = null;
+
+    function hideAsyncToast() {
+        const toast = document.getElementById('asyncToast');
+        if (!toast) return;
+        if (asyncToastTimer) {
+            clearTimeout(asyncToastTimer);
+            asyncToastTimer = null;
+        }
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-4');
+        setTimeout(() => {
+            if (toast && toast.classList.contains('opacity-0')) {
+                toast.classList.add('hidden');
+            }
+        }, 320);
+    }
+
     function showAsyncToast(title, desc, isSuccess = true) {
         const toast = document.getElementById('asyncToast');
         const tTitle = document.getElementById('toastTitle');
         const tDesc = document.getElementById('toastDesc');
+        const tIconBg = document.getElementById('toastIconBg');
+        const tIcon = document.getElementById('toastIcon');
         if (!toast) return;
+
+        if (toast.parentElement !== document.body) {
+            document.body.appendChild(toast);
+        }
 
         if (tTitle) tTitle.innerText = title;
         if (tDesc) tDesc.innerText = desc;
 
-        toast.classList.remove('translate-y-20', 'opacity-0');
-        toast.classList.add('translate-y-0', 'opacity-100');
+        if (tIconBg && tIcon) {
+            if (isSuccess) {
+                tIconBg.className = 'w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold flex-shrink-0 shadow-md shadow-emerald-500/30';
+                tIcon.className = 'fa-solid fa-check text-xs';
+                if (tDesc) tDesc.className = 'text-[11px] text-emerald-300 font-medium';
+            } else {
+                tIconBg.className = 'w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold flex-shrink-0 shadow-md shadow-amber-500/30';
+                tIcon.className = 'fa-solid fa-exclamation text-xs';
+                if (tDesc) tDesc.className = 'text-[11px] text-amber-300 font-medium';
+            }
+        }
 
-        setTimeout(() => {
-            toast.classList.remove('translate-y-0', 'opacity-100');
-            toast.classList.add('translate-y-20', 'opacity-0');
-        }, 3000);
+        if (asyncToastTimer) {
+            clearTimeout(asyncToastTimer);
+        }
+
+        toast.classList.remove('hidden');
+        void toast.offsetWidth;
+        toast.classList.remove('opacity-0', 'translate-y-4');
+        toast.classList.add('opacity-100', 'translate-y-0');
+
+        asyncToastTimer = setTimeout(() => {
+            hideAsyncToast();
+        }, 3500);
     }
 
     function updateRowNumbers(containerId) {
@@ -762,6 +806,7 @@ $backText = $isPengurusOrKader ? 'Kembali ke Menu LPJ' : 'Kembali ke Buku LPJ ('
     window.prevStep = prevStep;
     window.saveFormAsync = saveFormAsync;
     window.showAsyncToast = showAsyncToast;
+    window.hideAsyncToast = hideAsyncToast;
     window.updateRowNumbers = updateRowNumbers;
     window.addCapaianRow = addCapaianRow;
     window.addMasalahRow = addMasalahRow;

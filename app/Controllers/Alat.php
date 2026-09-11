@@ -116,18 +116,22 @@ class Alat extends BaseController
 
         $unitList = $this->unitModel->orderBy('nama_unit', 'ASC')->findAll();
 
+        $pengajuanModel = new \App\Models\PengajuanAlatModel();
+        $pengajuanDisetujui = $pengajuanModel->getListWithItems(['status' => 'Disetujui']);
+
         $data = [
-            'title'           => 'Inventaris & Peralatan Kebersihan',
-            'alatList'        => $alatList,
-            'kategoriList'    => $kategoriList,
-            'categoryCounts'  => $categoryCounts,
-            'unitList'        => $unitList,
-            'transaksiKeluar' => $transaksiKeluar,
-            'transaksiMasuk'  => $transaksiMasuk,
-            'totalJenis'      => $totalJenis,
-            'totalMasuk'      => $totalMasuk,
-            'totalKeluar'     => $totalKeluar,
-            'stokKritis'      => $stokKritis,
+            'title'              => 'Inventaris & Peralatan Kebersihan',
+            'alatList'           => $alatList,
+            'kategoriList'       => $kategoriList,
+            'categoryCounts'     => $categoryCounts,
+            'unitList'           => $unitList,
+            'transaksiKeluar'    => $transaksiKeluar,
+            'transaksiMasuk'     => $transaksiMasuk,
+            'pengajuanDisetujui' => $pengajuanDisetujui,
+            'totalJenis'         => $totalJenis,
+            'totalMasuk'         => $totalMasuk,
+            'totalKeluar'        => $totalKeluar,
+            'stokKritis'         => $stokKritis,
         ];
 
         return view('alat/index', $data);
@@ -290,14 +294,74 @@ class Alat extends BaseController
 
     public function storeTransaksi()
     {
-        $alatId = $this->request->getPost('alat_id');
+        $jenis = $this->request->getPost('jenis_transaksi') ?: 'Keluar';
+        $tanggal = $this->request->getPost('tanggal') ?: date('Y-m-d');
+        $penerima = trim($this->request->getPost('penerima_penyerah') ?? '');
+        $unitTujuan = trim($this->request->getPost('unit_tujuan') ?? '');
+        $keterangan = trim($this->request->getPost('keterangan') ?? '');
+
+        $itemsInput = $this->request->getPost('items');
+
+        // Multi-item transaction mode
+        if (is_array($itemsInput) && !empty($itemsInput)) {
+            $insertedCount = 0;
+            $errors = [];
+
+            foreach ($itemsInput as $idx => $it) {
+                $alatId = (int)($it['alat_id'] ?? 0);
+                $jumlah = (int)($it['jumlah'] ?? 0);
+                if ($alatId <= 0 || $jumlah <= 0) continue;
+
+                $alat = $this->alatModel->find($alatId);
+                if (!$alat) {
+                    $errors[] = "Item baris ke-" . ($idx + 1) . " tidak valid.";
+                    continue;
+                }
+
+                if ($jenis === 'Keluar' && $jumlah > (int)$alat['stok_sisa']) {
+                    $errors[] = "Stok {$alat['nama_alat']} tidak mencukupi (Tersedia: {$alat['stok_sisa']} {$alat['satuan']}).";
+                    continue;
+                }
+
+                $data = [
+                    'alat_id'           => $alatId,
+                    'jenis_transaksi'   => $jenis,
+                    'tanggal'           => $tanggal,
+                    'jumlah'            => $jumlah,
+                    'penerima_penyerah' => $penerima,
+                    'unit_tujuan'       => $unitTujuan,
+                    'keterangan'        => $keterangan,
+                ];
+
+                $this->transaksiModel->insert($data);
+                $this->recalculateStok($alatId);
+                $insertedCount++;
+            }
+
+            if ($insertedCount === 0) {
+                $errMsg = !empty($errors) ? implode(' ', $errors) : 'Tidak ada peralatan valid yang dipilih.';
+                return $this->respondJsonOrRedirect($errMsg, false);
+            }
+
+            $msg = ($jenis === 'Keluar')
+                ? "Berhasil mencatatkan distribusi {$insertedCount} peralatan keluar!"
+                : "Berhasil mencatatkan penambahan {$insertedCount} peralatan masuk!";
+
+            if (!empty($errors)) {
+                $msg .= ' Catatan: ' . implode(' ', $errors);
+            }
+
+            return $this->respondJsonOrRedirect($msg);
+        }
+
+        // Single-item fallback (e.g. from Barang Masuk modal)
+        $alatId = (int)$this->request->getPost('alat_id');
         $alat   = $this->alatModel->find($alatId);
 
         if (!$alat) {
             return $this->respondJsonOrRedirect('Pilihan alat tidak valid.', false);
         }
 
-        $jenis  = $this->request->getPost('jenis_transaksi') ?: 'Keluar';
         $jumlah = (int)$this->request->getPost('jumlah');
 
         if ($jumlah <= 0) {
@@ -309,13 +373,13 @@ class Alat extends BaseController
         }
 
         $data = [
-            'alat_id'          => $alatId,
-            'jenis_transaksi'  => $jenis,
-            'tanggal'          => $this->request->getPost('tanggal') ?: date('Y-m-d'),
-            'jumlah'           => $jumlah,
-            'penerima_penyerah'=> trim($this->request->getPost('penerima_penyerah') ?? ''),
-            'unit_tujuan'      => trim($this->request->getPost('unit_tujuan') ?? ''),
-            'keterangan'       => trim($this->request->getPost('keterangan') ?? ''),
+            'alat_id'           => $alatId,
+            'jenis_transaksi'   => $jenis,
+            'tanggal'           => $tanggal,
+            'jumlah'            => $jumlah,
+            'penerima_penyerah' => $penerima,
+            'unit_tujuan'       => $unitTujuan,
+            'keterangan'        => $keterangan,
         ];
 
         $this->transaksiModel->insert($data);

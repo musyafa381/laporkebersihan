@@ -1226,7 +1226,7 @@
                             <span>Foto Bukti Terlampir</span>
                         </span>
                     </label>
-                    <div id="modal_cs_fotos_container" class="flex flex-wrap gap-2.5 pt-1"></div>
+                    <div id="csFotosContainer" class="flex flex-wrap gap-2.5 pt-1"></div>
 
                     <!-- Input Tambah Foto Baru (Kamera & Galeri) -->
                     <div class="pt-2 border-t border-slate-200/80 space-y-2">
@@ -1251,18 +1251,18 @@
                 </div>
 
                 <!-- Preview Tanggapan Unit Jika Sudah Ditindaklanjuti Unit -->
-                <div id="modal_unit_response_box" class="p-4 rounded-2xl bg-gradient-to-br from-sky-50 to-blue-50/60 border border-sky-200/90 text-sky-950 space-y-2.5 hidden">
+                <div id="csUnitResponseBox" class="p-4 rounded-2xl bg-gradient-to-br from-sky-50 to-blue-50/60 border border-sky-200/90 text-sky-950 space-y-2.5 hidden">
                     <div class="flex items-center justify-between border-b border-sky-200/60 pb-2">
                         <span class="font-extrabold text-[11px] uppercase tracking-wider text-sky-900 flex items-center gap-1.5">
                             <i class="fa-solid fa-building-user text-sky-600 text-xs"></i>
-                            <span id="modal_unit_penanggap_label">Tindak Lanjut Unit</span>
+                            <span id="csUnitPenanggapLabel">Tindak Lanjut Unit</span>
                         </span>
-                        <span id="modal_unit_tanggal_label" class="text-[10px] font-mono text-sky-700 font-bold bg-white/80 px-2 py-0.5 rounded-lg border border-sky-200/60"></span>
+                        <span id="csUnitTanggalLabel" class="text-[10px] font-mono text-sky-700 font-bold bg-white/80 px-2 py-0.5 rounded-lg border border-sky-200/60"></span>
                     </div>
                     <div class="p-3 rounded-xl bg-white/90 border border-sky-100 shadow-2xs">
-                        <div id="modal_unit_tanggapan_text" class="text-xs text-slate-800 font-medium leading-relaxed italic"></div>
+                        <div id="csUnitTanggapanText" class="text-xs text-slate-800 font-medium leading-relaxed italic"></div>
                     </div>
-                    <div id="modal_unit_fotos_container" class="flex flex-wrap gap-2 pt-0.5"></div>
+                    <div id="csUnitFotosContainer" class="flex flex-wrap gap-2 pt-0.5"></div>
                 </div>
 
                 <div class="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/80 space-y-3">
@@ -1298,11 +1298,11 @@
                         <span class="text-[9.5px] text-emerald-700 font-bold bg-white px-2 py-0.5 rounded-full border border-emerald-200">1-Klik Otomatis</span>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <a id="modal_btn_wa_pj" href="#" target="_blank" class="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs transition shadow-sm flex items-center justify-center gap-2" title="Teruskan Pengaduan ke PJ Unit">
+                        <a id="csBtnWaPj" href="#" target="_blank" class="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs transition shadow-sm flex items-center justify-center gap-2" title="Teruskan Pengaduan ke PJ Unit">
                             <i class="fa-solid fa-share-nodes text-xs"></i>
                             <span>Teruskan ke WA PJ Unit</span>
                         </a>
-                        <a id="modal_btn_wa_pelapor" href="#" target="_blank" class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition shadow-sm flex items-center justify-center gap-2" title="Kirim Update ke Pelapor">
+                        <a id="csBtnWaPelapor" href="#" target="_blank" class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition shadow-sm flex items-center justify-center gap-2" title="Kirim Update ke Pelapor">
                             <i class="fa-brands fa-whatsapp text-sm"></i>
                             <span>Kirim Update ke Pelapor</span>
                         </a>
@@ -1323,10 +1323,10 @@
     </div>
 
     <!-- Modal Edit / Proses Pengajuan Alat (Admin Only) -->
-    <div id="modalProsesPengajuan" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md hidden flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl space-y-6 border border-slate-100 my-auto animate-in fade-in zoom-in duration-200">
+    <div id="modalProsesPengajuan" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-4xl xl:max-w-5xl w-full p-5 sm:p-7 shadow-2xl space-y-5 border border-slate-100 my-auto animate-in fade-in zoom-in duration-200">
             <!-- Modal Header -->
-            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3.5">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md shadow-emerald-600/20 flex-shrink-0">
                         <i class="fa-solid fa-sliders text-sm"></i>
@@ -1345,88 +1345,99 @@
 
             <!-- Modal Form -->
             <form id="formProsesPengajuan" action="" method="POST" class="space-y-4">
-                <!-- Info Header Box -->
-                <div class="p-4 rounded-2xl bg-gradient-to-r from-emerald-50/90 via-teal-50/70 to-emerald-50/90 border border-emerald-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
-                    <div class="space-y-1">
-                        <div class="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-receipt text-emerald-600"></i> Kode Transaksi
+                <!-- 2-Column Responsive Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                    
+                    <!-- Left Column: Info Transaksi & Daftar Item Alat -->
+                    <div class="lg:col-span-7 space-y-3.5">
+                        <!-- Info Header Box -->
+                        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50/90 via-teal-50/70 to-emerald-50/90 border border-emerald-200/80 flex items-center justify-between gap-3 shadow-2xs">
+                            <div class="space-y-1">
+                                <div class="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-receipt text-emerald-600"></i> Kode Transaksi
+                                </div>
+                                <div id="pengajuan_kode_display" class="flex items-center gap-2">
+                                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-mono text-xs font-bold shadow-2xs">REQ-000000-000</span>
+                                </div>
+                            </div>
+                            <div class="text-right space-y-0.5">
+                                <div class="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">Pemohon / Unit</div>
+                                <div class="font-extrabold text-xs text-slate-800" id="pengajuan_pemohon_display">Pemohon: -</div>
+                            </div>
                         </div>
-                        <div id="pengajuan_kode_display" class="flex items-center gap-2">
-                            <span class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-mono text-xs font-bold shadow-2xs">REQ-000000-000</span>
+
+                        <!-- Items Section with interactive table -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-boxes-stacked text-emerald-600"></i>
+                                    <span>Daftar Peralatan & Alokasi</span>
+                                </label>
+                                <div class="flex items-center gap-1.5">
+                                    <button type="button" onclick="setujuSemuaSesuaiMinta()" class="text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-xl border border-emerald-200 transition flex items-center gap-1 shadow-2xs">
+                                        <i class="fa-solid fa-check-double text-[9px]"></i> Penuhi Semua
+                                    </button>
+                                    <button type="button" onclick="tolakSemuaItem()" class="text-[10px] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded-xl border border-rose-200 transition flex items-center gap-1 shadow-2xs">
+                                        <i class="fa-solid fa-ban text-[9px]"></i> Nol-kan
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/50 shadow-2xs">
+                                <div class="divide-y divide-slate-100" id="pengajuanItemsContainer">
+                                    <!-- Dynamically populated by openModalProsesPengajuan -->
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="sm:text-right space-y-0.5">
-                        <div class="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">Pemohon / Unit</div>
-                        <div class="font-extrabold text-xs text-slate-800" id="pengajuan_pemohon_display">Pemohon: -</div>
+
+                    <!-- Right Column: Status Keputusan, Alasan Pemohon & Catatan Admin -->
+                    <div class="lg:col-span-5 space-y-3.5 flex flex-col justify-between">
+                        
+                        <!-- Keputusan Status Transaksi -->
+                        <div class="space-y-1.5">
+                            <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                                <i class="fa-solid fa-traffic-light text-emerald-600 text-[10px]"></i>
+                                <span>Keputusan Status Transaksi</span>
+                            </label>
+                            <select id="pengajuan_status" name="status" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-extrabold bg-slate-50/80 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs">
+                                <option value="Pending">⏳ Pending (Menunggu Peninjauan)</option>
+                                <option value="Disetujui">🟢 Disetujui (Alokasikan & Kurangi Stok)</option>
+                                <option value="Ditolak">🔴 Ditolak (Belum Disetujui)</option>
+                            </select>
+                            <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200/80 text-[10.5px] text-amber-900 leading-tight flex items-start gap-1.5">
+                                <i class="fa-solid fa-circle-info text-amber-600 mt-0.5 flex-shrink-0"></i>
+                                <span>Stok gudang otomatis berkurang sesuai item yang <strong>Disetujui</strong> saat disimpan.</span>
+                            </div>
+                        </div>
+
+                        <!-- Alasan Keperluan Pemohon -->
+                        <div class="space-y-1">
+                            <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                                <i class="fa-solid fa-file-lines text-emerald-600 text-[10px]"></i>
+                                <span>Alasan Keperluan Pemohon</span>
+                            </label>
+                            <div id="pengajuan_alasan_display" class="p-2.5 rounded-2xl bg-slate-100/70 border border-slate-200 text-slate-700 text-xs italic font-medium leading-relaxed max-h-24 overflow-y-auto">
+                                "-"
+                            </div>
+                        </div>
+
+                        <!-- Catatan Admin -->
+                        <div class="space-y-1">
+                            <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                                <i class="fa-solid fa-clipboard-check text-emerald-600 text-[10px]"></i>
+                                <span>Catatan / Alasan Keputusan Admin</span>
+                            </label>
+                            <textarea id="pengajuan_catatan" name="catatan_admin" rows="2" placeholder="Tuliskan catatan alokasi atau alasan keputusan admin..." class="w-full px-3.5 py-2 rounded-2xl border border-slate-200 text-xs font-medium bg-slate-50/80 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs leading-relaxed"></textarea>
+                        </div>
+
                     </div>
                 </div>
 
-                <!-- Items Section with interactive table -->
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between">
-                        <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-boxes-stacked text-emerald-600"></i>
-                            <span>Daftar Peralatan & Jumlah Disetujui</span>
-                        </label>
-                        <div class="flex items-center gap-2">
-                            <button type="button" onclick="setujuSemuaSesuaiMinta()" class="text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition flex items-center gap-1">
-                                <i class="fa-solid fa-check-double text-[9px]"></i> Penuhi Semua
-                            </button>
-                            <button type="button" onclick="tolakSemuaItem()" class="text-[10px] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded-lg border border-rose-200 transition flex items-center gap-1">
-                                <i class="fa-solid fa-ban text-[9px]"></i> Nol-kan
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/50 shadow-2xs">
-                        <div class="max-h-60 overflow-y-auto divide-y divide-slate-100" id="modalPengajuanItemsContainer">
-                            <!-- Dynamically populated by openModalProsesPengajuan -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Overall Status & Info -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <div>
-                        <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                            <i class="fa-solid fa-traffic-light text-emerald-600 text-[10px]"></i>
-                            <span>Keputusan Status Transaksi</span>
-                        </label>
-                        <select id="pengajuan_status" name="status" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-extrabold bg-slate-50/80 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs">
-                            <option value="Pending">⏳ Pending (Menunggu Peninjauan)</option>
-                            <option value="Disetujui">🟢 Disetujui (Alokasikan & Kurangi Stok)</option>
-                            <option value="Ditolak">🔴 Ditolak (Belum Disetujui)</option>
-                        </select>
-                    </div>
-                    <div class="flex flex-col justify-end">
-                        <div class="p-2.5 rounded-2xl bg-amber-50 border border-amber-200/80 text-[11px] text-amber-900 leading-tight flex items-start gap-2">
-                            <i class="fa-solid fa-circle-info text-amber-600 mt-0.5 flex-shrink-0"></i>
-                            <span>Stok fisik gudang otomatis dikurangi sejumlah item yang <strong>Disetujui</strong> saat status disimpan.</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                        <i class="fa-solid fa-file-lines text-emerald-600 text-[10px]"></i>
-                        <span>Alasan Keperluan Pemohon</span>
-                    </label>
-                    <div id="pengajuan_alasan_display" class="p-3 rounded-2xl bg-slate-100/70 border border-slate-200 text-slate-700 text-xs italic font-medium leading-relaxed max-h-20 overflow-y-auto">
-                        "-"
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                        <i class="fa-solid fa-clipboard-check text-emerald-600 text-[10px]"></i>
-                        <span>Catatan / Alasan Keputusan Admin</span>
-                    </label>
-                    <textarea id="pengajuan_catatan" name="catatan_admin" rows="2.5" placeholder="Tuliskan catatan alokasi atau alasan keputusan admin..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-medium bg-slate-50/80 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs leading-relaxed"></textarea>
-                </div>
-
-                <div class="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100">
-                    <div id="modal_cetak_nota_container" class="hidden">
-                        <a id="btn_modal_cetak_nota" href="#" target="_blank" class="px-4 py-2 rounded-2xl bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold border border-teal-200 transition flex items-center gap-1.5 shadow-2xs">
+                <!-- Footer Action Buttons -->
+                <div class="pt-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100">
+                    <div id="pengajuanCetakNotaContainer" class="hidden">
+                        <a id="btnPengajuanCetakNota" href="#" target="_blank" class="px-4 py-2 rounded-2xl bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold border border-teal-200 transition flex items-center gap-1.5 shadow-2xs">
                             <i class="fa-solid fa-print"></i>
                             <span>Cetak Bukti Serah Terima</span>
                         </a>
@@ -1582,7 +1593,7 @@
 
         function renderExistingFotosInModal(fotos) {
             currentReportFotos = [...fotos];
-            const fotosContainer = document.getElementById('modal_cs_fotos_container');
+            const fotosContainer = document.getElementById('csFotosContainer');
             if (!fotosContainer) return;
             fotosContainer.innerHTML = '';
 
@@ -1642,11 +1653,11 @@
             if (catatanEl) catatanEl.value = pengajuan.catatan_admin || '';
 
             // Cetak nota button toggle
-            const cetakContainer = document.getElementById('modal_cetak_nota_container');
-            const btnCetak = document.getElementById('btn_modal_cetak_nota');
+            const cetakContainer = document.getElementById('pengajuanCetakNotaContainer');
+            const btnCetak = document.getElementById('btnPengajuanCetakNota');
             if (cetakContainer && btnCetak) {
                 if (pengajuan.id) {
-                    btnCetak.href = "<?= base_url('cs/pengajuan/cetak/') ?>" + pengajuan.id;
+                    btnCetak.href = "<?= base_url('cs/pengajuan/cetak') ?>/" + pengajuan.id;
                     cetakContainer.classList.remove('hidden');
                 } else {
                     cetakContainer.classList.add('hidden');
@@ -1654,14 +1665,15 @@
             }
 
             // Render items in container
-            const itemsContainer = document.getElementById('modalPengajuanItemsContainer');
+            const itemsContainer = document.getElementById('pengajuanItemsContainer');
             if (itemsContainer) {
                 itemsContainer.innerHTML = '';
                 const items = (pengajuan.items && pengajuan.items.length > 0) ? pengajuan.items : [{
                     id: pengajuan.id,
                     nama_alat: pengajuan.nama_alat || 'Alat',
                     satuan: pengajuan.satuan || 'Unit',
-                    stok_alat: pengajuan.stok_sisa || 0,
+                    stok_sisa: pengajuan.stok_sisa !== undefined ? pengajuan.stok_sisa : (pengajuan.stok_alat || 0),
+                    stok_alat: pengajuan.stok_sisa !== undefined ? pengajuan.stok_sisa : (pengajuan.stok_alat || 0),
                     jumlah_minta: pengajuan.jumlah || 1,
                     jumlah_setuju: pengajuan.jumlah || 1,
                     catatan_item: ''
@@ -1670,7 +1682,7 @@
                 items.forEach((it, idx) => {
                     const minta = parseInt(it.jumlah_minta || 1, 10);
                     const setuju = (it.jumlah_setuju !== null && it.jumlah_setuju !== undefined) ? parseInt(it.jumlah_setuju, 10) : minta;
-                    const stok = parseInt(it.stok_alat || 0, 10);
+                    const stok = parseInt((it.stok_sisa !== undefined ? it.stok_sisa : it.stok_alat) || 0, 10);
                     const satuan = it.satuan || 'Unit';
 
                     const row = document.createElement('div');
@@ -1705,7 +1717,12 @@
             }
 
             const modal = document.getElementById('modalProsesPengajuan');
-            if (modal) modal.classList.remove('hidden');
+            if (modal) {
+                if (modal.parentElement !== document.body) {
+                    document.body.appendChild(modal);
+                }
+                modal.classList.remove('hidden');
+            }
         }
         window.openModalProsesPengajuan = openModalProsesPengajuan;
 
@@ -2983,7 +3000,7 @@
         // 1. Build WA URL for PJ Unit responsible for this shift
         let pjPhone = (targetPjKontak || '').replace(/[^0-9]/g, '');
         if (pjPhone.startsWith('0')) pjPhone = '62' + pjPhone.slice(1);
-        const waPjBtn = document.getElementById('modal_btn_wa_pj');
+        const waPjBtn = document.getElementById('csBtnWaPj');
         if (waPjBtn) {
             if (pjPhone) {
                 const locText = (report.unit_lokasi || '-') + (report.nama_wilayah ? (' - ' + report.nama_wilayah) : '') + (selectedShift ? (' (Shift ' + selectedShift + ')') : '');
@@ -3010,7 +3027,7 @@
         // 2. Build WA URL for Pelapor
         let pelaporPhone = (report.kontak_hp || '').replace(/[^0-9]/g, '');
         if (pelaporPhone.startsWith('0')) pelaporPhone = '62' + pelaporPhone.slice(1);
-        const waPelaporBtn = document.getElementById('modal_btn_wa_pelapor');
+        const waPelaporBtn = document.getElementById('csBtnWaPelapor');
         if (waPelaporBtn) {
             if (pelaporPhone) {
                 const currentStatus = document.getElementById('cs_status')?.value || report.status || 'Diproses';
@@ -3084,7 +3101,7 @@
         renderAdminPreviews();
 
         // Render existing photos in modal
-        const fotosContainer = document.getElementById('modal_cs_fotos_container');
+        const fotosContainer = document.getElementById('csFotosContainer');
         if (fotosContainer) {
             fotosContainer.innerHTML = '';
         }
@@ -3096,11 +3113,11 @@
         }
 
         // Show unit response in modal if available
-        const unitBox = document.getElementById('modal_unit_response_box');
-        const unitPenanggapLabel = document.getElementById('modal_unit_penanggap_label');
-        const unitDateLabel = document.getElementById('modal_unit_tanggal_label');
-        const unitContent = document.getElementById('modal_unit_tanggapan_text');
-        const unitFotosContainer = document.getElementById('modal_unit_fotos_container');
+        const unitBox = document.getElementById('csUnitResponseBox');
+        const unitPenanggapLabel = document.getElementById('csUnitPenanggapLabel');
+        const unitDateLabel = document.getElementById('csUnitTanggalLabel');
+        const unitContent = document.getElementById('csUnitTanggapanText');
+        const unitFotosContainer = document.getElementById('csUnitFotosContainer');
 
         if (report.tanggapan_unit && report.tanggapan_unit.trim() !== '') {
             if (unitBox) unitBox.classList.remove('hidden');
@@ -3141,6 +3158,9 @@
 
         const modal = document.getElementById('modalTanggapiCs');
         if (modal) {
+            if (modal.parentElement !== document.body) {
+                document.body.appendChild(modal);
+            }
             modal.classList.remove('hidden');
             modal.classList.add('flex');
         }

@@ -581,6 +581,28 @@ class Cs extends BaseController
         return $this->respondJsonOrRedirect("Laporan CS berhasil diperbarui & status diset ke '{$status}'!");
     }
 
+    private function recalculateAlatStok($alatId)
+    {
+        $alatModel = new \App\Models\AlatModel();
+        $transaksiModel = new \App\Models\AlatTransaksiModel();
+        $alat = $alatModel->find($alatId);
+        if (!$alat) return;
+
+        $masuk = $transaksiModel->where('alat_id', $alatId)->where('jenis_transaksi', 'Masuk')->selectSum('jumlah')->first();
+        $keluar = $transaksiModel->where('alat_id', $alatId)->where('jenis_transaksi', 'Keluar')->selectSum('jumlah')->first();
+
+        $totalMasuk = (int)($masuk['jumlah'] ?? 0);
+        $totalKeluar = (int)($keluar['jumlah'] ?? 0);
+        $stokAwal = (int)$alat['stok_awal'];
+        $stokSisa = $stokAwal + $totalMasuk - $totalKeluar;
+
+        $alatModel->update($alatId, [
+            'stok_masuk'  => $totalMasuk,
+            'stok_keluar' => $totalKeluar,
+            'stok_sisa'   => $stokSisa
+        ]);
+    }
+
     public function updatePengajuanStatus($id)
     {
         $pengajuan = $this->pengajuanModel->find($id);
@@ -596,12 +618,15 @@ class Cs extends BaseController
         $itemModel = new \App\Models\PengajuanAlatItemModel();
         $alatModel = new \App\Models\AlatModel();
         $alatTransaksiModel = new \App\Models\AlatTransaksiModel();
+        $unitModel = new \App\Models\MasterUnitModel();
 
-        // Get user details for transaction logging
+        // Get user and unit details for transaction logging
         $pemohon = (new \App\Models\UserModel())->find($pengajuan['user_id']);
-        $namaPemohon = $pemohon['nama_lengkap'] ?? 'Unit';
+        $namaPemohon = $pemohon['nama_lengkap'] ?? 'Pengurus Unit';
+        $unit = $unitModel->find($pengajuan['unit_id'] ?? 0);
+        $namaUnit = $unit['nama_unit'] ?? ($pemohon['unit'] ?? 'Unit Pesantren');
 
-        // Check if previously already deducted
+        $kodePengajuan = $pengajuan['kode_pengajuan'] ?? ('REQ-' . $id);
         $wasAlreadyDeducted = ($pengajuan['status'] === 'Disetujui' || $pengajuan['status'] === 'Selesai');
         $isNowApproved = ($status === 'Disetujui' || $status === 'Selesai');
 
@@ -634,26 +659,34 @@ class Cs extends BaseController
                     'catatan_item'  => $catatanItem
                 ]);
 
-                // Stock deduction logic: if approving now and was not previously deducted
-                if ($isNowApproved && !$wasAlreadyDeducted && $jumlahSetuju > 0) {
-                    $alat = $alatModel->find($dbItem['alat_id']);
-                    if ($alat) {
-                        $stokLama = (int)$alat['stok_sisa'];
-                        $stokBaru = max(0, $stokLama - $jumlahSetuju);
-                        $alatModel->update($alat['id'], ['stok_sisa' => $stokBaru]);
+                // Record into alat_transaksi if approving
+                if ($isNowApproved && $jumlahSetuju > 0) {
+                    // Check if transaction already exists for this pengajuan item to avoid duplicates
+                    $existingTrx = $alatTransaksiModel
+                        ->where('alat_id', $dbItem['alat_id'])
+                        ->where('jenis_transaksi', 'Keluar')
+                        ->like('keterangan', "Pengajuan {$kodePengajuan}")
+                        ->first();
 
-                        if ($db->tableExists('alat_transaksi')) {
-                            $alatTransaksiModel->insert([
-                                'alat_id'      => $alat['id'],
-                                'tipe'         => 'Keluar',
-                                'jumlah'       => $jumlahSetuju,
-                                'satuan'       => $alat['satuan'] ?? 'Unit',
-                                'penerima'     => $namaPemohon,
-                                'keterangan'   => "Realisasi Pengajuan {$pengajuan['kode_pengajuan']}",
-                                'created_at'   => date('Y-m-d H:i:s'),
-                            ]);
-                        }
+                    if ($existingTrx) {
+                        $alatTransaksiModel->update($existingTrx['id'], [
+                            'jumlah'            => $jumlahSetuju,
+                            'penerima_penyerah' => $namaPemohon,
+                            'unit_tujuan'       => $namaUnit,
+                            'keterangan'        => "Realisasi Pengajuan {$kodePengajuan}",
+                        ]);
+                    } else {
+                        $alatTransaksiModel->insert([
+                            'alat_id'           => $dbItem['alat_id'],
+                            'jenis_transaksi'   => 'Keluar',
+                            'tanggal'           => date('Y-m-d'),
+                            'jumlah'            => $jumlahSetuju,
+                            'penerima_penyerah' => $namaPemohon,
+                            'unit_tujuan'       => $namaUnit,
+                            'keterangan'        => "Realisasi Pengajuan {$kodePengajuan}",
+                        ]);
                     }
+                    $this->recalculateAlatStok($dbItem['alat_id']);
                 }
             }
         } else {
@@ -671,27 +704,47 @@ class Cs extends BaseController
                         'status_item'   => ($jSetuju < $cItem['jumlah_minta'] && $jSetuju > 0) ? 'Sebagian' : 'Disetujui'
                     ]);
 
-                    if (!$wasAlreadyDeducted && $jSetuju > 0) {
-                        $alat = $alatModel->find($cItem['alat_id']);
-                        if ($alat) {
-                            $stokLama = (int)$alat['stok_sisa'];
-                            $stokBaru = max(0, $stokLama - $jSetuju);
-                            $alatModel->update($alat['id'], ['stok_sisa' => $stokBaru]);
+                    if ($jSetuju > 0) {
+                        $existingTrx = $alatTransaksiModel
+                            ->where('alat_id', $cItem['alat_id'])
+                            ->where('jenis_transaksi', 'Keluar')
+                            ->like('keterangan', "Pengajuan {$kodePengajuan}")
+                            ->first();
 
-                            if ($db->tableExists('alat_transaksi')) {
-                                $alatTransaksiModel->insert([
-                                    'alat_id'      => $alat['id'],
-                                    'tipe'         => 'Keluar',
-                                    'jumlah'       => $jSetuju,
-                                    'satuan'       => $alat['satuan'] ?? 'Unit',
-                                    'penerima'     => $namaPemohon,
-                                    'keterangan'   => "Realisasi Pengajuan {$pengajuan['kode_pengajuan']}",
-                                    'created_at'   => date('Y-m-d H:i:s'),
-                                ]);
-                            }
+                        if ($existingTrx) {
+                            $alatTransaksiModel->update($existingTrx['id'], [
+                                'jumlah'            => $jSetuju,
+                                'penerima_penyerah' => $namaPemohon,
+                                'unit_tujuan'       => $namaUnit,
+                                'keterangan'        => "Realisasi Pengajuan {$kodePengajuan}",
+                            ]);
+                        } else {
+                            $alatTransaksiModel->insert([
+                                'alat_id'           => $cItem['alat_id'],
+                                'jenis_transaksi'   => 'Keluar',
+                                'tanggal'           => date('Y-m-d'),
+                                'jumlah'            => $jSetuju,
+                                'penerima_penyerah' => $namaPemohon,
+                                'unit_tujuan'       => $namaUnit,
+                                'keterangan'        => "Realisasi Pengajuan {$kodePengajuan}",
+                            ]);
                         }
+                        $this->recalculateAlatStok($cItem['alat_id']);
                     }
                 }
+            }
+        }
+
+        // If status reverted from Approved to Ditolak or Pending, remove transaction and restore stock
+        if (!$isNowApproved && $wasAlreadyDeducted) {
+            $existingTrxList = $alatTransaksiModel
+                ->where('jenis_transaksi', 'Keluar')
+                ->like('keterangan', "Pengajuan {$kodePengajuan}")
+                ->findAll();
+
+            foreach ($existingTrxList as $trx) {
+                $alatTransaksiModel->delete($trx['id']);
+                $this->recalculateAlatStok($trx['alat_id']);
             }
         }
 
@@ -705,7 +758,7 @@ class Cs extends BaseController
             'disetujui_pada' => date('Y-m-d H:i:s')
         ]);
 
-        return $this->respondJsonOrRedirect("Pengajuan alat ({$pengajuan['kode_pengajuan']}) berhasil diproses & status diset ke '{$status}'!");
+        return $this->respondJsonOrRedirect("Pengajuan alat ({$kodePengajuan}) berhasil diproses & status diset ke '{$status}'!");
     }
 
     public function cetakNotaPengajuan($id)

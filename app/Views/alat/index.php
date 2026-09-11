@@ -92,19 +92,16 @@
         <div class="pt-2">
             <nav class="bg-white p-2 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 overflow-x-auto">
                 <button onclick="switchTabAlat('stok')" id="tab-stok" class="tab-btn flex-1 min-w-max py-2.5 px-4 rounded-xl text-xs font-heading font-extrabold transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20 whitespace-nowrap">
-                    <i class="fa-solid fa-warehouse text-sm"></i>
                     <span>1. Stok & Gudang Utama</span>
-                    <span class="px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-extrabold text-white flex-shrink-0"><?= count($alatList) ?> Alat</span>
+                    <span class="px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-extrabold text-slate-600 flex-shrink-0"><?= count($alatList) ?> Alat</span>
                 </button>
 
                 <button onclick="switchTabAlat('keluar')" id="tab-keluar" class="tab-btn flex-1 min-w-max py-2.5 px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-truck-ramp-box text-sm"></i>
                     <span>2. Barang Keluar & Distribusi Unit</span>
                     <span class="px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-extrabold text-slate-600 flex-shrink-0"><?= count($transaksiKeluar) ?> Mutasi</span>
                 </button>
 
                 <button onclick="switchTabAlat('masuk')" id="tab-masuk" class="tab-btn flex-1 min-w-max py-2.5 px-4 rounded-xl text-xs font-heading font-extrabold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-boxes-packing text-sm"></i>
                     <span>3. Barang Masuk & Restok</span>
                     <span class="px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-extrabold text-slate-600 flex-shrink-0"><?= count($transaksiMasuk) ?> Masuk</span>
                 </button>
@@ -119,17 +116,14 @@
                 <!-- 1-Click Quick Filter Pills -->
                 <div class="flex items-center gap-2 flex-wrap">
                     <button type="button" onclick="setQuickFilterAlat('all')" id="btnFilterAll" class="quick-filter-btn px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-heading font-extrabold text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-boxes-stacked text-xs"></i>
                         <span>Semua Alat</span>
                         <span class="filter-badge px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-extrabold"><?= count($alatList) ?></span>
                     </button>
                     <button type="button" onclick="setQuickFilterAlat('kritis')" id="btnFilterKritis" class="quick-filter-btn px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-amber-50 hover:text-amber-800 font-heading font-extrabold text-xs transition border border-slate-200/80 flex items-center gap-1.5">
-                        <i class="fa-solid fa-triangle-exclamation text-amber-500 text-xs"></i>
                         <span>Stok Kritis</span>
                         <span class="filter-badge px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold"><?= $stokKritis ?></span>
                     </button>
                     <button type="button" onclick="setQuickFilterAlat('rusak')" id="btnFilterRusak" class="quick-filter-btn px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-800 font-heading font-extrabold text-xs transition border border-slate-200/80 flex items-center gap-1.5">
-                        <i class="fa-solid fa-screwdriver-wrench text-rose-500 text-xs"></i>
                         <span>Alat Rusak / Perlu Diganti</span>
                     </button>
                 </div>
@@ -303,13 +297,14 @@
                     <thead class="bg-slate-100/90 text-slate-700 font-heading font-extrabold uppercase text-[10px] tracking-wider border-b border-slate-200">
                         <tr>
                             <th width="4%" class="py-3 px-3 text-center">NO</th>
-                            <th width="12%" class="py-3 px-4">TANGGAL</th>
-                            <th width="24%" class="py-3 px-4">NAMA PERALATAN</th>
+                            <th width="11%" class="py-3 px-4">TANGGAL</th>
+                            <th width="20%" class="py-3 px-4">NAMA PERALATAN</th>
                             <th width="10%" class="py-3 px-3 text-center">JUMLAH KELUAR</th>
-                            <th width="20%" class="py-3 px-4">DIBERIKAN KEPADA (PENERIMA)</th>
-                            <th width="20%" class="py-3 px-4">UNIT / PERUNTUKAN</th>
+                            <th width="16%" class="py-3 px-4">DIBERIKAN KEPADA</th>
+                            <th width="16%" class="py-3 px-4">UNIT / PERUNTUKAN</th>
+                            <th width="15%" class="py-3 px-4">KETERANGAN / SUMBER</th>
                             <?php if (session()->get('role') === 'Admin'): ?>
-                                <th width="10%" class="py-3 px-3 text-center">AKSI</th>
+                                <th width="8%" class="py-3 px-3 text-center">AKSI</th>
                             <?php endif; ?>
                         </tr>
                     </thead>
@@ -334,6 +329,16 @@
                                     <td class="py-3 px-4 font-bold text-emerald-800">
                                         <i class="fa-solid fa-building-user text-emerald-600 mr-1.5"></i><?= esc($tk['unit_tujuan']) ?>
                                     </td>
+                                    <td class="py-3 px-4">
+                                        <?php if (!empty($tk['keterangan']) && stripos($tk['keterangan'], 'Pengajuan') !== false): ?>
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-[11px] font-bold shadow-2xs">
+                                                <i class="fa-solid fa-file-circle-check text-emerald-600 text-[10px]"></i>
+                                                <span><?= esc($tk['keterangan']) ?></span>
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="text-slate-500 font-medium text-xs"><?= esc($tk['keterangan'] ?: '-') ?></span>
+                                        <?php endif; ?>
+                                    </td>
                                     <?php if (session()->get('role') === 'Admin'): ?>
                                     <td class="py-3 px-3 text-center">
                                         <a href="<?= base_url('alat/transaksi/delete/' . $tk['id']) ?>" data-confirm-msg="Hapus riwayat barang keluar ini dan kembalikan stok?" class="w-7 h-7 rounded-xl bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition mx-auto" title="Hapus Riwayat">
@@ -345,7 +350,7 @@
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="7" class="py-10 text-center text-slate-400 font-medium italic">Belum ada catatan barang keluar.</td>
+                                <td colspan="8" class="py-10 text-center text-slate-400 font-medium italic">Belum ada catatan barang keluar.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -611,126 +616,156 @@
     </div>
 </div>
 
-<!-- Modal Catat Barang Keluar -->
-<div id="modalCatatKeluar" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-5 border border-slate-100 animate-in fade-in zoom-in duration-200">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h3 class="font-heading font-extrabold text-lg text-slate-900 flex items-center gap-2">
-                <i class="fa-solid fa-hand-holding-box text-rose-600"></i> Catat Barang Keluar & Distribusi
-            </h3>
-            <button onclick="closeModalCatatKeluar()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition">
-                <i class="fa-solid fa-xmark"></i>
+<!-- Modal Catat Barang Keluar (Wide & Multi-Item Support - No Scroll) -->
+<div id="modalCatatKeluar" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-2 sm:p-4">
+    <div class="bg-white rounded-3xl max-w-4xl w-full p-5 sm:p-6 shadow-2xl space-y-3.5 border border-slate-100 animate-in fade-in zoom-in duration-200">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-sm shadow-2xs flex-shrink-0">
+                    <i class="fa-solid fa-truck-ramp-box"></i>
+                </div>
+                <div>
+                    <h3 class="font-heading font-extrabold text-base sm:text-lg text-slate-900 leading-tight">
+                        Catat Barang Keluar & Distribusi
+                    </h3>
+                    <p class="text-[11px] text-slate-500 font-medium">Distribusi satu atau banyak peralatan kebersihan sekaligus ke unit tujuan.</p>
+                </div>
+            </div>
+            <button onclick="closeModalCatatKeluar()" class="w-7 h-7 rounded-xl bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-xs"></i>
             </button>
         </div>
 
-        <form action="<?= base_url('alat/transaksi/store') ?>" method="POST" class="space-y-4">
+        <form action="<?= base_url('alat/transaksi/store') ?>" method="POST" class="space-y-3">
             <input type="hidden" name="jenis_transaksi" value="Keluar">
 
-            <!-- Searchable Alat Picker for Catat Keluar -->
-            <div class="relative">
-                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                    <span>Pilih Peralatan (Dari Gudang) <span class="text-rose-500">*</span></span>
-                    <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
-                        <i class="fa-solid fa-magnifying-glass text-[9px]"></i> Bisa dicari
-                    </span>
+            <?php if (!empty($pengajuanDisetujui)): ?>
+            <!-- Quick Picker: Tarik Dari Pengajuan Disetujui (Searchable) -->
+            <div class="p-2.5 rounded-2xl bg-emerald-50/90 border border-emerald-200/90 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <label class="text-[11px] font-extrabold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5 flex-shrink-0">
+                    <i class="fa-solid fa-wand-magic-sparkles text-emerald-600"></i>
+                    <span>Tarik Dari Pengajuan:</span>
                 </label>
-                <input type="hidden" id="keluar_alat_id" name="alat_id" required value="">
-                <div class="relative">
-                    <i class="fa-solid fa-barcode absolute left-3.5 top-1/2 -translate-y-1/2 text-rose-600 text-xs pointer-events-none"></i>
-                    <input type="text" id="keluar_alat_search" placeholder="Cari nama atau kode alat..." autocomplete="off" onfocus="openKeluarAlatDropdown()" oninput="filterKeluarAlatOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-rose-500 transition shadow-2xs cursor-pointer placeholder-slate-400" required>
-                    <button type="button" onclick="toggleKeluarAlatDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
-                        <i id="keluarAlatIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
-                    </button>
-                </div>
-                <!-- Dropdown List -->
-                <div id="keluarAlatDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-56 overflow-y-auto z-50 hidden divide-y divide-slate-100">
-                    <?php foreach ($alatList as $a): ?>
-                        <div class="keluar-alat-item px-4 py-2.5 hover:bg-rose-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $a['id'] ?>" data-name="<?= esc($a['kode_alat']) ?> • <?= esc($a['nama_alat']) ?> (Sisa: <?= $a['stok_sisa'] ?> <?= esc($a['satuan']) ?>)" onclick="selectKeluarAlat(this)">
-                            <div>
-                                <div class="font-extrabold text-xs text-slate-900"><?= esc($a['nama_alat']) ?></div>
-                                <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
-                                    <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 font-mono font-bold border border-emerald-200/60"><?= esc($a['kode_alat']) ?></span>
-                                    <span>&bull;</span>
-                                    <span><?= esc($a['kategori']) ?></span>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold <?= $a['stok_sisa'] > 3 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200' ?>">
-                                    Sisa: <?= $a['stok_sisa'] ?> <?= esc($a['satuan']) ?>
-                                </span>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                    <div id="noKeluarAlatFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
-                        Tidak ditemukan peralatan yang sesuai.
+                <div class="relative w-full">
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600 text-xs pointer-events-none"></i>
+                        <input type="text" id="pengajuan_search_input" placeholder="Cari No. REQ / Nama Pemohon / Unit Asrama..." autocomplete="off" onfocus="openPengajuanDropdown()" oninput="filterPengajuanOptions(this.value)" class="w-full pl-8 pr-8 py-1.5 rounded-xl border border-emerald-300 text-xs font-bold bg-white text-slate-800 focus:ring-2 focus:ring-emerald-500 transition shadow-2xs placeholder-slate-400 cursor-pointer">
+                        <button type="button" onclick="togglePengajuanDropdown()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                            <i id="pengajuanDropdownIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                        </button>
                     </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Tanggal Keluar</label>
-                    <input type="date" name="tanggal" value="<?= date('Y-m-d') ?>" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                </div>
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Jumlah Keluar</label>
-                    <input type="number" name="jumlah" value="1" min="1" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold text-center bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Diberikan Kepada (Penerima)</label>
-                <input type="text" name="penerima_penyerah" placeholder="Misal: Kang Ahmad / Ibu Halimah" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
-            </div>
-
-            <!-- Searchable Unit Tujuan Picker for Catat Keluar -->
-            <div class="relative">
-                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                    <span>Unit / Peruntukan <span class="text-rose-500">*</span></span>
-                    <span class="text-[10px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
-                        <i class="fa-solid fa-magnifying-glass text-[9px]"></i> Bisa dicari
-                    </span>
-                </label>
-                <div class="relative">
-                    <i class="fa-solid fa-building text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2 text-xs pointer-events-none"></i>
-                    <input type="text" id="keluar_unit_tujuan_search" placeholder="Pilih / Cari Unit atau Asrama..." autocomplete="off" required onfocus="openKeluarUnitDropdown()" oninput="filterKeluarUnitOptions(this.value)" class="w-full pl-9 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
-                    <input type="hidden" id="keluar_unit_tujuan" name="unit_tujuan" required value="">
-                    <button type="button" onclick="toggleKeluarUnitDropdown()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
-                        <i id="keluarUnitIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
-                    </button>
-                </div>
-                <!-- Dropdown List -->
-                <div id="keluarUnitDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-48 overflow-y-auto z-50 hidden divide-y divide-slate-100">
-                    <?php if (!empty($unitList)): ?>
-                        <?php foreach ($unitList as $u): ?>
-                            <div class="keluar-unit-item px-4 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $u['id'] ?>" data-nama="<?= esc($u['nama_unit']) ?>" onclick="selectKeluarUnit(this)">
+                    <!-- Dropdown List of Approved Requests -->
+                    <div id="pengajuanDropdownList" class="absolute left-0 right-0 top-full mt-1 bg-white rounded-2xl shadow-2xl border border-emerald-200 max-h-48 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                        <?php foreach ($pengajuanDisetujui as $p): ?>
+                            <div class="pengajuan-item px-3.5 py-2 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $p['id'] ?>" data-text="<?= strtolower(esc(($p['kode_pengajuan'] ?? '') . ' ' . ($p['nama_unit'] ?? '') . ' ' . ($p['nama_lengkap'] ?? ''))) ?>" onclick="selectSearchablePengajuan(<?= $p['id'] ?>, '<?= esc($p['kode_pengajuan'] ?? 'REQ') ?> • <?= esc($p['nama_unit'] ?? 'Unit') ?> • <?= esc($p['nama_lengkap'] ?? '') ?>')">
                                 <div>
-                                    <div class="font-extrabold text-xs text-slate-900"><?= esc($u['nama_unit']) ?></div>
-                                    <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
-                                        <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200/60"><?= esc($u['tipe']) ?></span>
-                                        <?php if (!empty($u['kode_unit'])): ?>
-                                            <span>&bull;</span>
-                                            <span class="font-mono text-slate-400"><?= esc($u['kode_unit']) ?></span>
-                                        <?php endif; ?>
+                                    <div class="font-extrabold text-xs text-slate-900 flex items-center gap-1.5">
+                                        <span class="px-1.5 py-0.5 rounded bg-emerald-100/80 text-emerald-900 font-mono font-bold text-[10.5px]"><?= esc($p['kode_pengajuan'] ?? 'REQ') ?></span>
+                                        <span><?= esc($p['nama_unit'] ?? 'Unit') ?></span>
                                     </div>
+                                    <div class="text-[10px] text-slate-500 font-medium mt-0.5">
+                                        Pemohon: <span class="font-bold text-slate-700"><?= esc($p['nama_lengkap'] ?? 'Santri') ?></span> &bull; <span class="text-emerald-700 font-bold"><?= count($p['items'] ?? []) ?> Jenis Alat</span>
+                                    </div>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <span class="px-2 py-0.5 rounded-full text-[9.5px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        Pilih
+                                    </span>
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                    <?php endif; ?>
-                    <div id="noKeluarUnitFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
-                        Tidak ditemukan unit yang cocok.
+                        <div id="noPengajuanFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
+                            Tidak ditemukan pengajuan yang cocok.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Distribution Info (3 Cols Compact) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div>
+                    <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-1">Tanggal Keluar <span class="text-rose-500">*</span></label>
+                    <input type="date" name="tanggal" value="<?= date('Y-m-d') ?>" required class="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-1">Penerima / Pemohon <span class="text-rose-500">*</span></label>
+                    <input type="text" id="keluar_penerima" name="penerima_penyerah" placeholder="Misal: Kang Ahmad / Ibu Halimah" required class="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-1">Unit / Peruntukan <span class="text-rose-500">*</span></label>
+                    <div class="relative">
+                        <input type="text" id="keluar_unit_tujuan_search" placeholder="Pilih / Cari Unit..." autocomplete="off" required onfocus="openKeluarUnitDropdown()" oninput="filterKeluarUnitOptions(this.value)" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs cursor-pointer placeholder-slate-400">
+                        <input type="hidden" id="keluar_unit_tujuan" name="unit_tujuan" required value="">
+                        <button type="button" onclick="toggleKeluarUnitDropdown()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                            <i id="keluarUnitIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                        </button>
+                        <!-- Dropdown List -->
+                        <div id="keluarUnitDropdownList" class="absolute left-0 right-0 top-full mt-1 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-44 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                            <?php if (!empty($unitList)): ?>
+                                <?php foreach ($unitList as $u): ?>
+                                    <div class="keluar-unit-item px-3.5 py-1.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $u['id'] ?>" data-nama="<?= esc($u['nama_unit']) ?>" onclick="selectKeluarUnit(this)">
+                                        <div>
+                                            <div class="font-extrabold text-xs text-slate-900"><?= esc($u['nama_unit']) ?></div>
+                                            <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1.5">
+                                                <span class="px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200/60"><?= esc($u['tipe']) ?></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                            <div id="noKeluarUnitFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
+                                Tidak ditemukan unit yang cocok.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Multi-Item Tools Section (Compact Table) -->
+            <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                    <label class="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-boxes-stacked text-emerald-600"></i>
+                        <span>Daftar Peralatan Yang Dikeluarkan</span>
+                    </label>
+                    <button type="button" onclick="addMultiKeluarRow()" class="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 font-extrabold text-[11px] border border-slate-200/80 transition flex items-center gap-1 shadow-2xs">
+                        <i class="fa-solid fa-plus text-[10px]"></i>
+                        <span>Tambah Alat</span>
+                    </button>
+                </div>
+
+                <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50">
+                    <div class="overflow-x-auto max-h-40 overflow-y-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-100 text-slate-700 font-heading font-extrabold uppercase text-[10px] tracking-wider border-b border-slate-200 sticky top-0 bg-slate-100 z-10">
+                                <tr>
+                                    <th width="5%" class="py-2 px-2.5 text-center">NO</th>
+                                    <th width="48%" class="py-2 px-2.5">PILIH PERALATAN (GUDANG)</th>
+                                    <th width="24%" class="py-2 px-2.5 text-center">JUMLAH KELUAR</th>
+                                    <th width="15%" class="py-2 px-2.5 text-center">STOK SISA</th>
+                                    <th width="8%" class="py-2 px-2 text-center">AKSI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="multiKeluarItemsContainer" class="divide-y divide-slate-100 bg-white">
+                                <!-- Dynamic Rows Injected By JS -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
             <div>
-                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Keterangan (Opsional)</label>
-                <input type="text" name="keterangan" placeholder="Keterangan tambahan keperluan..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
+                <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-1">Keterangan / Catatan Tambahan (Opsional)</label>
+                <input type="text" id="keluar_keterangan" name="keterangan" placeholder="Contoh: Realisasi Pengajuan REQ-xxxx / Keperluan Ro'an Akbar" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
             </div>
 
-            <div class="pt-3 flex justify-end gap-2 border-t border-slate-100">
-                <button type="button" onclick="closeModalCatatKeluar()" class="px-5 py-2.5 rounded-2xl text-slate-600 text-xs font-bold hover:bg-slate-100 transition">Batal</button>
-                <button type="submit" class="px-6 py-2.5 rounded-2xl bg-rose-600 text-white text-xs font-extrabold hover:bg-rose-700 shadow-md shadow-rose-600/20 transition">Simpan Barang Keluar</button>
+            <div class="pt-2 flex justify-end gap-2 border-t border-slate-100">
+                <button type="button" onclick="closeModalCatatKeluar()" class="px-4 py-2 rounded-xl text-slate-600 text-xs font-bold hover:bg-slate-100 transition">Batal</button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-rose-600 text-white text-xs font-extrabold hover:bg-rose-700 shadow-md shadow-rose-600/20 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-check text-xs"></i>
+                    <span>Simpan Barang Keluar</span>
+                </button>
             </div>
         </form>
     </div>
@@ -1125,11 +1160,159 @@
         document.getElementById('btnSubmitKategori').innerHTML = '<i class="fa-solid fa-save"></i><span>Simpan Kategori</span>';
         document.getElementById('btnCancelEditKategori').classList.add('hidden');
     }
-    window.resetFormKategori = resetFormKategori;
+    window.pengajuanDisetujuiData = <?= json_encode($pengajuanDisetujui ?? []) ?>;
+    window.alatMasterData = <?= json_encode(array_map(function($a) {
+        return [
+            'id'        => (int)$a['id'],
+            'kode_alat' => $a['kode_alat'] ?? '',
+            'nama_alat' => $a['nama_alat'] ?? '',
+            'satuan'    => $a['satuan'] ?? 'Unit',
+            'stok_sisa' => (int)($a['stok_sisa'] ?? 0),
+            'kategori'  => $a['kategori'] ?? 'Umum',
+        ];
+    }, $alatList)) ?>;
+
+    function renderAlatOptionsHtml(selectedId = '') {
+        let html = '<option value="">-- Pilih Alat Kebersihan --</option>';
+        window.alatMasterData.forEach(a => {
+            const sel = String(a.id) === String(selectedId) ? 'selected' : '';
+            html += `<option value="${a.id}" data-satuan="${a.satuan}" data-stok="${a.stok_sisa}" ${sel}>${a.kode_alat ? a.kode_alat + ' • ' : ''}${a.nama_alat} (Sisa: ${a.stok_sisa} ${a.satuan})</option>`;
+        });
+        return html;
+    }
+
+    function addMultiKeluarRow(selectedAlatId = '', initialJumlah = 1) {
+        const container = document.getElementById('multiKeluarItemsContainer');
+        if (!container) return;
+        const rowIndex = container.children.length;
+
+        const tr = document.createElement('tr');
+        tr.className = "multi-keluar-row hover:bg-slate-50/80 transition";
+        
+        let initialSatuan = 'Unit';
+        let initialStok = '-';
+        if (selectedAlatId) {
+            const found = window.alatMasterData.find(a => String(a.id) === String(selectedAlatId));
+            if (found) {
+                initialSatuan = found.satuan;
+                initialStok = `${found.stok_sisa} ${found.satuan}`;
+            }
+        }
+
+        tr.innerHTML = `
+            <td class="py-2.5 px-3 text-center font-bold text-slate-400 row-number">${rowIndex + 1}</td>
+            <td class="py-2.5 px-3">
+                <select name="items[${rowIndex}][alat_id]" required onchange="onMultiKeluarAlatChange(this)" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:ring-2 focus:ring-rose-500 shadow-2xs">
+                    ${renderAlatOptionsHtml(selectedAlatId)}
+                </select>
+            </td>
+            <td class="py-2.5 px-3 text-center">
+                <div class="flex items-center justify-center gap-1.5">
+                    <input type="number" name="items[${rowIndex}][jumlah]" value="${initialJumlah}" min="1" required class="w-20 px-2.5 py-1.5 text-center rounded-xl border border-slate-200 text-xs font-extrabold bg-white focus:ring-2 focus:ring-rose-500 shadow-2xs">
+                    <span class="text-[11px] font-bold text-slate-500 badge-satuan">${initialSatuan}</span>
+                </div>
+            </td>
+            <td class="py-2.5 px-3 text-center">
+                <span class="px-2 py-0.5 rounded-full text-[10.5px] font-extrabold bg-slate-100 text-slate-700 border border-slate-200 badge-stok">
+                    ${initialStok}
+                </span>
+            </td>
+            <td class="py-2.5 px-3 text-center">
+                <button type="button" onclick="removeMultiKeluarRow(this)" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition mx-auto" title="Hapus Baris">
+                    <i class="fa-solid fa-trash text-[11px]"></i>
+                </button>
+            </td>
+        `;
+        container.appendChild(tr);
+        reindexMultiKeluarRows();
+    }
+    window.addMultiKeluarRow = addMultiKeluarRow;
+
+    function removeMultiKeluarRow(btn) {
+        const container = document.getElementById('multiKeluarItemsContainer');
+        if (!container) return;
+        if (container.children.length > 1) {
+            btn.closest('tr').remove();
+            reindexMultiKeluarRows();
+        } else {
+            const row = container.children[0];
+            const sel = row.querySelector('select');
+            const num = row.querySelector('input[type="number"]');
+            if (sel) sel.value = '';
+            if (num) num.value = '1';
+            onMultiKeluarAlatChange(sel);
+        }
+    }
+    window.removeMultiKeluarRow = removeMultiKeluarRow;
+
+    function reindexMultiKeluarRows() {
+        const container = document.getElementById('multiKeluarItemsContainer');
+        if (!container) return;
+        Array.from(container.children).forEach((tr, idx) => {
+            const numCol = tr.querySelector('.row-number');
+            if (numCol) numCol.textContent = idx + 1;
+            const sel = tr.querySelector('select');
+            if (sel) sel.name = `items[${idx}][alat_id]`;
+            const num = tr.querySelector('input[type="number"]');
+            if (num) num.name = `items[${idx}][jumlah]`;
+        });
+    }
+
+    function onMultiKeluarAlatChange(selectEl) {
+        if (!selectEl) return;
+        const tr = selectEl.closest('tr');
+        if (!tr) return;
+        const opt = selectEl.options[selectEl.selectedIndex];
+        const satuan = opt ? (opt.dataset.satuan || 'Unit') : 'Unit';
+        const stok = opt && opt.value ? `${opt.dataset.stok || '0'} ${satuan}` : '-';
+
+        const satEl = tr.querySelector('.badge-satuan');
+        if (satEl) satEl.textContent = satuan;
+        const stokEl = tr.querySelector('.badge-stok');
+        if (stokEl) stokEl.textContent = stok;
+    }
+    window.onMultiKeluarAlatChange = onMultiKeluarAlatChange;
+
+    function applyPengajuanToMultiKeluar(pengajuanId) {
+        if (!pengajuanId) return;
+        const pengajuan = window.pengajuanDisetujuiData.find(p => String(p.id) === String(pengajuanId));
+        if (!pengajuan) return;
+
+        if (document.getElementById('keluar_penerima')) {
+            document.getElementById('keluar_penerima').value = pengajuan.nama_lengkap || 'Pengurus Unit';
+        }
+        if (document.getElementById('keluar_unit_tujuan')) {
+            document.getElementById('keluar_unit_tujuan').value = pengajuan.nama_unit || '';
+            document.getElementById('keluar_unit_tujuan_search').value = pengajuan.nama_unit || '';
+        }
+        if (document.getElementById('keluar_keterangan')) {
+            document.getElementById('keluar_keterangan').value = `Realisasi Pengajuan ${pengajuan.kode_pengajuan || 'REQ'}`;
+        }
+
+        const container = document.getElementById('multiKeluarItemsContainer');
+        if (container) {
+            container.innerHTML = '';
+            if (pengajuan.items && pengajuan.items.length > 0) {
+                pengajuan.items.forEach(it => {
+                    const jSetuju = (it.jumlah_setuju !== null && it.jumlah_setuju !== undefined) ? it.jumlah_setuju : it.jumlah_minta;
+                    addMultiKeluarRow(it.alat_id, Math.max(1, parseInt(jSetuju) || 1));
+                });
+            } else {
+                addMultiKeluarRow();
+            }
+        }
+    }
+    window.applyPengajuanToMultiKeluar = applyPengajuanToMultiKeluar;
 
     function openModalCatatKeluar() {
         const modal = document.getElementById('modalCatatKeluar');
-        if (modal) modal.classList.remove('hidden');
+        if (modal) {
+            modal.classList.remove('hidden');
+            const container = document.getElementById('multiKeluarItemsContainer');
+            if (container && container.children.length === 0) {
+                addMultiKeluarRow();
+            }
+        }
     }
     window.openModalCatatKeluar = openModalCatatKeluar;
 
@@ -1179,56 +1362,6 @@
         if (modal) modal.classList.add('hidden');
     }
     window.closeModalEditAlat = closeModalEditAlat;
-
-    // Searchable Alat Picker Logic for Catat Keluar
-    function openKeluarAlatDropdown() {
-        const dd = document.getElementById('keluarAlatDropdownList');
-        const icon = document.getElementById('keluarAlatIcon');
-        if (dd) dd.classList.remove('hidden');
-        if (icon) icon.classList.add('rotate-180');
-    }
-    window.openKeluarAlatDropdown = openKeluarAlatDropdown;
-
-    function toggleKeluarAlatDropdown() {
-        const dd = document.getElementById('keluarAlatDropdownList');
-        const icon = document.getElementById('keluarAlatIcon');
-        if (dd) {
-            dd.classList.toggle('hidden');
-            if (icon) icon.classList.toggle('rotate-180', !dd.classList.contains('hidden'));
-        }
-    }
-    window.toggleKeluarAlatDropdown = toggleKeluarAlatDropdown;
-
-    function filterKeluarAlatOptions(query) {
-        openKeluarAlatDropdown();
-        query = (query || '').toLowerCase().trim();
-        const items = document.querySelectorAll('.keluar-alat-item');
-        let found = 0;
-        items.forEach(item => {
-            const text = item.innerText.toLowerCase();
-            if (!query || text.includes(query)) {
-                item.style.display = 'flex';
-                found++;
-            } else {
-                item.style.display = 'none';
-            }
-        });
-        const noFound = document.getElementById('noKeluarAlatFound');
-        if (noFound) noFound.classList.toggle('hidden', found > 0);
-    }
-    window.filterKeluarAlatOptions = filterKeluarAlatOptions;
-
-    function selectKeluarAlat(el) {
-        const id = el.dataset.id || '';
-        const name = el.dataset.name || '';
-        document.getElementById('keluar_alat_id').value = id;
-        document.getElementById('keluar_alat_search').value = name;
-        const dd = document.getElementById('keluarAlatDropdownList');
-        const icon = document.getElementById('keluarAlatIcon');
-        if (dd) dd.classList.add('hidden');
-        if (icon) icon.classList.remove('rotate-180');
-    }
-    window.selectKeluarAlat = selectKeluarAlat;
 
     // Searchable Alat Picker Logic for Catat Masuk
     function openMasukAlatDropdown() {
@@ -1326,15 +1459,63 @@
         if (dd) dd.classList.add('hidden');
         if (icon) icon.classList.remove('rotate-180');
     }
-    window.selectKeluarUnit = selectKeluarUnit;
+
+    // Searchable Tarik Pengajuan Logic
+    function openPengajuanDropdown() {
+        const dd = document.getElementById('pengajuanDropdownList');
+        const icon = document.getElementById('pengajuanDropdownIcon');
+        if (dd) dd.classList.remove('hidden');
+        if (icon) icon.classList.add('rotate-180');
+    }
+    window.openPengajuanDropdown = openPengajuanDropdown;
+
+    function togglePengajuanDropdown() {
+        const dd = document.getElementById('pengajuanDropdownList');
+        const icon = document.getElementById('pengajuanDropdownIcon');
+        if (dd) {
+            dd.classList.toggle('hidden');
+            if (icon) icon.classList.toggle('rotate-180', !dd.classList.contains('hidden'));
+        }
+    }
+    window.togglePengajuanDropdown = togglePengajuanDropdown;
+
+    function filterPengajuanOptions(query) {
+        openPengajuanDropdown();
+        query = (query || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.pengajuan-item');
+        let found = 0;
+        items.forEach(item => {
+            const text = (item.dataset.text || item.innerText).toLowerCase();
+            if (!query || text.includes(query)) {
+                item.style.display = 'flex';
+                found++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        const noFound = document.getElementById('noPengajuanFound');
+        if (noFound) noFound.classList.toggle('hidden', found > 0);
+    }
+    window.filterPengajuanOptions = filterPengajuanOptions;
+
+    function selectSearchablePengajuan(id, label) {
+        const input = document.getElementById('pengajuan_search_input');
+        if (input) input.value = label;
+        applyPengajuanToMultiKeluar(id);
+        const dd = document.getElementById('pengajuanDropdownList');
+        const icon = document.getElementById('pengajuanDropdownIcon');
+        if (dd) dd.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+    }
+    window.selectSearchablePengajuan = selectSearchablePengajuan;
 
     document.addEventListener('click', function(e) {
-        // Dismiss Keluar Alat Dropdown
-        const keluarSearch = document.getElementById('keluar_alat_search');
-        const keluarDd = document.getElementById('keluarAlatDropdownList');
-        if (keluarDd && keluarSearch && !keluarSearch.contains(e.target) && !keluarDd.contains(e.target)) {
-            keluarDd.classList.add('hidden');
-            const icon = document.getElementById('keluarAlatIcon');
+        // Dismiss Pengajuan Dropdown
+        const pengajuanSearch = document.getElementById('pengajuan_search_input');
+        const pengajuanDd = document.getElementById('pengajuanDropdownList');
+        if (pengajuanDd && pengajuanSearch && !pengajuanSearch.contains(e.target) && !pengajuanDd.contains(e.target)) {
+            pengajuanDd.classList.add('hidden');
+            const icon = document.getElementById('pengajuanDropdownIcon');
             if (icon) icon.classList.remove('rotate-180');
         }
 

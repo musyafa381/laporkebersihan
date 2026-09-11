@@ -417,9 +417,12 @@
            UNIVERSAL FULL-SCREEN MODAL ENGINE
            Ensures the modal backdrop covers 100% of the entire screen (including navbar & margins)
            and prevents modal content from getting cut off.
+           Only targets top-level modal backdrop overlays (with .fixed and .inset-0).
            ========================================================================== */
-        div[id^="modal"]:not(#mobileDrawerContainer),
-        div[id*="Modal"]:not(#mobileDrawerContainer) {
+        div[id^="modal"].fixed.inset-0:not(#mobileDrawerContainer):not([id*="Container"]):not([id*="container"]),
+        div[id*="Modal"].fixed.inset-0:not(#mobileDrawerContainer):not([id*="Container"]):not([id*="container"]),
+        div[id^="modal"][role="dialog"],
+        div[id*="Modal"][role="dialog"] {
             position: fixed !important;
             inset: 0 !important;
             top: 0 !important;
@@ -438,12 +441,16 @@
             justify-content: center;
             box-sizing: border-box;
         }
-        div[id^="modal"]:not(#mobileDrawerContainer).hidden,
-        div[id*="Modal"]:not(#mobileDrawerContainer).hidden {
+        div[id^="modal"].fixed.inset-0.hidden,
+        div[id*="Modal"].fixed.inset-0.hidden,
+        div[id^="modal"][role="dialog"].hidden,
+        div[id*="Modal"][role="dialog"].hidden {
             display: none !important;
         }
-        div[id^="modal"]:not(#mobileDrawerContainer) > div:not(.relative.max-w-4xl):not(#previewDocContainer),
-        div[id*="Modal"]:not(#mobileDrawerContainer) > div:not(.relative.max-w-4xl):not(#previewDocContainer) {
+        div[id^="modal"].fixed.inset-0:not(#mobileDrawerContainer) > div:not(.relative.max-w-4xl):not(#previewDocContainer),
+        div[id*="Modal"].fixed.inset-0:not(#mobileDrawerContainer) > div:not(.relative.max-w-4xl):not(#previewDocContainer),
+        div[id^="modal"][role="dialog"] > div:not(.relative.max-w-4xl):not(#previewDocContainer),
+        div[id*="Modal"][role="dialog"] > div:not(.relative.max-w-4xl):not(#previewDocContainer) {
             max-height: calc(100vh - 2rem) !important;
             max-height: calc(100dvh - 2rem) !important;
             margin-top: auto !important;
@@ -455,8 +462,10 @@
             position: relative !important;
             z-index: 10000000 !important;
         }
-        div[id^="modal"]:not(#mobileDrawerContainer) > div > form,
-        div[id*="Modal"]:not(#mobileDrawerContainer) > div > form {
+        div[id^="modal"].fixed.inset-0:not(#mobileDrawerContainer) > div > form,
+        div[id*="Modal"].fixed.inset-0:not(#mobileDrawerContainer) > div > form,
+        div[id^="modal"][role="dialog"] > div > form,
+        div[id*="Modal"][role="dialog"] > div > form {
             display: flex !important;
             flex-direction: column !important;
             flex: 1 1 auto !important;
@@ -466,12 +475,16 @@
             scrollbar-color: #cbd5e1 transparent !important;
             padding-right: 2px !important;
         }
-        div[id^="modal"]:not(#mobileDrawerContainer) > div > form::-webkit-scrollbar,
-        div[id*="Modal"]:not(#mobileDrawerContainer) > div > form::-webkit-scrollbar {
+        div[id^="modal"].fixed.inset-0:not(#mobileDrawerContainer) > div > form::-webkit-scrollbar,
+        div[id*="Modal"].fixed.inset-0:not(#mobileDrawerContainer) > div > form::-webkit-scrollbar,
+        div[id^="modal"][role="dialog"] > div > form::-webkit-scrollbar,
+        div[id*="Modal"][role="dialog"] > div > form::-webkit-scrollbar {
             width: 5px;
         }
-        div[id^="modal"]:not(#mobileDrawerContainer) > div > form::-webkit-scrollbar-thumb,
-        div[id*="Modal"]:not(#mobileDrawerContainer) > div > form::-webkit-scrollbar-thumb {
+        div[id^="modal"].fixed.inset-0:not(#mobileDrawerContainer) > div > form::-webkit-scrollbar-thumb,
+        div[id*="Modal"].fixed.inset-0:not(#mobileDrawerContainer) > div > form::-webkit-scrollbar-thumb,
+        div[id^="modal"][role="dialog"] > div > form::-webkit-scrollbar-thumb,
+        div[id*="Modal"][role="dialog"] > div > form::-webkit-scrollbar-thumb {
             background-color: #cbd5e1;
             border-radius: 9999px;
         }
@@ -2055,6 +2068,9 @@
                     currentMain.classList.add('spa-enter');
                     window.scrollTo({ top: 0, behavior: 'instant' });
                     applyStaggerMicroAnimations(currentMain);
+                    if (typeof teleportModalsToBody === 'function') {
+                        teleportModalsToBody();
+                    }
                 }
 
                 // Update active state in Header Navigation
@@ -2119,6 +2135,10 @@
                             console.error('Error executing SPA page script:', sErr);
                         }
                     });
+                }
+
+                if (typeof teleportModalsToBody === 'function') {
+                    teleportModalsToBody();
                 }
 
                 if (typeof window.rebindPageEvents === 'function') {
@@ -2637,10 +2657,14 @@
         }
         window.TablePaginator = TablePaginator;
 
-        // Auto-teleport all modals to document.body so they are 100% full-screen and never trapped inside <main>
+        // Auto-teleport only top-level full-screen modal overlays to document.body so they are never trapped inside nested overflow containers
         function teleportModalsToBody() {
-            document.querySelectorAll('div[id^="modal"], div[id*="Modal"]').forEach(function(el) {
-                if (el.id !== 'mobileDrawerContainer' && el.parentElement && el.parentElement !== document.body) {
+            document.querySelectorAll('div.fixed.inset-0').forEach(function(el) {
+                const id = (el.id || '').toLowerCase();
+                if (id === 'mobiledrawercontainer' || id === 'spaprogressbar' || id === 'globalnetworkindicator' || id.includes('preview')) return;
+                
+                const isModal = el.id.startsWith('modal') || el.id.endsWith('Modal') || el.id.includes('modal') || el.id.includes('Modal') || el.getAttribute('role') === 'dialog' || el.classList.contains('backdrop-blur-sm') || el.classList.contains('backdrop-blur-md') || el.classList.contains('bg-slate-900/60') || el.classList.contains('bg-slate-900/70') || el.classList.contains('bg-slate-900/80') || el.classList.contains('bg-slate-900/40') || el.classList.contains('bg-black/50') || el.classList.contains('bg-black/60');
+                if (isModal && el.parentElement && el.parentElement !== document.body) {
                     document.body.appendChild(el);
                 }
             });
@@ -2652,10 +2676,28 @@
         }
         window.teleportModalsToBody = teleportModalsToBody;
 
+        if (window.MutationObserver) {
+            let teleportDebounce = null;
+            const modalObserver = new MutationObserver(function(mutations) {
+                let hasAddedNodes = false;
+                for (let i = 0; i < mutations.length; i++) {
+                    if (mutations[i].addedNodes && mutations[i].addedNodes.length > 0) {
+                        hasAddedNodes = true;
+                        break;
+                    }
+                }
+                if (hasAddedNodes) {
+                    if (teleportDebounce) clearTimeout(teleportDebounce);
+                    teleportDebounce = setTimeout(teleportModalsToBody, 10);
+                }
+            });
+            modalObserver.observe(document.body, { childList: true, subtree: true });
+        }
+
         // Universal Modal Backdrop Click & Escape Key Handlers
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                const openModals = document.querySelectorAll('div[id^="modal"]:not(.hidden):not(#mobileDrawerContainer), div[id*="Modal"]:not(.hidden):not(#mobileDrawerContainer)');
+                const openModals = document.querySelectorAll('div.fixed.inset-0:not(.hidden):not(#mobileDrawerContainer)');
                 if (openModals.length > 0) {
                     const lastModal = openModals[openModals.length - 1];
                     const closeBtn = lastModal.querySelector('button[onclick*="close"], button[onclick*="Close"]');
@@ -2669,7 +2711,7 @@
         });
 
         document.addEventListener('mousedown', function(e) {
-            const openModals = document.querySelectorAll('div[id^="modal"]:not(.hidden):not(#mobileDrawerContainer), div[id*="Modal"]:not(.hidden):not(#mobileDrawerContainer)');
+            const openModals = document.querySelectorAll('div.fixed.inset-0:not(.hidden):not(#mobileDrawerContainer)');
             openModals.forEach(modal => {
                 if (e.target === modal) {
                     const closeBtn = modal.querySelector('button[onclick*="close"], button[onclick*="Close"]');

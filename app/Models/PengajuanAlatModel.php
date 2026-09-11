@@ -24,179 +24,192 @@ class PengajuanAlatModel extends Model
     ];
     protected $useTimestamps    = true;
 
+    private static bool $schemaEnsured = false;
+
     /**
      * Auto-ensure database tables & columns exist and migrate legacy flat data safely.
      */
     public static function ensureSchema()
     {
-        $db = \Config\Database::connect();
-        $forge = \Config\Database::forge();
-
-        // 1. Ensure pengajuan_alat table structure
-        if (!$db->tableExists('pengajuan_alat')) {
-            $forge->addField([
-                'id' => [
-                    'type'           => 'INT',
-                    'constraint'     => 11,
-                    'unsigned'       => true,
-                    'auto_increment' => true,
-                ],
-                'kode_pengajuan' => [
-                    'type'       => 'VARCHAR',
-                    'constraint' => 30,
-                    'null'       => true,
-                ],
-                'user_id' => [
-                    'type'       => 'INT',
-                    'constraint' => 11,
-                    'unsigned'   => true,
-                    'null'       => true,
-                ],
-                'unit_id' => [
-                    'type'       => 'INT',
-                    'constraint' => 11,
-                    'unsigned'   => true,
-                    'null'       => true,
-                ],
-                'alasan_keperluan' => [
-                    'type' => 'TEXT',
-                    'null' => true,
-                ],
-                'status' => [
-                    'type'       => 'VARCHAR',
-                    'constraint' => 50,
-                    'default'    => 'Pending',
-                ],
-                'catatan_admin' => [
-                    'type' => 'TEXT',
-                    'null' => true,
-                ],
-                'disetujui_oleh' => [
-                    'type'       => 'INT',
-                    'constraint' => 11,
-                    'unsigned'   => true,
-                    'null'       => true,
-                ],
-                'disetujui_pada' => [
-                    'type' => 'DATETIME',
-                    'null' => true,
-                ],
-                'created_at' => [
-                    'type' => 'DATETIME',
-                    'null' => true,
-                ],
-                'updated_at' => [
-                    'type' => 'DATETIME',
-                    'null' => true,
-                ],
-            ]);
-            $forge->addKey('id', true);
-            $forge->createTable('pengajuan_alat', true);
-        } else {
-            // Add any missing columns to pengajuan_alat
-            $fields = $db->getFieldNames('pengajuan_alat');
-            $missingFields = [];
-
-            if (!in_array('kode_pengajuan', $fields)) {
-                $missingFields['kode_pengajuan'] = ['type' => 'VARCHAR', 'constraint' => 30, 'null' => true, 'after' => 'id'];
-            }
-            if (!in_array('unit_id', $fields)) {
-                $missingFields['unit_id'] = ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'null' => true, 'after' => 'user_id'];
-            }
-            if (!in_array('disetujui_oleh', $fields)) {
-                $missingFields['disetujui_oleh'] = ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'null' => true, 'after' => 'catatan_admin'];
-            }
-            if (!in_array('disetujui_pada', $fields)) {
-                $missingFields['disetujui_pada'] = ['type' => 'DATETIME', 'null' => true, 'after' => 'disetujui_oleh'];
-            }
-
-            if (!empty($missingFields)) {
-                $forge->addColumn('pengajuan_alat', $missingFields);
-            }
+        if (self::$schemaEnsured) {
+            return;
         }
 
-        // 2. Ensure pengajuan_alat_item table structure
-        if (!$db->tableExists('pengajuan_alat_item')) {
-            $forge->addField([
-                'id' => [
-                    'type'           => 'INT',
-                    'constraint'     => 11,
-                    'unsigned'       => true,
-                    'auto_increment' => true,
-                ],
-                'pengajuan_id' => [
-                    'type'       => 'INT',
-                    'constraint' => 11,
-                    'unsigned'   => true,
-                ],
-                'alat_id' => [
-                    'type'       => 'INT',
-                    'constraint' => 11,
-                    'unsigned'   => true,
-                ],
-                'jumlah_minta' => [
-                    'type'       => 'INT',
-                    'constraint' => 11,
-                    'default'    => 1,
-                ],
-                'jumlah_setuju' => [
-                    'type'       => 'INT',
-                    'constraint' => 11,
-                    'null'       => true,
-                ],
-                'status_item' => [
-                    'type'       => 'VARCHAR',
-                    'constraint' => 50,
-                    'default'    => 'Pending',
-                ],
-                'catatan_item' => [
-                    'type'       => 'VARCHAR',
-                    'constraint' => 255,
-                    'null'       => true,
-                ],
-                'created_at' => [
-                    'type' => 'DATETIME',
-                    'null' => true,
-                ],
-                'updated_at' => [
-                    'type' => 'DATETIME',
-                    'null' => true,
-                ],
-            ]);
-            $forge->addKey('id', true);
-            $forge->addKey('pengajuan_id');
-            $forge->createTable('pengajuan_alat_item', true);
-        }
+        try {
+            $db = \Config\Database::connect();
+            $forge = \Config\Database::forge();
 
-        // 3. Auto-populate kode_pengajuan for old records and migrate old items
-        $fields = $db->getFieldNames('pengajuan_alat');
-        if (in_array('alat_id', $fields)) {
-            // There might be legacy single-item records
-            $legacyRows = $db->table('pengajuan_alat')->where('alat_id IS NOT NULL')->get()->getResultArray();
-            foreach ($legacyRows as $row) {
-                // If item not yet in pengajuan_alat_item
-                $itemExists = $db->table('pengajuan_alat_item')->where('pengajuan_id', $row['id'])->countAllResults();
-                if ($itemExists == 0 && !empty($row['alat_id'])) {
-                    $db->table('pengajuan_alat_item')->insert([
-                        'pengajuan_id'  => $row['id'],
-                        'alat_id'       => $row['alat_id'],
-                        'jumlah_minta'  => $row['jumlah'] ?? 1,
-                        'jumlah_setuju' => ($row['status'] === 'Disetujui' || $row['status'] === 'Selesai') ? ($row['jumlah'] ?? 1) : null,
-                        'status_item'   => $row['status'] ?? 'Pending',
-                        'catatan_item'  => $row['catatan_admin'] ?? null,
-                        'created_at'    => $row['created_at'] ?? date('Y-m-d H:i:s'),
-                        'updated_at'    => $row['updated_at'] ?? date('Y-m-d H:i:s'),
-                    ]);
+            // 1. Ensure pengajuan_alat table structure
+            if (!$db->tableExists('pengajuan_alat')) {
+                $forge->addField([
+                    'id' => [
+                        'type'           => 'INT',
+                        'constraint'     => 11,
+                        'unsigned'       => true,
+                        'auto_increment' => true,
+                    ],
+                    'kode_pengajuan' => [
+                        'type'       => 'VARCHAR',
+                        'constraint' => 30,
+                        'null'       => true,
+                    ],
+                    'user_id' => [
+                        'type'       => 'INT',
+                        'constraint' => 11,
+                        'unsigned'   => true,
+                        'null'       => true,
+                    ],
+                    'unit_id' => [
+                        'type'       => 'INT',
+                        'constraint' => 11,
+                        'unsigned'   => true,
+                        'null'       => true,
+                    ],
+                    'alasan_keperluan' => [
+                        'type' => 'TEXT',
+                        'null' => true,
+                    ],
+                    'status' => [
+                        'type'       => 'VARCHAR',
+                        'constraint' => 50,
+                        'default'    => 'Pending',
+                    ],
+                    'catatan_admin' => [
+                        'type' => 'TEXT',
+                        'null' => true,
+                    ],
+                    'disetujui_oleh' => [
+                        'type'       => 'INT',
+                        'constraint' => 11,
+                        'unsigned'   => true,
+                        'null'       => true,
+                    ],
+                    'disetujui_pada' => [
+                        'type' => 'DATETIME',
+                        'null' => true,
+                    ],
+                    'created_at' => [
+                        'type' => 'DATETIME',
+                        'null' => true,
+                    ],
+                    'updated_at' => [
+                        'type' => 'DATETIME',
+                        'null' => true,
+                    ],
+                ]);
+                $forge->addKey('id', true);
+                $forge->createTable('pengajuan_alat', true);
+            } else {
+                // Add any missing columns to pengajuan_alat
+                $fields = $db->getFieldNames('pengajuan_alat');
+                $missingFields = [];
+
+                if (!in_array('kode_pengajuan', $fields)) {
+                    $missingFields['kode_pengajuan'] = ['type' => 'VARCHAR', 'constraint' => 30, 'null' => true, 'after' => 'id'];
+                }
+                if (!in_array('unit_id', $fields)) {
+                    $missingFields['unit_id'] = ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'null' => true, 'after' => 'user_id'];
+                }
+                if (!in_array('disetujui_oleh', $fields)) {
+                    $missingFields['disetujui_oleh'] = ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'null' => true, 'after' => 'catatan_admin'];
+                }
+                if (!in_array('disetujui_pada', $fields)) {
+                    $missingFields['disetujui_pada'] = ['type' => 'DATETIME', 'null' => true, 'after' => 'disetujui_oleh'];
+                }
+
+                if (!empty($missingFields)) {
+                    $forge->addColumn('pengajuan_alat', $missingFields);
                 }
             }
-        }
 
-        // Fill empty kode_pengajuan
-        $emptyKodes = $db->table('pengajuan_alat')->where('kode_pengajuan IS NULL')->orWhere('kode_pengajuan', '')->get()->getResultArray();
-        foreach ($emptyKodes as $ek) {
-            $date = !empty($ek['created_at']) ? strtotime($ek['created_at']) : time();
-            $kode = 'REQ-' . date('Ym', $date) . '-' . str_pad($ek['id'], 3, '0', STR_PAD_LEFT);
-            $db->table('pengajuan_alat')->where('id', $ek['id'])->update(['kode_pengajuan' => $kode]);
+            // 2. Ensure pengajuan_alat_item table structure
+            if (!$db->tableExists('pengajuan_alat_item')) {
+                $forge->addField([
+                    'id' => [
+                        'type'           => 'INT',
+                        'constraint'     => 11,
+                        'unsigned'       => true,
+                        'auto_increment' => true,
+                    ],
+                    'pengajuan_id' => [
+                        'type'       => 'INT',
+                        'constraint' => 11,
+                        'unsigned'   => true,
+                    ],
+                    'alat_id' => [
+                        'type'       => 'INT',
+                        'constraint' => 11,
+                        'unsigned'   => true,
+                    ],
+                    'jumlah_minta' => [
+                        'type'       => 'INT',
+                        'constraint' => 11,
+                        'default'    => 1,
+                    ],
+                    'jumlah_setuju' => [
+                        'type'       => 'INT',
+                        'constraint' => 11,
+                        'null'       => true,
+                    ],
+                    'status_item' => [
+                        'type'       => 'VARCHAR',
+                        'constraint' => 50,
+                        'default'    => 'Pending',
+                    ],
+                    'catatan_item' => [
+                        'type'       => 'VARCHAR',
+                        'constraint' => 255,
+                        'null'       => true,
+                    ],
+                    'created_at' => [
+                        'type' => 'DATETIME',
+                        'null' => true,
+                    ],
+                    'updated_at' => [
+                        'type' => 'DATETIME',
+                        'null' => true,
+                    ],
+                ]);
+                $forge->addKey('id', true);
+                $forge->addKey('pengajuan_id');
+                $forge->createTable('pengajuan_alat_item', true);
+            }
+
+            // 3. Auto-populate kode_pengajuan for old records and migrate old items
+            $fields = $db->getFieldNames('pengajuan_alat');
+            if (in_array('alat_id', $fields)) {
+                $legacyRows = $db->table('pengajuan_alat')->where('alat_id IS NOT NULL')->get()->getResultArray();
+                foreach ($legacyRows as $row) {
+                    $itemExists = $db->table('pengajuan_alat_item')->where('pengajuan_id', $row['id'])->countAllResults();
+                    if ($itemExists == 0 && !empty($row['alat_id'])) {
+                        $db->table('pengajuan_alat_item')->insert([
+                            'pengajuan_id'  => $row['id'],
+                            'alat_id'       => $row['alat_id'],
+                            'jumlah_minta'  => $row['jumlah'] ?? 1,
+                            'jumlah_setuju' => ($row['status'] === 'Disetujui' || $row['status'] === 'Selesai') ? ($row['jumlah'] ?? 1) : null,
+                            'status_item'   => $row['status'] ?? 'Pending',
+                            'catatan_item'  => $row['catatan_admin'] ?? null,
+                            'created_at'    => $row['created_at'] ?? date('Y-m-d H:i:s'),
+                            'updated_at'    => $row['updated_at'] ?? date('Y-m-d H:i:s'),
+                        ]);
+                    }
+                }
+            }
+
+            // Fill empty kode_pengajuan if column exists
+            if (in_array('kode_pengajuan', $fields)) {
+                $emptyKodes = $db->table('pengajuan_alat')->where('kode_pengajuan IS NULL')->orWhere('kode_pengajuan', '')->get()->getResultArray();
+                foreach ($emptyKodes as $ek) {
+                    $date = !empty($ek['created_at']) ? strtotime($ek['created_at']) : time();
+                    $kode = 'REQ-' . date('Ym', $date) . '-' . str_pad($ek['id'], 3, '0', STR_PAD_LEFT);
+                    $db->table('pengajuan_alat')->where('id', $ek['id'])->update(['kode_pengajuan' => $kode]);
+                }
+            }
+
+            self::$schemaEnsured = true;
+        } catch (\Throwable $e) {
+            // Silently fallback without crashing page
+            log_message('error', 'PengajuanAlatModel ensureSchema failed: ' . $e->getMessage());
         }
     }
 
@@ -228,59 +241,92 @@ class PengajuanAlatModel extends Model
         self::ensureSchema();
         $db = \Config\Database::connect();
 
-        $builder = $db->table('pengajuan_alat p')
-            ->select('p.*, u.nama_lengkap, u.username, u.role, u.no_hp, mu.nama_unit, mu.tipe as tipe_unit, mu.kode_unit, admin_u.nama_lengkap as nama_admin')
-            ->join('users u', 'u.id = p.user_id', 'left')
-            ->join('master_unit mu', 'mu.id = COALESCE(p.unit_id, u.unit_id)', 'left')
-            ->join('users admin_u', 'admin_u.id = p.disetujui_oleh', 'left')
-            ->orderBy('p.id', 'DESC');
+        try {
+            $builder = $db->table('pengajuan_alat p')
+                ->select('p.*, u.nama_lengkap, u.username, u.role, mu.nama_unit, mu.tipe as tipe_unit, mu.kode_unit, mu.pj_kontak as no_hp, admin_u.nama_lengkap as nama_admin')
+                ->join('users u', 'u.id = p.user_id', 'left')
+                ->join('master_unit mu', 'mu.id = COALESCE(NULLIF(p.unit_id, 0), u.unit_id)', 'left')
+                ->join('users admin_u', 'admin_u.id = p.disetujui_oleh', 'left')
+                ->orderBy('p.id', 'DESC');
 
-        if (!empty($filters['user_id'])) {
-            $builder->where('p.user_id', $filters['user_id']);
-        }
-        if (!empty($filters['unit_id'])) {
-            $builder->where('(p.unit_id = ' . (int)$filters['unit_id'] . ' OR u.unit_id = ' . (int)$filters['unit_id'] . ')');
-        }
-        if (!empty($filters['status'])) {
-            $builder->where('p.status', $filters['status']);
-        }
-        if (!empty($filters['id'])) {
-            $builder->where('p.id', $filters['id']);
-        }
+            if (!empty($filters['user_id'])) {
+                $builder->where('p.user_id', $filters['user_id']);
+            }
+            if (!empty($filters['unit_id'])) {
+                $builder->where('(p.unit_id = ' . (int)$filters['unit_id'] . ' OR u.unit_id = ' . (int)$filters['unit_id'] . ')');
+            }
+            if (!empty($filters['status'])) {
+                $builder->where('p.status', $filters['status']);
+            }
+            if (!empty($filters['id'])) {
+                $builder->where('p.id', $filters['id']);
+            }
 
-        $requests = $builder->get()->getResultArray();
-        if (empty($requests)) {
+            $requests = $builder->get()->getResultArray();
+            if (empty($requests)) {
+                return [];
+            }
+
+            $requestIds = array_column($requests, 'id');
+            $itemsByPengajuan = [];
+
+            if ($db->tableExists('pengajuan_alat_item')) {
+                $itemsRaw = $db->table('pengajuan_alat_item pi')
+                    ->select('pi.*, ai.nama_alat, ai.kode_alat, ai.satuan, ai.kategori, ai.stok_sisa, ai.lokasi_gudang, ai.kondisi')
+                    ->join('alat_inventaris ai', 'ai.id = pi.alat_id', 'left')
+                    ->whereIn('pi.pengajuan_id', $requestIds)
+                    ->orderBy('pi.id', 'ASC')
+                    ->get()->getResultArray();
+
+                foreach ($itemsRaw as $item) {
+                    $stokVal = (int)($item['stok_sisa'] ?? 0);
+                    $item['stok_sisa'] = $stokVal;
+                    $item['stok_alat'] = $stokVal;
+                    $itemsByPengajuan[$item['pengajuan_id']][] = $item;
+                }
+            }
+
+            foreach ($requests as &$req) {
+                $req['items'] = $itemsByPengajuan[$req['id']] ?? [];
+                
+                // Fallback for single-item legacy row if items array is empty
+                if (empty($req['items']) && !empty($req['alat_id'])) {
+                    $alatObj = $db->table('alat_inventaris')->where('id', $req['alat_id'])->get()->getRowArray();
+                    $stokVal = (int)($alatObj['stok_sisa'] ?? 0);
+                    $req['items'] = [[
+                        'id'            => $req['id'],
+                        'pengajuan_id'  => $req['id'],
+                        'alat_id'       => $req['alat_id'],
+                        'jumlah_minta'  => $req['jumlah'] ?? 1,
+                        'jumlah_setuju' => ($req['status'] === 'Disetujui' || $req['status'] === 'Selesai') ? ($req['jumlah'] ?? 1) : null,
+                        'status_item'   => $req['status'] ?? 'Pending',
+                        'catatan_item'  => $req['catatan_admin'] ?? '',
+                        'nama_alat'     => $alatObj['nama_alat'] ?? 'Peralatan',
+                        'kode_alat'     => $alatObj['kode_alat'] ?? '',
+                        'satuan'        => $alatObj['satuan'] ?? 'Unit',
+                        'kategori'      => $alatObj['kategori'] ?? 'Umum',
+                        'stok_sisa'     => $stokVal,
+                        'stok_alat'     => $stokVal,
+                    ]];
+                }
+
+                $req['total_jenis_alat'] = count($req['items']);
+                
+                $totMinta = 0;
+                $totSetuju = 0;
+                foreach ($req['items'] as $it) {
+                    $totMinta += (int)($it['jumlah_minta'] ?? 0);
+                    $totSetuju += (int)($it['jumlah_setuju'] ?? 0);
+                }
+                $req['total_jumlah_minta'] = $totMinta;
+                $req['total_jumlah_setuju'] = $totSetuju;
+            }
+            unset($req);
+
+            return $requests;
+        } catch (\Throwable $e) {
+            log_message('error', 'getListWithItems error: ' . $e->getMessage());
             return [];
         }
-
-        $requestIds = array_column($requests, 'id');
-        $itemsRaw = $db->table('pengajuan_alat_item pi')
-            ->select('pi.*, ai.nama_alat, ai.kode_alat, ai.satuan, ai.kategori, ai.stok_sisa, ai.lokasi_gudang, ai.kondisi')
-            ->join('alat_inventaris ai', 'ai.id = pi.alat_id', 'left')
-            ->whereIn('pi.pengajuan_id', $requestIds)
-            ->orderBy('pi.id', 'ASC')
-            ->get()->getResultArray();
-
-        $itemsByPengajuan = [];
-        foreach ($itemsRaw as $item) {
-            $itemsByPengajuan[$item['pengajuan_id']][] = $item;
-        }
-
-        foreach ($requests as &$req) {
-            $req['items'] = $itemsByPengajuan[$req['id']] ?? [];
-            $req['total_jenis_alat'] = count($req['items']);
-            
-            $totMinta = 0;
-            $totSetuju = 0;
-            foreach ($req['items'] as $it) {
-                $totMinta += (int)($it['jumlah_minta'] ?? 0);
-                $totSetuju += (int)($it['jumlah_setuju'] ?? 0);
-            }
-            $req['total_jumlah_minta'] = $totMinta;
-            $req['total_jumlah_setuju'] = $totSetuju;
-        }
-        unset($req);
-
-        return $requests;
     }
 }

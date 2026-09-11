@@ -656,7 +656,7 @@
             </div>
 
             <!-- Active CS Alert Reminder Inside Modal (Compact) -->
-            <div id="modalCsAlertContainer" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs space-y-1 shadow-2xs">
+            <div id="laporCsAlertContainer" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs space-y-1 shadow-2xs">
                 <div class="flex items-center justify-between">
                     <span class="inline-flex items-center gap-1.5 font-extrabold text-rose-800 text-[11px]">
                         <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
@@ -664,7 +664,7 @@
                     </span>
                     <span class="px-2 py-0.5 rounded bg-rose-200 text-rose-900 text-[9px] font-extrabold">Wajib Dituntaskan</span>
                 </div>
-                <p id="modalCsAlertText" class="text-rose-800 italic font-semibold text-[11px] bg-white/90 px-2 py-1 rounded-lg border border-rose-200/80 shadow-2xs line-clamp-2">
+                <p id="laporCsAlertText" class="text-rose-800 italic font-semibold text-[11px] bg-white/90 px-2 py-1 rounded-lg border border-rose-200/80 shadow-2xs line-clamp-2">
                 </p>
             </div>
 
@@ -1198,8 +1198,8 @@
             updateSliderUI(85);
         }
 
-        const csAlertBox = document.getElementById('modalCsAlertContainer');
-        const csAlertText = document.getElementById('modalCsAlertText');
+        const csAlertBox = document.getElementById('laporCsAlertContainer');
+        const csAlertText = document.getElementById('laporCsAlertText');
         if (item.active_cs_reports && item.active_cs_reports.length > 0) {
             if (csAlertBox && csAlertText) {
                 csAlertText.innerText = `"${item.active_cs_reports[0].isi_laporan}" (Oleh: ${item.active_cs_reports[0].nama_pengirim || 'Pelapor CS'})`;

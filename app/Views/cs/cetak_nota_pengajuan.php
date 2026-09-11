@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($title ?? 'Bukti Serah Terima Alat') ?></title>
+    <link rel="icon" type="image/x-icon" href="<?= base_url('favicon.ico') ?>">
+    <link rel="icon" type="image/svg+xml" href="<?= base_url('favicon.svg') ?>">
+    <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('apple-touch-icon.png') ?>">
+    <link rel="icon" type="image/png" sizes="32x32" href="<?= base_url('favicon-32x32.png') ?>">
+    <link rel="icon" type="image/png" sizes="16x16" href="<?= base_url('favicon-16x16.png') ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -14,6 +19,9 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #f8fafc;
             color: #1e293b;
+        }
+        .font-heading {
+            font-family: 'Outfit', sans-serif;
         }
         @media print {
             body {
@@ -37,9 +45,9 @@
 
     <!-- Top Action Bar (Print / Back) -->
     <div class="max-w-3xl mx-auto mb-6 flex items-center justify-between no-print">
-        <a href="<?= base_url('cs') ?>" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 transition shadow-2xs">
+        <a href="<?= session('role') === 'admin' ? base_url('cs') : base_url('app/pengajuan-alat') ?>" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 transition shadow-xs">
             <i class="fa-solid fa-arrow-left"></i>
-            <span>Kembali ke Inbox CS</span>
+            <span>Kembali</span>
         </a>
         <button onclick="window.print()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold text-xs transition shadow-md shadow-emerald-600/20">
             <i class="fa-solid fa-print"></i>
@@ -51,17 +59,19 @@
     <div class="max-w-3xl mx-auto bg-white rounded-3xl p-8 sm:p-10 shadow-xl border border-slate-200 print-page space-y-6">
         
         <!-- Header / Kop Dokumen -->
-        <div class="border-b-2 border-slate-800 pb-4 flex items-center justify-between gap-4">
+        <div class="border-b-2 border-slate-900 pb-4 flex items-center justify-between gap-4">
             <div class="flex items-center gap-3.5">
-                <div class="w-12 h-12 rounded-2xl bg-emerald-700 text-white flex items-center justify-center text-xl font-black shadow-xs">
+                <div class="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-800 text-white flex items-center justify-center text-2xl font-black shadow-sm flex-shrink-0">
                     <i class="fa-solid fa-broom-ball"></i>
                 </div>
                 <div>
                     <h2 class="font-heading font-black text-lg sm:text-xl text-slate-900 leading-tight uppercase tracking-tight">
-                        Pondok Pesantren Assalafiyyah Mlangi
+                        <?= esc($settings['nama_instansi'] ?? 'PONDOK PESANTREN ASSALAFIYYAH MLANGI') ?>
                     </h2>
-                    <p class="text-xs font-bold text-emerald-800">BAGIAN K3L & PENGELOLAAN KEBERSIHAN LINGKUNGAN</p>
-                    <p class="text-[10px] text-slate-500">Mlangi, Nogotirto, Gamping, Sleman, D.I. Yogyakarta &bull; Telp/WA: <?= esc($settings['hotline_wa'] ?? '0895320276800') ?></p>
+                    <p class="text-xs font-bold text-emerald-700 tracking-wide font-heading">Divisi Logistik & Gudang</p>
+                    <p class="text-[10.5px] text-slate-500 mt-0.5">
+                        <?= esc($settings['alamat_instansi'] ?? 'Mlangi, Nogotirto, Gamping, Sleman, D.I. Yogyakarta') ?> &bull; Telp/WA: <?= esc($settings['hotline_wa'] ?? '0895320276800') ?>
+                    </p>
                 </div>
             </div>
             <div class="text-right flex-shrink-0">
@@ -103,7 +113,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="text-slate-500 font-semibold w-28">Diverifikasi Oleh:</span>
-                    <span class="font-bold text-slate-800"><?= esc($p['nama_admin'] ?: 'Admin Gudang K3L') ?></span>
+                    <span class="font-bold text-slate-800"><?= !empty($p['nama_admin']) && !in_array(strtolower($p['nama_admin']), ['admin', 'admin gudang', 'admin k3l']) ? esc($p['nama_admin']) : 'Ahmad Fakhri Maulana' ?></span>
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="text-slate-500 font-semibold w-28">Tgl Verifikasi:</span>
@@ -166,7 +176,7 @@
 
         <?php if (!empty($p['catatan_admin'])): ?>
             <div class="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/90 text-xs">
-                <span class="font-extrabold text-amber-950 uppercase tracking-wide text-[11px] block mb-0.5"><i class="fa-solid fa-comment-dots text-amber-600 mr-1"></i>Catatan Admin Gudang:</span>
+                <span class="font-extrabold text-amber-950 uppercase tracking-wide text-[11px] block mb-0.5">Catatan Divisi Logistik:</span>
                 <p class="text-amber-900 font-medium leading-relaxed">"<?= esc($p['catatan_admin']) ?>"</p>
             </div>
         <?php endif; ?>
@@ -175,15 +185,15 @@
         <div class="pt-6 grid grid-cols-2 gap-8 text-center text-xs">
             <div>
                 <p class="text-slate-500 font-semibold mb-16">Pihak Pemohon / Pengambil Barang,</p>
-                <div class="border-b border-slate-400 w-44 mx-auto mb-1"></div>
+                <div class="border-b border-slate-400 w-48 mx-auto mb-1.5"></div>
                 <p class="font-bold text-slate-900">( <?= esc($p['nama_lengkap'] ?: 'Pengurus Unit') ?> )</p>
                 <p class="text-[10px] text-slate-500">Unit: <?= esc($p['nama_unit'] ?: '-') ?></p>
             </div>
             <div>
-                <p class="text-slate-500 font-semibold mb-16">Petugas Logistik / Admin K3L,</p>
-                <div class="border-b border-slate-400 w-44 mx-auto mb-1"></div>
-                <p class="font-bold text-slate-900">( <?= esc($p['nama_admin'] ?: 'Admin Gudang') ?> )</p>
-                <p class="text-[10px] text-slate-500">K3L Assalafiyyah Mlangi</p>
+                <p class="text-slate-500 font-semibold mb-16">Petugas Divisi Logistik & Gudang,</p>
+                <div class="border-b border-slate-400 w-48 mx-auto mb-1.5"></div>
+                <p class="font-bold text-slate-900">( <?= !empty($p['nama_admin']) && !in_array(strtolower($p['nama_admin']), ['admin', 'admin gudang', 'admin k3l']) ? esc($p['nama_admin']) : 'Ahmad Fakhri Maulana' ?> )</p>
+                <p class="text-[10px] text-slate-500">Divisi Logistik & Gudang</p>
             </div>
         </div>
 
