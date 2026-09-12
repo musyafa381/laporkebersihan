@@ -278,6 +278,28 @@ class ProgramKerja extends BaseController
             return $this->respondJsonOrRedirect('Nama Program Kerja wajib diisi.', false);
         }
 
+        // Auto find matching Buku LPJ by date (month/year) or active Buku LPJ
+        $tglMulaiTime = strtotime($tglMulai);
+        $mNum = (int)date('n', $tglMulaiTime);
+        $yNum = (int)date('Y', $tglMulaiTime);
+        $bulanIndo = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        $targetBulan = $bulanIndo[$mNum] ?? '';
+
+        $matchedBuku = $this->bukuModel
+            ->where('tahun', $yNum)
+            ->like('bulan', $targetBulan, 'after')
+            ->first();
+
+        if (!$matchedBuku) {
+            $matchedBuku = $this->bukuModel->where('status', 'Aktif')->first();
+        }
+
+        $bukuLpjId = $matchedBuku ? (int)$matchedBuku['id'] : null;
+
         $data = [
             'unit_id'            => $unitId,
             'kader_type'         => $kaderType,
@@ -291,10 +313,38 @@ class ProgramKerja extends BaseController
             'penanggung_jawab'   => $pj,
             'status'             => $status,
             'sumber_input'       => 'Manual',
+            'buku_lpj_id'        => $bukuLpjId,
             'created_by_user_id' => $session->get('userId'),
         ];
 
-        $this->prokerModel->insert($data);
+        $insertedId = $this->prokerModel->insert($data);
+
+        // Also insert into proker_agenda for the matching Buku LPJ so it appears in LPJ immediately
+        if ($bukuLpjId) {
+            $agendaModel = new \App\Models\ProkerAgendaModel();
+            $kategoriBadge = 'Koordinasi PJ';
+            if ($kaderType === 'GEMERLAP' || $kaderType === 'Satgas') {
+                $kategoriBadge = 'Koordinasi Kader';
+            } elseif (stripos($namaProgram, 'sowan') !== false) {
+                $kategoriBadge = 'Koordinasi Sowan';
+            }
+
+            $existingAgenda = $agendaModel
+                ->where('buku_id', $bukuLpjId)
+                ->where('kegiatan', $namaProgram)
+                ->first();
+
+            if (!$existingAgenda) {
+                $agendaModel->insert([
+                    'buku_id'        => $bukuLpjId,
+                    'tanggal'        => $tglMulai,
+                    'kegiatan'       => $namaProgram,
+                    'keterangan'     => $tujuan ?: $subKegiatan,
+                    'kategori_badge' => $kategoriBadge,
+                ]);
+            }
+        }
+
         return $this->respondJsonOrRedirect('Program kerja berhasil ditambahkan ke buku program!');
     }
 
@@ -347,6 +397,8 @@ class ProgramKerja extends BaseController
         $targetInd     = trim($this->request->getPost('target_indikator') ?? $proker['target_indikator']);
         $pj            = trim($this->request->getPost('penanggung_jawab') ?? $proker['penanggung_jawab']);
         $status        = $this->request->getPost('status') ?: $proker['status'];
+        $oldNama       = $proker['nama_program'];
+        $bukuLpjId     = !empty($proker['buku_lpj_id']) ? (int)$proker['buku_lpj_id'] : null;
 
         if (empty($namaProgram)) {
             return $this->respondJsonOrRedirect('Nama Program Kerja wajib diisi.', false);
@@ -367,6 +419,24 @@ class ProgramKerja extends BaseController
         ];
 
         $this->prokerModel->update($id, $data);
+
+        // Keep linked proker_agenda in sync
+        if ($bukuLpjId) {
+            $agendaModel = new \App\Models\ProkerAgendaModel();
+            $existingAgenda = $agendaModel
+                ->where('buku_id', $bukuLpjId)
+                ->where('kegiatan', $oldNama)
+                ->first();
+
+            if ($existingAgenda) {
+                $agendaModel->update($existingAgenda['id'], [
+                    'kegiatan'   => $namaProgram,
+                    'tanggal'    => $tglMulai,
+                    'keterangan' => $tujuan ?: $subKegiatan,
+                ]);
+            }
+        }
+
         return $this->respondJsonOrRedirect('Program kerja berhasil diperbarui!');
     }
 
@@ -404,6 +474,15 @@ class ProgramKerja extends BaseController
                     @unlink(FCPATH . 'uploads/proker/' . basename($itemFile));
                 }
             }
+        }
+
+        // Also clean up linked proker_agenda if linked
+        if (!empty($proker['buku_lpj_id'])) {
+            $agendaModel = new \App\Models\ProkerAgendaModel();
+            $agendaModel
+                ->where('buku_id', $proker['buku_lpj_id'])
+                ->where('kegiatan', $proker['nama_program'])
+                ->delete();
         }
 
         $this->prokerModel->delete($id);

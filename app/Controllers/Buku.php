@@ -123,15 +123,138 @@ class Buku extends BaseController
         });
     }
 
+    protected function getMonthNumber($bulan)
+    {
+        $bulanMap = [
+            'januari' => 1, 'jan' => 1,
+            'februari' => 2, 'feb' => 2,
+            'maret' => 3, 'mar' => 3,
+            'april' => 4, 'apr' => 4,
+            'mei' => 5,
+            'juni' => 6, 'jun' => 6,
+            'juli' => 7, 'jul' => 7,
+            'agustus' => 8, 'agu' => 8, 'agt' => 8,
+            'september' => 9, 'sep' => 9,
+            'oktober' => 10, 'okt' => 10,
+            'november' => 11, 'nov' => 11,
+            'desember' => 12, 'des' => 12
+        ];
+        $key = strtolower(trim((string)$bulan));
+        return $bulanMap[$key] ?? (is_numeric($bulan) ? (int)$bulan : 0);
+    }
+
+    protected function syncProkersForBuku($bukuId, $bulan, $tahun)
+    {
+        $monthNum = $this->getMonthNumber($bulan);
+        $yearNum  = (int)$tahun;
+
+        $programKerjaModel = new \App\Models\ProgramKerjaModel();
+        if (!$this->prokerModel->db->tableExists('tbl_program_kerja')) {
+            return;
+        }
+
+        $builder = $programKerjaModel->groupStart()
+            ->where('buku_lpj_id', $bukuId);
+
+        if ($monthNum > 0 && $yearNum > 0) {
+            $monthStr = sprintf('%02d', $monthNum);
+            $builder->orWhere("(buku_lpj_id IS NULL OR buku_lpj_id = 0) AND (tgl_mulai LIKE '{$yearNum}-{$monthStr}-%' OR tgl_mulai IS NULL)");
+        }
+        $builder->groupEnd();
+
+        $matchedProkers = $builder->findAll();
+
+        $existingAgendas = $this->prokerModel->where('buku_id', $bukuId)->findAll();
+        $existingKeys = [];
+        foreach ($existingAgendas as $ea) {
+            $existingKeys[strtolower(trim($ea['kegiatan'])) . '_' . trim($ea['tanggal'])] = true;
+        }
+
+        foreach ($matchedProkers as $mp) {
+            $progName = trim($mp['nama_program'] ?? '');
+            $tgl = !empty($mp['tgl_mulai']) ? $mp['tgl_mulai'] : sprintf('%04d-%02d-01', $yearNum, max(1, $monthNum));
+            $pDay = (int)date('d', strtotime($tgl));
+            $daysInMonth = (int)cal_days_in_month(CAL_GREGORIAN, max(1, $monthNum), $yearNum);
+            $adjustedDay = min($pDay, $daysInMonth);
+            $alignedDate = sprintf('%04d-%02d-%02d', $yearNum, max(1, $monthNum), max(1, $adjustedDay));
+            $itemKey = strtolower($progName) . '_' . $alignedDate;
+
+            if ($progName !== '' && !isset($existingKeys[$itemKey])) {
+                $kategoriBadge = 'Koordinasi PJ';
+                if (($mp['kader_type'] ?? '') === 'GEMERLAP' || ($mp['kader_type'] ?? '') === 'Satgas') {
+                    $kategoriBadge = 'Koordinasi Kader';
+                } elseif (stripos($progName, 'sowan') !== false) {
+                    $kategoriBadge = 'Koordinasi Sowan';
+                }
+
+                $this->prokerModel->insert([
+                    'buku_id'        => $bukuId,
+                    'tanggal'        => $alignedDate,
+                    'kegiatan'       => $progName,
+                    'keterangan'     => $mp['tujuan_program'] ?? $mp['sub_kegiatan'] ?? '',
+                    'kategori_badge' => $kategoriBadge,
+                ]);
+                $existingKeys[$itemKey] = true;
+            }
+
+            if (empty($mp['buku_lpj_id']) || $mp['buku_lpj_id'] != $bukuId) {
+                $programKerjaModel->update($mp['id'], ['buku_lpj_id' => $bukuId]);
+            }
+        }
+    }
+
     public function index()
     {
         $bukuList = $this->bukuModel->findAll();
         $this->sortByTahunBulan($bukuList, 'DESC');
         
+        // Classify active units into unit vs kader
+        $allUnits = $this->unitModel->findAll();
+        $kaderUnitIds = [];
+        foreach ($allUnits as $u) {
+            $uStatus = strtolower(str_replace(['-', ' ', '_'], '', (string)($u['status'] ?? 'aktif')));
+            if ($uStatus === 'nonaktif' || $uStatus === 'inactive' || $uStatus === 'tidakaktif') {
+                continue;
+            }
+
+            $isKader = (($u['jenis_laporan'] ?? 'unit') === 'kader')
+                || stripos($u['tipe'] ?? '', 'Kader') !== false
+                || stripos($u['tipe'] ?? '', 'Posko') !== false
+                || stripos($u['tipe'] ?? '', 'Gemerlap') !== false
+                || stripos($u['nama_unit'] ?? '', 'GEMERLAP ') === 0
+                || stripos($u['nama_unit'] ?? '', 'Satgas Kebersihan ') === 0;
+
+            if ($isKader) {
+                $kaderUnitIds[$u['id']] = true;
+            }
+        }
+
         // Enrich each book with count stats and normalized status
         foreach ($bukuList as &$buku) {
-            $buku['status']           = $this->normalizeStatus($buku['status']);
-            $buku['total_proker']     = $this->prokerModel->where('buku_id', $buku['id'])->countAllResults();
+            $buku['status'] = $this->normalizeStatus($buku['status']);
+
+            // Auto sync matching prokers to ensure no prokers appear lost/missing
+            $this->syncProkersForBuku($buku['id'], $buku['bulan'], $buku['tahun']);
+
+            // Total Agenda / Proker
+            $buku['total_proker'] = $this->prokerModel->where('buku_id', $buku['id'])->countAllResults();
+
+            // Total LPJ Submitted (Capaian Evaluasi: Unit & Kader)
+            $evaluasiEntries = $this->evaluasiModel->where('buku_id', $buku['id'])->findAll();
+            $countUnit = 0;
+            $countKader = 0;
+            foreach ($evaluasiEntries as $ev) {
+                if (isset($kaderUnitIds[$ev['unit_id']])) {
+                    $countKader++;
+                } else {
+                    $countUnit++;
+                }
+            }
+            $buku['total_lpj_unit']   = $countUnit;
+            $buku['total_lpj_kader']  = $countKader;
+            $buku['total_laporan']    = count($evaluasiEntries); // Gabungan jumlah laporan unit dan kader yang sudah mengisi LPJ
+
+            // Koordinasi & Target counts
             $buku['total_koordinasi'] = $this->koordinasiModel->where('buku_id', $buku['id'])->countAllResults();
             $buku['total_targets']    = $this->targetModel->where('buku_id', $buku['id'])->countAllResults();
         }
@@ -284,6 +407,8 @@ class Buku extends BaseController
             }
         }
 
+        $this->syncProkersForBuku($buku['id'], $buku['bulan'], $buku['tahun']);
+
         $proker              = $this->prokerModel->where('buku_id', $id)->orderBy('tanggal', 'ASC')->findAll();
         $targets             = $this->targetModel->where('buku_id', $id)->findAll();
         $capaianList         = $this->capaianBulananModel->where('buku_id', $id)->findAll();
@@ -340,9 +465,13 @@ class Buku extends BaseController
             }
         }
 
+        $allBukuList = $this->bukuModel->where('id !=', $id)->findAll();
+        $this->sortByTahunBulan($allBukuList, 'DESC');
+
         $data = [
             'title'               => $buku['judul'],
             'buku'                => $buku,
+            'allBukuList'         => $allBukuList,
             'units'               => $units,
             'kaderUnits'          => $kaderUnits,
             'proker'              => $proker,
@@ -391,6 +520,32 @@ class Buku extends BaseController
             'kategori_badge' => $badge,
         ]);
 
+        // Sync with tbl_program_kerja so data is never separated
+        $programKerjaModel = new \App\Models\ProgramKerjaModel();
+        if ($this->prokerModel->db->tableExists('tbl_program_kerja')) {
+            $existing = $programKerjaModel
+                ->where('nama_program', $kegiatan)
+                ->where('buku_lpj_id', $bukuId)
+                ->first();
+
+            if (!$existing) {
+                $defaultUnit = $this->unitModel->first();
+                $kaderType = stripos((string)$badge, 'kader') !== false ? 'GEMERLAP' : 'Non-Kader';
+                $programKerjaModel->insert([
+                    'unit_id'           => $defaultUnit['id'] ?? null,
+                    'kader_type'        => $kaderType,
+                    'nama_program'      => $kegiatan,
+                    'sub_kegiatan'      => 'Agenda Buku LPJ',
+                    'tgl_mulai'         => $tanggal ?: date('Y-m-d'),
+                    'periode_frekuensi' => 'Bulanan',
+                    'tujuan_program'    => $ket ?: 'Agenda program kerja dari Buku LPJ bulanan.',
+                    'status'            => 'Sedang Berjalan',
+                    'sumber_input'      => 'LPJ Bulanan',
+                    'buku_lpj_id'       => $bukuId,
+                ]);
+            }
+        }
+
         return $this->respondJsonOrRedirect('Agenda Proker berhasil ditambahkan!');
     }
 
@@ -409,6 +564,7 @@ class Buku extends BaseController
         $kegiatan = $this->request->getPost('kegiatan');
         $ket      = $this->request->getPost('keterangan');
         $badge    = $this->request->getPost('kategori_badge');
+        $oldKegiatan = $proker['kegiatan'];
 
         $this->prokerModel->update($prokerId, [
             'tanggal'        => $tanggal,
@@ -423,6 +579,23 @@ class Buku extends BaseController
                 'kegiatan'     => $kegiatan,
                 'hari_tanggal' => date('d M Y', strtotime($tanggal))
             ])->update();
+        }
+
+        // Keep tbl_program_kerja in sync
+        $programKerjaModel = new \App\Models\ProgramKerjaModel();
+        if ($this->prokerModel->db->tableExists('tbl_program_kerja')) {
+            $existing = $programKerjaModel
+                ->where('buku_lpj_id', $proker['buku_id'])
+                ->where('nama_program', $oldKegiatan)
+                ->first();
+
+            if ($existing) {
+                $programKerjaModel->update($existing['id'], [
+                    'nama_program'   => $kegiatan,
+                    'tgl_mulai'      => $tanggal ?: $existing['tgl_mulai'],
+                    'tujuan_program' => $ket ?: $existing['tujuan_program'],
+                ]);
+            }
         }
 
         return $this->respondJsonOrRedirect('Agenda Proker berhasil diperbarui!');
@@ -452,8 +625,139 @@ class Buku extends BaseController
             $this->koordinasiModel->delete($lk['id']);
         }
 
+        // Clean up or detach in tbl_program_kerja
+        $programKerjaModel = new \App\Models\ProgramKerjaModel();
+        if ($this->prokerModel->db->tableExists('tbl_program_kerja')) {
+            $existing = $programKerjaModel
+                ->where('buku_lpj_id', $proker['buku_id'])
+                ->where('nama_program', $proker['kegiatan'])
+                ->first();
+            if ($existing && ($existing['sumber_input'] ?? '') === 'LPJ Bulanan') {
+                $programKerjaModel->delete($existing['id']);
+            }
+        }
+
         $this->prokerModel->delete($prokerId);
         return $this->respondJsonOrRedirect('Agenda Proker berhasil dihapus.');
+    }
+
+    public function copyProker($targetBukuId)
+    {
+        if (!$this->isBukuEditable($targetBukuId)) {
+            return $this->respondJsonOrRedirect("Buku LPJ tidak dalam status 'Aktif' sehingga tidak dapat diubah.", false);
+        }
+
+        $sourceBukuId = (int)$this->request->getPost('source_buku_id');
+        if (!$sourceBukuId) {
+            return $this->respondJsonOrRedirect('Pilih Buku LPJ sumber untuk disalin!', false);
+        }
+
+        $targetBuku = $this->bukuModel->find($targetBukuId);
+        if (!$targetBuku) {
+            return $this->respondJsonOrRedirect('Buku LPJ target tidak ditemukan.', false);
+        }
+
+        $monthNum = $this->getMonthNumber($targetBuku['bulan']);
+        $yearNum  = (int)$targetBuku['tahun'];
+        $daysInMonth = (int)cal_days_in_month(CAL_GREGORIAN, max(1, $monthNum), $yearNum);
+
+        $sourceAgendas = $this->prokerModel->where('buku_id', $sourceBukuId)->findAll();
+        if (empty($sourceAgendas)) {
+            return $this->respondJsonOrRedirect('Buku sumber tidak memiliki agenda proker.', false);
+        }
+
+        $existingAgendas = $this->prokerModel->where('buku_id', $targetBukuId)->findAll();
+        $existingKeys = [];
+        foreach ($existingAgendas as $ea) {
+            $existingKeys[strtolower(trim($ea['kegiatan'])) . '_' . trim($ea['tanggal'])] = true;
+        }
+
+        $copiedCount = 0;
+        foreach ($sourceAgendas as $sa) {
+            $keg = trim($sa['kegiatan']);
+            $pDay = (int)date('d', strtotime($sa['tanggal']));
+            $adjustedDay = min($pDay, $daysInMonth);
+            $alignedDate = sprintf('%04d-%02d-%02d', $yearNum, max(1, $monthNum), max(1, $adjustedDay));
+            $itemKey = strtolower($keg) . '_' . $alignedDate;
+
+            if ($keg !== '' && !isset($existingKeys[$itemKey])) {
+                $this->prokerModel->insert([
+                    'buku_id'        => $targetBukuId,
+                    'tanggal'        => $alignedDate,
+                    'kegiatan'       => $keg,
+                    'keterangan'     => $sa['keterangan'] ?? '',
+                    'kategori_badge' => $sa['kategori_badge'] ?? 'Koordinasi PJ',
+                ]);
+                $existingKeys[$itemKey] = true;
+                $copiedCount++;
+            }
+        }
+
+        return $this->respondJsonOrRedirect("Berhasil menyalin {$copiedCount} agenda proker ke Buku LPJ {$targetBuku['bulan']} {$targetBuku['tahun']}!");
+    }
+
+    public function importMasterProker($targetBukuId)
+    {
+        if (!$this->isBukuEditable($targetBukuId)) {
+            return $this->respondJsonOrRedirect("Buku LPJ tidak dalam status 'Aktif' sehingga tidak dapat diubah.", false);
+        }
+
+        $targetBuku = $this->bukuModel->find($targetBukuId);
+        if (!$targetBuku) {
+            return $this->respondJsonOrRedirect('Buku LPJ target tidak ditemukan.', false);
+        }
+
+        $monthNum = $this->getMonthNumber($targetBuku['bulan']);
+        $yearNum  = (int)$targetBuku['tahun'];
+        $daysInMonth = (int)cal_days_in_month(CAL_GREGORIAN, max(1, $monthNum), $yearNum);
+
+        $programKerjaModel = new \App\Models\ProgramKerjaModel();
+        $allProkers = $programKerjaModel->findAll();
+
+        if (empty($allProkers)) {
+            return $this->respondJsonOrRedirect('Tidak ada program kerja di Master Program Kerja.', false);
+        }
+
+        $existingAgendas = $this->prokerModel->where('buku_id', $targetBukuId)->findAll();
+        $existingKeys = [];
+        foreach ($existingAgendas as $ea) {
+            $existingKeys[strtolower(trim($ea['kegiatan'])) . '_' . trim($ea['tanggal'])] = true;
+        }
+
+        $importedCount = 0;
+        foreach ($allProkers as $mp) {
+            $progName = trim($mp['nama_program'] ?? '');
+            $tgl = !empty($mp['tgl_mulai']) ? $mp['tgl_mulai'] : sprintf('%04d-%02d-01', $yearNum, max(1, $monthNum));
+            $pDay = (int)date('d', strtotime($tgl));
+            $adjustedDay = min($pDay, $daysInMonth);
+            $alignedDate = sprintf('%04d-%02d-%02d', $yearNum, max(1, $monthNum), max(1, $adjustedDay));
+            $itemKey = strtolower($progName) . '_' . $alignedDate;
+
+            if ($progName !== '' && !isset($existingKeys[$itemKey])) {
+                $kategoriBadge = 'Koordinasi PJ';
+                if (($mp['kader_type'] ?? '') === 'GEMERLAP' || ($mp['kader_type'] ?? '') === 'Satgas') {
+                    $kategoriBadge = 'Koordinasi Kader';
+                } elseif (stripos($progName, 'sowan') !== false) {
+                    $kategoriBadge = 'Koordinasi Sowan';
+                }
+
+                $this->prokerModel->insert([
+                    'buku_id'        => $targetBukuId,
+                    'tanggal'        => $alignedDate,
+                    'kegiatan'       => $progName,
+                    'keterangan'     => $mp['tujuan_program'] ?? $mp['sub_kegiatan'] ?? '',
+                    'kategori_badge' => $kategoriBadge,
+                ]);
+                $existingKeys[$itemKey] = true;
+                $importedCount++;
+
+                if (empty($mp['buku_lpj_id'])) {
+                    $programKerjaModel->update($mp['id'], ['buku_lpj_id' => $targetBukuId]);
+                }
+            }
+        }
+
+        return $this->respondJsonOrRedirect("Berhasil mengimpor {$importedCount} program kerja dari Master Program Kerja!");
     }
 
     public function storeTarget($bukuId)
@@ -1062,6 +1366,8 @@ class Buku extends BaseController
                 $units[] = $u;
             }
         }
+
+        $this->syncProkersForBuku($buku['id'], $buku['bulan'], $buku['tahun']);
 
         $proker              = $this->prokerModel->where('buku_id', $id)->orderBy('tanggal', 'ASC')->findAll();
         $targets             = $this->targetModel->where('buku_id', $id)->findAll();

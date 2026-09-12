@@ -104,7 +104,7 @@
                                 <button type="button" onclick="openModalEditFromBtn(this)" data-id="<?= $buku['id'] ?>" data-judul="<?= esc($buku['judul']) ?>" data-bulan="<?= esc($buku['bulan']) ?>" data-tahun="<?= esc($buku['tahun']) ?>" data-status="<?= esc($buku['status']) ?>" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition flex items-center justify-center text-xs" title="Edit Informasi Buku">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
-                                <button type="button" onclick="openModalDeleteBuku(this)" data-id="<?= $buku['id'] ?>" data-bulan="<?= esc($buku['bulan']) ?>" data-tahun="<?= esc($buku['tahun']) ?>" data-proker="<?= $buku['total_proker'] ?>" data-koordinasi="<?= $buku['total_koordinasi'] ?>" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Hapus Buku">
+                                <button type="button" onclick="openModalDeleteBuku(this)" data-id="<?= $buku['id'] ?>" data-bulan="<?= esc($buku['bulan']) ?>" data-tahun="<?= esc($buku['tahun']) ?>" data-proker="<?= $buku['total_proker'] ?>" data-laporan="<?= $buku['total_laporan'] ?? 0 ?>" data-koordinasi="<?= $buku['total_koordinasi'] ?? 0 ?>" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Hapus Buku">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </button>
                             </div>
@@ -127,19 +127,23 @@
 
                         <!-- Quick Stats Indicators -->
                         <div class="grid grid-cols-2 gap-2 p-3 rounded-2xl bg-slate-50/80 border border-slate-100 text-xs mb-6">
-                            <div class="flex items-center gap-2 text-slate-600">
-                                <div class="w-6 h-6 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center text-[10px]">
+                            <div class="flex items-center gap-2 text-slate-600" title="<?= $buku['total_proker'] ?> Agenda Program Kerja">
+                                <div class="w-6 h-6 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center text-[10px] flex-shrink-0">
                                     <i class="fa-solid fa-calendar-days"></i>
                                 </div>
-                                <span class="font-semibold text-slate-800"><?= $buku['total_proker'] ?></span>
-                                <span class="text-slate-400 text-[11px]">Agenda</span>
-                            </div>
-                            <div class="flex items-center gap-2 text-slate-600">
-                                <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px]">
-                                    <i class="fa-solid fa-handshake"></i>
+                                <div class="flex items-baseline gap-1 truncate">
+                                    <span class="font-bold text-slate-800"><?= $buku['total_proker'] ?></span>
+                                    <span class="text-slate-400 text-[11px]">Agenda</span>
                                 </div>
-                                <span class="font-semibold text-slate-800"><?= $buku['total_koordinasi'] ?></span>
-                                <span class="text-slate-400 text-[11px]">Laporan</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-slate-600" title="<?= $buku['total_laporan'] ?> Laporan LPJ Terisi (<?= $buku['total_lpj_unit'] ?? 0 ?> Unit, <?= $buku['total_lpj_kader'] ?? 0 ?> Kader)">
+                                <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] flex-shrink-0">
+                                    <i class="fa-solid fa-file-circle-check"></i>
+                                </div>
+                                <div class="flex items-baseline gap-1 truncate">
+                                    <span class="font-bold <?= ($buku['total_laporan'] ?? 0) > 0 ? 'text-emerald-700' : 'text-slate-800' ?>"><?= $buku['total_laporan'] ?? 0 ?></span>
+                                    <span class="text-slate-400 text-[11px]">Laporan</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -809,8 +813,8 @@
             </p>
             <ul class="text-[11px] text-rose-700 space-y-1 pl-4 list-disc">
                 <li><strong id="deleteBukuProkerCount">0</strong> agenda proker & kalender kegiatan</li>
-                <li><strong id="deleteBukuKoordinasiCount">0</strong> laporan hasil koordinasi</li>
-                <li>Target bulanan, capaian, & evaluasi terkait</li>
+                <li><strong id="deleteBukuLaporanCount">0</strong> laporan LPJ unit & kader</li>
+                <li>Target bulanan, capaian utama, evaluasi, & data terkait</li>
             </ul>
         </div>
 
@@ -840,11 +844,11 @@
         const bulan = btn.getAttribute('data-bulan');
         const tahun = btn.getAttribute('data-tahun');
         const proker = btn.getAttribute('data-proker') || '0';
-        const koordinasi = btn.getAttribute('data-koordinasi') || '0';
+        const laporan = btn.getAttribute('data-laporan') || '0';
 
         document.getElementById('deleteBukuLabel').textContent = 'Buku LPJ ' + bulan + ' ' + tahun;
         document.getElementById('deleteBukuProkerCount').textContent = proker;
-        document.getElementById('deleteBukuKoordinasiCount').textContent = koordinasi;
+        document.getElementById('deleteBukuLaporanCount').textContent = laporan;
         document.getElementById('formDeleteBuku').action = '<?= base_url('buku/delete/') ?>' + id;
         document.getElementById('delete_buku_password').value = '';
         document.getElementById('modalDeleteBuku').classList.remove('hidden');

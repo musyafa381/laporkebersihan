@@ -18,6 +18,8 @@ $routes->post('/buku/update-status/(:num)', 'Buku::updateStatus/$1');
 $routes->post('/buku/proker/store/(:num)', 'Buku::storeProker/$1');
 $routes->post('/buku/proker/update/(:num)', 'Buku::updateProker/$1');
 $routes->get('/buku/proker/delete/(:num)', 'Buku::deleteProker/$1');
+$routes->post('/buku/proker/copy/(:num)', 'Buku::copyProker/$1');
+$routes->post('/buku/proker/import-master/(:num)', 'Buku::importMasterProker/$1');
 $routes->post('/buku/target/store/(:num)', 'Buku::storeTarget/$1');
 $routes->get('/buku/target/delete/(:num)', 'Buku::deleteTarget/$1');
 $routes->post('/buku/capaian/store/(:num)', 'Buku::storeCapaian/$1');

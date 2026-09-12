@@ -380,7 +380,7 @@
 
             <!-- Tabel Agenda Proker (Right Card) -->
             <div class="<?= $canEditBuku ? 'lg:col-span-2' : 'lg:col-span-2' ?> glass-card rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-5">
-                <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
                             <i class="fa-solid fa-list-check text-base"></i>
@@ -391,10 +391,26 @@
                         </div>
                     </div>
 
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-extrabold border border-emerald-200/80">
-                        <i class="fa-solid fa-layer-group text-[10px] text-emerald-600"></i>
-                        <?= count($proker) ?> Agenda
-                    </span>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <?php if ($canEditBuku): ?>
+                            <?php if (!empty($allBukuList)): ?>
+                                <button type="button" onclick="openModalCopyProker()" class="py-1.5 px-3 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-700 font-heading font-extrabold text-[11px] transition border border-cyan-200/80 flex items-center gap-1.5 shadow-2xs" title="Salin seluruh agenda dari Buku LPJ periode lain">
+                                    <i class="fa-solid fa-copy text-xs"></i>
+                                    <span>Salin dari Buku Lain</span>
+                                </button>
+                            <?php endif; ?>
+                            <form action="<?= base_url('buku/proker/import-master/' . $buku['id']) ?>" method="POST" class="inline" onsubmit="return confirm('Impor seluruh program kerja dari modul Master Program Kerja ke Buku LPJ ini?');">
+                                <button type="submit" class="py-1.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-heading font-extrabold text-[11px] transition border border-emerald-200/80 flex items-center gap-1.5 shadow-2xs" title="Impor seluruh data dari Master Program Kerja">
+                                    <i class="fa-solid fa-bolt text-xs text-emerald-600"></i>
+                                    <span>Impor Master Proker</span>
+                                </button>
+                            </form>
+                        <?php endif; ?>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-extrabold border border-emerald-200/80">
+                            <i class="fa-solid fa-layer-group text-[10px] text-emerald-600"></i>
+                            <?= count($proker) ?> Agenda
+                        </span>
+                    </div>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -450,7 +466,7 @@
                                                             data-kategori="<?= esc($p['kategori_badge']) ?>" 
                                                             data-kegiatan="<?= esc($p['kegiatan']) ?>" 
                                                             data-keterangan="<?= esc($p['keterangan']) ?>" 
-                                                            class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white transition-all flex items-center justify-center text-xs shadow-2xs" 
+                                                            class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition-all flex items-center justify-center text-xs shadow-2xs" 
                                                             title="Edit Agenda">
                                                         <i class="fa-solid fa-pen-to-square"></i>
                                                     </button>
@@ -466,9 +482,30 @@
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="5" class="p-10 text-center text-slate-400 font-medium italic">
-                                        <i class="fa-solid fa-calendar-xmark text-2xl text-slate-300 mb-2 block"></i>
-                                        Belum ada agenda proker tersimpan.
+                                    <td colspan="5" class="p-8 text-center space-y-3">
+                                        <div class="w-12 h-12 mx-auto rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center text-xl">
+                                            <i class="fa-solid fa-calendar-xmark"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-heading font-bold text-sm text-slate-700">Belum ada agenda proker pada periode ini</p>
+                                            <p class="text-xs text-slate-400 mt-0.5">Tambah agenda baru di form sebelah kiri atau salin cepat dari periode sebelumnya.</p>
+                                        </div>
+                                        <?php if ($canEditBuku): ?>
+                                            <div class="flex flex-wrap items-center justify-center gap-2 pt-2">
+                                                <?php if (!empty($allBukuList)): ?>
+                                                    <button type="button" onclick="openModalCopyProker()" class="py-2 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-heading font-extrabold text-xs transition shadow-md shadow-cyan-600/20 flex items-center gap-1.5">
+                                                        <i class="fa-solid fa-copy"></i>
+                                                        <span>Salin dari Buku Lain</span>
+                                                    </button>
+                                                <?php endif; ?>
+                                                <form action="<?= base_url('buku/proker/import-master/' . $buku['id']) ?>" method="POST" class="inline" onsubmit="return confirm('Impor seluruh program kerja dari modul Master Program Kerja ke Buku LPJ ini?');">
+                                                    <button type="submit" class="py-2 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold text-xs transition shadow-md shadow-emerald-600/20 flex items-center gap-1.5">
+                                                        <i class="fa-solid fa-bolt"></i>
+                                                        <span>Impor dari Master Proker</span>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endif; ?>
@@ -2139,5 +2176,60 @@
         </div>
     </div>
 </div>
+
+<!-- Modal: Salin Proker dari Buku Lain -->
+<div id="modalCopyProker" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-7 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center">
+                    <i class="fa-solid fa-copy text-sm"></i>
+                </div>
+                <h3 class="font-heading font-bold text-lg text-slate-900">Salin Agenda dari Buku Lain</h3>
+            </div>
+            <button type="button" onclick="closeModalCopyProker()" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+
+        <p class="text-xs text-slate-500 leading-relaxed">
+            Pilih periode Buku LPJ yang ingin Anda salin agendanya ke Buku LPJ <strong><?= esc($buku['bulan']) ?> <?= esc($buku['tahun']) ?></strong>. Tanggal agenda akan disesuaikan secara otomatis ke bulan ini.
+        </p>
+
+        <form action="<?= base_url('buku/proker/copy/' . $buku['id']) ?>" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Pilih Buku LPJ Sumber</label>
+                <select name="source_buku_id" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-xs font-semibold bg-slate-50">
+                    <option value="">-- Pilih Buku Sumber --</option>
+                    <?php if (!empty($allBukuList)): ?>
+                        <?php foreach ($allBukuList as $ab): ?>
+                            <option value="<?= $ab['id'] ?>">Buku LPJ <?= esc($ab['bulan']) ?> <?= esc($ab['tahun']) ?> (<?= esc($ab['status']) ?>)</option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
+            </div>
+
+            <div class="pt-3 flex justify-end gap-2 border-t border-slate-100">
+                <button type="button" onclick="closeModalCopyProker()" class="px-5 py-2.5 rounded-xl text-slate-600 text-xs font-semibold hover:bg-slate-100">Batal</button>
+                <button type="submit" class="px-6 py-2.5 rounded-xl bg-cyan-600 text-white text-xs font-bold hover:bg-cyan-700 shadow-md shadow-cyan-500/20 flex items-center gap-2">
+                    <i class="fa-solid fa-copy text-[11px]"></i>
+                    <span>Salin Agenda Sekarang</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openModalCopyProker() {
+        const modal = document.getElementById('modalCopyProker');
+        if (modal) modal.classList.remove('hidden');
+    }
+    window.openModalCopyProker = openModalCopyProker;
+
+    function closeModalCopyProker() {
+        const modal = document.getElementById('modalCopyProker');
+        if (modal) modal.classList.add('hidden');
+    }
+    window.closeModalCopyProker = closeModalCopyProker;
+</script>
 
 <?= $this->endSection() ?>
