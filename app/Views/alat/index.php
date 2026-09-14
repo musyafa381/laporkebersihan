@@ -1,6 +1,12 @@
 <?= $this->extend('layout/main') ?>
 
 <?= $this->section('content') ?>
+<?php 
+    $userRole = session()->get('role');
+    $isAdmin = ($userRole === 'Admin');
+    $isLogistik = in_array($userRole, ['Petugas Logistik', 'Admin Logistik', 'Logistik']);
+    $canManageAlat = ($isAdmin || $isLogistik);
+?>
 <div class="space-y-6">
     <!-- Header & Metric Cards Banner -->
     <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white/90 backdrop-blur-xl space-y-6">
@@ -19,7 +25,7 @@
                 </p>
             </div>
 
-            <?php if (session()->get('role') === 'Admin'): ?>
+            <?php if ($canManageAlat): ?>
             <!-- Right Action Buttons -->
             <div class="flex flex-wrap items-center gap-2.5 self-start lg:self-center flex-shrink-0">
                 <button type="button" onclick="openModalTambahAlat()" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 transition shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 flex items-center gap-2">
@@ -160,7 +166,7 @@
                             <th width="7%" class="py-3.5 px-3 text-center">KELUAR</th>
                             <th width="11%" class="py-3.5 px-4 text-center">SISA GUDANG</th>
                             <th width="14%" class="py-3.5 px-4 text-center">KONDISI</th>
-                            <?php if (session()->get('role') === 'Admin'): ?>
+                            <?php if ($canManageAlat): ?>
                                 <th width="8%" class="py-3.5 px-3 text-center">AKSI</th>
                             <?php endif; ?>
                         </tr>
@@ -235,7 +241,7 @@
                                             </span>
                                         <?php endif; ?>
                                     </td>
-                                    <?php if (session()->get('role') === 'Admin'): ?>
+                                    <?php if ($canManageAlat): ?>
                                     <td class="py-3.5 px-3 text-center">
                                         <div class="flex items-center justify-center gap-1.5">
                                             <button type="button" onclick="openModalEditAlat(<?= htmlspecialchars(json_encode($a)) ?>)" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 flex items-center justify-center transition shadow-2xs" title="Edit Alat">
@@ -284,7 +290,7 @@
                     </h3>
                     <p class="text-xs text-slate-500 font-medium">Pencatatan alat kebersihan yang didistribusikan kepada kader / pengurus unit.</p>
                 </div>
-                <?php if (session()->get('role') === 'Admin'): ?>
+                <?php if ($canManageAlat): ?>
                 <button type="button" onclick="openModalCatatKeluar()" class="px-4 py-2 rounded-2xl bg-rose-600 text-white font-extrabold text-xs hover:bg-rose-700 transition shadow-md shadow-rose-600/20 flex items-center gap-2">
                     <i class="fa-solid fa-plus"></i>
                     <span>Catat Barang Keluar</span>
@@ -303,7 +309,7 @@
                             <th width="16%" class="py-3 px-4">DIBERIKAN KEPADA</th>
                             <th width="16%" class="py-3 px-4">UNIT / PERUNTUKAN</th>
                             <th width="15%" class="py-3 px-4">KETERANGAN / SUMBER</th>
-                            <?php if (session()->get('role') === 'Admin'): ?>
+                            <?php if ($canManageAlat): ?>
                                 <th width="8%" class="py-3 px-3 text-center">AKSI</th>
                             <?php endif; ?>
                         </tr>
@@ -339,7 +345,7 @@
                                             <span class="text-slate-500 font-medium text-xs"><?= esc($tk['keterangan'] ?: '-') ?></span>
                                         <?php endif; ?>
                                     </td>
-                                    <?php if (session()->get('role') === 'Admin'): ?>
+                                    <?php if ($canManageAlat): ?>
                                     <td class="py-3 px-3 text-center">
                                         <a href="<?= base_url('alat/transaksi/delete/' . $tk['id']) ?>" data-confirm-msg="Hapus riwayat barang keluar ini dan kembalikan stok?" class="w-7 h-7 rounded-xl bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition mx-auto" title="Hapus Riwayat">
                                             <i class="fa-solid fa-trash text-xs"></i>
@@ -383,7 +389,7 @@
                     </h3>
                     <p class="text-xs text-slate-500 font-medium">Pencatatan pembelian baru, pasokan, atau hibah alat ke gudang K3L.</p>
                 </div>
-                <?php if (session()->get('role') === 'Admin'): ?>
+                <?php if ($canManageAlat): ?>
                 <button type="button" onclick="openModalCatatMasuk()" class="px-4 py-2 rounded-2xl bg-blue-600 text-white font-extrabold text-xs hover:bg-blue-700 transition shadow-md shadow-blue-600/20 flex items-center gap-2">
                     <i class="fa-solid fa-plus"></i>
                     <span>Catat Barang Masuk</span>
@@ -401,7 +407,7 @@
                             <th width="12%" class="py-3 px-3 text-center">JUMLAH MASUK</th>
                             <th width="20%" class="py-3 px-4">SUMBER / SUPPLIER</th>
                             <th width="18%" class="py-3 px-4">KETERANGAN</th>
-                            <?php if (session()->get('role') === 'Admin'): ?>
+                            <?php if ($canManageAlat): ?>
                                 <th width="8%" class="py-3 px-3 text-center">AKSI</th>
                             <?php endif; ?>
                         </tr>
@@ -425,7 +431,7 @@
                                         <i class="fa-solid fa-store text-slate-400 mr-1.5"></i><?= esc($tm['penerima_penyerah'] ?: '-') ?>
                                     </td>
                                     <td class="py-3 px-4 text-slate-600"><?= esc($tm['keterangan'] ?: '-') ?></td>
-                                    <?php if (session()->get('role') === 'Admin'): ?>
+                                    <?php if ($canManageAlat): ?>
                                     <td class="py-3 px-3 text-center">
                                         <a href="<?= base_url('alat/transaksi/delete/' . $tm['id']) ?>" data-confirm-msg="Hapus riwayat barang masuk ini?" class="w-7 h-7 rounded-xl bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition mx-auto" title="Hapus Riwayat">
                                             <i class="fa-solid fa-trash text-xs"></i>
@@ -638,49 +644,52 @@
 
         <form action="<?= base_url('alat/transaksi/store') ?>" method="POST" class="space-y-3">
             <input type="hidden" name="jenis_transaksi" value="Keluar">
+            <input type="hidden" name="pengajuan_id" id="keluar_pengajuan_id" value="">
 
-            <?php if (!empty($pengajuanDisetujui)): ?>
-            <!-- Quick Picker: Tarik Dari Pengajuan Disetujui (Searchable) -->
-            <div class="p-2.5 rounded-2xl bg-emerald-50/90 border border-emerald-200/90 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <label class="text-[11px] font-extrabold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5 flex-shrink-0">
-                    <i class="fa-solid fa-wand-magic-sparkles text-emerald-600"></i>
+            <!-- Quick Picker: Tarik Dari Pengajuan Pending (Searchable) -->
+            <?php 
+            $listPengajuan = !empty($pengajuanPending) ? $pengajuanPending : (!empty($pengajuanDisetujui) ? $pengajuanDisetujui : []);
+            ?>
+            <div id="quickPickerPengajuanWrapper" class="p-2.5 rounded-2xl bg-amber-50/90 border border-amber-200/90 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 <?= empty($listPengajuan) ? 'hidden' : '' ?>">
+                <label class="text-[11px] font-extrabold text-amber-950 uppercase tracking-wider flex items-center gap-1.5 flex-shrink-0">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-600"></i>
                     <span>Tarik Dari Pengajuan:</span>
                 </label>
                 <div class="relative w-full">
                     <div class="relative">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600 text-xs pointer-events-none"></i>
-                        <input type="text" id="pengajuan_search_input" placeholder="Cari No. REQ / Nama Pemohon / Unit Asrama..." autocomplete="off" onfocus="openPengajuanDropdown()" oninput="filterPengajuanOptions(this.value)" class="w-full pl-8 pr-8 py-1.5 rounded-xl border border-emerald-300 text-xs font-bold bg-white text-slate-800 focus:ring-2 focus:ring-emerald-500 transition shadow-2xs placeholder-slate-400 cursor-pointer">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-amber-600 text-xs pointer-events-none"></i>
+                        <input type="text" id="pengajuan_search_input" placeholder="Cari No. REQ / Nama Pemohon / Unit Asrama..." autocomplete="off" onfocus="openPengajuanDropdown()" oninput="filterPengajuanOptions(this.value)" class="w-full pl-8 pr-8 py-1.5 rounded-xl border border-amber-300 text-xs font-bold bg-white text-slate-800 focus:ring-2 focus:ring-amber-500 transition shadow-2xs placeholder-slate-400 cursor-pointer">
                         <button type="button" onclick="togglePengajuanDropdown()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
                             <i id="pengajuanDropdownIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
                         </button>
                     </div>
-                    <!-- Dropdown List of Approved Requests -->
-                    <div id="pengajuanDropdownList" class="absolute left-0 right-0 top-full mt-1 bg-white rounded-2xl shadow-2xl border border-emerald-200 max-h-48 overflow-y-auto z-50 hidden divide-y divide-slate-100">
-                        <?php foreach ($pengajuanDisetujui as $p): ?>
-                            <div class="pengajuan-item px-3.5 py-2 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $p['id'] ?>" data-text="<?= strtolower(esc(($p['kode_pengajuan'] ?? '') . ' ' . ($p['nama_unit'] ?? '') . ' ' . ($p['nama_lengkap'] ?? ''))) ?>" onclick="selectSearchablePengajuan(<?= $p['id'] ?>, '<?= esc($p['kode_pengajuan'] ?? 'REQ') ?> • <?= esc($p['nama_unit'] ?? 'Unit') ?> • <?= esc($p['nama_lengkap'] ?? '') ?>')">
+                    <!-- Dropdown List of Pending Requests -->
+                    <div id="pengajuanDropdownList" class="absolute left-0 right-0 top-full mt-1 bg-white rounded-2xl shadow-2xl border border-amber-200 max-h-48 overflow-y-auto z-50 hidden divide-y divide-slate-100">
+                        <?php foreach ($listPengajuan as $p): ?>
+                            <div class="pengajuan-item px-3.5 py-2 hover:bg-amber-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $p['id'] ?>" data-text="<?= strtolower(esc(($p['kode_pengajuan'] ?? '') . ' ' . ($p['nama_unit'] ?? '') . ' ' . ($p['nama_lengkap'] ?? ''))) ?>" onclick="selectSearchablePengajuan(<?= $p['id'] ?>)">
                                 <div>
                                     <div class="font-extrabold text-xs text-slate-900 flex items-center gap-1.5">
-                                        <span class="px-1.5 py-0.5 rounded bg-emerald-100/80 text-emerald-900 font-mono font-bold text-[10.5px]"><?= esc($p['kode_pengajuan'] ?? 'REQ') ?></span>
+                                        <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono font-bold text-[10.5px]"><?= esc($p['kode_pengajuan'] ?? 'REQ') ?></span>
                                         <span><?= esc($p['nama_unit'] ?? 'Unit') ?></span>
+                                        <span class="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">Pending</span>
                                     </div>
                                     <div class="text-[10px] text-slate-500 font-medium mt-0.5">
-                                        Pemohon: <span class="font-bold text-slate-700"><?= esc($p['nama_lengkap'] ?? 'Santri') ?></span> &bull; <span class="text-emerald-700 font-bold"><?= count($p['items'] ?? []) ?> Jenis Alat</span>
+                                        Pemohon: <span class="font-bold text-slate-700"><?= esc($p['nama_lengkap'] ?? 'Santri') ?></span> &bull; <span class="text-amber-700 font-bold"><?= count($p['items'] ?? []) ?> Jenis Alat</span>
                                     </div>
                                 </div>
                                 <div class="text-right flex-shrink-0">
-                                    <span class="px-2 py-0.5 rounded-full text-[9.5px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="px-2 py-0.5 rounded-full text-[9.5px] font-extrabold bg-amber-500 text-white shadow-2xs hover:bg-amber-600 transition">
                                         Pilih
                                     </span>
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                        <div id="noPengajuanFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">
-                            Tidak ditemukan pengajuan yang cocok.
+                        <div id="noPengajuanFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium <?= empty($listPengajuan) ? '' : 'hidden' ?>">
+                            Tidak ditemukan pengajuan pending yang cocok.
                         </div>
                     </div>
                 </div>
             </div>
-            <?php endif; ?>
 
             <!-- Distribution Info (3 Cols Compact) -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
@@ -1160,7 +1169,8 @@
         document.getElementById('btnSubmitKategori').innerHTML = '<i class="fa-solid fa-save"></i><span>Simpan Kategori</span>';
         document.getElementById('btnCancelEditKategori').classList.add('hidden');
     }
-    window.pengajuanDisetujuiData = <?= json_encode($pengajuanDisetujui ?? []) ?>;
+    window.pengajuanPendingData = <?= json_encode($pengajuanPending ?? ($pengajuanDisetujui ?? [])) ?>;
+    window.pengajuanDisetujuiData = window.pengajuanPendingData;
     window.alatMasterData = <?= json_encode(array_map(function($a) {
         return [
             'id'        => (int)$a['id'],
@@ -1275,8 +1285,12 @@
 
     function applyPengajuanToMultiKeluar(pengajuanId) {
         if (!pengajuanId) return;
-        const pengajuan = window.pengajuanDisetujuiData.find(p => String(p.id) === String(pengajuanId));
+        const dataList = window.pengajuanPendingData || window.pengajuanDisetujuiData || [];
+        const pengajuan = dataList.find(p => String(p.id) === String(pengajuanId));
         if (!pengajuan) return;
+
+        const pIdInput = document.getElementById('keluar_pengajuan_id');
+        if (pIdInput) pIdInput.value = pengajuan.id;
 
         if (document.getElementById('keluar_penerima')) {
             document.getElementById('keluar_penerima').value = pengajuan.nama_lengkap || 'Pengurus Unit';
@@ -1294,8 +1308,8 @@
             container.innerHTML = '';
             if (pengajuan.items && pengajuan.items.length > 0) {
                 pengajuan.items.forEach(it => {
-                    const jSetuju = (it.jumlah_setuju !== null && it.jumlah_setuju !== undefined) ? it.jumlah_setuju : it.jumlah_minta;
-                    addMultiKeluarRow(it.alat_id, Math.max(1, parseInt(jSetuju) || 1));
+                    const jMinta = (it.jumlah_minta !== null && it.jumlah_minta !== undefined) ? it.jumlah_minta : (it.jumlah_setuju ?? 1);
+                    addMultiKeluarRow(it.alat_id, Math.max(1, parseInt(jMinta) || 1));
                 });
             } else {
                 addMultiKeluarRow();
@@ -1311,6 +1325,9 @@
             const container = document.getElementById('multiKeluarItemsContainer');
             if (container && container.children.length === 0) {
                 addMultiKeluarRow();
+            }
+            if (typeof refreshPendingPengajuanList === 'function') {
+                refreshPendingPengajuanList();
             }
         }
     }
@@ -1460,8 +1477,78 @@
         if (icon) icon.classList.remove('rotate-180');
     }
 
-    // Searchable Tarik Pengajuan Logic
+    // Searchable Tarik Pengajuan Logic (Real-time dynamic refresh)
+    async function refreshPendingPengajuanList() {
+        try {
+            const res = await fetch("<?= base_url('alat/pending-pengajuan') ?>");
+            const result = await res.json();
+            if (result && result.status === 'success' && Array.isArray(result.data)) {
+                window.pengajuanPendingData = result.data;
+                window.pengajuanDisetujuiData = result.data;
+                renderPengajuanDropdownItems(result.data);
+                
+                const wrapper = document.getElementById('quickPickerPengajuanWrapper');
+                if (wrapper) {
+                    if (result.data.length > 0) {
+                        wrapper.classList.remove('hidden');
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('Failed to refresh pending pengajuan:', err);
+        }
+    }
+    window.refreshPendingPengajuanList = refreshPendingPengajuanList;
+
+    function renderPengajuanDropdownItems(list) {
+        const dd = document.getElementById('pengajuanDropdownList');
+        if (!dd) return;
+
+        if (!list || list.length === 0) {
+            dd.innerHTML = `<div class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium">Tidak ada pengajuan pending saat ini.</div>`;
+            return;
+        }
+
+        let html = '';
+        list.forEach(p => {
+            const kode = p.kode_pengajuan || 'REQ';
+            const unit = p.nama_unit || 'Unit';
+            const pemohon = p.nama_lengkap || 'Santri';
+            const countItems = (p.items || []).length;
+            const searchLabel = `${kode} • ${unit} • ${pemohon}`;
+            const searchText = `${kode} ${unit} ${pemohon}`.toLowerCase();
+
+            html += `
+                <div class="pengajuan-item px-3.5 py-2 hover:bg-amber-50 transition flex items-center justify-between cursor-pointer" 
+                     data-id="${p.id}" 
+                     data-text="${searchText}" 
+                     onclick="selectSearchablePengajuan(${p.id})">
+                    <div>
+                        <div class="font-extrabold text-xs text-slate-900 flex items-center gap-1.5">
+                            <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono font-bold text-[10.5px]">${kode}</span>
+                            <span>${unit}</span>
+                            <span class="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">Pending</span>
+                        </div>
+                        <div class="text-[10px] text-slate-500 font-medium mt-0.5">
+                            Pemohon: <span class="font-bold text-slate-700">${pemohon}</span> &bull; <span class="text-amber-700 font-bold">${countItems} Jenis Alat</span>
+                        </div>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <span class="px-2 py-0.5 rounded-full text-[9.5px] font-extrabold bg-amber-500 text-white shadow-2xs hover:bg-amber-600 transition">
+                            Pilih
+                        </span>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `<div id="noPengajuanFound" class="px-4 py-3 text-center text-slate-400 text-xs italic font-medium hidden">Tidak ditemukan pengajuan pending yang cocok.</div>`;
+        dd.innerHTML = html;
+    }
+    window.renderPengajuanDropdownItems = renderPengajuanDropdownItems;
+
     function openPengajuanDropdown() {
+        refreshPendingPengajuanList();
         const dd = document.getElementById('pengajuanDropdownList');
         const icon = document.getElementById('pengajuanDropdownIcon');
         if (dd) dd.classList.remove('hidden');
@@ -1473,14 +1560,23 @@
         const dd = document.getElementById('pengajuanDropdownList');
         const icon = document.getElementById('pengajuanDropdownIcon');
         if (dd) {
-            dd.classList.toggle('hidden');
-            if (icon) icon.classList.toggle('rotate-180', !dd.classList.contains('hidden'));
+            const isHidden = dd.classList.contains('hidden');
+            if (isHidden) {
+                openPengajuanDropdown();
+            } else {
+                dd.classList.add('hidden');
+                if (icon) icon.classList.remove('rotate-180');
+            }
         }
     }
     window.togglePengajuanDropdown = togglePengajuanDropdown;
 
     function filterPengajuanOptions(query) {
-        openPengajuanDropdown();
+        const dd = document.getElementById('pengajuanDropdownList');
+        const icon = document.getElementById('pengajuanDropdownIcon');
+        if (dd) dd.classList.remove('hidden');
+        if (icon) icon.classList.add('rotate-180');
+
         query = (query || '').toLowerCase().trim();
         const items = document.querySelectorAll('.pengajuan-item');
         let found = 0;
@@ -1498,9 +1594,14 @@
     }
     window.filterPengajuanOptions = filterPengajuanOptions;
 
-    function selectSearchablePengajuan(id, label) {
+    function selectSearchablePengajuan(id, label = '') {
+        const dataList = window.pengajuanPendingData || window.pengajuanDisetujuiData || [];
+        const p = dataList.find(item => String(item.id) === String(id));
+        if (p) {
+            label = `${p.kode_pengajuan || 'REQ'} • ${p.nama_unit || 'Unit'} • ${p.nama_lengkap || ''}`;
+        }
         const input = document.getElementById('pengajuan_search_input');
-        if (input) input.value = label;
+        if (input && label) input.value = label;
         applyPengajuanToMultiKeluar(id);
         const dd = document.getElementById('pengajuanDropdownList');
         const icon = document.getElementById('pengajuanDropdownIcon');

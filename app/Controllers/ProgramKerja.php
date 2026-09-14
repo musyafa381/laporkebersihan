@@ -319,32 +319,6 @@ class ProgramKerja extends BaseController
 
         $insertedId = $this->prokerModel->insert($data);
 
-        // Also insert into proker_agenda for the matching Buku LPJ so it appears in LPJ immediately
-        if ($bukuLpjId) {
-            $agendaModel = new \App\Models\ProkerAgendaModel();
-            $kategoriBadge = 'Koordinasi PJ';
-            if ($kaderType === 'GEMERLAP' || $kaderType === 'Satgas') {
-                $kategoriBadge = 'Koordinasi Kader';
-            } elseif (stripos($namaProgram, 'sowan') !== false) {
-                $kategoriBadge = 'Koordinasi Sowan';
-            }
-
-            $existingAgenda = $agendaModel
-                ->where('buku_id', $bukuLpjId)
-                ->where('kegiatan', $namaProgram)
-                ->first();
-
-            if (!$existingAgenda) {
-                $agendaModel->insert([
-                    'buku_id'        => $bukuLpjId,
-                    'tanggal'        => $tglMulai,
-                    'kegiatan'       => $namaProgram,
-                    'keterangan'     => $tujuan ?: $subKegiatan,
-                    'kategori_badge' => $kategoriBadge,
-                ]);
-            }
-        }
-
         return $this->respondJsonOrRedirect('Program kerja berhasil ditambahkan ke buku program!');
     }
 
@@ -420,23 +394,6 @@ class ProgramKerja extends BaseController
 
         $this->prokerModel->update($id, $data);
 
-        // Keep linked proker_agenda in sync
-        if ($bukuLpjId) {
-            $agendaModel = new \App\Models\ProkerAgendaModel();
-            $existingAgenda = $agendaModel
-                ->where('buku_id', $bukuLpjId)
-                ->where('kegiatan', $oldNama)
-                ->first();
-
-            if ($existingAgenda) {
-                $agendaModel->update($existingAgenda['id'], [
-                    'kegiatan'   => $namaProgram,
-                    'tanggal'    => $tglMulai,
-                    'keterangan' => $tujuan ?: $subKegiatan,
-                ]);
-            }
-        }
-
         return $this->respondJsonOrRedirect('Program kerja berhasil diperbarui!');
     }
 
@@ -474,15 +431,6 @@ class ProgramKerja extends BaseController
                     @unlink(FCPATH . 'uploads/proker/' . basename($itemFile));
                 }
             }
-        }
-
-        // Also clean up linked proker_agenda if linked
-        if (!empty($proker['buku_lpj_id'])) {
-            $agendaModel = new \App\Models\ProkerAgendaModel();
-            $agendaModel
-                ->where('buku_id', $proker['buku_lpj_id'])
-                ->where('kegiatan', $proker['nama_program'])
-                ->delete();
         }
 
         $this->prokerModel->delete($id);
@@ -641,48 +589,4 @@ class ProgramKerja extends BaseController
         return $this->respondJsonOrRedirect('Foto dokumentasi berhasil dihapus!');
     }
 
-    // Fitur Import / Sinkronisasi Cepat dari LPJ Bulanan
-    public function syncFromLpj($bukuId)
-    {
-        $session = session();
-        if (!$session->get('isLoggedIn') || !in_array($session->get('role'), ['Admin', 'Auditor'])) {
-            return $this->respondJsonOrRedirect('Akses ditolak.', false);
-        }
-
-        $agendaModel = new \App\Models\ProkerAgendaModel();
-        $agendas = $agendaModel->where('buku_id', $bukuId)->findAll();
-
-        if (empty($agendas)) {
-            return $this->respondJsonOrRedirect('Tidak ada data agenda/proker pada buku LPJ tersebut.', false);
-        }
-
-        // Cari unit default (atau Posko Gemerlap)
-        $defaultUnit = $this->unitModel->first();
-        $importedCount = 0;
-
-        foreach ($agendas as $ag) {
-            $existing = $this->prokerModel
-                ->where('nama_program', $ag['kegiatan'])
-                ->where('buku_lpj_id', $bukuId)
-                ->first();
-
-            if (!$existing) {
-                $this->prokerModel->insert([
-                    'unit_id'           => $defaultUnit['id'] ?? null,
-                    'kader_type'        => 'Non-Kader',
-                    'nama_program'      => $ag['kegiatan'],
-                    'sub_kegiatan'      => 'Imported dari LPJ Bulanan',
-                    'tgl_mulai'         => $ag['tanggal'] ?? date('Y-m-d'),
-                    'periode_frekuensi' => 'Bulanan',
-                    'tujuan_program'    => $ag['keterangan'] ?? 'Program kerja tersinkronisasi dari lembar LPJ bulanan.',
-                    'status'            => 'Terlaksana Rutin',
-                    'sumber_input'      => 'LPJ Bulanan',
-                    'buku_lpj_id'       => $bukuId,
-                ]);
-                $importedCount++;
-            }
-        }
-
-        return $this->respondJsonOrRedirect("Berhasil mengimpor {$importedCount} program kerja dari Buku LPJ!");
-    }
 }

@@ -532,24 +532,43 @@
         $isWilayahActive    = (strpos($uriStr, 'wilayah') !== false && strpos($uriStr, 'app/lapor-wilayah') === false && strpos($uriStr, 'app/wilayah-tugas') === false);
         $isPengaturanActive = (strpos($uriStr, 'pengaturan') !== false);
         $isProfilActive     = (strpos($uriStr, 'profil') !== false || strpos($uriStr, 'akun') !== false);
-        $isCsActive         = (strpos($uriStr, 'cs') !== false && strpos($uriStr, 'app/laporan-kebersihan') === false);
+        $isLacakActive      = (strpos($uriStr, 'lacak') !== false);
+        $isCsActive         = (strpos($uriStr, 'cs') !== false && strpos($uriStr, 'app/laporan-kebersihan') === false && !$isLacakActive);
         $isFaqActive        = (strpos($uriStr, 'faq') !== false || strpos($uriStr, 'bantuan') !== false);
         $isStrukturActive   = (strpos($uriStr, 'struktur') !== false);
         $isSopActive        = (strpos($uriStr, 'sop') !== false);
         $isProkerActive     = (strpos($uriStr, 'program-kerja') !== false || strpos($uriStr, 'proker') !== false);
 
-        $isLoggedIn          = session()->get('isLoggedIn');
-        $userRole            = session()->get('role');
-        $isAuditor           = ($userRole === 'Auditor');
-        $isAdmin             = ($userRole === 'Admin');
-        $isUserAdminOrAuditor = $isLoggedIn && in_array($userRole, ['Admin', 'Auditor']);
-        $isUserPengurusOrKader = $isLoggedIn && in_array($userRole, ['Pengurus', 'Kader']);
+        $isLoggedIn = (bool)session()->get('isLoggedIn');
+        $userRole   = trim((string)session()->get('role'));
+        $userId     = session()->get('userId') ?? session()->get('user_id');
+
+        // Realtime DB role sync if logged in (in case role was updated in DB while session is active)
+        if ($isLoggedIn && $userId) {
+            $db = \Config\Database::connect();
+            $dbUser = $db->table('users')->where('id', $userId)->get()->getRowArray();
+            if ($dbUser && !empty($dbUser['role'])) {
+                $userRole = trim((string)$dbUser['role']);
+                if ($userRole !== session()->get('role')) {
+                    session()->set('role', $userRole);
+                }
+            }
+        }
+
+        $roleLower  = strtolower($userRole);
+        $isAuditor  = ($roleLower === 'auditor');
+        $isAdmin    = ($roleLower === 'admin');
+        $isLogistik = in_array($roleLower, ['petugas logistik', 'admin logistik', 'logistik', 'petugas_logistik', 'admin_logistik']);
+        $isUserAdminOrAuditor  = $isLoggedIn && in_array($roleLower, ['admin', 'auditor']);
+        $isUserPengurusOrKader = $isLoggedIn && in_array($roleLower, ['pengurus', 'kader']);
 
         // Set isDrawerActive only for subpages that live inside the drawer and not in the 4 bottom tabs
-        if ($isUserAdminOrAuditor) {
-            $isDrawerActive = ($isPengaturanActive || $isProfilActive || $isStrukturActive || $isFaqActive || $isSopActive || $isCsActive || $isProkerActive);
+        if ($isLogistik) {
+            $isDrawerActive = ($isProfilActive);
+        } elseif ($isUserAdminOrAuditor) {
+            $isDrawerActive = ($isPengaturanActive || $isProfilActive || $isStrukturActive || $isFaqActive || $isSopActive || $isCsActive || $isProkerActive || $isLacakActive);
         } elseif ($isUserPengurusOrKader) {
-            $isDrawerActive = ($isAppAlatActive || $isAppLaporActive || $isStrukturActive || $isFaqActive || $isSopActive || $isProkerActive);
+            $isDrawerActive = ($isAppAlatActive || $isAppLaporActive || $isStrukturActive || $isFaqActive || $isSopActive || $isProkerActive || $isLacakActive);
         } else {
             // Public: only active on items inside drawer (Struktur, FAQ, Login)
             $isDrawerActive = ($isStrukturActive || $isFaqActive || $isLoginActive);
@@ -590,7 +609,36 @@
         $waCsMessage = "Halo Admin Kebersihan K3L, saya ingin berkonsultasi / membutuhkan bantuan terkait kebersihan.";
         $waCsUrl = "https://api.whatsapp.com/send?phone=" . $cleanWaNumber . "&text=" . urlencode($waCsMessage);
 
-        if ($isUserAdminOrAuditor) {
+        if ($isLogistik) {
+            // Mode Logistik: Khusus Beranda, Data Alat Kebersihan, dan Pengajuan Alat (CS)
+            $navGroups = [
+                [
+                    'type'        => 'link',
+                    'url'         => base_url('/'),
+                    'icon'        => 'fa-solid fa-house',
+                    'label'       => 'Beranda',
+                    'short_label' => 'Beranda',
+                    'active'      => $isHomeActive,
+                ],
+                [
+                    'type'        => 'link',
+                    'url'         => base_url('alat'),
+                    'icon'        => 'fa-solid fa-broom-ball',
+                    'label'       => 'Data Alat Kebersihan',
+                    'short_label' => 'Alat',
+                    'active'      => $isAlatActive,
+                ],
+                [
+                    'type'        => 'link',
+                    'url'         => base_url('cs'),
+                    'icon'        => 'fa-solid fa-box-open',
+                    'label'       => 'Pengajuan Alat',
+                    'short_label' => 'Pengajuan',
+                    'badge'       => $notifAlatCount,
+                    'active'      => $isCsActive,
+                ],
+            ];
+        } elseif ($isUserAdminOrAuditor) {
             // Mode 1: Admin & Auditor Grouped Navigation
             $navGroups = [
                 [
@@ -684,6 +732,13 @@
                             'label'  => 'FAQ & Panduan Alur',
                             'desc'   => 'Panduan alur modul & tanya jawab',
                             'active' => $isFaqActive,
+                        ],
+                        [
+                            'url'    => base_url('lacak'),
+                            'icon'   => 'fa-solid fa-magnifying-glass-location',
+                            'label'  => 'Lacak Pengaduan',
+                            'desc'   => 'Cek status tiket pengaduan publik',
+                            'active' => $isLacakActive,
                         ],
                         [
                             'url'    => base_url('cs'),
@@ -786,6 +841,13 @@
                             'desc'   => 'Panduan alur sistem & tanya jawab',
                             'active' => $isFaqActive,
                         ],
+                        [
+                            'url'    => base_url('lacak'),
+                            'icon'   => 'fa-solid fa-magnifying-glass-location',
+                            'label'  => 'Lacak Pengaduan',
+                            'desc'   => 'Cek status tiket pengaduan publik',
+                            'active' => $isLacakActive,
+                        ],
                     ]
                 ]
             ];
@@ -836,6 +898,14 @@
                             'active' => $isFaqActive,
                         ],
                     ]
+                ],
+                [
+                    'type'        => 'link',
+                    'url'         => base_url('lacak'),
+                    'icon'        => 'fa-solid fa-magnifying-glass-location',
+                    'label'       => 'Lacak Laporan',
+                    'short_label' => 'Lacak',
+                    'active'      => $isLacakActive,
                 ],
                 [
                     'type'        => 'link',
@@ -941,7 +1011,7 @@
                                 </div>
                                 <div class="text-left hidden 2xl:flex flex-col justify-center leading-tight">
                                     <span class="font-heading font-extrabold text-[11px] text-slate-800 truncate max-w-[110px] leading-tight"><?= esc(session()->get('nama_lengkap')) ?></span>
-                                    <span class="text-[9px] font-bold leading-tight mt-0.5 <?= session()->get('role') === 'Admin' ? 'text-emerald-700' : (session()->get('role') === 'Auditor' ? 'text-blue-700' : 'text-purple-700') ?>">
+                                    <span class="text-[9px] font-bold leading-tight mt-0.5 <?= session()->get('role') === 'Admin' ? 'text-emerald-700' : (session()->get('role') === 'Auditor' ? 'text-blue-700' : ($isLogistik ? 'text-amber-700' : 'text-purple-700')) ?>">
                                         <?= esc(session()->get('role')) ?>
                                     </span>
                                 </div>
@@ -959,7 +1029,7 @@
                                             <div class="flex-1 min-w-0">
                                                 <p class="font-heading font-extrabold text-xs text-slate-900 truncate leading-tight"><?= esc(session()->get('nama_lengkap')) ?></p>
                                                 <div class="flex items-center gap-1 mt-1 flex-wrap">
-                                                    <span class="text-[9px] px-1.5 py-0.5 rounded-md font-extrabold uppercase tracking-wider <?= session()->get('role') === 'Admin' ? 'bg-emerald-100 text-emerald-800' : (session()->get('role') === 'Auditor' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800') ?>">
+                                                    <span class="text-[9px] px-1.5 py-0.5 rounded-md font-extrabold uppercase tracking-wider <?= session()->get('role') === 'Admin' ? 'bg-emerald-100 text-emerald-800' : (session()->get('role') === 'Auditor' ? 'bg-blue-100 text-blue-800' : ($isLogistik ? 'bg-amber-100 text-amber-800' : 'bg-purple-100 text-purple-800')) ?>">
                                                         <?= esc(session()->get('role')) ?>
                                                     </span>
                                                     <?php if (session()->get('role') === 'Auditor'): ?>
@@ -989,6 +1059,13 @@
                                                 <i class="fa-solid fa-user-gear"></i>
                                             </div>
                                             <span class="text-xs font-heading <?= $isProfilActive ? 'font-extrabold text-emerald-900' : 'font-bold text-slate-800' ?> truncate">Kelola Akun & Profil</span>
+                                        </a>
+                                    <?php elseif ($isLogistik): ?>
+                                        <a href="<?= base_url('profil') ?>" class="group/item flex items-center gap-2.5 p-2 rounded-xl transition duration-150 <?= $isProfilActive ? 'bg-emerald-50 text-emerald-800 font-extrabold border border-emerald-200/60 shadow-xs' : 'text-slate-700 hover:bg-slate-100/80 hover:text-emerald-700' ?>">
+                                            <div class="w-7 h-7 rounded-lg <?= $isProfilActive ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 group-hover/item:bg-emerald-100 group-hover/item:text-emerald-700' ?> flex items-center justify-center text-xs flex-shrink-0">
+                                                <i class="fa-solid fa-user-gear"></i>
+                                            </div>
+                                            <span class="text-xs font-heading <?= $isProfilActive ? 'font-extrabold text-emerald-900' : 'font-bold text-slate-800' ?> truncate">Profil Saya</span>
                                         </a>
                                     <?php else: ?>
                                         <a href="<?= base_url('app') ?>" class="group/item flex items-center gap-2.5 p-2 rounded-xl transition duration-150 <?= $isAppActive ? 'bg-emerald-50 text-emerald-800 font-extrabold border border-emerald-200/60 shadow-xs' : 'text-slate-700 hover:bg-slate-100/80 hover:text-emerald-700' ?>">
@@ -1085,7 +1162,7 @@
                         <div class="min-w-0 flex-1">
                             <div class="font-heading font-extrabold text-xs text-slate-900 truncate"><?= esc(session()->get('nama_lengkap')) ?></div>
                             <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                                <span class="inline-block text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider <?= session()->get('role') === 'Admin' ? 'bg-emerald-100 text-emerald-800' : (session()->get('role') === 'Auditor' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800') ?>">
+                                <span class="inline-block text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider <?= session()->get('role') === 'Admin' ? 'bg-emerald-100 text-emerald-800' : (session()->get('role') === 'Auditor' ? 'bg-blue-100 text-blue-800' : ($isLogistik ? 'bg-amber-100 text-amber-800' : 'bg-purple-100 text-purple-800')) ?>">
                                     <?= esc(session()->get('role')) ?>
                                 </span>
                                 <?php if (session()->get('nama_unit')): ?>
@@ -1204,6 +1281,24 @@
                                             <i class="fa-solid fa-user-gear"></i>
                                         </div>
                                         <span class="text-xs font-heading <?= $isProfilActive ? 'font-black text-white' : 'font-extrabold text-slate-800 group-hover:text-emerald-800' ?>">Kelola Akun & Profil</span>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-[9px] transition-transform group-hover:translate-x-0.5 <?= $isProfilActive ? 'text-white/80' : 'text-slate-300 group-hover:text-emerald-600' ?>"></i>
+                                </a>
+                            </div>
+                        </div>
+                    <?php elseif ($isLogistik): ?>
+                        <div class="space-y-1 pt-1">
+                            <div class="px-2 pt-1 pb-0.5 flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-wider text-slate-400">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                Akun & Profil
+                            </div>
+                            <div class="space-y-0.5">
+                                <a href="<?= base_url('profil') ?>" onclick="toggleMobileDrawer(false)" class="flex items-center justify-between p-2 rounded-2xl transition-all duration-200 group <?= $isProfilActive ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/25' : 'hover:bg-slate-100/80 text-slate-700' ?>">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs border transition-transform group-hover:scale-105 <?= $isProfilActive ? 'bg-white text-emerald-700 border-white shadow-2xs' : 'bg-blue-50 text-blue-600 border-blue-200/60' ?>">
+                                            <i class="fa-solid fa-user-gear"></i>
+                                        </div>
+                                        <span class="text-xs font-heading <?= $isProfilActive ? 'font-black text-white' : 'font-extrabold text-slate-800 group-hover:text-emerald-800' ?>">Profil Saya</span>
                                     </div>
                                     <i class="fa-solid fa-chevron-right text-[9px] transition-transform group-hover:translate-x-0.5 <?= $isProfilActive ? 'text-white/80' : 'text-slate-300 group-hover:text-emerald-600' ?>"></i>
                                 </a>
@@ -1432,7 +1527,26 @@
         $footerCsLabel = 'Buka Layanan CS';
         $footerCsDesc = 'Butuh bantuan operasional atau ingin menyampaikan kendala kebersihan?';
 
-        if ($isUserAdminOrAuditor) {
+        if ($isLogistik) {
+            $footerCol1Title = 'Logistik & Alat';
+            $footerCol1Icon = 'fa-solid fa-broom-ball';
+            $footerCol1 = [
+                ['url' => base_url('/'), 'icon' => 'fa-solid fa-house', 'label' => 'Beranda Utama'],
+                ['url' => base_url('alat'), 'icon' => 'fa-solid fa-broom-ball', 'label' => 'Data Alat Kebersihan'],
+                ['url' => base_url('cs'), 'icon' => 'fa-solid fa-headset', 'label' => 'Pengajuan Alat & CS'],
+                ['url' => base_url('profil'), 'icon' => 'fa-solid fa-user-gear', 'label' => 'Profil Saya'],
+            ];
+
+            $footerCol2Title = 'Informasi & Panduan';
+            $footerCol2Icon = 'fa-solid fa-circle-info';
+            $footerCol2 = [
+                ['url' => base_url('faq'), 'icon' => 'fa-solid fa-circle-question', 'label' => 'Panduan Sistem'],
+                ['url' => base_url('sop'), 'icon' => 'fa-solid fa-file-shield', 'label' => 'SOP Kebersihan'],
+            ];
+            $footerCsUrl = base_url('cs');
+            $footerCsLabel = 'Kelola Pengajuan Alat';
+            $footerCsDesc = 'Tinjau dan proses permohonan logistik alat kebersihan unit.';
+        } elseif ($isUserAdminOrAuditor) {
             $footerCol1Title = 'Operasional & Wilayah';
             $footerCol1Icon = 'fa-solid fa-broom-ball';
             $footerCol1 = [
@@ -1617,7 +1731,58 @@
     <!-- Mobile Bottom App Bar Navigation (Floating Glassmorphism Card Style) -->
     <nav id="mobileBottomNav" class="md:hidden fixed bottom-3 left-3 right-3 sm:left-6 sm:right-6 max-w-md mx-auto z-40 bg-white/95 backdrop-blur-2xl border border-slate-100 shadow-[0_12px_40px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.04)] ring-1 ring-slate-900/5 rounded-[32px] px-2 py-1.5">
         <div class="grid grid-cols-5 items-end justify-items-center relative">
-            <?php if ($isUserAdminOrAuditor): ?>
+            <?php if ($isLogistik): ?>
+                <!-- Petugas Logistik Mobile Bottom Tabs -->
+                <!-- 1. Alat -->
+                <a href="<?= base_url('alat') ?>" class="flex flex-col items-center justify-between w-full h-[54px] py-1 text-center transition group relative">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm relative transition-all duration-200 <?= $isAlatActive ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300/50 shadow-2xs' : 'text-slate-400 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-broom-ball"></i>
+                        <?php if ($notifAlatCount > 0): ?>
+                            <span class="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center ring-2 ring-white shadow-2xs animate-pulse">
+                                <?= $notifAlatCount > 9 ? '9+' : $notifAlatCount ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isAlatActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Alat</span>
+                </a>
+
+                <!-- 2. Pengajuan Alat / CS -->
+                <a href="<?= base_url('cs') ?>" class="flex flex-col items-center justify-between w-full h-[54px] py-1 text-center transition group relative">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm relative transition-all duration-200 <?= $isCsActive ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300/50 shadow-2xs' : 'text-slate-400 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-headset"></i>
+                        <?php if ($notifCsCount > 0): ?>
+                            <span class="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center ring-2 ring-white shadow-2xs animate-pulse">
+                                <?= $notifCsCount > 9 ? '9+' : $notifCsCount ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isCsActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Pengajuan</span>
+                </a>
+
+                <!-- 3. Center Raised FAB: Beranda (Home) -->
+                <a href="<?= base_url('/') ?>" class="flex flex-col items-center justify-end w-full h-[54px] pb-1 text-center transition group relative">
+                    <div class="absolute -top-4.5 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full flex items-center justify-center text-base transition-all duration-300 <?= $isHomeActive ? 'bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-600 text-white shadow-xl shadow-emerald-600/40 ring-4 ring-emerald-200/90 scale-105' : 'bg-white text-slate-400 border border-slate-200/90 shadow-md shadow-slate-300/40 ring-4 ring-slate-100/90 group-hover:scale-105 group-hover:text-emerald-600 group-hover:border-emerald-300 group-hover:shadow-emerald-500/15 active:scale-95' ?>">
+                        <i class="fa-solid fa-house <?= $isHomeActive ? 'drop-shadow-xs' : '' ?>"></i>
+                    </div>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isHomeActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-emerald-700' ?>">Beranda</span>
+                </a>
+
+                <!-- 4. Profil -->
+                <a href="<?= base_url('profil') ?>" class="flex flex-col items-center justify-between w-full h-[54px] py-1 text-center transition group relative">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm transition-all duration-200 <?= $isProfilActive ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300/50 shadow-2xs' : 'text-slate-400 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-user-gear"></i>
+                    </div>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isProfilActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Profil</span>
+                </a>
+
+                <!-- 5. Menu Drawer Trigger -->
+                <button type="button" onclick="toggleMobileDrawer(true)" class="flex flex-col items-center justify-between w-full h-[54px] py-1 text-center transition group relative">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm relative transition-all duration-200 <?= $isDrawerActive ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300/50 shadow-2xs' : 'text-slate-400 group-hover:text-emerald-700' ?>">
+                        <i class="fa-solid fa-bars"></i>
+                    </div>
+                    <span class="text-[10px] font-heading tracking-tight leading-none <?= $isDrawerActive ? 'font-black text-emerald-800' : 'font-bold text-slate-400 group-hover:text-slate-600' ?>">Menu</span>
+                </button>
+            <?php elseif ($isUserAdminOrAuditor): ?>
                 <!-- Admin / Auditor Mobile Bottom Tabs -->
                 <!-- 1. Wilayah -->
                 <a href="<?= base_url('wilayah') ?>" class="flex flex-col items-center justify-between w-full h-[54px] py-1 text-center transition group relative">

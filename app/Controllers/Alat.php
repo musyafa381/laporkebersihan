@@ -117,7 +117,7 @@ class Alat extends BaseController
         $unitList = $this->unitModel->orderBy('nama_unit', 'ASC')->findAll();
 
         $pengajuanModel = new \App\Models\PengajuanAlatModel();
-        $pengajuanDisetujui = $pengajuanModel->getListWithItems(['status' => 'Disetujui']);
+        $pengajuanPending = $pengajuanModel->getListWithItems(['status' => 'Pending']);
 
         $data = [
             'title'              => 'Inventaris & Peralatan Kebersihan',
@@ -127,7 +127,8 @@ class Alat extends BaseController
             'unitList'           => $unitList,
             'transaksiKeluar'    => $transaksiKeluar,
             'transaksiMasuk'     => $transaksiMasuk,
-            'pengajuanDisetujui' => $pengajuanDisetujui,
+            'pengajuanPending'   => $pengajuanPending,
+            'pengajuanDisetujui' => $pengajuanPending,
             'totalJenis'         => $totalJenis,
             'totalMasuk'         => $totalMasuk,
             'totalKeluar'        => $totalKeluar,
@@ -135,6 +136,16 @@ class Alat extends BaseController
         ];
 
         return view('alat/index', $data);
+    }
+
+    public function getPendingPengajuan()
+    {
+        $pengajuanModel = new \App\Models\PengajuanAlatModel();
+        $pending = $pengajuanModel->getListWithItems(['status' => 'Pending']);
+        return $this->response->setJSON([
+            'status' => 'success',
+            'data'   => $pending
+        ]);
     }
 
     public function storeKategori()
@@ -302,6 +313,8 @@ class Alat extends BaseController
 
         $itemsInput = $this->request->getPost('items');
 
+        $pengajuanId = (int)$this->request->getPost('pengajuan_id');
+
         // Multi-item transaction mode
         if (is_array($itemsInput) && !empty($itemsInput)) {
             $insertedCount = 0;
@@ -343,8 +356,58 @@ class Alat extends BaseController
                 return $this->respondJsonOrRedirect($errMsg, false);
             }
 
+            // If transaction originated from a Pending Pengajuan, update its status to Disetujui
+            if ($jenis === 'Keluar' && $pengajuanId > 0) {
+                $pengajuanModel = new \App\Models\PengajuanAlatModel();
+                $itemModel = new \App\Models\PengajuanAlatItemModel();
+                $pengajuan = $pengajuanModel->find($pengajuanId);
+
+                if ($pengajuan) {
+                    $session = session();
+                    $adminId = $session->get('userId') ?: ($session->get('user_id') ?: $session->get('id'));
+
+                    $pengajuanModel->update($pengajuanId, [
+                        'status'         => 'Disetujui',
+                        'catatan_admin'  => $keterangan ?: 'Disetujui & diserahkan via pencatatan barang keluar gudang.',
+                        'disetujui_oleh' => $adminId,
+                        'disetujui_pada' => date('Y-m-d H:i:s'),
+                    ]);
+
+                    $allPengajuanItems = $itemModel->where('pengajuan_id', $pengajuanId)->findAll();
+                    $processedItemIds = [];
+
+                    // Update fulfilled items
+                    foreach ($itemsInput as $it) {
+                        $itAlatId = (int)($it['alat_id'] ?? 0);
+                        $itJumlah = (int)($it['jumlah'] ?? 0);
+                        if ($itAlatId <= 0 || $itJumlah <= 0) continue;
+
+                        $dbItem = $itemModel->where('pengajuan_id', $pengajuanId)->where('alat_id', $itAlatId)->first();
+                        if ($dbItem) {
+                            $jMinta = (int)$dbItem['jumlah_minta'];
+                            $statusItem = ($itJumlah < $jMinta) ? 'Sebagian' : 'Disetujui';
+                            $itemModel->update($dbItem['id'], [
+                                'jumlah_setuju' => $itJumlah,
+                                'status_item'   => $statusItem,
+                            ]);
+                            $processedItemIds[] = $dbItem['id'];
+                        }
+                    }
+
+                    // Mark any omitted items from original request as Ditolak
+                    foreach ($allPengajuanItems as $api) {
+                        if (!in_array($api['id'], $processedItemIds)) {
+                            $itemModel->update($api['id'], [
+                                'jumlah_setuju' => 0,
+                                'status_item'   => 'Ditolak',
+                            ]);
+                        }
+                    }
+                }
+            }
+
             $msg = ($jenis === 'Keluar')
-                ? "Berhasil mencatatkan distribusi {$insertedCount} peralatan keluar!"
+                ? "Berhasil mencatatkan distribusi {$insertedCount} peralatan keluar!" . ($pengajuanId > 0 ? " Status pengajuan telah disetujui." : "")
                 : "Berhasil mencatatkan penambahan {$insertedCount} peralatan masuk!";
 
             if (!empty($errors)) {
@@ -385,7 +448,35 @@ class Alat extends BaseController
         $this->transaksiModel->insert($data);
         $this->recalculateStok($alatId);
 
-        $msg = ($jenis === 'Keluar') ? 'Berhasil mencatatkan distribusi Barang Keluar!' : 'Berhasil mencatatkan penambahan Barang Masuk!';
+        if ($jenis === 'Keluar' && $pengajuanId > 0) {
+            $pengajuanModel = new \App\Models\PengajuanAlatModel();
+            $itemModel = new \App\Models\PengajuanAlatItemModel();
+            $pengajuan = $pengajuanModel->find($pengajuanId);
+
+            if ($pengajuan) {
+                $session = session();
+                $adminId = $session->get('userId') ?: ($session->get('user_id') ?: $session->get('id'));
+
+                $pengajuanModel->update($pengajuanId, [
+                    'status'         => 'Disetujui',
+                    'catatan_admin'  => $keterangan ?: 'Disetujui & diserahkan via pencatatan barang keluar gudang.',
+                    'disetujui_oleh' => $adminId,
+                    'disetujui_pada' => date('Y-m-d H:i:s'),
+                ]);
+
+                $dbItem = $itemModel->where('pengajuan_id', $pengajuanId)->where('alat_id', $alatId)->first();
+                if ($dbItem) {
+                    $jMinta = (int)$dbItem['jumlah_minta'];
+                    $statusItem = ($jumlah < $jMinta) ? 'Sebagian' : 'Disetujui';
+                    $itemModel->update($dbItem['id'], [
+                        'jumlah_setuju' => $jumlah,
+                        'status_item'   => $statusItem,
+                    ]);
+                }
+            }
+        }
+
+        $msg = ($jenis === 'Keluar') ? ('Berhasil mencatatkan distribusi Barang Keluar!' . ($pengajuanId > 0 ? " Status pengajuan telah disetujui." : "")) : 'Berhasil mencatatkan penambahan Barang Masuk!';
         return $this->respondJsonOrRedirect($msg);
     }
 

@@ -41,7 +41,9 @@ class Cs extends BaseController
     public function index()
     {
         $session = session();
-        $isUserAdminOrAuditor = $session->get('isLoggedIn') && in_array($session->get('role'), ['Admin', 'Auditor']);
+        $userRole = $session->get('role');
+        $isLogistik = in_array($userRole, ['Petugas Logistik', 'Admin Logistik', 'Logistik']);
+        $isUserAdminOrAuditor = $session->get('isLoggedIn') && in_array($userRole, ['Admin', 'Auditor', 'Petugas Logistik', 'Admin Logistik', 'Logistik']);
 
         // Generate random math CAPTCHA for public form
         if (!$session->get('captcha_num1')) {
@@ -192,6 +194,7 @@ class Cs extends BaseController
             'isUserAdminOrAuditor' => $isUserAdminOrAuditor,
             'isAuditor'            => ($session->get('role') === 'Auditor'),
             'isAdmin'              => ($session->get('role') === 'Admin'),
+            'isLogistik'           => $isLogistik,
             'reportsList'          => $reportsList,
             'pengajuanList'        => $pengajuanList,
             'wilayahList'          => $wilayahList,
@@ -479,8 +482,98 @@ class Cs extends BaseController
             'is_flagged'    => 0,
         ];
 
-        $this->csModel->insert($data);
-        return $this->respondJsonOrRedirect('Laporan/Pengaduan Anda beserta foto bukti berhasil dikirim ke Cloud Storage & Tim CS!');
+        $insertId = $this->csModel->insert($data);
+        $kodeTiket = 'CS-' . date('ymd') . '-' . sprintf('%04d', $insertId);
+        $this->csModel->update($insertId, ['kode_tiket' => $kodeTiket]);
+
+        // Kirim Notifikasi WhatsApp Otomatis Berisi Kode Tiket & Tautan Lacak (Fonnte)
+        try {
+            $pengaturanModel = new \App\Models\PengaturanModel();
+            $settings = $pengaturanModel->getAllAsMap();
+            $rawTemplate = $settings['wa_template_terima'] ?? '';
+            $urlLacak = base_url('lacak?tiket=' . $kodeTiket);
+            $namaPelapor = $nama ?: 'Bapak/Ibu/Santri';
+            $lokasiText = $lokasi ?: ($namaWilayah ?: 'Unit Terkait');
+            if ($namaWilayah && $namaWilayah !== $lokasi) {
+                $lokasiText .= ' (' . $namaWilayah . ')';
+            }
+
+            if (!empty(trim($rawTemplate))) {
+                $pesanWa = str_replace(
+                    ['{NAMA}', '{KODE_TIKET}', '{REPORT_ID}', '{LOKASI}', '{KENDALA}', '{URL_LACAK}'],
+                    [$namaPelapor, $kodeTiket, $insertId, $lokasiText, $laporan, $urlLacak],
+                    $rawTemplate
+                );
+            } else {
+                $pesanWa = "*[K3L YAYASAN ASSALAFIYYAH MLANGI]*\n"
+                         . "_Laporan Kendala Kebersihan Diterima_\n\n"
+                         . "Assalamu'alaikum Wr. Wb.\n"
+                         . "Halo Kak *{$namaPelapor}*, terima kasih telah menyampaikan kendala kebersihan. Laporan Anda telah berhasil kami terima.\n\n"
+                         . "📌 *Detail Pengaduan Anda:*\n"
+                         . "- *Kode Tiket:* *{$kodeTiket}*\n"
+                         . "- *Lokasi:* {$lokasiText}\n"
+                         . "- *Kendala:* \"{$laporan}\"\n"
+                         . "- *Status:* 🟢 Baru (Dalam Antrean Penanganan)\n\n"
+                         . "🔍 *Lacak Status Tindak Lanjut:*\n"
+                         . "Anda dapat memantau proses penanganan secara langsung melalui tautan berikut:\n"
+                         . "{$urlLacak}\n\n"
+                         . "_Pesan otomatis oleh Sistem Manajemen Kebersihan Assalafiyyah._";
+            }
+
+            $fonnte = new \App\Libraries\FonnteService();
+            $fonnte->sendMessage($cleanPhone, $pesanWa);
+        } catch (\Throwable $e) {
+            log_message('error', 'Gagal mengirim WA Tiket CS otomatis: ' . $e->getMessage());
+        }
+
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'status'     => 'success',
+                'message'    => 'Laporan/Pengaduan Anda berhasil dikirim! Kode Tiket: ' . $kodeTiket,
+                'kode_tiket' => $kodeTiket,
+                'redirect'   => base_url('lacak?tiket=' . $kodeTiket)
+            ]);
+        }
+
+        return redirect()->to(base_url('lacak?tiket=' . $kodeTiket))
+            ->with('success_tiket', $kodeTiket)
+            ->with('success', 'Laporan/Pengaduan Anda berhasil dikirim! Simpan Kode Tiket Anda: ' . $kodeTiket);
+    }
+
+    /**
+     * Halaman Publik: Lacak Status Pengaduan Berdasarkan Kode Tiket
+     */
+    public function lacak()
+    {
+        $session = session();
+        $tiket = trim($this->request->getGet('tiket') ?? $this->request->getPost('tiket') ?? '');
+        $report = null;
+        $searched = !empty($tiket);
+
+        if ($searched) {
+            $report = $this->csModel
+                ->select('cs_reports.*, master_unit.nama_unit, master_unit.pj_nama, master_unit.pj_kontak, master_unit.kode_unit, tbl_wilayah_kebersihan.nama_wilayah, tbl_wilayah_kebersihan.lokasi_gedung')
+                ->join('master_unit', '(cs_reports.unit_id IS NOT NULL AND cs_reports.unit_id > 0 AND master_unit.id = cs_reports.unit_id) OR ((cs_reports.unit_id IS NULL OR cs_reports.unit_id = 0) AND master_unit.nama_unit = cs_reports.unit_lokasi)', 'left')
+                ->join('tbl_wilayah_kebersihan', 'tbl_wilayah_kebersihan.id = cs_reports.wilayah_id', 'left')
+                ->where('cs_reports.kode_tiket', $tiket)
+                ->orWhere('cs_reports.id', is_numeric($tiket) ? (int)$tiket : 0)
+                ->first();
+        }
+
+        $pengaturanModel = new \App\Models\PengaturanModel();
+        $settings = $pengaturanModel->getAllAsMap();
+        $hotlineWa = !empty($settings['hotline_wa']) && $settings['hotline_wa'] !== '081234567890' ? $settings['hotline_wa'] : '0895320276800';
+
+        $data = [
+            'title'     => 'Lacak Status Pengaduan Kebersihan',
+            'tiket'     => $tiket,
+            'report'    => $report,
+            'searched'  => $searched,
+            'settings'  => $settings,
+            'hotlineWa' => $hotlineWa,
+        ];
+
+        return view('cs/lacak', $data);
     }
 
     public function updateReportStatus($id)

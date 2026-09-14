@@ -225,8 +225,9 @@
                                         <div class="w-8 h-8 rounded-xl flex items-center justify-center font-heading font-extrabold text-xs shadow-2xs uppercase flex-shrink-0
                                             <?= $u['role'] === 'Admin' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200/80' : '' ?>
                                             <?= $u['role'] === 'Auditor' ? 'bg-blue-100 text-blue-700 border border-blue-200/80' : '' ?>
+                                            <?= in_array($u['role'], ['Petugas Logistik', 'Admin Logistik', 'Logistik']) ? 'bg-amber-100 text-amber-700 border border-amber-200/80' : '' ?>
                                             <?= $u['role'] === 'Pengurus' ? 'bg-purple-100 text-purple-700 border border-purple-200/80' : '' ?>
-                                            <?= ($u['role'] !== 'Admin' && $u['role'] !== 'Auditor' && $u['role'] !== 'Pengurus') ? 'bg-teal-100 text-teal-700 border border-teal-200/80' : '' ?>">
+                                            <?= ($u['role'] !== 'Admin' && $u['role'] !== 'Auditor' && !in_array($u['role'], ['Petugas Logistik', 'Admin Logistik', 'Logistik']) && $u['role'] !== 'Pengurus') ? 'bg-teal-100 text-teal-700 border border-teal-200/80' : '' ?>">
                                             <?= esc(substr($u['nama_lengkap'], 0, 1)) ?>
                                         </div>
                                         <div>
@@ -245,6 +246,11 @@
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-extrabold border border-blue-200/90 shadow-2xs">
                                             <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
                                             Auditor
+                                        </span>
+                                    <?php elseif (in_array($u['role'], ['Petugas Logistik', 'Admin Logistik', 'Logistik'])): ?>
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-800 text-xs font-extrabold border border-amber-200/90 shadow-2xs">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                            Petugas Logistik
                                         </span>
                                     <?php elseif ($u['role'] === 'Pengurus'): ?>
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-extrabold border border-purple-200/90 shadow-2xs">
@@ -356,6 +362,7 @@
                 <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Role Akses</label>
                 <select name="role" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
                     <option value="Admin">Admin (Full Control)</option>
+                    <option value="Petugas Logistik">Petugas Logistik (Khusus Data Alat & Pengajuan)</option>
                     <option value="Auditor">Auditor (Read-Only)</option>
                     <option value="Pengurus" selected>Pengurus Unit (Mobile Frontend)</option>
                     <option value="Kader">Kader Kebersihan (Mobile Frontend)</option>
@@ -441,6 +448,7 @@
                 <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Role Akses</label>
                 <select id="edit_role" name="role" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs">
                     <option value="Admin">Admin (Full Control)</option>
+                    <option value="Petugas Logistik">Petugas Logistik (Khusus Data Alat & Pengajuan)</option>
                     <option value="Auditor">Auditor (Read-Only)</option>
                     <option value="Pengurus">Pengurus Unit (Mobile Frontend)</option>
                     <option value="Kader">Kader Kebersihan (Mobile Frontend)</option>

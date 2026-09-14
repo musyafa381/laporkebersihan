@@ -43,6 +43,33 @@ class AuditorReadonlyFilter implements FilterInterface
                 return redirect()->back();
             }
         }
+
+        // Restrict Petugas Logistik role to only allowed modules: Beranda, Alat, CS (Pengajuan Alat), and Profil
+        if (in_array($userRole, ['Petugas Logistik', 'Admin Logistik', 'Logistik'])) {
+            $uri = trim((string)$request->getUri()->getPath(), '/');
+            $disallowedPrefixes = ['keuangan', 'buku', 'wilayah', 'program-kerja', 'pengaturan', 'struktur', 'sop', 'unit', 'app'];
+            $isDisallowed = false;
+
+            foreach ($disallowedPrefixes as $prefix) {
+                if ($uri === $prefix || strpos($uri, $prefix . '/') === 0) {
+                    $isDisallowed = true;
+                    break;
+                }
+            }
+
+            if ($isDisallowed) {
+                if ($request->isAJAX() || $request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
+                    $response = service('response');
+                    return $response->setJSON([
+                        'status'  => 'error',
+                        'message' => 'Akses ditolak: Akun Petugas Logistik hanya memiliki izin pada menu Beranda, Data Alat Kebersihan, Pengajuan Alat (CS), dan Profil.',
+                    ])->setStatusCode(403);
+                }
+
+                $session->setFlashdata('msg_error', 'Akses ditolak: Akun Petugas Logistik khusus bertugas mengelola Data Alat Kebersihan & Pengajuan Logistik.');
+                return redirect()->to(base_url('alat'));
+            }
+        }
     }
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)

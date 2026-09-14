@@ -7,6 +7,8 @@
     $userRole = session()->get('role');
     $isAuditor = ($userRole === 'Auditor');
     $isAdmin   = ($userRole === 'Admin');
+    $isLogistik = in_array($userRole, ['Petugas Logistik', 'Admin Logistik', 'Logistik']);
+    $canManagePengajuan = ($isAdmin || $isLogistik);
 ?>
 
 <?php if (!$isUserAdminOrAuditor || $isAuditor): ?>
@@ -31,13 +33,19 @@
                     Sampaikan kendala kebersihan atau pertanyaan seputar kebersihan pesantren. Tim siap menindaklanjuti.
                 </p>
             </div>
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <a href="<?= base_url('lacak') ?>" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 text-white text-xs font-extrabold transition shadow-sm hover:scale-105 backdrop-blur-md">
+                    <i class="fa-solid fa-magnifying-glass-location text-emerald-300"></i>
+                    <span>Lacak Status Tiket &rarr;</span>
+                </a>
+            </div>
         </div>
     </div>
 
     <!-- Public Contact Grid & Form -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 items-start relative">
         <!-- Form Pengaduan Publik (Anti-SPAM CAPTCHA) -->
-        <div class="lg:col-span-2 glass-card rounded-[32px] p-5 sm:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.06)] border border-white/80 bg-white/80 backdrop-blur-2xl space-y-5 relative z-30">
+        <div class="lg:col-span-2 glass-card rounded-[32px] p-5 sm:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.06)] border border-white/80 bg-white/90 space-y-5 relative z-30 overflow-visible">
             <div class="border-b border-slate-100 pb-3 flex items-center justify-between gap-2">
                 <h2 class="font-heading font-extrabold text-sm sm:text-base text-slate-900 flex items-center gap-2">
                     <i class="fa-solid fa-paper-plane text-emerald-600 text-xs sm:text-sm"></i> 
@@ -94,7 +102,7 @@
                 <!-- ========================================== -->
                 <!-- 🔹 LANGKAH 1: IDENTITAS & LOKASI UNIT     -->
                 <!-- ========================================== -->
-                <div id="csStep1" class="cs-step-pane space-y-3.5 sm:space-y-4 animate-fadeIn">
+                <div id="csStep1" class="cs-step-pane space-y-3.5 sm:space-y-4 animate-fadeIn pb-16 sm:pb-20">
                     <div class="p-2.5 sm:p-3 rounded-xl bg-emerald-50/70 border border-emerald-100 flex items-center gap-2 text-xs text-emerald-900 font-medium">
                         <i class="fa-solid fa-circle-info text-emerald-600 text-xs flex-shrink-0"></i>
                         <span class="text-[11px] sm:text-xs">Lengkapi data diri dan tentukan lokasi kendala kebersihan.</span>
@@ -142,7 +150,7 @@
                                 </button>
                             </div>
                             <!-- Dropdown List -->
-                            <div id="csUnitDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200/90 ring-1 ring-slate-900/10 max-h-56 overflow-y-auto z-[100] hidden divide-y divide-slate-100">
+                            <div id="csUnitDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200/90 ring-1 ring-slate-900/10 max-h-72 sm:max-h-80 overflow-y-auto overflow-x-hidden z-[200] hidden divide-y divide-slate-100 shadow-emerald-950/15">
                                 <?php if (!empty($unitList)): ?>
                                     <?php foreach ($unitList as $u): ?>
                                         <div class="cs-unit-item px-3.5 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="<?= $u['id'] ?>" data-nama="<?= esc($u['nama_unit']) ?>" onclick="selectCsUnit(this)">
@@ -187,7 +195,7 @@
                                 </button>
                             </div>
                             <!-- Dropdown List -->
-                            <div id="csWilayahDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200/90 ring-1 ring-slate-900/10 max-h-56 overflow-y-auto z-[100] hidden divide-y divide-slate-100">
+                            <div id="csWilayahDropdownList" class="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200/90 ring-1 ring-slate-900/10 max-h-72 sm:max-h-80 overflow-y-auto overflow-x-hidden z-[200] hidden divide-y divide-slate-100 shadow-emerald-950/15">
                                 <div class="cs-wilayah-item px-3.5 py-2.5 hover:bg-emerald-50 transition flex items-center justify-between cursor-pointer" data-id="" data-name="" data-lokasi-gedung="" onclick="selectCsWilayah(this)">
                                     <div>
                                         <div class="font-extrabold text-xs text-slate-600 italic">-- Bukan Wilayah Khusus / Umum --</div>
@@ -543,22 +551,22 @@
     <!-- ========================================== -->
     <!-- 👑 TAMPILAN INBOX CS (ADMIN & AUDITOR)     -->
     <!-- ========================================== -->
-    <!-- Hero Banner / Page Header (Only show for Admin if not Auditor) -->
-    <?php if ($isAdmin): ?>
+    <!-- Hero Banner / Page Header (Only show for Admin/Logistik if not Auditor) -->
+    <?php if ($isAdmin || $isLogistik): ?>
     <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-700 to-emerald-900 text-white p-8 sm:p-10 shadow-2xl shadow-emerald-900/20 border border-emerald-600/30">
         <div class="absolute -right-10 -bottom-10 opacity-10 text-white pointer-events-none">
-            <i class="fa-solid fa-headset text-[240px]"></i>
+            <i class="fa-solid <?= $isLogistik ? 'fa-box-open' : 'fa-headset' ?> text-[240px]"></i>
         </div>
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div class="space-y-2 max-w-3xl">
                 <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/20 backdrop-blur-md text-emerald-200 text-xs font-bold uppercase tracking-wider border border-emerald-400/30">
-                    <i class="fa-solid fa-headset"></i> Layanan Pengaduan & Permohonan
+                    <i class="fa-solid <?= $isLogistik ? 'fa-box-open' : 'fa-headset' ?>"></i> <?= $isLogistik ? 'Permohonan Pengajuan Alat' : 'Layanan Pengaduan & Permohonan' ?>
                 </span>
                 <h1 class="text-3xl sm:text-4xl font-heading font-extrabold tracking-tight leading-tight">
-                    Kelola Inbox Customer Service & Permohonan Alat
+                    <?= $isLogistik ? 'Inbox Permohonan Pengajuan Alat Kebersihan' : 'Kelola Inbox Customer Service & Permohonan Alat' ?>
                 </h1>
                 <p class="text-emerald-100/90 text-sm sm:text-base leading-relaxed">
-                    Halaman ini khusus untuk Admin & Auditor dalam menangani laporan kendala kebersihan dari publik serta permohonan alat dari pengurus/kader.
+                    <?= $isLogistik ? 'Halaman ini khusus untuk Petugas Logistik dalam memproses dan mengalokasikan permohonan alat kebersihan dari pengurus dan kader.' : 'Halaman ini khusus untuk Admin & Auditor dalam menangani laporan kendala kebersihan dari publik serta permohonan alat dari pengurus/kader.' ?>
                 </p>
             </div>
         </div>
@@ -567,6 +575,7 @@
 
     <!-- Admin Inbox CS Reports & Pengajuan Alat Panel -->
     <div class="space-y-8 w-full">
+        <?php if (!$isLogistik): ?>
         <!-- Panel 1: Inbox Laporan CS Masuk -->
         <div class="glass-card rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-5">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
@@ -839,6 +848,7 @@
                 <div class="flex items-center gap-1.5" id="page-buttons-cs"></div>
             </div>
         </div>
+        <?php endif; ?>
 
         <!-- Panel 2: Inbox Pengajuan Alat dari Pengurus & Kader -->
         <div class="glass-card rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-200/40 border border-slate-200/80 bg-white space-y-5">
@@ -875,9 +885,9 @@
                             <th width="14%" class="py-3 px-4">TANGGAL & KODE</th>
                             <th width="18%" class="py-3 px-4">PEMOHON & UNIT</th>
                             <th width="24%" class="py-3 px-4">DETAIL PERALATAN</th>
-                            <th width="<?= $isAdmin ? '22%' : '30%' ?>" class="py-3 px-4">ALASAN & CATATAN</th>
+                            <th width="<?= $canManagePengajuan ? '22%' : '30%' ?>" class="py-3 px-4">ALASAN & CATATAN</th>
                             <th width="10%" class="py-3 px-4 text-center">STATUS</th>
-                            <?php if ($isAdmin): ?>
+                            <?php if ($canManagePengajuan): ?>
                                 <th width="8%" class="py-3 px-3 text-center">PROSES</th>
                             <?php endif; ?>
                         </tr>
@@ -997,7 +1007,7 @@
                                             </span>
                                         <?php endif; ?>
                                     </td>
-                                    <?php if ($isAdmin): ?>
+                                    <?php if ($canManagePengajuan): ?>
                                         <td class="py-4 px-3 text-center">
                                             <div class="flex items-center justify-center gap-1.5">
                                                 <button type="button" onclick="openModalProsesPengajuan(<?= htmlspecialchars(json_encode($p)) ?>)" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-heading font-extrabold text-xs hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-1.5" title="Proses Pengajuan">

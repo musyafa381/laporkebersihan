@@ -710,15 +710,32 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Template Pesan Balasan Laporan Diterima</label>
-                    <textarea name="wa_template_terima" rows="3" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs"><?= esc($settings['wa_template_terima'] ?? '') ?></textarea>
-                    <span class="text-[11px] text-slate-400 font-medium">Gunakan variabel <code class="text-emerald-700 font-bold">{REPORT_ID}</code> untuk ID Laporan.</span>
+                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-ticket text-emerald-600"></i> Template Pesan WhatsApp Konfirmasi & Kode Tiket Pelapor
+                    </label>
+                    <textarea name="wa_template_terima" rows="6" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs leading-relaxed font-mono"><?= esc($settings['wa_template_terima'] ?? "*[K3L YAYASAN ASSALAFIYYAH MLANGI]*\n_Laporan Kendala Kebersihan Diterima_\n\nAssalamu'alaikum Wr. Wb.\nHalo Kak *{NAMA}*, terima kasih telah menyampaikan kendala kebersihan. Laporan Anda telah berhasil kami terima.\n\n📌 *Detail Pengaduan Anda:*\n- *Kode Tiket:* *{KODE_TIKET}*\n- *Lokasi:* {LOKASI}\n- *Kendala:* \"{KENDALA}\"\n- *Status:* 🟢 Baru (Dalam Antrean Penanganan)\n\n🔍 *Lacak Status Tindak Lanjut:*\nAnda dapat memantau proses penanganan secara langsung melalui tautan berikut:\n{URL_LACAK}\n\n_Pesan otomatis oleh Sistem Manajemen Kebersihan Assalafiyyah._") ?></textarea>
+                    <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                        <span class="text-[11px] text-slate-400 font-medium">Variabel dinamis:</span>
+                        <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-mono font-bold">{KODE_TIKET} = Kode Tiket</span>
+                        <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-mono font-bold">{URL_LACAK} = Link Lacak</span>
+                        <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-mono font-bold">{NAMA} = Nama Pelapor</span>
+                        <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-mono font-bold">{LOKASI} = Unit/Lokasi</span>
+                        <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-mono font-bold">{KENDALA} = Isi Laporan</span>
+                        <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-mono font-bold">{REPORT_ID} = ID</span>
+                    </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Template Pesan Balasan Laporan Selesai</label>
-                    <textarea name="wa_template_selesai" rows="3" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs"><?= esc($settings['wa_template_selesai'] ?? '') ?></textarea>
-                    <span class="text-[11px] text-slate-400 font-medium">Gunakan variabel <code class="text-emerald-700 font-bold">{REPORT_ID}</code> dan <code class="text-emerald-700 font-bold">{LOKASI}</code>.</span>
+                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-check text-blue-600"></i> Template Pesan Balasan Laporan Selesai
+                    </label>
+                    <textarea name="wa_template_selesai" rows="3" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition shadow-2xs font-mono"><?= esc($settings['wa_template_selesai'] ?? '') ?></textarea>
+                    <div class="flex items-center gap-2 mt-1 flex-wrap">
+                        <span class="text-[11px] text-slate-400 font-medium">Variabel:</span>
+                        <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-mono font-bold">{KODE_TIKET}</span>
+                        <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-mono font-bold">{REPORT_ID}</span>
+                        <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-mono font-bold">{LOKASI}</span>
+                    </div>
                 </div>
 
                 <div class="pt-3 border-t border-slate-100 flex justify-end">

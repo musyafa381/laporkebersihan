@@ -57,6 +57,7 @@ $routes->get('/keuangan/cetak/(:num)', 'Keuangan::cetak/$1');
 
 // Menu Tambahan Navbar & Modul Alat Inventaris
 $routes->get('/alat', 'Alat::index');
+$routes->get('/alat/pending-pengajuan', 'Alat::getPendingPengajuan');
 $routes->post('/alat/store', 'Alat::storeAlat');
 $routes->post('/alat/update/(:num)', 'Alat::updateAlat/$1');
 $routes->get('/alat/delete/(:num)', 'Alat::deleteAlat/$1');
@@ -116,6 +117,8 @@ $routes->get('/faq/alur/delete/(:num)', 'Faq::deleteAlur/$1');
 
 // Public & Admin Customer Service
 $routes->get('/cs', 'Cs::index');
+$routes->get('/lacak', 'Cs::lacak');
+$routes->get('/cs/lacak', 'Cs::lacak');
 $routes->post('/cs/public/send-otp', 'Cs::sendOtp');
 $routes->post('/cs/public/store', 'Cs::storePublicReport');
 $routes->post('/cs/report/update/(:num)', 'Cs::updateReportStatus/$1');

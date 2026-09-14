@@ -11,6 +11,7 @@ class CsReportModel extends Model
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $allowedFields    = [
+        'kode_tiket',
         'nama_pengirim',
         'kontak_hp',
         'unit_lokasi',
@@ -51,6 +52,14 @@ class CsReportModel extends Model
             $forge = \Config\Database::forge();
 
             $newCols = [];
+            if (!in_array('kode_tiket', $fields)) {
+                $newCols['kode_tiket'] = [
+                    'type'       => 'VARCHAR',
+                    'constraint' => 50,
+                    'null'       => true,
+                    'after'      => 'id'
+                ];
+            }
             if (!in_array('unit_id', $fields)) {
                 $newCols['unit_id'] = [
                     'type'       => 'INT',
