@@ -169,6 +169,10 @@ class Faq extends BaseController
             return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat mengelola FAQ.', false);
         }
 
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $item = $this->faqModel->find($id);
         if (!$item) {
             return $this->respondJsonOrRedirect('Item FAQ tidak ditemukan.', false);
@@ -285,6 +289,10 @@ class Faq extends BaseController
     {
         if (session()->get('role') !== 'Admin') {
             return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat mengelola Panduan Alur.', false);
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
         }
 
         $item = $this->faqAlurModel->find($id);

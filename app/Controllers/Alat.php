@@ -214,6 +214,14 @@ class Alat extends BaseController
 
     public function deleteKategori($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus kategori alat.', false);
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $kat = $this->kategoriAlatModel->find($id);
         if (!$kat) {
             return $this->respondJsonOrRedirect('Kategori alat tidak ditemukan.', false);
@@ -294,6 +302,14 @@ class Alat extends BaseController
 
     public function deleteAlat($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus alat.', false);
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $alat = $this->alatModel->find($id);
         if (!$alat) {
             return $this->respondJsonOrRedirect('Alat tidak ditemukan.', false);
@@ -482,6 +498,14 @@ class Alat extends BaseController
 
     public function deleteTransaksi($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus transaksi.', false);
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $trx = $this->transaksiModel->find($id);
         if (!$trx) {
             return $this->respondJsonOrRedirect('Transaksi tidak ditemukan.', false);

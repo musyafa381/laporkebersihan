@@ -233,6 +233,10 @@ class Sop extends BaseController
             return $this->respondJsonOrRedirect('Akses ditolak. Anda tidak memiliki wewenang menghapus SOP.', false);
         }
 
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $sop = $this->sopModel->find($id);
         if (!$sop) {
             return $this->respondJsonOrRedirect('Data SOP tidak ditemukan.', false);

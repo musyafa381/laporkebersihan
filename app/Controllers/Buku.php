@@ -498,6 +498,14 @@ class Buku extends BaseController
 
     public function deleteProker($prokerId)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus agenda proker.', false);
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $proker = $this->prokerModel->find($prokerId);
         if (!$proker) {
             return $this->respondJsonOrRedirect('Agenda Proker tidak ditemukan.', false);
@@ -673,6 +681,14 @@ class Buku extends BaseController
 
     public function deleteTarget($targetId)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus target.', false);
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $target = $this->targetModel->find($targetId);
         if (!$target) {
             return $this->respondJsonOrRedirect('Target tidak ditemukan.', false);
@@ -718,6 +734,14 @@ class Buku extends BaseController
 
     public function deleteCapaian($capaianId)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus capaian.', false);
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $capaian = $this->capaianBulananModel->find($capaianId);
         if (!$capaian) {
             return $this->respondJsonOrRedirect('Capaian tidak ditemukan.', false);
@@ -763,6 +787,14 @@ class Buku extends BaseController
 
     public function deleteEvaluasiBulanan($evaluasiId)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus evaluasi.', false);
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $evaluasi = $this->evaluasiBulananModel->find($evaluasiId);
         if (!$evaluasi) {
             return $this->respondJsonOrRedirect('Evaluasi tidak ditemukan.', false);
@@ -900,6 +932,14 @@ class Buku extends BaseController
 
     public function deleteKoordinasi($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus laporan koordinasi.', false);
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $koordinasi = $this->koordinasiModel->find($id);
         if (!$koordinasi) {
             return $this->respondJsonOrRedirect('Laporan Koordinasi tidak ditemukan.', false);
@@ -922,6 +962,14 @@ class Buku extends BaseController
 
     public function deleteFotoKoordinasi($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus foto.', false);
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $koordinasi = $this->koordinasiModel->find($id);
         if (!$koordinasi) {
             return $this->respondJsonOrRedirect('Laporan Koordinasi tidak ditemukan.', false);
@@ -1116,6 +1164,10 @@ class Buku extends BaseController
             return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus unit.', false);
         }
 
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $this->unitModel->delete($id);
         return $this->respondJsonOrRedirect('Unit Kebersihan Berhasil Dihapus!');
     }
@@ -1205,12 +1257,24 @@ class Buku extends BaseController
 
     public function deleteKeuanganMasuk($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus data.', false);
+        }
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
         $this->keuanganMasukModel->delete($id);
         return $this->respondJsonOrRedirect('Data Dana Masuk Berhasil Dihapus!');
     }
 
     public function deleteKeuanganPembelian($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus data.', false);
+        }
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
         $this->keuanganItemModel->delete($id);
         return $this->respondJsonOrRedirect('Data Item Pembelian Berhasil Dihapus!');
     }
@@ -1383,6 +1447,14 @@ class Buku extends BaseController
 
     public function unlinkKeuangan($bukuId)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat memutuskan tautan keuangan.', false);
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $buku = $this->bukuModel->find($bukuId);
         if (!$buku) {
             return $this->respondJsonOrRedirect('Buku LPJ tidak ditemukan.', false, base_url('buku'));

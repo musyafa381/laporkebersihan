@@ -198,6 +198,14 @@ class Keuangan extends BaseController
 
     public function delete($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus buku keuangan.', false);
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $this->keuanganMasukModel->where('keuangan_id', $id)->delete();
         $this->keuanganItemModel->where('keuangan_id', $id)->delete();
         $this->bukuKeuanganModel->delete($id);

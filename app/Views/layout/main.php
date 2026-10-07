@@ -2489,7 +2489,7 @@
 
                         try {
                             const response = await fetch(href, {
-                                method: 'GET',
+                                method: 'POST',
                                 headers: {
                                     'X-Requested-With': 'XMLHttpRequest',
                                     'Accept': 'application/json'
@@ -2522,7 +2522,11 @@
                     });
                 } else {
                     if (confirm(confirmMsg)) {
-                        window.location.href = href;
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = href;
+                        document.body.appendChild(form);
+                        form.submit();
                     }
                 }
             }

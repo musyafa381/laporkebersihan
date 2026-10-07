@@ -470,7 +470,7 @@
                                                             title="Edit Agenda">
                                                         <i class="fa-solid fa-pen-to-square"></i>
                                                     </button>
-                                                    <a href="<?= base_url('buku/proker/delete/' . $p['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus agenda ini?" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all flex items-center justify-center text-xs shadow-2xs" title="Hapus Agenda">
+                                                    <a href="<?= base_url('buku/proker/delete/' . $p['id']) ?>" rel="nofollow" data-confirm-msg="Apakah Anda yakin ingin menghapus agenda ini?" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all flex items-center justify-center text-xs shadow-2xs" title="Hapus Agenda">
                                                         <i class="fa-solid fa-trash-can"></i>
                                                     </a>
                                                 </div>
@@ -804,7 +804,7 @@
                                                             <button type="button" onclick="resetPhotoPosition('img_preview_<?= $p['id'] ?>', 'foto_pos_<?= $p['id'] ?>')" class="pointer-events-auto px-2.5 py-1 bg-slate-900/80 text-white rounded-xl text-[10px] font-bold shadow-md hover:bg-slate-900 transition">
                                                                 <i class="fa-solid fa-rotate-left"></i> Reset
                                                             </button>
-                                                            <a href="<?= base_url('buku/koordinasi/delete-foto/' . $kData['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus foto dokumentasi ini?" class="pointer-events-auto px-2.5 py-1 bg-rose-600/90 text-white rounded-xl text-[10px] font-bold shadow-md hover:bg-rose-700 transition" title="Hapus Foto">
+                                                            <a href="<?= base_url('buku/koordinasi/delete-foto/' . $kData['id']) ?>" rel="nofollow" data-confirm-msg="Apakah Anda yakin ingin menghapus foto dokumentasi ini?" class="pointer-events-auto px-2.5 py-1 bg-rose-600/90 text-white rounded-xl text-[10px] font-bold shadow-md hover:bg-rose-700 transition" title="Hapus Foto">
                                                                 <i class="fa-solid fa-trash"></i> Hapus
                                                             </a>
                                                         <?php endif; ?>
@@ -825,7 +825,7 @@
                                                 <div class="flex items-center gap-2">
                                                     <input type="file" name="foto" accept="image/*" onchange="previewImageLive(this, 'img_preview_<?= $p['id'] ?>', 'placeholder_<?= $p['id'] ?>', 'container_preview_<?= $p['id'] ?>', 'foto_pos_<?= $p['id'] ?>')" class="w-full text-xs text-slate-500 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition shadow-2xs">
                                                     <?php if (!empty($kData['foto'])): ?>
-                                                        <a href="<?= base_url('buku/koordinasi/delete-foto/' . $kData['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin menghapus foto dokumentasi ini?" class="px-3.5 py-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all text-xs font-bold flex items-center gap-1.5 shadow-2xs flex-shrink-0" title="Hapus Foto">
+                                                        <a href="<?= base_url('buku/koordinasi/delete-foto/' . $kData['id']) ?>" rel="nofollow" data-confirm-msg="Apakah Anda yakin ingin menghapus foto dokumentasi ini?" class="px-3.5 py-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all text-xs font-bold flex items-center gap-1.5 shadow-2xs flex-shrink-0" title="Hapus Foto">
                                                             <i class="fa-solid fa-trash-can text-xs"></i>
                                                             <span>Hapus Foto</span>
                                                         </a>
@@ -1045,7 +1045,7 @@
                                 <span>Ubah Import</span>
                             </button>
 
-                            <a href="<?= base_url('buku/keuangan/unlink/' . $buku['id']) ?>" data-confirm-msg="Apakah Anda yakin ingin memutuskan tautan Laporan Keuangan dari LPJ ini?" class="px-3.5 py-2.5 rounded-2xl bg-rose-50 text-rose-600 font-extrabold text-xs hover:bg-rose-100 transition border border-rose-200 shadow-2xs flex items-center gap-1.5" title="Putuskan Tautan">
+                            <a href="<?= base_url('buku/keuangan/unlink/' . $buku['id']) ?>" rel="nofollow" data-confirm-msg="Apakah Anda yakin ingin memutuskan tautan Laporan Keuangan dari LPJ ini?" class="px-3.5 py-2.5 rounded-2xl bg-rose-50 text-rose-600 font-extrabold text-xs hover:bg-rose-100 transition border border-rose-200 shadow-2xs flex items-center gap-1.5" title="Putuskan Tautan">
                                 <i class="fa-solid fa-link-slash"></i>
                             </a>
                         <?php else: ?>

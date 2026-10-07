@@ -273,6 +273,12 @@ class Wilayah extends BaseController
     public function delete($id)
     {
         $this->checkAuth();
+        if (session()->get('role') !== 'Admin') {
+            return redirect()->to('/wilayah')->with('error', 'Akses ditolak. Hanya Admin yang dapat menghapus data.');
+        }
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return redirect()->to('/wilayah')->with('error', 'Metode request tidak diizinkan. Gunakan POST.');
+        }
 
         try {
             $wilayah = $this->wilayahModel->find($id);
@@ -382,6 +388,12 @@ class Wilayah extends BaseController
     public function deleteFoto($fotoId)
     {
         $this->checkAuth();
+        if (session()->get('role') !== 'Admin') {
+            return redirect()->to('/wilayah')->with('error', 'Akses ditolak. Hanya Admin yang dapat menghapus data.');
+        }
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return redirect()->to('/wilayah')->with('error', 'Metode request tidak diizinkan. Gunakan POST.');
+        }
 
         try {
             $foto = $this->fotoModel->find($fotoId);
@@ -526,6 +538,12 @@ class Wilayah extends BaseController
     public function deletePenugasan($id)
     {
         $this->checkAuth();
+        if (session()->get('role') !== 'Admin') {
+            return redirect()->to('/wilayah')->with('error', 'Akses ditolak. Hanya Admin yang dapat menghapus data.');
+        }
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return redirect()->to('/wilayah')->with('error', 'Metode request tidak diizinkan. Gunakan POST.');
+        }
 
         try {
             $penugasan = $this->penugasanModel->find($id);
@@ -579,6 +597,12 @@ class Wilayah extends BaseController
     public function deleteLaporan($id)
     {
         $this->checkAuth();
+        if (session()->get('role') !== 'Admin') {
+            return redirect()->to('/wilayah/laporan')->with('error', 'Akses ditolak. Hanya Admin yang dapat menghapus data.');
+        }
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return redirect()->to('/wilayah/laporan')->with('error', 'Metode request tidak diizinkan. Gunakan POST.');
+        }
 
         try {
             $laporan = $this->laporanModel->find($id);

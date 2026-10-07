@@ -295,6 +295,14 @@ class Pengaturan extends BaseController
 
     public function deleteUnitPj($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus PJ.', false);
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $pj = $this->unitPjModel->find($id);
         if (!$pj) {
             if ($this->request->isAJAX() || $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
@@ -746,6 +754,13 @@ class Pengaturan extends BaseController
 
     public function deleteUnit($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus data.', false, base_url('pengaturan?tab=units'));
+        }
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false, base_url('pengaturan?tab=units'));
+        }
+
         $unit = $this->unitModel->find($id);
         if ($unit) {
             // Hapus juga unit posko kader anaknya jika ada
@@ -823,6 +838,13 @@ class Pengaturan extends BaseController
 
     public function deleteTipe($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus tipe unit.', false, base_url('pengaturan?tab=units'));
+        }
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false, base_url('pengaturan?tab=units'));
+        }
+
         $tipe = $this->tipeUnitModel->find($id);
         if (!$tipe) {
             return $this->respondJsonOrRedirect('Tipe Unit tidak ditemukan.', false, base_url('pengaturan?tab=units'));
@@ -908,6 +930,13 @@ class Pengaturan extends BaseController
 
     public function deleteKategoriAlat($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus kategori alat.', false, base_url('pengaturan?tab=units'));
+        }
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false, base_url('pengaturan?tab=units'));
+        }
+
         $kat = $this->kategoriAlatModel->find($id);
         if (!$kat) {
             return $this->respondJsonOrRedirect('Kategori alat tidak ditemukan.', false, base_url('pengaturan?tab=units'));

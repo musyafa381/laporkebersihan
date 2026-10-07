@@ -332,6 +332,10 @@ class AppPortal extends BaseController
     {
         $this->checkAuth();
 
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false, base_url('app/pengajuan-alat'));
+        }
+
         $pengajuan = $this->pengajuanModel->find($id);
         if (!$pengajuan) {
             return $this->respondJsonOrRedirect('Pengajuan alat tidak ditemukan.', false, base_url('app/pengajuan-alat'));
@@ -906,6 +910,10 @@ class AppPortal extends BaseController
     public function deleteWilayahTugas($penugasanId)
     {
         $this->checkAuth();
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return redirect()->to('/app/lapor-wilayah')->with('error', 'Metode request tidak diizinkan. Gunakan POST.');
+        }
 
         $session = session();
         $unitId  = $this->getResolvedUnitId();

@@ -285,6 +285,10 @@ class Struktur extends BaseController
             return $this->respondJsonOrRedirect('Akses ditolak: Hanya Admin yang memiliki izin untuk menghapus anggota struktur.', false, base_url('struktur'));
         }
 
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false, base_url('struktur'));
+        }
+
         $this->strukturModel->delete($id);
         return $this->respondJsonOrRedirect('Anggota Struktur Kebersihan berhasil dihapus!');
     }

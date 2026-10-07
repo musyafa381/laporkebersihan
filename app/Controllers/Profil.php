@@ -138,6 +138,15 @@ class Profil extends BaseController
 
     public function deleteUser($id)
     {
+        $session = session();
+        if (!$session->get('isLoggedIn') || $session->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak: Hanya Admin yang dapat menghapus akun.', false, base_url('profil?tab=kelola_users'));
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false, base_url('profil?tab=kelola_users'));
+        }
+
         $user = $this->userModel->find($id);
         if (!$user) {
             return $this->respondJsonOrRedirect('Akun pengguna tidak ditemukan.', false, base_url('profil?tab=kelola_users'));

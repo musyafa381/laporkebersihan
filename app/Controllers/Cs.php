@@ -875,6 +875,14 @@ class Cs extends BaseController
 
     public function deleteReport($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus laporan CS.', false);
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $report = $this->csModel->find($id);
         if (!$report) {
             return $this->respondJsonOrRedirect('Laporan tidak ditemukan.', false);
@@ -898,6 +906,14 @@ class Cs extends BaseController
 
     public function deletePengajuan($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            return $this->respondJsonOrRedirect('Akses ditolak. Hanya Admin yang dapat menghapus pengajuan alat.', false);
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $pengajuan = $this->pengajuanModel->find($id);
         if (!$pengajuan) {
             return $this->respondJsonOrRedirect('Pengajuan alat tidak ditemukan.', false);

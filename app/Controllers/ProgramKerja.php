@@ -404,6 +404,10 @@ class ProgramKerja extends BaseController
             return $this->respondJsonOrRedirect('Silakan login terlebih dahulu.', false, base_url('login'));
         }
 
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
+        }
+
         $proker = $this->prokerModel->find($id);
         if (!$proker) {
             return $this->respondJsonOrRedirect('Data program kerja tidak ditemukan.', false);
@@ -543,6 +547,10 @@ class ProgramKerja extends BaseController
         $session = session();
         if (!$session->get('isLoggedIn')) {
             return $this->respondJsonOrRedirect('Silakan login terlebih dahulu.', false, base_url('login'));
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            return $this->respondJsonOrRedirect('Metode request tidak diizinkan. Gunakan POST.', false);
         }
 
         $proker = $this->prokerModel->find($id);

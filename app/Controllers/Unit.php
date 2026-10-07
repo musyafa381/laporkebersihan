@@ -246,6 +246,20 @@ class Unit extends BaseController
 
     public function deletePj($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            if ($this->request->isAJAX() || $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Akses ditolak. Hanya Admin yang dapat menghapus data.']);
+            }
+            return redirect()->to(base_url('pengaturan'))->with('msg_error', 'Akses ditolak. Hanya Admin yang dapat menghapus data.');
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            if ($this->request->isAJAX() || $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Metode request tidak diizinkan. Gunakan POST.']);
+            }
+            return redirect()->to(base_url('pengaturan'))->with('msg_error', 'Metode request tidak diizinkan. Gunakan POST.');
+        }
+
         $pj = $this->unitPjModel->find($id);
         if (!$pj) {
             if ($this->request->isAJAX() || $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
@@ -312,6 +326,20 @@ class Unit extends BaseController
 
     public function deleteKader($id)
     {
+        if (session()->get('role') !== 'Admin') {
+            if ($this->request->isAJAX() || $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Akses ditolak. Hanya Admin yang dapat menghapus data.']);
+            }
+            return redirect()->to(base_url('pengaturan'))->with('msg_error', 'Akses ditolak. Hanya Admin yang dapat menghapus data.');
+        }
+
+        if (strtoupper($this->request->getMethod()) !== 'POST') {
+            if ($this->request->isAJAX() || $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Metode request tidak diizinkan. Gunakan POST.']);
+            }
+            return redirect()->to(base_url('pengaturan'))->with('msg_error', 'Metode request tidak diizinkan. Gunakan POST.');
+        }
+
         $kader = $this->unitKaderModel->find($id);
         if (!$kader) {
             if ($this->request->isAJAX() || $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
